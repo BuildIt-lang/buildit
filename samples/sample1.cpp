@@ -7,7 +7,7 @@ int main(int argc, char* argv[]) {
 	builder::int_var a(context);
 	builder::int_var b(context);
 
-	(block::expr::Ptr)a && b;
+	a && b;
 
 	context->extract_ast()->dump(std::cout, 0);
 

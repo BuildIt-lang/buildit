@@ -24,9 +24,11 @@ public:
 	std::string var_name;
 	block::var::Ptr block_var;
 	
-	operator block::expr::Ptr ();	
+	operator block::expr::Ptr () const;
+
 
 };
+block::expr::Ptr operator && (const var&, const block::expr::Ptr&);
 
 
 class int_var: public var {

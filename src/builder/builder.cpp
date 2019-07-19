@@ -1,7 +1,7 @@
 #include "builder/builder.h"
 
 namespace builder {
-var::operator block::expr::Ptr () {
+var::operator block::expr::Ptr () const {
 	assert(block_var != nullptr);
 	
 	block::var_expr::Ptr var_expr = std::make_shared<block::var_expr>();
@@ -32,4 +32,8 @@ int_var::int_var(builder_context *context_) {
 	
 	context->current_block_stmt->stmts.push_back(decl_stmt);
 }		
+
+block::expr::Ptr operator && (const var& a, const block::expr::Ptr& b) {	
+	return (block::expr::Ptr)a && b;
+}
 }
