@@ -1,7 +1,7 @@
 #ifndef BUILDER_H
 #define BUILDER_H
 #include <memory>
-#include <strings>
+#include <string>
 #include "blocks/var.h"
 #include "builder/builder_context.h"
 
@@ -12,29 +12,26 @@ namespace builder {
 class builder {
 public:
 	builder_context* context;
+	builder() = default;
 	builder(builder_context* context_): context(context_) {}	
-	builder() = delete;
 };
 
 
-class var: builder {
+class var: public builder {
 public:
 	
 	// Optional var name
 	std::string var_name;
-	block::var block_var;
-	var() = delete;
+	block::var::Ptr block_var;
 	
+	operator block::expr::Ptr ();	
 
 };
 
 
-class int_var: var {
+class int_var: public var {
 public:
-	int_var() = delete;
-	int_var(builder_context* context_) {
-		builder::builder(context_);
-	}	
+	int_var(builder_context* context_);
 };
 
 

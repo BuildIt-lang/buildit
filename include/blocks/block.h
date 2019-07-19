@@ -2,15 +2,21 @@
 #define BLOCK_H
 #include <memory>
 #include <assert.h>
+#include <iostream>
 
+namespace builder {
+class builder_context;
+}
 // Top level class definition for blocks
-
 // Abstract class
 namespace block {
 class block: public std::enable_shared_from_this<block> {
 public:
 	typedef std::shared_ptr<block> Ptr;
-	virtual ~block() = default;
+
+	builder::builder_context* context;
+	virtual void dump(std::ostream&, int);
+
 };
 template <typename T>
 bool isa(block::Ptr p) {

@@ -2,26 +2,49 @@ BASE_DIR=$(shell pwd)
 SRC_DIR=$(BASE_DIR)/src
 BUILD_DIR=$(BASE_DIR)/build
 INCLUDE_DIR=$(BASE_DIR)/include
+SAMPLES_DIR=$(BASE_DIR)/samples
 
+INCLUDES=$(wildcard $(INCLUDE_DIR)/*.h) $(wildcard $(INCLUDE_DIR)/*/*.h)
 
-INCLUDES=$(wildcard $(INCLUDE_DIR)/*.h)
 
 $(shell mkdir -p $(BUILD_DIR))
 $(shell mkdir -p $(BUILD_DIR)/blocks)
 $(shell mkdir -p $(BUILD_DIR)/builder)
+$(shell mkdir -p $(BUILD_DIR)/samples)
 
-all: $(BUILD_DIR)/blocks.a $(BUILD_DIR)/builder.a
-
-$(BUILD_DIR)/builder.a: $(BUILD_DIR)/builder/builder_context.o
-	ar rcs $@ $^
+SAMPLES=$(BUILD_DIR)/sample1
 
 
-$(BUILD_DIR)/blocks.a: 
-	ar rcs $@ $^
 
-$(BUILD_DIR)/builder/builder_context.o: $(SRC_DIR)/builder/builder_context.cpp
+CFLAGS=-g
+LINKER_FLAGS=-g
+
+
+BUILDER_SRC=$(wildcard $(SRC_DIR)/builder/*.cpp)
+BLOCKS_SRC=$(wildcard $(SRC_DIR)/blocks/*.cpp)
+
+BUILDER_OBJS=$(subst $(SRC_DIR),$(BUILD_DIR),$(BUILDER_SRC:.cpp=.o))
+BLOCKS_OBJS=$(subst $(SRC_DIR),$(BUILD_DIR),$(BLOCKS_SRC:.cpp=.o))
+
+LIBRARY_OBJS=$(BUILDER_OBJS) $(BLOCKS_OBJS)
+
+all: executables
+
+$(BUILD_DIR)/builder/%.o: $(SRC_DIR)/builder/%.cpp $(INCLUDES)
+	$(CXX) $(CFLAGS) $< -o $@ -I$(INCLUDE_DIR) -c
+$(BUILD_DIR)/blocks/%.o: $(SRC_DIR)/blocks/%.cpp $(INCLUDES)
 	$(CXX) $(CFLAGS) $< -o $@ -I$(INCLUDE_DIR) -c
 
+
+$(BUILD_DIR)/samples/%.o: $(SAMPLES_DIR)/%.cpp $(INCLUDES)
+	$(CXX) $(CFLAGS) $< -o $@ -I$(INCLUDE_DIR) -c 
+
+$(BUILD_DIR)/sample%: $(BUILD_DIR)/samples/sample%.o $(LIBRARY_OBJS)
+	$(CXX) -o $@ $^ $(LINKER_FLAGS)
+
+
+.PHONY: executables
+executables: $(SAMPLES)
 
 clean:
 	- rm -rf build
