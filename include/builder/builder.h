@@ -30,6 +30,8 @@ public:
 	block::var::Ptr block_var;
 	
 	operator builder() const;
+
+	operator bool();
 	builder operator && (const builder &);
 };
 

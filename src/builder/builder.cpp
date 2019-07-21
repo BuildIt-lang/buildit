@@ -77,4 +77,7 @@ builder var::operator && (const builder &a) {
 builder::operator bool() {
 	return get_next_bool_from_context(context, block_expr);
 }
+var::operator bool() {
+	return (builder)(*this);
+}
 }

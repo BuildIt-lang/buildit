@@ -9,7 +9,7 @@ void foo(builder::builder_context* context) {
 	int_var b(context);
 	int_var c(context);
 
-	if (c && c) {
+	if (c) {
 		a &&b;
 		if (a && b) {
 			c && b;
