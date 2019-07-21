@@ -47,15 +47,15 @@ int_var::int_var(builder_context *context_) {
 	block_var->var_name = var_name;
 }		
 
-
-builder builder::operator && (const builder &a) {
+template <typename T>
+builder builder::builder_binary_op(const builder &a) {
 	assert(context != nullptr);
 	assert(context == a.context);
 	
 	int32_t offset = get_offset_in_function(context->current_function);
 	assert(offset != -1);
 	
-	block::and_expr::Ptr expr = std::make_shared<block::and_expr>();
+	typename T::Ptr expr = std::make_shared<T>();
 	expr->static_offset = offset;
 	
 	context->remove_node_from_sequence(block_expr);
@@ -71,8 +71,70 @@ builder builder::operator && (const builder &a) {
 	ret_builder.block_expr = expr;
 	return ret_builder;	
 }
+
+builder builder::operator && (const builder &a) {
+	return builder_binary_op<block::and_expr>(a);
+}
 builder var::operator && (const builder &a) {
 	return (builder)(*this) && a;
+}
+
+builder builder::operator || (const builder &a) {
+	return builder_binary_op<block::or_expr>(a);
+}
+builder var::operator || (const builder &a) {
+	return (builder)(*this) || a;
+}
+
+builder builder::operator + (const builder &a) {
+	return builder_binary_op<block::plus_expr>(a);
+}
+builder var::operator + (const builder &a) {
+	return (builder)(*this) + a;
+}
+
+builder builder::operator - (const builder &a) {
+	return builder_binary_op<block::minus_expr>(a);
+}
+builder var::operator - (const builder &a) {
+	return (builder)(*this) - a;
+}
+
+builder builder::operator * (const builder &a) {
+	return builder_binary_op<block::mul_expr>(a);
+}
+builder var::operator * (const builder &a) {
+	return (builder)(*this) * a;
+}
+
+builder builder::operator / (const builder &a) {
+	return builder_binary_op<block::div_expr>(a);
+}
+builder var::operator / (const builder &a) {
+	return (builder)(*this) / a;
+}
+
+builder var::operator = (const builder &a) {
+	assert(context != nullptr);
+	assert(context == a.context);
+	
+	int32_t offset = get_offset_in_function(context->current_function);
+	assert(offset != -1);
+	
+	block::assign_expr::Ptr expr = std::make_shared<block::assign_expr>();
+	expr->static_offset = offset;
+	
+	context->remove_node_from_sequence(a.block_expr);
+
+	expr->var1 = block_var;
+	expr->expr1 = a.block_expr;
+
+	context->add_node_to_sequence(expr);	
+	
+	builder ret_builder;
+	ret_builder.context = context;
+	ret_builder.block_expr = expr;
+	return ret_builder;	
 }
 builder::operator bool() {
 	return get_next_bool_from_context(context, block_expr);

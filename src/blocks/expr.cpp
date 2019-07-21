@@ -29,6 +29,42 @@ void and_expr::dump(std::ostream &oss, int indent) {
 	expr1->dump(oss, indent+1);
 	expr2->dump(oss, indent+1);
 }
+void or_expr::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "OR_EXPR" << std::endl;	
+	expr1->dump(oss, indent+1);
+	expr2->dump(oss, indent+1);
+}
+void plus_expr::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "PLUS_EXPR" << std::endl;	
+	expr1->dump(oss, indent+1);
+	expr2->dump(oss, indent+1);
+}
+void minus_expr::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "MINUS_EXPR" << std::endl;	
+	expr1->dump(oss, indent+1);
+	expr2->dump(oss, indent+1);
+}
+void mul_expr::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "MUL_EXPR" << std::endl;	
+	expr1->dump(oss, indent+1);
+	expr2->dump(oss, indent+1);
+}
+void div_expr::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "DIV_EXPR" << std::endl;	
+	expr1->dump(oss, indent+1);
+	expr2->dump(oss, indent+1);
+}
+void assign_expr::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "ASSIGN_EXPR" << std::endl;
+	var1->dump(oss, indent+1);
+	expr1->dump(oss, indent+1);
+}
 void var_expr::dump(std::ostream &oss, int indent) {
 	printer::indent(oss, indent);
 	oss << "VAR_EXPR" << std::endl;

@@ -12,7 +12,9 @@ $(shell mkdir -p $(BUILD_DIR)/blocks)
 $(shell mkdir -p $(BUILD_DIR)/builder)
 $(shell mkdir -p $(BUILD_DIR)/samples)
 
-SAMPLES=$(BUILD_DIR)/sample1 $(BUILD_DIR)/sample2 $(BUILD_DIR)/sample3
+SAMPLES_SRCS=$(wildcard $(SAMPLES_DIR)/*.cpp)
+SAMPLES=$(subst $(SAMPLES_DIR),$(BUILD_DIR),$(SAMPLES_SRCS:.cpp=))
+
 
 
 

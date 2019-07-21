@@ -21,7 +21,7 @@ public:
 };
 template <typename T>
 bool isa(block::Ptr p) {
-	std::shared_ptr<T> ret = std::dynamic_pointer_cast<T> (p.get()->shared_from_this());
+	std::shared_ptr<T> ret = std::dynamic_pointer_cast<T> (p);
 
 	if (ret != nullptr) 
 		return true;
@@ -29,7 +29,7 @@ bool isa(block::Ptr p) {
 }
 template <typename T>
 typename T::Ptr to(block::Ptr p) {
-	typename T::Ptr ret = std::dynamic_pointer_cast<T> (p.get()->shared_from_this());
+	typename T::Ptr ret = std::dynamic_pointer_cast<T> (p);
 	assert(ret != nullptr);
 	return ret;
 }

@@ -16,8 +16,15 @@ public:
 	builder(builder_context* context_): context(context_) {}	
 	
 	block::expr::Ptr block_expr;
-	
+	template <typename T>	
+	builder builder_binary_op(const builder &);
 	builder operator && (const builder &);	
+	builder operator || (const builder &);
+	builder operator + (const builder &);
+	builder operator - (const builder &);
+	builder operator * (const builder &);
+	builder operator / (const builder &);
+	
 	operator bool();
 };
 
@@ -29,16 +36,25 @@ public:
 	std::string var_name;
 	block::var::Ptr block_var;
 	
+	
 	operator builder() const;
 
 	operator bool();
 	builder operator && (const builder &);
+	builder operator || (const builder &);
+	builder operator + (const builder &);
+	builder operator - (const builder &);
+	builder operator * (const builder &);
+	builder operator / (const builder &);
+	
+	builder operator = (const builder &);
 };
 
 
 class int_var: public var {
 public:
 	int_var(builder_context* context_);
+	using var::operator =;
 };
 }
 
