@@ -1,8 +1,10 @@
 #include "blocks/expr.h"
 #include "builder/builder_context.h"
 #include "util/printer.h"
+#include "util/tracer.h"
 
 #include <iostream>
+#include <execinfo.h>
 
 namespace block {
 
@@ -33,13 +35,22 @@ void var_expr::dump(std::ostream &oss, int indent) {
 	var1->dump(oss, indent+1);
 }
 
+
 expr::Ptr operator && (const expr::Ptr &a, const expr::Ptr &b) {
+	
+
 	builder::builder_context * context = a->context;
 	assert(context != nullptr);
 	assert(context == b->context);
+		
+	int32_t offset = get_offset_in_function(context->current_function);
+	assert(offset != -1);
+	
+	
 	
 	and_expr::Ptr expr = std::make_shared<and_expr>();
 	expr->context = context;
+	expr->static_offset = offset;
 	
 	context->remove_node_from_sequence(a);			
 	context->remove_node_from_sequence(b);			

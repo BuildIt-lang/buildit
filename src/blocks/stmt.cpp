@@ -25,7 +25,14 @@ void decl_stmt::dump(std::ostream &oss, int indent) {
 		init_expr->dump(oss, indent+1);
 	else {
 		printer::indent(oss, indent+1);
-		oss << "NO INITIALIZATION" << std::endl;
+		oss << "NO_INITIALIZATION" << std::endl;
 	}	
+}
+void if_stmt::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "IF_STMT" << std::endl;
+	cond->dump(oss, indent+1);
+	then_stmt->dump(oss, indent+1);
+	else_stmt->dump(oss, indent+1);		
 }
 }

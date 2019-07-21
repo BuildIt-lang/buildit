@@ -12,12 +12,12 @@ $(shell mkdir -p $(BUILD_DIR)/blocks)
 $(shell mkdir -p $(BUILD_DIR)/builder)
 $(shell mkdir -p $(BUILD_DIR)/samples)
 
-SAMPLES=$(BUILD_DIR)/sample1
+SAMPLES=$(BUILD_DIR)/sample1 $(BUILD_DIR)/sample2
 
 
 
-CFLAGS=-g
-LINKER_FLAGS=-g
+CFLAGS=-g -std=c++14
+LINKER_FLAGS=-g -rdynamic
 
 
 BUILDER_SRC=$(wildcard $(SRC_DIR)/builder/*.cpp)
@@ -29,6 +29,10 @@ BLOCKS_OBJS=$(subst $(SRC_DIR),$(BUILD_DIR),$(BLOCKS_SRC:.cpp=.o))
 LIBRARY_OBJS=$(BUILDER_OBJS) $(BLOCKS_OBJS)
 
 all: executables
+
+.PRECIOUS: $(BUILD_DIR)/builder/%.o 
+.PRECIOUS: $(BUILD_DIR)/blocks/%.o 
+.PRECIOUS: $(BUILD_DIR)/samples/%.o 
 
 $(BUILD_DIR)/builder/%.o: $(SRC_DIR)/builder/%.cpp $(INCLUDES)
 	$(CXX) $(CFLAGS) $< -o $@ -I$(INCLUDE_DIR) -c

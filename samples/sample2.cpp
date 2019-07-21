@@ -3,13 +3,21 @@
 #include <iostream>
 using int_var = builder::int_var;
 
-
-
-// A simple straight line code with 2 variable declarations and one operator
+// A simple if condition with two stmts
 void foo(builder::builder_context* context) {
 	int_var a(context);
 	int_var b(context);
-	a && b;
+	int_var c(context);
+
+	if (c && c) {
+		a &&b;
+	} else {
+		b && a;
+	}
+	// This statement should appear AFTER the if statement and not duplicated
+	// in both the above branches
+	c && b;
+	
 }
 
 int main(int argc, char* argv[]) {

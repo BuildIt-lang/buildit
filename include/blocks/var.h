@@ -5,7 +5,7 @@
 namespace block {
 class var: public block {
 public:
-	typedef std::shared_ptr<var> Ptr;
+	typedef util::wrapped_shared_ptr<var> Ptr;
 	virtual void dump(std::ostream&, int);
 	// Optional var_name
 	std::string var_name;
@@ -13,7 +13,7 @@ public:
 
 class int_var: public var {
 public:
-	typedef std::shared_ptr<int_var> Ptr;
+	typedef util::wrapped_shared_ptr<int_var> Ptr;
 	virtual void dump(std::ostream&, int);
 	
 };
