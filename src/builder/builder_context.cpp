@@ -11,7 +11,6 @@ void builder_context::commit_uncommitted(void) {
 	for (auto block_ptr: uncommitted_sequence) {
 		block::expr_stmt::Ptr s = std::make_shared<block::expr_stmt>();
 		assert(block::isa<block::expr>(block_ptr));
-		s->context = block_ptr->context;
 		s->static_offset = block_ptr->static_offset;
 		s->expr1 = block::to<block::expr>(block_ptr);
 		assert(current_block_stmt != nullptr);
@@ -31,7 +30,7 @@ block::stmt::Ptr builder_context::extract_ast(void) {
 	return ast;
 }
 
-bool get_next_bool_from_builder_context(builder_context *context, block::expr::Ptr expr) {	
+bool get_next_bool_from_context(builder_context *context, block::expr::Ptr expr) {	
 	if (context->bool_vector.size() == 0) {
 		int32_t offset = expr->static_offset; 
 		throw OutOfBoolsException(offset);
@@ -113,7 +112,6 @@ block::stmt::Ptr builder_context::extract_ast_from_function(ast_function_type fu
 		std::vector<block::stmt::Ptr> trimmed_stmts = trim_common_from_back(true_ast, false_ast);
 		
 		block::if_stmt::Ptr new_if_stmt = std::make_shared<block::if_stmt>();
-		new_if_stmt->context = this;
 		new_if_stmt->static_offset = e.static_offset;
 		
 		new_if_stmt->cond = cond_expr;

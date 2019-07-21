@@ -5,14 +5,14 @@
 namespace block{
 class stmt: public block {
 public:
-	typedef util::wrapped_shared_ptr<stmt> Ptr;
+	typedef std::shared_ptr<stmt> Ptr;
 	virtual void dump(std::ostream&, int) override;
 	
 };
 
 class expr_stmt: public stmt {
 public:
-	typedef util::wrapped_shared_ptr<expr_stmt> Ptr;
+	typedef std::shared_ptr<expr_stmt> Ptr;
 	virtual void dump(std::ostream&, int) override;
 	
 	expr::Ptr expr1;
@@ -20,7 +20,7 @@ public:
 
 class stmt_block: public stmt {
 public:
-	typedef util::wrapped_shared_ptr<stmt_block> Ptr;
+	typedef std::shared_ptr<stmt_block> Ptr;
 	virtual void dump(std::ostream&, int) override;
 
 	std::vector<stmt::Ptr> stmts;	
@@ -28,7 +28,7 @@ public:
 
 class decl_stmt: public stmt {
 public:
-	typedef util::wrapped_shared_ptr<decl_stmt> Ptr;
+	typedef std::shared_ptr<decl_stmt> Ptr;
 	virtual void dump(std::ostream&, int);
 	
 	var::Ptr decl_var;
@@ -38,7 +38,7 @@ public:
 
 class if_stmt: public stmt {
 public:
-	typedef util::wrapped_shared_ptr<if_stmt> Ptr;
+	typedef std::shared_ptr<if_stmt> Ptr;
 	virtual void dump(std::ostream&, int);
 	
 	expr::Ptr cond;

@@ -16,8 +16,8 @@ SAMPLES=$(BUILD_DIR)/sample1 $(BUILD_DIR)/sample2 $(BUILD_DIR)/sample3
 
 
 
-CFLAGS=-g -std=c++14
-LINKER_FLAGS=-g -rdynamic
+CFLAGS=-std=c++14
+LINKER_FLAGS=-rdynamic
 
 
 BUILDER_SRC=$(wildcard $(SRC_DIR)/builder/*.cpp)

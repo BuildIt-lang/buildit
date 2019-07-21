@@ -36,31 +36,5 @@ void var_expr::dump(std::ostream &oss, int indent) {
 }
 
 
-expr::Ptr operator && (const expr::Ptr &a, const expr::Ptr &b) {
-	
-
-	builder::builder_context * context = a->context;
-	assert(context != nullptr);
-	assert(context == b->context);
-		
-	int32_t offset = get_offset_in_function(context->current_function);
-	assert(offset != -1);
-	
-	
-	
-	and_expr::Ptr expr = std::make_shared<and_expr>();
-	expr->context = context;
-	expr->static_offset = offset;
-	
-	context->remove_node_from_sequence(a);			
-	context->remove_node_from_sequence(b);			
-	
-	expr->expr1 = a;
-	expr->expr2 = b;
-	
-	context->add_node_to_sequence(expr);
-	
-	return expr;
-}
 }
 

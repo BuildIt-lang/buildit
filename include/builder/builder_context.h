@@ -31,8 +31,8 @@ public:
 	block::stmt::Ptr extract_ast(void);
 	block::stmt::Ptr extract_ast_from_function(ast_function_type, std::vector<bool> bl = std::vector<bool>());
 		
-bool get_next_bool_from_context(builder_context *context);
 };
+bool get_next_bool_from_context(builder_context *context, block::expr::Ptr);
 
 }
 

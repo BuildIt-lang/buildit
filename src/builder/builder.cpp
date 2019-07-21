@@ -1,19 +1,23 @@
 #include "builder/builder.h"
 #include "util/tracer.h"
+#include "builder/builder_context.h"
 
 namespace builder {
-var::operator block::expr::Ptr () const {
+var::operator builder () const {
 	assert(block_var != nullptr);
 	int32_t offset = get_offset_in_function(context->current_function);
 		
 	block::var_expr::Ptr var_expr = std::make_shared<block::var_expr>();
-	var_expr->context = context;
 	var_expr->static_offset = offset;
 	
 	var_expr->var1 = block_var;
 	context->add_node_to_sequence(var_expr);
 	
-	return var_expr;	
+	builder ret_block;
+	ret_block.context = context;	
+	ret_block.block_expr = var_expr;
+	
+	return ret_block;
 }
 	
 int_var::int_var(builder_context *context_) {
@@ -22,16 +26,13 @@ int_var::int_var(builder_context *context_) {
 	context = context_;
 	context->commit_uncommitted();
 	
-	block::int_var::Ptr int_var = std::make_shared<block::int_var>();
-	int_var->context = context;
-	
+	block::int_var::Ptr int_var = std::make_shared<block::int_var>();	
 		
 	block_var = int_var;
 	
 	int32_t offset = get_offset_in_function(context->current_function);
 			
 	block::decl_stmt::Ptr decl_stmt = std::make_shared<block::decl_stmt>();
-	decl_stmt->context = context;
 	decl_stmt->static_offset = offset;
 	
 	decl_stmt->decl_var = int_var;
@@ -46,7 +47,34 @@ int_var::int_var(builder_context *context_) {
 	block_var->var_name = var_name;
 }		
 
-block::expr::Ptr operator && (const var& a, const block::expr::Ptr& b) {	
-	return (block::expr::Ptr)a && b;
+
+builder builder::operator && (const builder &a) {
+	assert(context != nullptr);
+	assert(context == a.context);
+	
+	int32_t offset = get_offset_in_function(context->current_function);
+	assert(offset != -1);
+	
+	block::and_expr::Ptr expr = std::make_shared<block::and_expr>();
+	expr->static_offset = offset;
+	
+	context->remove_node_from_sequence(block_expr);
+	context->remove_node_from_sequence(a.block_expr);
+
+	expr->expr1 = block_expr;
+	expr->expr2 = a.block_expr;
+
+	context->add_node_to_sequence(expr);	
+	
+	builder ret_builder;
+	ret_builder.context = context;
+	ret_builder.block_expr = expr;
+	return ret_builder;	
+}
+builder var::operator && (const builder &a) {
+	return (builder)(*this) && a;
+}
+builder::operator bool() {
+	return get_next_bool_from_context(context, block_expr);
 }
 }

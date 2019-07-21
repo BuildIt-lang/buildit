@@ -3,7 +3,6 @@
 #include <memory>
 #include <assert.h>
 #include <iostream>
-#include "util/shared_ptr.h"
 
 namespace builder {
 class builder_context;
@@ -13,9 +12,8 @@ class builder_context;
 namespace block {
 class block: public std::enable_shared_from_this<block> {
 public:
-	typedef util::wrapped_shared_ptr<block> Ptr;
+	typedef std::shared_ptr<block> Ptr;
 
-	builder::builder_context* context;
 	int32_t static_offset;
 
 	virtual void dump(std::ostream&, int);
