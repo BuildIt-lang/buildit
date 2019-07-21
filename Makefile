@@ -12,7 +12,7 @@ $(shell mkdir -p $(BUILD_DIR)/blocks)
 $(shell mkdir -p $(BUILD_DIR)/builder)
 $(shell mkdir -p $(BUILD_DIR)/samples)
 
-SAMPLES=$(BUILD_DIR)/sample1 $(BUILD_DIR)/sample2
+SAMPLES=$(BUILD_DIR)/sample1 $(BUILD_DIR)/sample2 $(BUILD_DIR)/sample3
 
 
 
