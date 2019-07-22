@@ -4,6 +4,7 @@
 #include <vector>
 #include "blocks/expr.h"
 #include "blocks/stmt.h"
+#include <unordered_map>
 
 namespace builder {
 class builder;
@@ -19,12 +20,10 @@ public:
 	std::list <block::block::Ptr> uncommitted_sequence;
 	block::stmt::Ptr ast;
 	block::stmt_block::Ptr current_block_stmt;	
-	int var_name_counter;
 	ast_function_type current_function;
 	std::vector<bool> bool_vector;
+	std::unordered_map<int32_t, block::stmt_block::Ptr> stmt_offsets;
 		
-	
-
 	builder_context();
 
 	void commit_uncommitted(void);	
@@ -33,7 +32,8 @@ public:
 
 
 	block::stmt::Ptr extract_ast(void);
-	block::stmt::Ptr extract_ast_from_function(ast_function_type, std::vector<bool> bl = std::vector<bool>());
+	block::stmt::Ptr extract_ast_from_function(ast_function_type);
+	block::stmt::Ptr extract_ast_from_function_internal(ast_function_type, std::vector<bool> bl = std::vector<bool>());
 
 private:
 	static builder_context *current_builder_context;

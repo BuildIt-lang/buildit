@@ -11,6 +11,7 @@ void foo(void) {
 	int_var b = a;
 	a && b;
 	b + 1;
+	1 + b;
 }
 
 int main(int argc, char* argv[]) {

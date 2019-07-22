@@ -11,12 +11,18 @@ class expr: public block {
 public:
 	typedef std::shared_ptr<expr> Ptr; 		
 	virtual void dump(std::ostream&, int);
+	virtual void accept(block_visitor* visitor) {
+		visitor->visit(self<expr>());
+	}
 };
 class unary_expr: public expr {
 public:
 	typedef std::shared_ptr<unary_expr> Ptr;
 	expr::Ptr expr1;
 	virtual void dump(std::ostream&, int);
+	virtual void accept(block_visitor* visitor) {
+		visitor->visit(self<unary_expr>());
+	}
 	
 };
 
@@ -27,6 +33,9 @@ public:
 	virtual void dump(std::ostream&, int);
 	expr::Ptr expr1;
 	expr::Ptr expr2;
+	virtual void accept(block_visitor* visitor) {
+		visitor->visit(self<binary_expr>());
+	}
 
 };
 
@@ -35,6 +44,9 @@ class not_expr: public unary_expr {
 public:
 	typedef std::shared_ptr<not_expr> Ptr;
 	virtual void dump(std::ostream&, int);
+	virtual void accept(block_visitor* visitor) {
+		visitor->visit(self<not_expr>());
+	}
 };
 
 
@@ -42,6 +54,9 @@ class and_expr: public binary_expr {
 public: 
 	typedef std::shared_ptr<and_expr> Ptr;	
 	virtual void dump(std::ostream&, int);
+	virtual void accept(block_visitor* visitor) {
+		visitor->visit(self<and_expr>());
+	}
 };
 
 
@@ -49,6 +64,9 @@ class or_expr: public binary_expr {
 public:
 	typedef std::shared_ptr<or_expr> Ptr;
 	virtual void dump(std::ostream&, int);
+	virtual void accept(block_visitor* visitor) {
+		visitor->visit(self<or_expr>());
+	}
 };
 
 
@@ -56,6 +74,9 @@ class plus_expr: public binary_expr {
 public: 
 	typedef std::shared_ptr<plus_expr> Ptr;
 	virtual void dump(std::ostream&, int);
+	virtual void accept(block_visitor* visitor) {
+		visitor->visit(self<plus_expr>());
+	}
 };
 
 
@@ -63,6 +84,9 @@ class minus_expr: public binary_expr {
 public:
 	typedef std::shared_ptr<minus_expr> Ptr;
 	virtual void dump(std::ostream&, int);
+	virtual void accept(block_visitor* visitor) {
+		visitor->visit(self<minus_expr>());
+	}
 };
 
 
@@ -70,6 +94,9 @@ class mul_expr: public binary_expr {
 public: 
 	typedef std::shared_ptr<mul_expr> Ptr;
 	virtual void dump(std::ostream&, int);
+	virtual void accept(block_visitor* visitor) {
+		visitor->visit(self<mul_expr>());
+	}
 };
 
 
@@ -77,6 +104,9 @@ class div_expr: public binary_expr {
 public: 
 	typedef std::shared_ptr<div_expr> Ptr;
 	virtual void dump(std::ostream&, int);
+	virtual void accept(block_visitor* visitor) {
+		visitor->visit(self<div_expr>());
+	}
 };
 
 
@@ -84,6 +114,9 @@ class var_expr: public expr {
 public:
 	typedef std::shared_ptr<var_expr> Ptr;
 	virtual void dump(std::ostream&, int);
+	virtual void accept(block_visitor* visitor) {
+		visitor->visit(self<var_expr>());
+	}
 
 	var::Ptr var1;	
 };
@@ -92,12 +125,18 @@ class const_expr: public expr {
 public:
 	typedef std::shared_ptr<const_expr> Ptr;
 	virtual void dump(std::ostream&, int);
+	virtual void accept(block_visitor* visitor) {
+		visitor->visit(self<const_expr>());
+	}
 };
 
 class int_const: public const_expr {
 public:
 	typedef std::shared_ptr<int_const> Ptr;
 	virtual void dump(std::ostream&, int);
+	virtual void accept(block_visitor* visitor) {
+		visitor->visit(self<int_const>());
+	}
 	
 	long long value;
 };
@@ -106,6 +145,9 @@ class assign_expr: public expr {
 public:
 	typedef std::shared_ptr<assign_expr> Ptr;
 	virtual void dump(std::ostream&, int);
+	virtual void accept(block_visitor* visitor) {
+		visitor->visit(self<assign_expr>());
+	}
 	
 	var::Ptr var1;	
 	expr::Ptr expr1;

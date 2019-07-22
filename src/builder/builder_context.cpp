@@ -2,6 +2,8 @@
 #include "builder/exceptions.h"
 #include "util/tracer.h"
 #include <algorithm>
+#include "blocks/var_namer.h"
+
 namespace builder {
 builder_context* builder_context::current_builder_context = nullptr;
 builder_context::builder_context() {
@@ -74,12 +76,20 @@ static std::vector<block::stmt::Ptr> trim_common_from_back(block::stmt::Ptr ast1
 	std::reverse(trimmed_stmts.begin(), trimmed_stmts.end());
 	return trimmed_stmts;
 }
-block::stmt::Ptr builder_context::extract_ast_from_function(ast_function_type function, std::vector<bool> b) {
+block::stmt::Ptr builder_context::extract_ast_from_function(ast_function_type function) {
+	std::vector<bool> b;
+	block::stmt::Ptr ast = extract_ast_from_function_internal(function, b);
+	
+	block::var_namer namer;
+	namer.ast = ast;
+	ast->accept(&namer);	
+	return ast;
+}
+block::stmt::Ptr builder_context::extract_ast_from_function_internal(ast_function_type function, std::vector<bool> b) {
 
 	current_block_stmt = std::make_shared<block::stmt_block>();
 	assert(current_block_stmt != nullptr);
 	ast = current_block_stmt;
-	var_name_counter = 0;
 	bool_vector = b;
 
 	current_function = function;
@@ -106,7 +116,7 @@ block::stmt::Ptr builder_context::extract_ast_from_function(ast_function_type fu
 		std::vector<bool> true_bv;
 		true_bv.push_back(true);
 		std::copy(b.begin(), b.end(), std::back_inserter(true_bv));	
-		block::stmt::Ptr true_ast = true_context.extract_ast_from_function(function, true_bv);	
+		block::stmt::Ptr true_ast = true_context.extract_ast_from_function_internal(function, true_bv);	
 		trim_ast_at_offset(true_ast, e.static_offset);
 
 
@@ -114,7 +124,7 @@ block::stmt::Ptr builder_context::extract_ast_from_function(ast_function_type fu
 		std::vector<bool> false_bv;
 		false_bv.push_back(false);
 		std::copy(b.begin(), b.end(), std::back_inserter(false_bv));
-		block::stmt::Ptr false_ast = false_context.extract_ast_from_function(function, false_bv);
+		block::stmt::Ptr false_ast = false_context.extract_ast_from_function_internal(function, false_bv);
 		trim_ast_at_offset(false_ast, e.static_offset);
 		std::vector<block::stmt::Ptr> trimmed_stmts = trim_common_from_back(true_ast, false_ast);
 		

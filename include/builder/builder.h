@@ -30,6 +30,12 @@ public:
 	builder (const int&);
 
 };
+builder operator && (const int &a, const builder &);
+builder operator || (const int &a, const builder &);
+builder operator + (const int &a, const builder &);
+builder operator - (const int &a, const builder &);
+builder operator * (const int &a, const builder &);
+builder operator / (const int &a, const builder &);
 
 class var {
 public:

@@ -29,7 +29,7 @@ void int_var::create_int_var(void) {
 	block_var = int_var;
 	
 	int32_t offset = get_offset_in_function(builder_context::current_builder_context->current_function);
-			
+		
 	block::decl_stmt::Ptr decl_stmt = std::make_shared<block::decl_stmt>();
 	decl_stmt->static_offset = offset;
 	
@@ -38,12 +38,8 @@ void int_var::create_int_var(void) {
 	block_decl_stmt = decl_stmt;
 	
 	builder_context::current_builder_context->current_block_stmt->stmts.push_back(decl_stmt);
-
-
-	var_name = std::string("var") + std::to_string(builder_context::current_builder_context->var_name_counter);
-	builder_context::current_builder_context->var_name_counter++;
+	int_var->static_offset = offset;
 	
-	block_var->var_name = var_name;
 }	
 int_var::int_var() {
 	create_int_var();
@@ -118,12 +114,18 @@ builder builder::operator && (const builder &a) {
 builder var::operator && (const builder &a) {
 	return this->operator builder() && a;
 }
+builder operator && (const int &a, const builder &b) {
+	return (builder)a && b;
+}
 
 builder builder::operator || (const builder &a) {
 	return builder_binary_op<block::or_expr>(a);
 }
 builder var::operator || (const builder &a) {
 	return this->operator builder() || a;
+}
+builder operator || (const int &a, const builder &b) {
+	return (builder)a || b;
 }
 
 builder builder::operator + (const builder &a) {
@@ -132,12 +134,18 @@ builder builder::operator + (const builder &a) {
 builder var::operator + (const builder &a) {
 	return this->operator builder() + a;
 }
+builder operator + (const int &a, const builder &b) {
+	return (builder)a + b;
+}
 
 builder builder::operator - (const builder &a) {
 	return builder_binary_op<block::minus_expr>(a);
 }
 builder var::operator - (const builder &a) {
 	return this->operator builder() - a;
+}
+builder operator - (const int &a, const builder &b) {
+	return (builder)a - b;
 }
 
 builder builder::operator * (const builder &a) {
@@ -146,6 +154,9 @@ builder builder::operator * (const builder &a) {
 builder var::operator * (const builder &a) {
 	return this->operator builder() * a;
 }
+builder operator * (const int &a, const builder &b) {
+	return (builder)a * b;
+}
 
 builder builder::operator / (const builder &a) {
 	return builder_binary_op<block::div_expr>(a);
@@ -153,6 +164,10 @@ builder builder::operator / (const builder &a) {
 builder var::operator / (const builder &a) {
 	return this->operator builder() / a;
 }
+builder operator / (const int &a, const builder &b) {
+	return (builder)a / b;
+}
+
 builder builder::operator ! () {
 	return builder_unary_op<block::not_expr>();
 }

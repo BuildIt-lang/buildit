@@ -3,13 +3,32 @@
 #include <memory>
 #include <assert.h>
 #include <iostream>
+#include "blocks/block_visitor.h"
+
 
 namespace builder {
 class builder_context;
+
 }
 // Top level class definition for blocks
 // Abstract class
 namespace block {
+class block;
+
+template <typename T>
+bool isa(std::shared_ptr<block> p) {
+	std::shared_ptr<T> ret = std::dynamic_pointer_cast<T> (p);
+	if (ret != nullptr) 
+		return true;
+	return false;
+}
+template <typename T>
+std::shared_ptr<T> to(std::shared_ptr<block> p) {
+	std::shared_ptr<T> ret = std::dynamic_pointer_cast<T> (p);
+	assert(ret != nullptr);
+	return ret;
+}
+
 class block: public std::enable_shared_from_this<block> {
 public:
 	typedef std::shared_ptr<block> Ptr;
@@ -17,21 +36,14 @@ public:
 	int32_t static_offset;
 
 	virtual void dump(std::ostream&, int);
+	virtual void accept(block_visitor* visitor) {
+		visitor->visit(self<block>());
+	}
+	template<typename T>
+	std::shared_ptr<T> self() {
+		return to<T>(shared_from_this());
+	}	
 
 };
-template <typename T>
-bool isa(block::Ptr p) {
-	std::shared_ptr<T> ret = std::dynamic_pointer_cast<T> (p);
-
-	if (ret != nullptr) 
-		return true;
-	return false;
-}
-template <typename T>
-typename T::Ptr to(block::Ptr p) {
-	typename T::Ptr ret = std::dynamic_pointer_cast<T> (p);
-	assert(ret != nullptr);
-	return ret;
-}
 }
 #endif

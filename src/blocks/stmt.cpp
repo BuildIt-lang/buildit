@@ -35,4 +35,14 @@ void if_stmt::dump(std::ostream &oss, int indent) {
 	then_stmt->dump(oss, indent+1);
 	else_stmt->dump(oss, indent+1);		
 }
+void label_stmt::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "LABEL_STMT" << std::endl;
+	label1->dump(oss, indent+1);
+}
+void goto_stmt::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "GOTO_STMT" << std::endl;
+	label1->dump(oss, indent+1);
+}
 }
