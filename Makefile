@@ -18,7 +18,7 @@ SAMPLES=$(subst $(SAMPLES_DIR),$(BUILD_DIR),$(SAMPLES_SRCS:.cpp=))
 
 
 
-CFLAGS=-std=c++14
+CFLAGS=
 LINKER_FLAGS=-rdynamic
 
 

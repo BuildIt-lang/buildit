@@ -17,6 +17,8 @@ void unary_expr::dump(std::ostream &oss, int indent) {
 
 void binary_expr::dump(std::ostream &oss, int indent) {
 }
+void const_expr::dump(std::ostream &oss, int indent) {
+}
 
 void not_expr::dump(std::ostream &oss, int indent) {
 	printer::indent(oss, indent);
@@ -71,6 +73,10 @@ void var_expr::dump(std::ostream &oss, int indent) {
 	var1->dump(oss, indent+1);
 }
 
+void int_const::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "INT_CONST (" << value << ")" << std::endl;
+}
 
 }
 

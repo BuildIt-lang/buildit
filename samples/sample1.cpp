@@ -7,9 +7,10 @@ using int_var = builder::int_var;
 
 // A simple straight line code with 2 variable declarations and one operator
 void foo(void) {
-	int_var a;
-	int_var b;
+	int_var a = 0;
+	int_var b = a;
 	a && b;
+	b + 1;
 }
 
 int main(int argc, char* argv[]) {

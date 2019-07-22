@@ -60,14 +60,16 @@ static std::vector<block::stmt::Ptr> trim_common_from_back(block::stmt::Ptr ast1
 	std::vector<block::stmt::Ptr> trimmed_stmts;
 	std::vector<block::stmt::Ptr> &ast1_stmts = block::to<block::stmt_block>(ast1)->stmts;
 	std::vector<block::stmt::Ptr> &ast2_stmts = block::to<block::stmt_block>(ast2)->stmts;
-	while(1) {
-		if (ast1_stmts.back()->static_offset != ast2_stmts.back()->static_offset) {
-			break;
+	if (ast1_stmts.size() > 0 && ast2_stmts.size() > 0) {
+		while(1) {
+			if (ast1_stmts.back()->static_offset != ast2_stmts.back()->static_offset) {
+				break;
+			}
+			block::stmt::Ptr trimmed_stmt = ast1_stmts.back();
+			ast1_stmts.pop_back();
+			ast2_stmts.pop_back();		
+			trimmed_stmts.push_back(trimmed_stmt);	
 		}
-		block::stmt::Ptr trimmed_stmt = ast1_stmts.back();
-		ast1_stmts.pop_back();
-		ast2_stmts.pop_back();		
-		trimmed_stmts.push_back(trimmed_stmt);	
 	}
 	std::reverse(trimmed_stmts.begin(), trimmed_stmts.end());
 	return trimmed_stmts;

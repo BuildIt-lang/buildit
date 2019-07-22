@@ -11,7 +11,7 @@ namespace builder {
 class var;
 class builder {
 public:
-	
+	builder() = default;	
 	block::expr::Ptr block_expr;
 	template <typename T>	
 	builder builder_binary_op(const builder &);
@@ -25,29 +25,34 @@ public:
 	builder operator / (const builder &);
 	
 	builder operator ! ();
-	operator bool();
+	explicit operator bool();
+
+	builder (const int&);
 
 };
-
 
 class var {
 public:
 	// Optional var name
 	std::string var_name;
 	block::var::Ptr block_var;
+	block::decl_stmt::Ptr block_decl_stmt;
 
+	var() = default;
 	
 	operator builder() const;
 
-	operator bool();
+	explicit operator bool();
 	builder operator && (const builder &);
 	builder operator || (const builder &);
 	builder operator + (const builder &);
 	builder operator - (const builder &);
 	builder operator * (const builder &);
 	builder operator / (const builder &);
+
 	
 	builder operator = (const builder &);
+
 	builder operator ! ();
 };
 
@@ -55,8 +60,13 @@ public:
 class int_var: public var {
 public:
 	using var::operator =;
+	void create_int_var(void);
 	int_var();
+	int_var(const int_var&);
+	int_var(const builder&);
+	int_var(const int);
 };
+
 }
 
 #endif
