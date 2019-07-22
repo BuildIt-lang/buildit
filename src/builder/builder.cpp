@@ -170,6 +170,66 @@ builder operator / (const int &a, const builder &b) {
 	return (builder)a / b;
 }
 
+builder builder::operator < (const builder &a) {
+	return builder_binary_op<block::lt_expr>(a);
+}
+builder var::operator < (const builder &a) {
+	return this->operator builder() < a;
+}
+builder operator < (const int &a, const builder &b) {
+	return (builder)a < b;
+}
+
+builder builder::operator > (const builder &a) {
+	return builder_binary_op<block::gt_expr>(a);
+}
+builder var::operator > (const builder &a) {
+	return this->operator builder() > a;
+}
+builder operator > (const int &a, const builder &b) {
+	return (builder)a > b;
+}
+
+builder builder::operator <= (const builder &a) {
+	return builder_binary_op<block::lte_expr>(a);
+}
+builder var::operator <= (const builder &a) {
+	return this->operator builder() <= a;
+}
+builder operator <= (const int &a, const builder &b) {
+	return (builder)a <= b;
+}
+
+builder builder::operator >= (const builder &a) {
+	return builder_binary_op<block::gte_expr>(a);
+}
+builder var::operator >= (const builder &a) {
+	return this->operator builder() >= a;
+}
+builder operator >= (const int &a, const builder &b) {
+	return (builder)a >= b;
+}
+
+builder builder::operator == (const builder &a) {
+	return builder_binary_op<block::equals_expr>(a);
+}
+builder var::operator == (const builder &a) {
+	return this->operator builder() == a;
+}
+builder operator == (const int &a, const builder &b) {
+	return (builder)a == b;
+}
+
+builder builder::operator != (const builder &a) {
+	return builder_binary_op<block::ne_expr>(a);
+}
+builder var::operator != (const builder &a) {
+	return this->operator builder() != a;
+}
+builder operator != (const int &a, const builder &b) {
+	return (builder)a != b;
+}
+
 builder builder::operator ! () {
 	return builder_unary_op<block::not_expr>();
 }

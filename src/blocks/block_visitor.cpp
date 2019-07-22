@@ -41,6 +41,30 @@ void block_visitor::visit(div_expr::Ptr a) {
 	a->expr1->accept(this);
 	a->expr2->accept(this);
 }
+void block_visitor::visit(lt_expr::Ptr a) {
+	a->expr1->accept(this);
+	a->expr2->accept(this);
+}
+void block_visitor::visit(gt_expr::Ptr a) {
+	a->expr1->accept(this);
+	a->expr2->accept(this);
+}
+void block_visitor::visit(lte_expr::Ptr a) {
+	a->expr1->accept(this);
+	a->expr2->accept(this);
+}
+void block_visitor::visit(gte_expr::Ptr a) {
+	a->expr1->accept(this);
+	a->expr2->accept(this);
+}
+void block_visitor::visit(equals_expr::Ptr a) {
+	a->expr1->accept(this);
+	a->expr2->accept(this);
+}
+void block_visitor::visit(ne_expr::Ptr a) {
+	a->expr1->accept(this);
+	a->expr2->accept(this);
+}
 void block_visitor::visit(var_expr::Ptr a) {
 	a->var1->accept(this);
 }

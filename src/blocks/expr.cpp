@@ -61,6 +61,42 @@ void div_expr::dump(std::ostream &oss, int indent) {
 	expr1->dump(oss, indent+1);
 	expr2->dump(oss, indent+1);
 }
+void lt_expr::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "LT_EXPR" << std::endl;	
+	expr1->dump(oss, indent+1);
+	expr2->dump(oss, indent+1);
+}
+void gt_expr::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "GT_EXPR" << std::endl;	
+	expr1->dump(oss, indent+1);
+	expr2->dump(oss, indent+1);
+}
+void lte_expr::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "LTE_EXPR" << std::endl;	
+	expr1->dump(oss, indent+1);
+	expr2->dump(oss, indent+1);
+}
+void gte_expr::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "GTE_EXPR" << std::endl;	
+	expr1->dump(oss, indent+1);
+	expr2->dump(oss, indent+1);
+}
+void equals_expr::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "EQUALS_EXPR" << std::endl;	
+	expr1->dump(oss, indent+1);
+	expr2->dump(oss, indent+1);
+}
+void ne_expr::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "NE_EXPR" << std::endl;	
+	expr1->dump(oss, indent+1);
+	expr2->dump(oss, indent+1);
+}
 void assign_expr::dump(std::ostream &oss, int indent) {
 	printer::indent(oss, indent);
 	oss << "ASSIGN_EXPR" << std::endl;

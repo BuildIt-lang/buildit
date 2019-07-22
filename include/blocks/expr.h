@@ -108,7 +108,56 @@ public:
 		visitor->visit(self<div_expr>());
 	}
 };
+class lt_expr: public binary_expr {
+public:
+	typedef std::shared_ptr<lt_expr> Ptr;
+	virtual void dump(std::ostream&, int);
+	virtual void accept(block_visitor* visitor) {
+		visitor->visit(self<lt_expr>());
+	}
+};
+class gt_expr: public binary_expr {
+public:
+	typedef std::shared_ptr<gt_expr> Ptr;
+	virtual void dump(std::ostream&, int);
+	virtual void accept(block_visitor* visitor) {
+		visitor->visit(self<gt_expr>());
+	}
+};
+class lte_expr: public binary_expr {
+public:
+	typedef std::shared_ptr<lte_expr> Ptr;
+	virtual void dump(std::ostream&, int);
+	virtual void accept(block_visitor* visitor) {
+		visitor->visit(self<lte_expr>());
+	}
+};
+class gte_expr: public binary_expr {
+public:
+	typedef std::shared_ptr<gte_expr> Ptr;
+	virtual void dump(std::ostream&, int);
+	virtual void accept(block_visitor* visitor) {
+		visitor->visit(self<gte_expr>());
+	}
+};
 
+class equals_expr: public binary_expr {
+public:
+	typedef std::shared_ptr<equals_expr> Ptr;
+	virtual void dump(std::ostream&, int);
+	virtual void accept(block_visitor* visitor) {
+		visitor->visit(self<equals_expr>());
+	}
+};
+
+class ne_expr: public binary_expr {
+public:
+	typedef std::shared_ptr<ne_expr> Ptr;
+	virtual void dump(std::ostream&, int);
+	virtual void accept(block_visitor* visitor) {
+		visitor->visit(self<ne_expr>());
+	}
+};
 
 class var_expr: public expr {
 public:
