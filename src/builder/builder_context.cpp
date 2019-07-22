@@ -3,9 +3,23 @@
 #include "util/tracer.h"
 #include <algorithm>
 #include "blocks/var_namer.h"
+#include "blocks/label_inserter.h"
 
 namespace builder {
 builder_context* builder_context::current_builder_context = nullptr;
+int32_t get_offset_in_function(builder_context::ast_function_type _function) {
+	int32_t offset = get_offset_in_function_impl(_function);
+	
+	if (builder_context::current_builder_context->visited_offsets.count(offset) > 0) {
+		throw LoopBackException(offset);
+	}
+	for (auto expr: builder_context::current_builder_context->uncommitted_sequence) {
+		if (block::to<block::expr>(expr)->static_offset == offset) {
+			throw LoopBackException(offset);
+		}
+	}
+	return offset;
+}
 builder_context::builder_context() {
 	current_block_stmt = nullptr;
 	ast = nullptr;
@@ -13,6 +27,7 @@ builder_context::builder_context() {
 void builder_context::commit_uncommitted(void) {
 	for (auto block_ptr: uncommitted_sequence) {
 		block::expr_stmt::Ptr s = std::make_shared<block::expr_stmt>();
+		builder_context::current_builder_context->visited_offsets.insert(block_ptr->static_offset);
 		assert(block::isa<block::expr>(block_ptr));
 		s->static_offset = block_ptr->static_offset;
 		s->expr1 = block::to<block::expr>(block_ptr);
@@ -83,11 +98,23 @@ block::stmt::Ptr builder_context::extract_ast_from_function(ast_function_type fu
 	block::var_namer namer;
 	namer.ast = ast;
 	ast->accept(&namer);	
+
+	block::label_collector collector;
+	ast->accept(&collector);
+
+	block::label_creator creator;
+	creator.collected_labels = collector.collected_labels;
+	ast->accept(&creator);
+
+	block::label_inserter inserter;
+	inserter.offset_to_label = creator.offset_to_label;
+	ast->accept(&inserter);
 	return ast;
 }
 block::stmt::Ptr builder_context::extract_ast_from_function_internal(ast_function_type function, std::vector<bool> b) {
-
+	
 	current_block_stmt = std::make_shared<block::stmt_block>();
+	current_block_stmt->static_offset = -1;
 	assert(current_block_stmt != nullptr);
 	ast = current_block_stmt;
 	bool_vector = b;
@@ -98,14 +125,14 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(ast_functio
 	try {
 		current_builder_context = this;
 		function();
-		current_builder_context = nullptr;
 		
 		ret_ast = extract_ast();
+		current_builder_context = nullptr;
 
 	} catch (OutOfBoolsException &e) {
-		current_builder_context = nullptr;
 		
 		commit_uncommitted();
+		current_builder_context = nullptr;
 		
 		block::expr_stmt::Ptr last_stmt = block::to<block::expr_stmt>(current_block_stmt->stmts.back());
 		current_block_stmt->stmts.pop_back();
@@ -139,6 +166,16 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(ast_functio
 		
 		std::copy(trimmed_stmts.begin(), trimmed_stmts.end(), std::back_inserter(current_block_stmt->stmts));
 		ret_ast = ast;
+	} catch (LoopBackException &e) {
+		commit_uncommitted();
+		current_builder_context = nullptr;
+		
+		block::goto_stmt::Ptr goto_stmt = std::make_shared<block::goto_stmt>();
+		goto_stmt->static_offset = -1;	
+		goto_stmt->temporary_label_number = e.static_offset;
+		
+		current_block_stmt->stmts.push_back(goto_stmt);	
+		ret_ast = ast;	
 	}
 	
 	ast = current_block_stmt = nullptr;

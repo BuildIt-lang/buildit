@@ -32,6 +32,7 @@ void int_var::create_int_var(void) {
 		
 	block::decl_stmt::Ptr decl_stmt = std::make_shared<block::decl_stmt>();
 	decl_stmt->static_offset = offset;
+	builder_context::current_builder_context->visited_offsets.insert(offset);
 	
 	decl_stmt->decl_var = int_var;
 	decl_stmt->init_expr = nullptr;
@@ -69,13 +70,13 @@ template <typename T>
 builder builder::builder_unary_op() {
 	assert(builder_context::current_builder_context != nullptr);
 	
+	builder_context::current_builder_context->remove_node_from_sequence(block_expr);
 	int32_t offset = get_offset_in_function(builder_context::current_builder_context->current_function);
 	assert(offset != -1);
 	
 	typename T::Ptr expr = std::make_shared<T>();
 	expr->static_offset = offset;
 	
-	builder_context::current_builder_context->remove_node_from_sequence(block_expr);
 
 	expr->expr1 = block_expr;
 
@@ -89,14 +90,15 @@ template <typename T>
 builder builder::builder_binary_op(const builder &a) {
 	assert(builder_context::current_builder_context != nullptr);
 	
+	builder_context::current_builder_context->remove_node_from_sequence(block_expr);
+	builder_context::current_builder_context->remove_node_from_sequence(a.block_expr);
+
 	int32_t offset = get_offset_in_function(builder_context::current_builder_context->current_function);
 	assert(offset != -1);
 	
 	typename T::Ptr expr = std::make_shared<T>();
 	expr->static_offset = offset;
 	
-	builder_context::current_builder_context->remove_node_from_sequence(block_expr);
-	builder_context::current_builder_context->remove_node_from_sequence(a.block_expr);
 
 	expr->expr1 = block_expr;
 	expr->expr2 = a.block_expr;
@@ -177,13 +179,13 @@ builder var::operator! () {
 builder var::operator = (const builder &a) {
 	assert(builder_context::current_builder_context != nullptr);
 	
+	builder_context::current_builder_context->remove_node_from_sequence(a.block_expr);
 	int32_t offset = get_offset_in_function(builder_context::current_builder_context->current_function);
 	assert(offset != -1);
 	
 	block::assign_expr::Ptr expr = std::make_shared<block::assign_expr>();
 	expr->static_offset = offset;
 	
-	builder_context::current_builder_context->remove_node_from_sequence(a.block_expr);
 
 	expr->var1 = block_var;
 	expr->expr1 = a.block_expr;

@@ -78,10 +78,12 @@ void block_visitor::visit(label::Ptr a) {
 	
 }
 void block_visitor::visit(label_stmt::Ptr a) {
-	a->label1->accept(this);
+	if (a->label1 != nullptr)		
+		a->label1->accept(this);
 }
 void block_visitor::visit(goto_stmt::Ptr a) {
-	a->label1->accept(this);
+	if (a->label1 != nullptr)
+		a->label1->accept(this);
 }
 void block_visitor::visit(var::Ptr a) {
 		

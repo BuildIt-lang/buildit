@@ -38,11 +38,20 @@ void if_stmt::dump(std::ostream &oss, int indent) {
 void label_stmt::dump(std::ostream &oss, int indent) {
 	printer::indent(oss, indent);
 	oss << "LABEL_STMT" << std::endl;
-	label1->dump(oss, indent+1);
+	if (label1 != nullptr)
+		label1->dump(oss, indent+1);
 }
 void goto_stmt::dump(std::ostream &oss, int indent) {
 	printer::indent(oss, indent);
-	oss << "GOTO_STMT" << std::endl;
-	label1->dump(oss, indent+1);
+	if (label1 != nullptr)
+		oss << "GOTO_STMT" << std::endl;
+	else 
+		oss << "GOTO_STMT (" << temporary_label_number << ")" << std::endl;	
+	if (label1 != nullptr)
+		label1->dump(oss, indent+1);
+}
+void label::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "LABEL (" << label_name << ")" << std::endl;
 }
 }

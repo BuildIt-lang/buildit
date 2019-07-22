@@ -6,7 +6,7 @@ namespace builder {
 class builder_context;
 }
 typedef void (*ast_function_type) (void);
-static int get_offset_in_function(ast_function_type _function) {
+static int get_offset_in_function_impl(ast_function_type _function) {
 	void * function = (void*) _function;
 	void *buffer[20];
 	int backtrace_size = backtrace(buffer, 20);

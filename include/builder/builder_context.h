@@ -4,7 +4,7 @@
 #include <vector>
 #include "blocks/expr.h"
 #include "blocks/stmt.h"
-#include <unordered_map>
+#include <unordered_set>
 
 namespace builder {
 class builder;
@@ -22,7 +22,7 @@ public:
 	block::stmt_block::Ptr current_block_stmt;	
 	ast_function_type current_function;
 	std::vector<bool> bool_vector;
-	std::unordered_map<int32_t, block::stmt_block::Ptr> stmt_offsets;
+	std::unordered_set<int32_t> visited_offsets;
 		
 	builder_context();
 
@@ -40,9 +40,10 @@ private:
 	friend builder;
 	friend var;
 	friend int_var;
-		
+	friend int32_t get_offset_in_function(ast_function_type _function);
 };
 bool get_next_bool_from_context(builder_context *context, block::expr::Ptr);
+int32_t get_offset_in_function(builder_context::ast_function_type _function);
 
 }
 

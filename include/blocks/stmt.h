@@ -90,6 +90,7 @@ public:
 	}
 	
 	label::Ptr label1;	
+	int32_t temporary_label_number;
 };
 }
 #endif
