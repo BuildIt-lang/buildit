@@ -6,9 +6,9 @@ using int_var = builder::int_var;
 
 
 // A simple straight line code with 2 variable declarations and one operator
-void foo(builder::builder_context* context) {
-	int_var a(context);
-	int_var b(context);
+void foo(void) {
+	int_var a;
+	int_var b;
 	a && b;
 }
 

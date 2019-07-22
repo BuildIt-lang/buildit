@@ -6,10 +6,14 @@
 #include "blocks/stmt.h"
 
 namespace builder {
+class builder;
+class var;
+class int_var;
+
 class builder_context {
 public:
 
-	typedef void (*ast_function_type)(builder_context* context);
+	typedef void (*ast_function_type)();
 
 	
 	std::list <block::block::Ptr> uncommitted_sequence;
@@ -30,6 +34,12 @@ public:
 
 	block::stmt::Ptr extract_ast(void);
 	block::stmt::Ptr extract_ast_from_function(ast_function_type, std::vector<bool> bl = std::vector<bool>());
+
+private:
+	static builder_context *current_builder_context;
+	friend builder;
+	friend var;
+	friend int_var;
 		
 };
 bool get_next_bool_from_context(builder_context *context, block::expr::Ptr);

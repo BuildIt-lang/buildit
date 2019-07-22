@@ -5,7 +5,7 @@
 namespace builder {
 class builder_context;
 }
-typedef void (*ast_function_type) (builder::builder_context* context);
+typedef void (*ast_function_type) (void);
 static int get_offset_in_function(ast_function_type _function) {
 	void * function = (void*) _function;
 	void *buffer[20];

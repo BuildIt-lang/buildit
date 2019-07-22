@@ -52,5 +52,11 @@ $(BUILD_DIR)/sample%: $(BUILD_DIR)/samples/sample%.o $(LIBRARY_OBJS)
 .PHONY: executables
 executables: $(SAMPLES)
 
+run: $(SAMPLES)
+	for sample in $(SAMPLES); do \
+		echo Running $$sample; \
+		$$sample; \
+	done	
+	
 clean:
 	- rm -rf build

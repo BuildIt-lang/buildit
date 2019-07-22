@@ -5,32 +5,31 @@
 namespace builder {
 var::operator builder () const {
 	assert(block_var != nullptr);
-	int32_t offset = get_offset_in_function(context->current_function);
+	int32_t offset = get_offset_in_function(builder_context::current_builder_context->current_function);
 		
 	block::var_expr::Ptr var_expr = std::make_shared<block::var_expr>();
 	var_expr->static_offset = offset;
 	
 	var_expr->var1 = block_var;
-	context->add_node_to_sequence(var_expr);
+	builder_context::current_builder_context->add_node_to_sequence(var_expr);
 	
 	builder ret_block;
-	ret_block.context = context;	
 	ret_block.block_expr = var_expr;
 	
 	return ret_block;
 }
 	
-int_var::int_var(builder_context *context_) {
-	assert(context_ != nullptr);
-	assert(context_->current_block_stmt != nullptr);
-	context = context_;
-	context->commit_uncommitted();
+int_var::int_var() {
+	assert(builder_context::current_builder_context != nullptr);
+	assert(builder_context::current_builder_context->current_block_stmt != nullptr);
+	
+	builder_context::current_builder_context->commit_uncommitted();
 	
 	block::int_var::Ptr int_var = std::make_shared<block::int_var>();	
 		
 	block_var = int_var;
 	
-	int32_t offset = get_offset_in_function(context->current_function);
+	int32_t offset = get_offset_in_function(builder_context::current_builder_context->current_function);
 			
 	block::decl_stmt::Ptr decl_stmt = std::make_shared<block::decl_stmt>();
 	decl_stmt->static_offset = offset;
@@ -38,36 +37,55 @@ int_var::int_var(builder_context *context_) {
 	decl_stmt->decl_var = int_var;
 	decl_stmt->init_expr = nullptr;
 	
-	context->current_block_stmt->stmts.push_back(decl_stmt);
+	builder_context::current_builder_context->current_block_stmt->stmts.push_back(decl_stmt);
 
 
-	var_name = std::string("var") + std::to_string(context->var_name_counter);
-	context->var_name_counter++;
+	var_name = std::string("var") + std::to_string(builder_context::current_builder_context->var_name_counter);
+	builder_context::current_builder_context->var_name_counter++;
 	
 	block_var->var_name = var_name;
 }		
 
+
 template <typename T>
-builder builder::builder_binary_op(const builder &a) {
-	assert(context != nullptr);
-	assert(context == a.context);
+builder builder::builder_unary_op() {
+	assert(builder_context::current_builder_context != nullptr);
 	
-	int32_t offset = get_offset_in_function(context->current_function);
+	int32_t offset = get_offset_in_function(builder_context::current_builder_context->current_function);
 	assert(offset != -1);
 	
 	typename T::Ptr expr = std::make_shared<T>();
 	expr->static_offset = offset;
 	
-	context->remove_node_from_sequence(block_expr);
-	context->remove_node_from_sequence(a.block_expr);
+	builder_context::current_builder_context->remove_node_from_sequence(block_expr);
+
+	expr->expr1 = block_expr;
+
+	builder_context::current_builder_context->add_node_to_sequence(expr);	
+	
+	builder ret_builder;
+	ret_builder.block_expr = expr;
+	return ret_builder;	
+}
+template <typename T>
+builder builder::builder_binary_op(const builder &a) {
+	assert(builder_context::current_builder_context != nullptr);
+	
+	int32_t offset = get_offset_in_function(builder_context::current_builder_context->current_function);
+	assert(offset != -1);
+	
+	typename T::Ptr expr = std::make_shared<T>();
+	expr->static_offset = offset;
+	
+	builder_context::current_builder_context->remove_node_from_sequence(block_expr);
+	builder_context::current_builder_context->remove_node_from_sequence(a.block_expr);
 
 	expr->expr1 = block_expr;
 	expr->expr2 = a.block_expr;
 
-	context->add_node_to_sequence(expr);	
+	builder_context::current_builder_context->add_node_to_sequence(expr);	
 	
 	builder ret_builder;
-	ret_builder.context = context;
 	ret_builder.block_expr = expr;
 	return ret_builder;	
 }
@@ -113,31 +131,35 @@ builder builder::operator / (const builder &a) {
 builder var::operator / (const builder &a) {
 	return (builder)(*this) / a;
 }
-
+builder builder::operator ! () {
+	return builder_unary_op<block::not_expr>();
+}
+builder var::operator! () {
+	return !(builder)(*this);
+}
 builder var::operator = (const builder &a) {
-	assert(context != nullptr);
-	assert(context == a.context);
+	assert(builder_context::current_builder_context != nullptr);
 	
-	int32_t offset = get_offset_in_function(context->current_function);
+	int32_t offset = get_offset_in_function(builder_context::current_builder_context->current_function);
 	assert(offset != -1);
 	
 	block::assign_expr::Ptr expr = std::make_shared<block::assign_expr>();
 	expr->static_offset = offset;
 	
-	context->remove_node_from_sequence(a.block_expr);
+	builder_context::current_builder_context->remove_node_from_sequence(a.block_expr);
 
 	expr->var1 = block_var;
 	expr->expr1 = a.block_expr;
 
-	context->add_node_to_sequence(expr);	
+	builder_context::current_builder_context->add_node_to_sequence(expr);	
 	
 	builder ret_builder;
-	ret_builder.context = context;
 	ret_builder.block_expr = expr;
 	return ret_builder;	
 }
+
 builder::operator bool() {
-	return get_next_bool_from_context(context, block_expr);
+	return get_next_bool_from_context(builder_context::current_builder_context, block_expr);
 }
 var::operator bool() {
 	return (builder)(*this);

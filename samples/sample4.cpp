@@ -6,10 +6,10 @@ using int_var = builder::int_var;
 
 
 // A simple straight line code with three variables and assignment
-void foo(builder::builder_context* context) {
-	int_var a(context);
-	int_var b(context);
-	int_var c(context);
+void foo(void) {
+	int_var a;
+	int_var b;
+	int_var c;
 	c = a + b;
 }
 

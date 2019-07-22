@@ -11,13 +11,12 @@ namespace builder {
 class var;
 class builder {
 public:
-	builder_context* context;
-	builder() = default;
-	builder(builder_context* context_): context(context_) {}	
 	
 	block::expr::Ptr block_expr;
 	template <typename T>	
 	builder builder_binary_op(const builder &);
+	template <typename T>	
+	builder builder_unary_op();
 	builder operator && (const builder &);	
 	builder operator || (const builder &);
 	builder operator + (const builder &);
@@ -25,17 +24,18 @@ public:
 	builder operator * (const builder &);
 	builder operator / (const builder &);
 	
+	builder operator ! ();
 	operator bool();
+
 };
 
 
 class var {
 public:
-	builder_context* context;	
 	// Optional var name
 	std::string var_name;
 	block::var::Ptr block_var;
-	
+
 	
 	operator builder() const;
 
@@ -48,13 +48,14 @@ public:
 	builder operator / (const builder &);
 	
 	builder operator = (const builder &);
+	builder operator ! ();
 };
 
 
 class int_var: public var {
 public:
-	int_var(builder_context* context_);
 	using var::operator =;
+	int_var();
 };
 }
 

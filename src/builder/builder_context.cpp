@@ -3,6 +3,7 @@
 #include "util/tracer.h"
 #include <algorithm>
 namespace builder {
+builder_context* builder_context::current_builder_context = nullptr;
 builder_context::builder_context() {
 	current_block_stmt = nullptr;
 	ast = nullptr;
@@ -78,15 +79,19 @@ block::stmt::Ptr builder_context::extract_ast_from_function(ast_function_type fu
 	ast = current_block_stmt;
 	var_name_counter = 0;
 	bool_vector = b;
-	
+
 	current_function = function;
 
 	block::stmt::Ptr ret_ast;
 	try {
-		function(this);
+		current_builder_context = this;
+		function();
+		current_builder_context = nullptr;
+		
 		ret_ast = extract_ast();
 
 	} catch (OutOfBoolsException &e) {
+		current_builder_context = nullptr;
 		
 		commit_uncommitted();
 		
