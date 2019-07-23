@@ -1,5 +1,5 @@
 # mirror-cpp [![Build Status](https://api.travis-ci.org/AjayBrahmakshatriya/mirror-cpp.svg?branch=master)](https://travis-ci.org/AjayBrahmakshatriya/mirror-cpp)
-Mirror-CPP, is a library for bringing reflection into C++ by overloading operator. Mirror-CPP also extracts the control flow in the function by repeated execution and exploration of all branches. 
+Mirror-CPP is a library for bringing reflection into C++ by overloading the basic operators. Mirror-CPP also extracts the control flow in the function by repeated execution and exploration of all branches. 
 
 Mirror-CPP does not require any special compiler support and provides a library for embedding any DSL in C++. 
 
