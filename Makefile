@@ -17,9 +17,14 @@ SAMPLES=$(subst $(SAMPLES_DIR),$(BUILD_DIR),$(SAMPLES_SRCS:.cpp=))
 
 
 
-
+DEBUG ?= 0
+ifeq ($(DEBUG),1)
 CFLAGS=-g
 LINKER_FLAGS=-rdynamic -g
+else
+CFLAGS=
+LINKER_FLAGS=-rdynamic
+endif
 
 
 BUILDER_SRC=$(wildcard $(SRC_DIR)/builder/*.cpp)
