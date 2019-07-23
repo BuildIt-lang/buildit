@@ -60,8 +60,8 @@ executables: $(SAMPLES)
 run: $(SAMPLES)
 	for sample in $(SAMPLES); do \
 		echo Running $$sample; \
-		$$sample; \
-	done	
+		$$sample || exit 1; \
+	done 
 	
 clean:
 	- rm -rf build

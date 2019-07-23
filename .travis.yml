@@ -1,0 +1,6 @@
+os:
+        - linux
+dist: xenial
+language: generic
+script:
+        - make run
