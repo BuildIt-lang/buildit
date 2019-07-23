@@ -7,17 +7,15 @@
 
 namespace builder {
 builder_context* builder_context::current_builder_context = nullptr;
+void builder_context::add_stmt_to_current_block(block::stmt::Ptr s) {
+	if (s->static_offset != -1 && visited_offsets.count(s->static_offset) > 0) {
+		throw LoopBackException(s->static_offset);
+	}
+	visited_offsets.insert(s->static_offset);
+	current_block_stmt->stmts.push_back(s);
+}
 int32_t get_offset_in_function(builder_context::ast_function_type _function) {
 	int32_t offset = get_offset_in_function_impl(_function);
-	
-	if (builder_context::current_builder_context->visited_offsets.count(offset) > 0) {
-		throw LoopBackException(offset);
-	}
-	for (auto expr: builder_context::current_builder_context->uncommitted_sequence) {
-		if (block::to<block::expr>(expr)->static_offset == offset) {
-			throw LoopBackException(offset);
-		}
-	}
 	return offset;
 }
 builder_context::builder_context() {
@@ -27,12 +25,11 @@ builder_context::builder_context() {
 void builder_context::commit_uncommitted(void) {
 	for (auto block_ptr: uncommitted_sequence) {
 		block::expr_stmt::Ptr s = std::make_shared<block::expr_stmt>();
-		builder_context::current_builder_context->visited_offsets.insert(block_ptr->static_offset);
 		assert(block::isa<block::expr>(block_ptr));
 		s->static_offset = block_ptr->static_offset;
 		s->expr1 = block::to<block::expr>(block_ptr);
 		assert(current_block_stmt != nullptr);
-		current_block_stmt->stmts.push_back(s);			
+		add_stmt_to_current_block(s);
 	}	
 	uncommitted_sequence.clear();
 
@@ -79,8 +76,18 @@ static std::vector<block::stmt::Ptr> trim_common_from_back(block::stmt::Ptr ast1
 	std::vector<block::stmt::Ptr> &ast2_stmts = block::to<block::stmt_block>(ast2)->stmts;
 	if (ast1_stmts.size() > 0 && ast2_stmts.size() > 0) {
 		while(1) {
+			
 			if (ast1_stmts.back()->static_offset != ast2_stmts.back()->static_offset) {
 				break;
+			}
+			if (ast1_stmts.back()->static_offset == -1) {
+				// The only possibility is that these two are goto statements. Gotos are same only if they are going to the same label
+				assert(block::isa<block::goto_stmt>(ast1_stmts.back()));
+				assert(block::isa<block::goto_stmt>(ast2_stmts.back()));
+				block::goto_stmt::Ptr gt1 = block::to<block::goto_stmt>(ast1_stmts.back());
+				block::goto_stmt::Ptr gt2 = block::to<block::goto_stmt>(ast2_stmts.back());
+				if (gt1->temporary_label_number != gt2->temporary_label_number)
+					break;
 			}
 			block::stmt::Ptr trimmed_stmt = ast1_stmts.back();
 			ast1_stmts.pop_back();
@@ -136,6 +143,7 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(ast_functio
 		
 		block::expr_stmt::Ptr last_stmt = block::to<block::expr_stmt>(current_block_stmt->stmts.back());
 		current_block_stmt->stmts.pop_back();
+		visited_offsets.erase(e.static_offset);
 		
 		block::expr::Ptr cond_expr = last_stmt->expr1;	
 
@@ -162,19 +170,18 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(ast_functio
 		new_if_stmt->then_stmt = true_ast;
 		new_if_stmt->else_stmt = false_ast;
 		
-		current_block_stmt->stmts.push_back(new_if_stmt);			
+		add_stmt_to_current_block(new_if_stmt);
 		
 		std::copy(trimmed_stmts.begin(), trimmed_stmts.end(), std::back_inserter(current_block_stmt->stmts));
 		ret_ast = ast;
 	} catch (LoopBackException &e) {
-		commit_uncommitted();
 		current_builder_context = nullptr;
 		
 		block::goto_stmt::Ptr goto_stmt = std::make_shared<block::goto_stmt>();
 		goto_stmt->static_offset = -1;	
 		goto_stmt->temporary_label_number = e.static_offset;
 		
-		current_block_stmt->stmts.push_back(goto_stmt);	
+		add_stmt_to_current_block(goto_stmt);
 		ret_ast = ast;	
 	}
 	

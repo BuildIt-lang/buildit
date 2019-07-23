@@ -29,6 +29,8 @@ public:
 	void commit_uncommitted(void);	
 	void remove_node_from_sequence(block::expr::Ptr);
 	void add_node_to_sequence(block::expr::Ptr);
+	
+	void add_stmt_to_current_block(block::stmt::Ptr);
 
 
 	block::stmt::Ptr extract_ast(void);

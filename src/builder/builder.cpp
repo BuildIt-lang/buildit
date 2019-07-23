@@ -32,13 +32,12 @@ void int_var::create_int_var(void) {
 		
 	block::decl_stmt::Ptr decl_stmt = std::make_shared<block::decl_stmt>();
 	decl_stmt->static_offset = offset;
-	builder_context::current_builder_context->visited_offsets.insert(offset);
 	
 	decl_stmt->decl_var = int_var;
 	decl_stmt->init_expr = nullptr;
 	block_decl_stmt = decl_stmt;
 	
-	builder_context::current_builder_context->current_block_stmt->stmts.push_back(decl_stmt);
+	builder_context::current_builder_context->add_stmt_to_current_block(decl_stmt);
 	int_var->static_offset = offset;
 	
 }	
@@ -65,6 +64,7 @@ builder::builder (const int &a) {
 	builder_context::current_builder_context->add_node_to_sequence(int_const);	
 	
 	block_expr = int_const;
+	
 }
 template <typename T>
 builder builder::builder_unary_op() {
@@ -258,6 +258,7 @@ builder var::operator = (const builder &a) {
 }
 
 builder::operator bool() {
+	builder_context::current_builder_context->commit_uncommitted();
 	return get_next_bool_from_context(builder_context::current_builder_context, block_expr);
 }
 var::operator bool() {
