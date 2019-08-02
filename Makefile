@@ -22,7 +22,7 @@ ifeq ($(DEBUG),1)
 CFLAGS=-g -std=c++11
 LINKER_FLAGS=-rdynamic -g
 else
-CFLAGS=-std=c++11
+CFLAGS=-std=c++11 -O3
 LINKER_FLAGS=-rdynamic
 endif
 

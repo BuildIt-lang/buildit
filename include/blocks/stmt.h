@@ -100,6 +100,7 @@ public:
 		a->visit(self<while_stmt>());
 	}
 	stmt::Ptr body;
+	expr::Ptr cond;
 };
 class break_stmt: public stmt {
 public:

@@ -64,6 +64,8 @@ void loop_finder::visit(label_stmt::Ptr a) {
 	finder.found_parent->stmts.clear();
 
 	while_stmt::Ptr new_while = std::make_shared<while_stmt>();
+	new_while->cond = std::make_shared<int_const>();
+	to<int_const>(new_while->cond)->value = 1;
 	new_while->body = std::make_shared<stmt_block>();	
 	to<stmt_block>(new_while->body)->stmts = stmts_in_body;
 	
