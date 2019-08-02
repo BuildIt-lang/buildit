@@ -54,4 +54,13 @@ void label::dump(std::ostream &oss, int indent) {
 	printer::indent(oss, indent);
 	oss << "LABEL (" << label_name << ")" << std::endl;
 }
+void while_stmt::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "WHILE_SMT" << std::endl;
+	body->dump(oss, indent+1);
+}
+void break_stmt::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "BREAK_STMT" << std::endl;
+}
 }

@@ -34,6 +34,8 @@ class if_stmt;
 class label;
 class label_stmt;
 class goto_stmt;	
+class while_stmt;
+class break_stmt;
 
 class block_visitor {
 public:
@@ -68,6 +70,8 @@ public:
 	virtual void visit (std::shared_ptr<label>);
 	virtual void visit (std::shared_ptr<label_stmt>);
 	virtual void visit (std::shared_ptr<goto_stmt>);	
+	virtual void visit (std::shared_ptr<while_stmt>);	
+	virtual void visit (std::shared_ptr<break_stmt>);	
 
 };
 }

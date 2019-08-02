@@ -15,7 +15,7 @@ static int get_offset_in_function_impl(ast_function_type _function) {
 	for (int i = 0; i < backtrace_size; i++) {
 		int offset;
 		unsigned long long address;
-		if(sscanf(backtrace_functions[i], "%*[^+]+%x) [%llx]", &offset, &address) != 2)
+		if (sscanf(backtrace_functions[i], "%*[^+]+%x) [%llx]", &offset, &address) != 2)
 			continue;
 		if ((unsigned long long) function == address - offset) {
 			free (backtrace_functions);

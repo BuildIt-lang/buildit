@@ -115,4 +115,9 @@ void block_visitor::visit(var::Ptr a) {
 void block_visitor::visit(int_var::Ptr a) {
 
 }
+void block_visitor::visit(break_stmt::Ptr a) {
+}
+void block_visitor::visit(while_stmt::Ptr a) {
+	a->body->accept(this);
+}
 }

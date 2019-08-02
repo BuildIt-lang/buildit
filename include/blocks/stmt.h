@@ -92,5 +92,22 @@ public:
 	label::Ptr label1;	
 	int32_t temporary_label_number;
 };
+class while_stmt: public stmt {
+public:
+	typedef std::shared_ptr<while_stmt> Ptr;
+	virtual void dump(std::ostream&, int);
+	virtual void accept(block_visitor *a) {
+		a->visit(self<while_stmt>());
+	}
+	stmt::Ptr body;
+};
+class break_stmt: public stmt {
+public:
+	typedef std::shared_ptr<break_stmt> Ptr;
+	virtual void dump(std::ostream&, int);
+	virtual void accept(block_visitor *a) {
+		a->visit(self<break_stmt>());
+	}
+};
 }
 #endif

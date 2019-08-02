@@ -4,6 +4,7 @@
 #include <algorithm>
 #include "blocks/var_namer.h"
 #include "blocks/label_inserter.h"
+#include "blocks/loop_finder.h"
 
 namespace builder {
 builder_context* builder_context::current_builder_context = nullptr;
@@ -116,6 +117,12 @@ block::stmt::Ptr builder_context::extract_ast_from_function(ast_function_type fu
 	block::label_inserter inserter;
 	inserter.offset_to_label = creator.offset_to_label;
 	ast->accept(&inserter);
+
+
+	block::loop_finder finder;
+	finder.ast = ast;
+	ast->accept(&finder);
+
 	return ast;
 }
 block::stmt::Ptr builder_context::extract_ast_from_function_internal(ast_function_type function, std::vector<bool> b) {
@@ -151,7 +158,7 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(ast_functio
 		std::vector<bool> true_bv;
 		true_bv.push_back(true);
 		std::copy(b.begin(), b.end(), std::back_inserter(true_bv));	
-		block::stmt::Ptr true_ast = true_context.extract_ast_from_function_internal(function, true_bv);	
+		block::stmt_block::Ptr true_ast = block::to<block::stmt_block>(true_context.extract_ast_from_function_internal(function, true_bv));
 		trim_ast_at_offset(true_ast, e.static_offset);
 
 
@@ -159,10 +166,16 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(ast_functio
 		std::vector<bool> false_bv;
 		false_bv.push_back(false);
 		std::copy(b.begin(), b.end(), std::back_inserter(false_bv));
-		block::stmt::Ptr false_ast = false_context.extract_ast_from_function_internal(function, false_bv);
+		block::stmt_block::Ptr false_ast = block::to<block::stmt_block>(false_context.extract_ast_from_function_internal(function, false_bv));
 		trim_ast_at_offset(false_ast, e.static_offset);
+
+
+
 		std::vector<block::stmt::Ptr> trimmed_stmts = trim_common_from_back(true_ast, false_ast);
 		
+		
+
+
 		block::if_stmt::Ptr new_if_stmt = std::make_shared<block::if_stmt>();
 		new_if_stmt->static_offset = e.static_offset;
 		

@@ -8,8 +8,8 @@ using int_var = builder::int_var;
 // A nested loop 
 void foo(void) {
 	int_var a = 0;
-	for(int_var c = 0; c < 100; c = c + 3) {
-		for(int_var b = 0; b < 10; b = b + 1) {
+	for (int_var c = 0; c < 100; c = c + 3) {
+		for (int_var b = 0; b < 10; b = b + 1) {
 			a = a + b;
 		}
 	}
