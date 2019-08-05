@@ -74,6 +74,7 @@ void c_code_generator::visit(stmt_block::Ptr a) {
 	}
 	curr_indent -= 1;
 	printer::indent(oss, curr_indent);
+
 	oss << "}";	
 }
 void c_code_generator::visit(decl_stmt::Ptr a) {

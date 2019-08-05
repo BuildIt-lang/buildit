@@ -1,5 +1,4 @@
 #include "blocks/loop_finder.h"
-#include "blocks/parent_finder.h"
 
 namespace block {
 
@@ -25,11 +24,27 @@ void ensure_back_has_goto(stmt_block::Ptr a, label::Ptr label_detect) {
 	return;
 }
 
-void loop_finder::visit(label_stmt::Ptr a) {
-	parent_finder finder;
-	finder.to_find = a;
-	ast->accept(&finder);
-	assert(finder.found_parent != nullptr);
+
+
+void loop_finder::visit(stmt_block::Ptr a) {
+	// Check if this block has a label
+	while (1) {
+		label_stmt::Ptr found_label = nullptr;
+		for (auto stmt: a->stmts) {
+			if (isa<label_stmt>(stmt)) {
+				found_label = to<label_stmt>(stmt);
+			}
+		}	
+		if (found_label == nullptr) 
+			break;
+		visit_label(found_label, a);	
+	}
+	// Once all labels are done, visit the instructions normally 
+	for (auto stmt: a->stmts) {
+		stmt->accept(this);
+	}
+}
+void loop_finder::visit_label(label_stmt::Ptr a, stmt_block::Ptr parent) {
 	
 	// First separate out the stmts before the loop begin
 	std::vector<stmt::Ptr> stmts_before;
@@ -38,7 +53,7 @@ void loop_finder::visit(label_stmt::Ptr a) {
 
 	stmt::Ptr last_stmt = nullptr;
 
-	for (auto stmt: finder.found_parent->stmts) {
+	for (auto stmt: parent->stmts) {
 		last_jump_finder jump_finder;
 		jump_finder.jump_label = a->label1;
 		stmt->accept(&jump_finder);
@@ -46,22 +61,22 @@ void loop_finder::visit(label_stmt::Ptr a) {
 			last_stmt = stmt;	
 	}
 	std::vector<stmt::Ptr>::iterator stmt;	
-	for (stmt = finder.found_parent->stmts.begin(); stmt != finder.found_parent->stmts.end(); stmt++) {
+	for (stmt = parent->stmts.begin(); stmt != parent->stmts.end(); stmt++) {
 		if (*stmt == a)
 			break;
 		stmts_before.push_back(*stmt);
 	}
 	stmt++;
-	for (; stmt != finder.found_parent->stmts.end(); stmt++) {
+	for (; stmt != parent->stmts.end(); stmt++) {
 		stmts_in_body.push_back(*stmt);
 		if (*stmt == last_stmt)
 			break;
 	}
 	stmt++;
-	for (; stmt != finder.found_parent->stmts.end(); stmt++) {
+	for (; stmt != parent->stmts.end(); stmt++) {
 		stmts_after_body.push_back(*stmt);
 	}
-	finder.found_parent->stmts.clear();
+	parent->stmts.clear();
 
 	while_stmt::Ptr new_while = std::make_shared<while_stmt>();
 	new_while->cond = std::make_shared<int_const>();
@@ -71,10 +86,29 @@ void loop_finder::visit(label_stmt::Ptr a) {
 	
 	ensure_back_has_goto(to<stmt_block>(new_while->body), a->label1);
 	
-	finder.found_parent->stmts = stmts_before;
-	finder.found_parent->stmts.push_back(new_while);
+	parent->stmts = stmts_before;
+	parent->stmts.push_back(new_while);
 	for (auto stmt: stmts_after_body) {
-		finder.found_parent->stmts.push_back(stmt);
+		parent->stmts.push_back(stmt);
+	}
+
+	// If the body of the while loop only has a single if condition and
+	// the else part of the condition is just a break, fuse the if with 
+	// the loop
+
+	if (to<stmt_block>(new_while->body)->stmts.size() == 1 && isa<if_stmt>(to<stmt_block>(new_while->body)->stmts[0])) {
+		if_stmt::Ptr if_body = to<if_stmt>(to<stmt_block>(new_while->body)->stmts[0]);
+		
+		stmt::Ptr then_stmt = if_body->then_stmt;
+		stmt::Ptr else_stmt = if_body->else_stmt;
+	
+		if (isa<stmt_block> (else_stmt) && to<stmt_block>(else_stmt)->stmts.size() == 1) {
+			if (isa<break_stmt>(to<stmt_block>(else_stmt)->stmts[0])) {
+				new_while->cond = if_body->cond;
+				//new_while->body = std::make_shared<stmt_block>();
+				new_while->body = then_stmt;
+			}
+		}
 	}
 }
 void last_jump_finder::visit(goto_stmt::Ptr a) {

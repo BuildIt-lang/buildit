@@ -7,7 +7,8 @@ namespace block {
 class loop_finder: public block_visitor {
 public:
 	stmt::Ptr ast;
-	virtual void visit(label_stmt::Ptr);
+	void visit_label(label_stmt::Ptr, stmt_block::Ptr);
+	virtual void visit(stmt_block::Ptr);
 	
 };
 class last_jump_finder: public block_visitor {
