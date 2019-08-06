@@ -6,12 +6,28 @@ void c_code_generator::visit(not_expr::Ptr a) {
 	a->expr1->accept(this);
 	oss << ")";
 }
+
+static bool expr_needs_bracket(expr::Ptr a) {
+	if (isa<binary_expr>(a))
+		return true;
+	else if (isa<assign_expr>(a))
+		return true;
+	return false;
+}
 void c_code_generator::emit_binary_expr(binary_expr::Ptr a, std::string character) {
-	oss << "(";
-	a->expr1->accept(this);
+	if (expr_needs_bracket(a->expr1)) {
+		oss << "(";
+		a->expr1->accept(this);
+		oss << ")";
+	} else 
+		a->expr1->accept(this);
 	oss << " " << character << " ";
-	a->expr2->accept(this);
-	oss << ")";
+	if (expr_needs_bracket(a->expr2)) {
+		oss << "(";
+		a->expr2->accept(this);
+		oss << ")";
+	} else
+		a->expr2->accept(this);
 }
 void c_code_generator::visit(and_expr::Ptr a) {
 	emit_binary_expr(a, "&&");
@@ -56,9 +72,8 @@ void c_code_generator::visit(int_const::Ptr a) {
 	oss << a->value;
 }
 void c_code_generator::visit(assign_expr::Ptr a) {
-	oss << "(" << a->var1->var_name << " = ";
+	oss << a->var1->var_name << " = ";
 	a->expr1->accept(this);
-	oss << ")";
 }
 void c_code_generator::visit(expr_stmt::Ptr a) {
 	a->expr1->accept(this);
