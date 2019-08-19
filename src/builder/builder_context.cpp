@@ -9,6 +9,10 @@
 namespace builder {
 builder_context* builder_context::current_builder_context = nullptr;
 void builder_context::add_stmt_to_current_block(block::stmt::Ptr s) {
+	if (current_label != "") {
+		s->annotation = current_label;
+		current_label = "";
+	}
 	if (s->static_offset != -1 && visited_offsets.count(s->static_offset) > 0) {
 		throw LoopBackException(s->static_offset);
 	}
@@ -177,6 +181,7 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(ast_functio
 
 
 		block::if_stmt::Ptr new_if_stmt = std::make_shared<block::if_stmt>();
+		new_if_stmt->annotation = last_stmt->annotation;
 		new_if_stmt->static_offset = e.static_offset;
 		
 		new_if_stmt->cond = cond_expr;

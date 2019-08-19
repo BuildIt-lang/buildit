@@ -85,6 +85,10 @@ public:
 	int_var(const int);
 };
 
+void annotate(std::string);
+
 }
+
+
 
 #endif

@@ -6,6 +6,7 @@ namespace block{
 class stmt: public block {
 public:
 	typedef std::shared_ptr<stmt> Ptr;
+	std::string annotation;
 	virtual void dump(std::ostream&, int) override;
 	virtual void accept(block_visitor *a) {
 		a->visit(self<stmt>());

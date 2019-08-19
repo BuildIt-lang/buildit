@@ -36,12 +36,15 @@ public:
 	block::stmt::Ptr extract_ast(void);
 	block::stmt::Ptr extract_ast_from_function(ast_function_type);
 	block::stmt::Ptr extract_ast_from_function_internal(ast_function_type, std::vector<bool> bl = std::vector<bool>());
+	
+	std::string current_label;
 
 private:
 	static builder_context *current_builder_context;
 	friend builder;
 	friend var;
 	friend int_var;
+	friend void annotate(std::string);
 	friend int32_t get_offset_in_function(ast_function_type _function);
 };
 bool get_next_bool_from_context(builder_context *context, block::expr::Ptr);
