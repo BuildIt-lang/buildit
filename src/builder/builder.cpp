@@ -24,8 +24,8 @@ void int_var::create_int_var(void) {
 	
 	builder_context::current_builder_context->commit_uncommitted();
 	
-	block::int_var::Ptr int_var = std::make_shared<block::int_var>();	
-		
+	block::var::Ptr int_var = std::make_shared<block::var>();	
+	int_var->var_type = create_block_type();	
 	block_var = int_var;
 	
 	int32_t offset = get_offset_in_function(builder_context::current_builder_context->current_function);
@@ -53,6 +53,7 @@ int_var::int_var(const builder& a) {
 }
 int_var::int_var(const int a): int_var((builder)a) {
 }
+
 
 builder::builder (const int &a) {	
 	assert(builder_context::current_builder_context != nullptr);

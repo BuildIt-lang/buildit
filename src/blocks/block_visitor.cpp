@@ -109,16 +109,22 @@ void block_visitor::visit(goto_stmt::Ptr a) {
 	if (a->label1 != nullptr)
 		a->label1->accept(this);
 }
-void block_visitor::visit(var::Ptr a) {
-		
-}
-void block_visitor::visit(int_var::Ptr a) {
-
-}
 void block_visitor::visit(break_stmt::Ptr a) {
 }
 void block_visitor::visit(while_stmt::Ptr a) {
 	a->cond->accept(this);
 	a->body->accept(this);
 }
+void block_visitor::visit(var::Ptr a) {
+	a->var_type->accept(this);
 }
+void block_visitor::visit(type::Ptr a) {
+}
+void block_visitor::visit(scalar_type::Ptr a) {
+	
+}
+void block_visitor::visit(pointer_type::Ptr a) {
+	a->pointee_type->accept(this);
+}
+}
+

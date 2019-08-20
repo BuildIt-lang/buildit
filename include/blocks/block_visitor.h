@@ -24,8 +24,6 @@ class var_expr;
 class const_expr;
 class int_const;
 class assign_expr;
-class var;
-class int_var;
 class stmt;
 class expr_stmt;
 class stmt_block;
@@ -36,6 +34,12 @@ class label_stmt;
 class goto_stmt;	
 class while_stmt;
 class break_stmt;
+
+
+class var;
+class type;
+class scalar_type;
+class pointer_type;
 
 class block_visitor {
 public:
@@ -60,8 +64,6 @@ public:
 	virtual void visit (std::shared_ptr<const_expr>);
 	virtual void visit (std::shared_ptr<int_const>);
 	virtual void visit (std::shared_ptr<assign_expr>);
-	virtual void visit (std::shared_ptr<var>);
-	virtual void visit (std::shared_ptr<int_var>);
 	virtual void visit (std::shared_ptr<stmt>);
 	virtual void visit (std::shared_ptr<expr_stmt>);
 	virtual void visit (std::shared_ptr<stmt_block>);
@@ -72,6 +74,11 @@ public:
 	virtual void visit (std::shared_ptr<goto_stmt>);	
 	virtual void visit (std::shared_ptr<while_stmt>);	
 	virtual void visit (std::shared_ptr<break_stmt>);	
+
+	virtual void visit (std::shared_ptr<var>);
+	virtual void visit (std::shared_ptr<type>);
+	virtual void visit (std::shared_ptr<scalar_type>);
+	virtual void visit (std::shared_ptr<pointer_type>);
 
 };
 }

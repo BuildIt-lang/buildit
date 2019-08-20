@@ -92,11 +92,20 @@ void c_code_generator::visit(stmt_block::Ptr a) {
 
 	oss << "}";	
 }
-void c_code_generator::visit(decl_stmt::Ptr a) {
-	if (isa<int_var>(a->decl_var))
+void c_code_generator::visit(scalar_type::Ptr type) {
+	if (type->scalar_type_id == scalar_type::INT_TYPE) {
 		oss << "int";
-	else 
-		assert(false);
+	}
+}
+void c_code_generator::visit(pointer_type::Ptr type) {
+	type->pointee_type->accept(this);
+	oss << "*";
+}
+void c_code_generator::visit(var::Ptr var) {
+	oss << var->var_name;
+}
+void c_code_generator::visit(decl_stmt::Ptr a) {
+	a->decl_var->var_type->accept(this);
 	oss << " ";
 	oss << a->decl_var->var_name;
 	if (a->init_expr == nullptr) {

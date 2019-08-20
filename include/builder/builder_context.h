@@ -10,6 +10,8 @@ namespace builder {
 class builder;
 class var;
 class int_var;
+template <typename T>
+class pointer_var;
 
 class builder_context {
 public:
@@ -44,6 +46,8 @@ private:
 	friend builder;
 	friend var;
 	friend int_var;
+	template <typename T>
+	friend class pointer_var;
 	friend void annotate(std::string);
 	friend int32_t get_offset_in_function(ast_function_type _function);
 };

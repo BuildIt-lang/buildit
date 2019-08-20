@@ -20,6 +20,7 @@ void stmt_block::dump(std::ostream &oss, int indent) {
 void decl_stmt::dump(std::ostream &oss, int indent) {
 	printer::indent(oss, indent);
 	oss << "DECL_STMT" << std::endl;
+	decl_var->var_type->dump(oss, indent+1);
 	decl_var->dump(oss, indent+1);
 	if (init_expr != nullptr)
 		init_expr->dump(oss, indent+1);
