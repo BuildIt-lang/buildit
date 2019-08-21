@@ -91,7 +91,7 @@ public:
 	}
 	
 	label::Ptr label1;	
-	int32_t temporary_label_number;
+	tracer::tag temporary_label_number;
 };
 class while_stmt: public stmt {
 public:

@@ -8,20 +8,20 @@
 namespace block {
 class label_collector: public block_visitor {
 public:
-	std::unordered_set<int32_t> collected_labels;	
+	std::vector<tracer::tag> collected_labels;	
 	virtual void visit(goto_stmt::Ptr);
 
 };
 class label_creator: public block_visitor {
 public:
-	std::unordered_set<int32_t> collected_labels;
-	std::unordered_map<int32_t, label::Ptr> offset_to_label;
+	std::vector<tracer::tag> collected_labels;	
+	std::unordered_map<std::string, label::Ptr> offset_to_label;
 	virtual void visit(stmt_block::Ptr);
 		
 };
 class label_inserter: public block_visitor {
 public:
-	std::unordered_map<int32_t, label::Ptr> offset_to_label;
+	std::unordered_map<std::string, label::Ptr> offset_to_label;
 	virtual void visit(goto_stmt::Ptr);
 };
 }

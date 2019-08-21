@@ -4,7 +4,7 @@
 #include <assert.h>
 #include <iostream>
 #include "blocks/block_visitor.h"
-
+#include "util/tracer.h"
 
 namespace builder {
 class builder_context;
@@ -33,7 +33,7 @@ class block: public std::enable_shared_from_this<block> {
 public:
 	typedef std::shared_ptr<block> Ptr;
 
-	int32_t static_offset;
+	tracer::tag static_offset;
 
 	virtual void dump(std::ostream&, int);
 	virtual void accept(block_visitor* visitor) {

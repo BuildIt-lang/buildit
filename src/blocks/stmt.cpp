@@ -47,7 +47,7 @@ void goto_stmt::dump(std::ostream &oss, int indent) {
 	if (label1 != nullptr)
 		oss << "GOTO_STMT" << std::endl;
 	else 
-		oss << "GOTO_STMT (" << temporary_label_number << ")" << std::endl;	
+		oss << "GOTO_STMT (" << temporary_label_number.stringify() << ")" << std::endl;	
 	if (label1 != nullptr)
 		label1->dump(oss, indent+1);
 }

@@ -13,7 +13,7 @@ public:
 class var_replacer: public block_visitor {
 public:
 	var::Ptr to_replace;
-	int32_t offset_to_replace;
+	tracer::tag offset_to_replace;
 	
 	virtual void visit(assign_expr::Ptr);
 	virtual void visit(var_expr::Ptr);

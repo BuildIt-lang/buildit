@@ -13,19 +13,34 @@ void builder_context::add_stmt_to_current_block(block::stmt::Ptr s) {
 		s->annotation = current_label;
 		current_label = "";
 	}
-	if (s->static_offset != -1 && visited_offsets.count(s->static_offset) > 0) {
+	if (!s->static_offset.is_empty() && is_visited_tag(s->static_offset) > 0) {
 		throw LoopBackException(s->static_offset);
 	}
-	visited_offsets.insert(s->static_offset);
+	visited_offsets.push_back(s->static_offset);
 	current_block_stmt->stmts.push_back(s);
 }
-int32_t get_offset_in_function(builder_context::ast_function_type _function) {
-	int32_t offset = get_offset_in_function_impl(_function);
+tracer::tag get_offset_in_function(builder_context::ast_function_type _function) {
+	tracer::tag offset = tracer::get_offset_in_function_impl(_function);
 	return offset;
 }
 builder_context::builder_context() {
 	current_block_stmt = nullptr;
 	ast = nullptr;
+}
+bool builder_context::is_visited_tag(tracer::tag &new_tag) {
+	for (int i = 0; i < visited_offsets.size(); i++) {
+		if (visited_offsets[i] == new_tag)
+			return true;
+	}
+	return false;
+}
+void builder_context::erase_tag(tracer::tag &erase_tag) {
+	std::vector<tracer::tag> new_tags;
+	for (int i = 0; i < visited_offsets.size(); i++) {
+		if (visited_offsets[i] != erase_tag)
+			new_tags.push_back(visited_offsets[i]);
+	}
+	visited_offsets = new_tags;
 }
 void builder_context::commit_uncommitted(void) {
 	for (auto block_ptr: uncommitted_sequence) {
@@ -52,7 +67,7 @@ block::stmt::Ptr builder_context::extract_ast(void) {
 
 bool get_next_bool_from_context(builder_context *context, block::expr::Ptr expr) {	
 	if (context->bool_vector.size() == 0) {
-		int32_t offset = expr->static_offset; 
+		tracer::tag offset = expr->static_offset; 
 		throw OutOfBoolsException(offset);
 	}
 	bool ret_val = context->bool_vector.back();
@@ -61,7 +76,7 @@ bool get_next_bool_from_context(builder_context *context, block::expr::Ptr expr)
 }
 
 
-static void trim_ast_at_offset(block::stmt::Ptr ast, int32_t offset) {
+static void trim_ast_at_offset(block::stmt::Ptr ast, tracer::tag offset) {
 	block::stmt_block::Ptr top_level_block = block::to<block::stmt_block>(ast);
 	std::vector<block::stmt::Ptr> &stmts = top_level_block->stmts;
 	auto it = stmts.begin();
@@ -85,7 +100,7 @@ static std::vector<block::stmt::Ptr> trim_common_from_back(block::stmt::Ptr ast1
 			if (ast1_stmts.back()->static_offset != ast2_stmts.back()->static_offset) {
 				break;
 			}
-			if (ast1_stmts.back()->static_offset == -1) {
+			if (ast1_stmts.back()->static_offset.is_empty()) {
 				// The only possibility is that these two are goto statements. Gotos are same only if they are going to the same label
 				assert(block::isa<block::goto_stmt>(ast1_stmts.back()));
 				assert(block::isa<block::goto_stmt>(ast2_stmts.back()));
@@ -132,7 +147,7 @@ block::stmt::Ptr builder_context::extract_ast_from_function(ast_function_type fu
 block::stmt::Ptr builder_context::extract_ast_from_function_internal(ast_function_type function, std::vector<bool> b) {
 	
 	current_block_stmt = std::make_shared<block::stmt_block>();
-	current_block_stmt->static_offset = -1;
+	current_block_stmt->static_offset.clear();
 	assert(current_block_stmt != nullptr);
 	ast = current_block_stmt;
 	bool_vector = b;
@@ -154,7 +169,7 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(ast_functio
 		
 		block::expr_stmt::Ptr last_stmt = block::to<block::expr_stmt>(current_block_stmt->stmts.back());
 		current_block_stmt->stmts.pop_back();
-		visited_offsets.erase(e.static_offset);
+		erase_tag(e.static_offset);
 		
 		block::expr::Ptr cond_expr = last_stmt->expr1;	
 
@@ -196,7 +211,7 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(ast_functio
 		current_builder_context = nullptr;
 		
 		block::goto_stmt::Ptr goto_stmt = std::make_shared<block::goto_stmt>();
-		goto_stmt->static_offset = -1;	
+		goto_stmt->static_offset.clear();
 		goto_stmt->temporary_label_number = e.static_offset;
 		
 		add_stmt_to_current_block(goto_stmt);

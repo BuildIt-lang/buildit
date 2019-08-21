@@ -5,6 +5,7 @@
 #include "blocks/expr.h"
 #include "blocks/stmt.h"
 #include <unordered_set>
+#include "util/tracer.h"
 
 namespace builder {
 class builder;
@@ -24,7 +25,9 @@ public:
 	block::stmt_block::Ptr current_block_stmt;	
 	ast_function_type current_function;
 	std::vector<bool> bool_vector;
-	std::unordered_set<int32_t> visited_offsets;
+	std::vector<tracer::tag> visited_offsets;
+	bool is_visited_tag (tracer::tag &new_tag);
+	void erase_tag(tracer::tag &erase_tag);
 		
 	builder_context();
 
@@ -49,10 +52,10 @@ private:
 	template <typename T>
 	friend class pointer_var;
 	friend void annotate(std::string);
-	friend int32_t get_offset_in_function(ast_function_type _function);
+	friend tracer::tag get_offset_in_function(ast_function_type _function);
 };
 bool get_next_bool_from_context(builder_context *context, block::expr::Ptr);
-int32_t get_offset_in_function(builder_context::ast_function_type _function);
+tracer::tag get_offset_in_function(builder_context::ast_function_type _function);
 
 }
 

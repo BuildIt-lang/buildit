@@ -117,7 +117,7 @@ void pointer_var<base_type>::create_pointer_var(void) {
 	block::var::Ptr pointer_var = std::make_shared<block::var>();	
 	pointer_var->var_type = create_block_type();
 	block_var = pointer_var;
-	int32_t offset = get_offset_in_function(builder_context::current_builder_context->current_function);
+	tracer::tag offset = get_offset_in_function(builder_context::current_builder_context->current_function);
 	block::decl_stmt::Ptr decl_stmt = std::make_shared<block::decl_stmt>();
 	decl_stmt->static_offset = offset;
 	decl_stmt->decl_var = pointer_var;
