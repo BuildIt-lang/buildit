@@ -199,4 +199,20 @@ void c_code_generator::visit(sq_bkt_expr::Ptr a) {
 	a->index->accept(this);
 	oss << "]";	
 }
+void c_code_generator::visit(function_call_expr::Ptr a) {
+	if (expr_needs_bracket(a->expr1)) {
+		oss << "(";
+	}
+	a->expr1->accept(this);
+	if (expr_needs_bracket(a->expr1)) {
+		oss << ")";
+	}	
+	oss << "(";
+	for (int i = 0; i < a->args.size(); i++) {
+		a->args[i]->accept(this);
+		if (i != a->args.size() - 1)
+			oss << ", ";	
+	}
+	oss << ")";
+}
 }

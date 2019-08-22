@@ -37,10 +37,19 @@ public:
 	virtual void visit(while_stmt::Ptr);
 	virtual void visit(break_stmt::Ptr);
 	virtual void visit(sq_bkt_expr::Ptr);
+	virtual void visit(function_call_expr::Ptr);
+
 	virtual void visit(var::Ptr);
 	virtual void visit(scalar_type::Ptr);
 	virtual void visit(pointer_type::Ptr);
-
+	
+	static void generate_code(block::Ptr ast, std::ostream &oss, int indent = 0) {
+		c_code_generator generator (oss);
+		generator.curr_indent = indent;
+		ast->accept(&generator);
+		oss << std::endl;
+	
+	}
 };
 }
 #endif
