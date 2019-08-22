@@ -63,8 +63,10 @@ $(BUILD_DIR)/sample%: $(BUILD_DIR)/samples/sample%.o $(LIBRARY_OBJS)
 .PHONY: executables
 executables: $(SAMPLES)
 
+SORTED_SAMPLES=$(shell echo $(SAMPLES) | tr " " "\n" | sort -V | tr "\n" " ")
+
 run: $(SAMPLES)
-	for sample in $(SAMPLES); do \
+	for sample in $(SORTED_SAMPLES); do \
 		echo Running $$sample; \
 		$$sample || exit 1; \
 	done 
