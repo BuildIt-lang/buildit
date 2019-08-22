@@ -1,6 +1,7 @@
 #include "builder/builder_context.h"
 #include "builder/builder.h"
 #include <iostream>
+#include "blocks/c_code_generator.h"
 using int_var = builder::int_var;
 template <typename T>
 using static_var = builder::static_var<T>;
@@ -22,6 +23,9 @@ void foo(void) {
 
 int main(int argc, char* argv[]) {
 	builder::builder_context context;
-	context.extract_ast_from_function(foo)->dump(std::cout, 0);	
+	block::block::Ptr ast = context.extract_ast_from_function(foo);
+	block::c_code_generator generator(std::cout);
+	ast->accept(&generator);	
+	std::cout << std::endl;
 	return 0;
 }
