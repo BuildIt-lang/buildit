@@ -2,21 +2,31 @@
 #define TRACER_H
 #include <execinfo.h>
 #include <vector>
+#include <string>
 
+#define MAX_TRACKING_VAR_SIZE (128)
 namespace builder {
 class builder_context;
 }
 
 namespace tracer {
 
+
 class tag {
 public:
 	std::vector<unsigned long long> pointers;
+	std::vector<std::string> static_var_snapshots;
+	
 	bool operator== (const tag &other) {
 		if (other.pointers.size() != pointers.size())
 			return false;
 		for (int i = 0; i < pointers.size(); i++) 
 			if (pointers[i] != other.pointers[i])
+				return false;
+		if (other.static_var_snapshots.size() != static_var_snapshots.size())
+			return false;
+		for (int i = 0; i < static_var_snapshots.size(); i++) 
+			if (static_var_snapshots[i] != other.static_var_snapshots[i])
 				return false;
 		return true;
 	}	
@@ -28,6 +38,7 @@ public:
 	}
 	void clear(void) {
 		pointers.clear();
+		static_var_snapshots.clear();
 	}
 	std::string stringify(void) {
 		std::string output_string = "[";
@@ -38,51 +49,21 @@ public:
 			if (i != pointers.size() - 1)
 				output_string += ", ";
 		}
+		output_string += "]:[";
+		for (int i = 0; i < static_var_snapshots.size(); i++) {
+			output_string += static_var_snapshots[i];
+			if (i != static_var_snapshots.size() -1)
+				output_string += ", ";
+		}
 		output_string += "]";
+		
 		return output_string;
 	}
 };
 typedef void (*ast_function_type) (void);
 
 
-static tag get_offset_in_function_impl(ast_function_type _function) {
-	unsigned long long function = (unsigned long long) (void*) _function;
-	void *buffer[20];
-	tag new_tag;
-	int backtrace_size = backtrace(buffer, 20);	
-	char** backtrace_functions = backtrace_symbols(buffer, backtrace_size);
-	for (int i = 0; i < backtrace_size; i++) {
-		int offset;
-		unsigned long long address;
-		if (sscanf(backtrace_functions[i], "%*[^+]+%x) [%llx]", &offset, &address) != 2)
-			continue;
-		new_tag.pointers.push_back(address);
-		if (function == address - offset)
-			break;
-	}
-	free (backtrace_functions);
-	return new_tag;
-}
-static int get_offset_in_function_impl_old(ast_function_type _function) {
-	void * function = (void*) _function;
-	void *buffer[20];
-	int backtrace_size = backtrace(buffer, 20);
-	char** backtrace_functions = backtrace_symbols(buffer, backtrace_size);
-
-	for (int i = 0; i < backtrace_size; i++) {
-		int offset;
-		unsigned long long address;
-		if (sscanf(backtrace_functions[i], "%*[^+]+%x) [%llx]", &offset, &address) != 2)
-			continue;
-		if ((unsigned long long) function == address - offset) {
-			free (backtrace_functions);
-			return offset;
-		}
-	} 
-	free (backtrace_functions);
-	assert(false);
-	return -1;
-}
+tag get_offset_in_function_impl(ast_function_type _function, builder::builder_context* current_builder_context);
 
 }
 #endif

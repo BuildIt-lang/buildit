@@ -10,6 +10,7 @@ INCLUDES=$(wildcard $(INCLUDE_DIR)/*.h) $(wildcard $(INCLUDE_DIR)/*/*.h)
 $(shell mkdir -p $(BUILD_DIR))
 $(shell mkdir -p $(BUILD_DIR)/blocks)
 $(shell mkdir -p $(BUILD_DIR)/builder)
+$(shell mkdir -p $(BUILD_DIR)/util)
 $(shell mkdir -p $(BUILD_DIR)/samples)
 
 SAMPLES_SRCS=$(wildcard $(SAMPLES_DIR)/*.cpp)
@@ -29,21 +30,26 @@ endif
 
 BUILDER_SRC=$(wildcard $(SRC_DIR)/builder/*.cpp)
 BLOCKS_SRC=$(wildcard $(SRC_DIR)/blocks/*.cpp)
+UTIL_SRC=$(wildcard $(SRC_DIR)/util/*.cpp)
 
 BUILDER_OBJS=$(subst $(SRC_DIR),$(BUILD_DIR),$(BUILDER_SRC:.cpp=.o))
 BLOCKS_OBJS=$(subst $(SRC_DIR),$(BUILD_DIR),$(BLOCKS_SRC:.cpp=.o))
+UTIL_OBJS=$(subst $(SRC_DIR),$(BUILD_DIR),$(UTIL_SRC:.cpp=.o))
 
-LIBRARY_OBJS=$(BUILDER_OBJS) $(BLOCKS_OBJS)
+LIBRARY_OBJS=$(BUILDER_OBJS) $(BLOCKS_OBJS) $(UTIL_OBJS)
 
 all: executables
 
 .PRECIOUS: $(BUILD_DIR)/builder/%.o 
 .PRECIOUS: $(BUILD_DIR)/blocks/%.o 
 .PRECIOUS: $(BUILD_DIR)/samples/%.o 
+.PRECIOUS: $(BUILD_DIR)/util/%.o
 
 $(BUILD_DIR)/builder/%.o: $(SRC_DIR)/builder/%.cpp $(INCLUDES)
 	$(CXX) $(CFLAGS) $< -o $@ -I$(INCLUDE_DIR) -c
 $(BUILD_DIR)/blocks/%.o: $(SRC_DIR)/blocks/%.cpp $(INCLUDES)
+	$(CXX) $(CFLAGS) $< -o $@ -I$(INCLUDE_DIR) -c
+$(BUILD_DIR)/util/%.o: $(SRC_DIR)/util/%.cpp $(INCLUDES)
 	$(CXX) $(CFLAGS) $< -o $@ -I$(INCLUDE_DIR) -c
 
 

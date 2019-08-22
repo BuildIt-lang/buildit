@@ -5,7 +5,7 @@
 #include "blocks/expr.h"
 #include "blocks/stmt.h"
 #include <unordered_set>
-#include "util/tracer.h"
+
 
 namespace builder {
 class builder;
@@ -13,6 +13,24 @@ class var;
 class int_var;
 template <typename T>
 class pointer_var;
+template <typename T>
+class static_var;
+
+class tracking_tuple {
+public:
+        const unsigned char* ptr;
+        uint32_t size;
+        tracking_tuple (const unsigned char* _ptr, uint32_t _size): ptr(_ptr), size(_size) {}
+	std::string snapshot(void) {
+		std::string output_string;
+		char temp[4];
+		for (int i = 0; i < size; i++) {
+			sprintf(temp, "%02x", ptr[i]);
+			output_string += temp;	
+		}
+		return output_string;
+	}
+};
 
 class builder_context {
 public:
@@ -44,13 +62,20 @@ public:
 	
 	std::string current_label;
 
+
+	std::vector<tracking_tuple> static_var_tuples;
+
 private:
 	static builder_context *current_builder_context;
 	friend builder;
 	friend var;
 	friend int_var;
+
 	template <typename T>
 	friend class pointer_var;
+	template <typename T>
+	friend class static_var;
+
 	friend void annotate(std::string);
 	friend tracer::tag get_offset_in_function(ast_function_type _function);
 };

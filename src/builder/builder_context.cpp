@@ -20,7 +20,7 @@ void builder_context::add_stmt_to_current_block(block::stmt::Ptr s) {
 	current_block_stmt->stmts.push_back(s);
 }
 tracer::tag get_offset_in_function(builder_context::ast_function_type _function) {
-	tracer::tag offset = tracer::get_offset_in_function_impl(_function);
+	tracer::tag offset = tracer::get_offset_in_function_impl(_function, builder_context::current_builder_context);
 	return offset;
 }
 builder_context::builder_context() {

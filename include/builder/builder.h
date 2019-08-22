@@ -4,6 +4,7 @@
 #include <string>
 #include "blocks/var.h"
 #include "builder/builder_context.h"
+#include "builder/static_var.h"
 
 namespace builder {
 // Builder objects are always alive only for duration of the RUN/SEQUENCE. 
