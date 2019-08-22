@@ -1,30 +1,81 @@
 #include "blocks/loop_finder.h"
-
+#include <algorithm>
 namespace block {
 
-void ensure_back_has_goto(stmt_block::Ptr a, label::Ptr label_detect) {
+void ensure_back_has_goto(stmt_block::Ptr a, label::Ptr label_detect, std::vector<stmt_block::Ptr> &parents) {
+
 	if (a->stmts.size() == 0) {
-		break_stmt::Ptr new_break = std::make_shared<break_stmt>();
-		a->stmts.push_back(new_break);
+		//break_stmt::Ptr new_break = std::make_shared<break_stmt>();
+		//a->stmts.push_back(new_break);
+		parents.push_back(a);
 		return;
 	}
 	stmt::Ptr last_stmt = a->stmts.back();
 	if (isa<if_stmt>(last_stmt)) {
-		ensure_back_has_goto(to<stmt_block>(to<if_stmt>(last_stmt)->then_stmt), label_detect);
-		ensure_back_has_goto(to<stmt_block>(to<if_stmt>(last_stmt)->else_stmt), label_detect);
+		// For ifs don't add unnecessary common ends
+		if_stmt::Ptr if_stmt_ptr = to<if_stmt>(last_stmt);
+
+		stmt_block::Ptr then_block = to<stmt_block>(if_stmt_ptr->then_stmt);
+		stmt_block::Ptr else_block = to<stmt_block>(if_stmt_ptr->else_stmt);
+
+		std::vector<stmt_block::Ptr> if_parents;	
+		ensure_back_has_goto(then_block, label_detect, if_parents);
+		ensure_back_has_goto(else_block, label_detect, if_parents);
+		if (if_parents.size() == 2 && if_parents[0] == then_block && if_parents[1] == else_block) {
+			parents.push_back(a);
+		} else {
+			for (int i = 0; i < if_parents.size(); i++) {
+				parents.push_back(if_parents[i]);
+			}
+		}
 	} else if (isa<goto_stmt>(last_stmt) && to<goto_stmt>(last_stmt)->label1 == label_detect) {
 		a->stmts.pop_back();
 		
 	} else if (isa<goto_stmt>(last_stmt) && to<goto_stmt>(last_stmt)->label1 != label_detect) {
+		parents.push_back(a);
+	} else if (isa<break_stmt>(last_stmt)) {
+		assert("How is there already a break?");
 	} else {
-		break_stmt::Ptr new_break = std::make_shared<break_stmt>();
-		a->stmts.push_back(new_break);
+		//break_stmt::Ptr new_break = std::make_shared<break_stmt>();
+		//a->stmts.push_back(new_break);
+		parents.push_back(a);
 
 	}
 	return;
 }
 
 
+bool check_last_choppable(std::vector<stmt_block::Ptr> &parents) {
+	// Check if everyone has atleast one stmt
+	for (int i = 0; i < parents.size(); i++) {
+		if (parents[i]->stmts.size() == 0)
+			return false;
+	}
+
+	if (parents.size() == 1)
+		return true;
+
+	tracer::tag first_tag = parents[0]->stmts.back()->static_offset;
+	for (int i = 1; i < parents.size(); i++) {
+		if (parents[i]->stmts.back()->static_offset != first_tag)
+			return false;
+	}
+	return true;
+}
+void trim_from_parents(std::vector<stmt_block::Ptr> &parents, std::vector<stmt::Ptr> &trimmed) {
+	
+	// First check if the ends are all same
+	if (check_last_choppable(parents)) {
+		// Chop a stmt off of everyone
+		stmt::Ptr chopped = parents[0]->stmts.back();
+		for (int i = 0; i < parents.size(); i++) {
+			parents[i]->stmts.pop_back();
+		}
+		trimmed.push_back(chopped);
+		trim_from_parents(parents, trimmed);	
+	}
+	
+}
 
 void loop_finder::visit(stmt_block::Ptr a) {
 	// Check if this block has a label
@@ -83,11 +134,30 @@ void loop_finder::visit_label(label_stmt::Ptr a, stmt_block::Ptr parent) {
 	to<int_const>(new_while->cond)->value = 1;
 	new_while->body = std::make_shared<stmt_block>();	
 	to<stmt_block>(new_while->body)->stmts = stmts_in_body;
+
+	std::vector<stmt_block::Ptr> parents;
+	ensure_back_has_goto(to<stmt_block>(new_while->body), a->label1, parents);
 	
-	ensure_back_has_goto(to<stmt_block>(new_while->body), a->label1);
+	std::vector<stmt::Ptr> trimmed;
+	if (parents.size() > 0)
+		trim_from_parents(parents, trimmed);
 	
+	// Now push a break to the end of every parent
+	for (stmt_block::Ptr block: parents) {
+		if (block->stmts.size() > 0 && isa<goto_stmt>(block->stmts.back()))
+			continue;
+		break_stmt::Ptr new_break = std::make_shared<break_stmt>();
+		block->stmts.push_back(new_break);
+		
+	}	
+	
+	std::reverse(trimmed.begin(), trimmed.end());
 	parent->stmts = stmts_before;
 	parent->stmts.push_back(new_while);
+
+	for (auto stmt: trimmed) {
+		parent->stmts.push_back(stmt);
+	}
 	for (auto stmt: stmts_after_body) {
 		parent->stmts.push_back(stmt);
 	}

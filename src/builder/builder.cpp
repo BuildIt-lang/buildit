@@ -267,6 +267,7 @@ builder var::operator! () {
 builder builder::operator = (const builder &a) {
 	assert(builder_context::current_builder_context != nullptr);
 	
+	builder_context::current_builder_context->remove_node_from_sequence(block_expr);
 	builder_context::current_builder_context->remove_node_from_sequence(a.block_expr);
 	tracer::tag offset = get_offset_in_function(builder_context::current_builder_context->current_function);
 	//assert(offset != -1);
