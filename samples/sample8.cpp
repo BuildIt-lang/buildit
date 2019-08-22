@@ -17,12 +17,11 @@ void foo(void) {
 			break;
 	}
 }
-
 int main(int argc, char* argv[]) {
 	builder::builder_context context;
-	auto ast = context.extract_ast_from_function(foo);
-	block::c_code_generator generator(std::cout);
-	ast->accept(&generator);	
-	std::cout << std::endl;
+	auto ast = context.extract_ast_from_function(foo);	
+	ast->dump(std::cout, 0);
+	block::c_code_generator::generate_code(ast, std::cout, 0);	
 	return 0;
 }
+

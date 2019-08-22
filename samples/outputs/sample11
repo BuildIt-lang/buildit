@@ -29,3 +29,11 @@ STMT_BLOCK
         VAR (var2)
       VAR_EXPR
         VAR (var3)
+{
+  int var0 = 0;
+  int var1 = var0;
+  var0 && var1;
+  int var2 = 0;
+  int var3 = var2;
+  var2 && var3;
+}

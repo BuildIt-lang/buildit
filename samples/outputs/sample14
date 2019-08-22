@@ -15,3 +15,8 @@ STMT_BLOCK
       VAR_EXPR
         VAR (var1)
       INT_CONST (1)
+{
+  int var0 = 0;
+  int var1 = var0;
+  int var2 = var1 + 1;
+}

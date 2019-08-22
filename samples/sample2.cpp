@@ -1,6 +1,7 @@
 #include "builder/builder_context.h"
 #include "builder/builder.h"
 #include <iostream>
+#include "blocks/c_code_generator.h"
 using int_var = builder::int_var;
 
 // A simple if condition with two stmts
@@ -21,9 +22,11 @@ void foo(void) {
 	a = (c< 10)? c : b;
 	
 }
-
 int main(int argc, char* argv[]) {
 	builder::builder_context context;
-	context.extract_ast_from_function(foo)->dump(std::cout, 0);	
+	auto ast = context.extract_ast_from_function(foo);	
+	ast->dump(std::cout, 0);
+	block::c_code_generator::generate_code(ast, std::cout, 0);	
 	return 0;
 }
+

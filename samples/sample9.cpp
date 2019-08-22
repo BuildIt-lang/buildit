@@ -30,7 +30,6 @@ int main(int argc, char* argv[]) {
 	if (s1_stmt != nullptr) {
 		s1_stmt->dump(std::cout, 0);
 	}
-
 	block::stmt::Ptr s2_stmt = block::annotation_finder::find_annotation(ast, "s2");
 	if (s2_stmt != nullptr) {
 		s2_stmt->dump(std::cout, 0);

@@ -48,3 +48,15 @@ STMT_BLOCK
             VAR_EXPR
               VAR (var1)
             INT_CONST (3)
+{
+  int var0 = 0;
+  int var1 = 0;
+  while (var1 < 100) {
+    int var2 = 0;
+    while (var2 < 10) {
+      var0 = var0 + var2;
+      var2 = var2 + 1;
+    }
+    var1 = var1 + 3;
+  }
+}
