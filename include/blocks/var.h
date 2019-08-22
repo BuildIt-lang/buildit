@@ -18,7 +18,7 @@ public:
 class scalar_type: public type {
 public:
 	typedef std::shared_ptr<scalar_type> Ptr;
-	enum {INT_TYPE} scalar_type_id;
+	enum {INT_TYPE, VOID_TYPE} scalar_type_id;
 	virtual void accept(block_visitor *visitor) {
 		visitor->visit(self<scalar_type>());
 	}
@@ -32,6 +32,18 @@ public:
 	virtual void accept(block_visitor *visitor) {
 		visitor->visit(self<pointer_type>());
 	}
+	virtual void dump(std::ostream&, int);
+};
+class function_type: public type {
+public: 
+	typedef std::shared_ptr<function_type> Ptr;
+	virtual void accept(block_visitor *visitor) {
+		visitor->visit(self<function_type>());	
+	}
+
+	type::Ptr return_type;
+	std::vector<type::Ptr> arg_types;
+
 	virtual void dump(std::ostream&, int);
 };
 class var: public block {

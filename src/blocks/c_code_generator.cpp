@@ -102,6 +102,8 @@ void c_code_generator::visit(stmt_block::Ptr a) {
 void c_code_generator::visit(scalar_type::Ptr type) {
 	if (type->scalar_type_id == scalar_type::INT_TYPE) {
 		oss << "int";
+	} else if (type->scalar_type_id == scalar_type::VOID_TYPE) {
+		oss << "void";
 	}
 }
 void c_code_generator::visit(pointer_type::Ptr type) {
@@ -112,6 +114,21 @@ void c_code_generator::visit(var::Ptr var) {
 	oss << var->var_name;
 }
 void c_code_generator::visit(decl_stmt::Ptr a) {
+	if (isa<function_type> (a->decl_var->var_type)) {
+		function_type::Ptr type = to<function_type>(a->decl_var->var_type);
+		type->return_type->accept(this);
+		oss << " ";
+		oss << a->decl_var->var_name;
+		oss << "(";
+		for (int i = 0; i < type->arg_types.size(); i++) {
+			type->arg_types[i]->accept(this);
+			if (i != type->arg_types.size()-1) 
+				oss << ", ";
+		}
+		oss << ");";
+		return;	
+	}
+
 	a->decl_var->var_type->accept(this);
 	oss << " ";
 	oss << a->decl_var->var_name;

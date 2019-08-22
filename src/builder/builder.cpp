@@ -296,4 +296,9 @@ builder::operator bool() {
 var::operator bool() {
 	return (bool)this->operator builder();
 }
+template <>
+std::vector<block::type::Ptr> extract_type_vector<> (void) {
+	std::vector<block::type::Ptr> empty_vector;
+	return empty_vector;
+}
 }

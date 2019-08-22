@@ -41,6 +41,7 @@ class var;
 class type;
 class scalar_type;
 class pointer_type;
+class function_type;
 
 class block_visitor {
 public:
@@ -81,6 +82,7 @@ public:
 	virtual void visit (std::shared_ptr<type>);
 	virtual void visit (std::shared_ptr<scalar_type>);
 	virtual void visit (std::shared_ptr<pointer_type>);
+	virtual void visit (std::shared_ptr<function_type>);
 
 };
 }

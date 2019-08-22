@@ -15,6 +15,8 @@ template <typename T>
 class pointer_var;
 template <typename T>
 class static_var;
+template <typename r_type, typename... a_types>
+class function_var; 
 
 class tracking_tuple {
 public:
@@ -75,6 +77,8 @@ private:
 	friend class pointer_var;
 	template <typename T>
 	friend class static_var;
+	template <typename r_type, typename... a_types>
+	friend class function_var; 
 
 	friend void annotate(std::string);
 	friend tracer::tag get_offset_in_function(ast_function_type _function);
