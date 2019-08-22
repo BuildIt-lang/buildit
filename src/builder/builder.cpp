@@ -231,13 +231,40 @@ builder operator != (const int &a, const builder &b) {
 	return (builder)a != b;
 }
 
+
+builder builder::operator [] (const builder &a) {
+	assert(builder_context::current_builder_context != nullptr);
+	
+	builder_context::current_builder_context->remove_node_from_sequence(block_expr);
+	builder_context::current_builder_context->remove_node_from_sequence(a.block_expr);
+
+	tracer::tag offset = get_offset_in_function(builder_context::current_builder_context->current_function);
+	//assert(offset != -1);
+	
+	block::sq_bkt_expr::Ptr expr = std::make_shared<block::sq_bkt_expr>();
+	expr->static_offset = offset;
+	
+
+	expr->var_expr = block_expr;
+	expr->index = a.block_expr;
+
+	builder_context::current_builder_context->add_node_to_sequence(expr);	
+	
+	builder ret_builder;
+	ret_builder.block_expr = expr;
+	return ret_builder;	
+}
+builder var::operator [] (const builder &a) {
+	return this->operator builder () [a];
+}
+
 builder builder::operator ! () {
 	return builder_unary_op<block::not_expr>();
 }
 builder var::operator! () {
 	return !this->operator builder();
 }
-builder var::operator = (const builder &a) {
+builder builder::operator = (const builder &a) {
 	assert(builder_context::current_builder_context != nullptr);
 	
 	builder_context::current_builder_context->remove_node_from_sequence(a.block_expr);
@@ -248,7 +275,7 @@ builder var::operator = (const builder &a) {
 	expr->static_offset = offset;
 	
 
-	expr->var1 = block_var;
+	expr->var1 = block_expr;
 	expr->expr1 = a.block_expr;
 
 	builder_context::current_builder_context->add_node_to_sequence(expr);	
@@ -256,6 +283,9 @@ builder var::operator = (const builder &a) {
 	builder ret_builder;
 	ret_builder.block_expr = expr;
 	return ret_builder;	
+}
+builder var::operator = (const builder &a) {
+	return this->operator builder() = a;
 }
 
 builder::operator bool() {

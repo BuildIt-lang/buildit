@@ -36,6 +36,7 @@ public:
 	virtual void visit(if_stmt::Ptr);
 	virtual void visit(while_stmt::Ptr);
 	virtual void visit(break_stmt::Ptr);
+	virtual void visit(sq_bkt_expr::Ptr);
 	virtual void visit(var::Ptr);
 	virtual void visit(scalar_type::Ptr);
 	virtual void visit(pointer_type::Ptr);

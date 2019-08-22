@@ -103,6 +103,12 @@ void assign_expr::dump(std::ostream &oss, int indent) {
 	var1->dump(oss, indent+1);
 	expr1->dump(oss, indent+1);
 }
+void sq_bkt_expr::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "SQ_BKT_EXPR" << std::endl;
+	var_expr->dump(oss, indent+1);
+	index->dump(oss, indent+1);
+}
 void var_expr::dump(std::ostream &oss, int indent) {
 	printer::indent(oss, indent);
 	oss << "VAR_EXPR" << std::endl;

@@ -9,6 +9,7 @@ using pointer_var = builder::pointer_var<T>;
 // Pointer variables
 void foo(void) {
 	pointer_var<int_var> a;
+	a[5] = a[6];
 	
 }
 

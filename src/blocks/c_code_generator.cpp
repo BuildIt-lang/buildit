@@ -72,7 +72,14 @@ void c_code_generator::visit(int_const::Ptr a) {
 	oss << a->value;
 }
 void c_code_generator::visit(assign_expr::Ptr a) {
-	oss << a->var1->var_name << " = ";
+	if (expr_needs_bracket(a->var1)) {
+		oss << "(";
+		a->var1->accept(this);
+		oss << ")";
+	} else 
+		a->var1->accept(this);
+	
+	oss << " = ";
 	a->expr1->accept(this);
 }
 void c_code_generator::visit(expr_stmt::Ptr a) {
@@ -162,5 +169,17 @@ void c_code_generator::visit(while_stmt::Ptr a) {
 }
 void c_code_generator::visit(break_stmt::Ptr a) {
 	oss << "break;";
+}
+void c_code_generator::visit(sq_bkt_expr::Ptr a) {
+	if (expr_needs_bracket(a->var_expr)) {
+		oss << "(";
+	}
+	a->var_expr->accept(this);
+	if (expr_needs_bracket(a->var_expr)) {
+		oss << ")";
+	}
+	oss << "[";
+	a->index->accept(this);
+	oss << "]";	
 }
 }

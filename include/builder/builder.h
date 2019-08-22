@@ -31,6 +31,10 @@ public:
 	builder operator == (const builder &);
 	builder operator != (const builder &);
 	
+	builder operator [] (const builder &);
+	
+	builder operator = (const builder &);
+	
 	builder operator ! ();
 	explicit operator bool();
 
@@ -73,7 +77,8 @@ public:
 	builder operator >= (const builder &);
 	builder operator == (const builder &);
 	builder operator != (const builder &);
-
+	
+	builder operator [] (const builder &);
 	
 	builder operator = (const builder &);
 

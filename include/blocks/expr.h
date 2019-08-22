@@ -198,9 +198,18 @@ public:
 		visitor->visit(self<assign_expr>());
 	}
 	
-	var::Ptr var1;	
+	expr::Ptr var1;	
 	expr::Ptr expr1;
 
+};
+class sq_bkt_expr: public expr {
+public:
+	typedef std::shared_ptr<sq_bkt_expr> Ptr;
+	virtual void dump(std::ostream&, int);
+	virtual void accept(block_visitor* visitor) {
+	}
+	expr::Ptr var_expr;
+	expr::Ptr index;
 };
 }
 

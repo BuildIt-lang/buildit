@@ -115,6 +115,10 @@ void block_visitor::visit(while_stmt::Ptr a) {
 	a->cond->accept(this);
 	a->body->accept(this);
 }
+void block_visitor::visit(sq_bkt_expr::Ptr a) {
+	a->var_expr->accept(this);
+	a->index->accept(this);
+}
 void block_visitor::visit(var::Ptr a) {
 	a->var_type->accept(this);
 }
@@ -126,5 +130,6 @@ void block_visitor::visit(scalar_type::Ptr a) {
 void block_visitor::visit(pointer_type::Ptr a) {
 	a->pointee_type->accept(this);
 }
+
 }
 
