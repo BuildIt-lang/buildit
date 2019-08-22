@@ -44,7 +44,6 @@ public:
 		return to<T>(shared_from_this());
 	}	
 
-
 	virtual bool is_same(block::Ptr other) {
 		if (static_offset != other->static_offset)	
 			return false;

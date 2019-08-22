@@ -65,10 +65,13 @@ executables: $(SAMPLES)
 
 SORTED_SAMPLES=$(shell echo $(SAMPLES) | tr " " "\n" | sort -V | tr "\n" " ")
 
+
+run: SHELL:=/bin/bash
 run: $(SAMPLES)
-	for sample in $(SORTED_SAMPLES); do \
-		echo Running $$sample; \
-		$$sample || exit 1; \
+	@ for sample in $(SORTED_SAMPLES); do \
+		sample_name=$$(basename $$sample); \
+		diff $(SAMPLES_DIR)/outputs/$$sample_name <($$sample) || exit 1; \
+		echo $$sample_name: OK; \
 	done 
 	
 clean:

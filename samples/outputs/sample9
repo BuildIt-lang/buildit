@@ -1,0 +1,24 @@
+DECL_STMT
+  SCALAR_TYPE (INT)
+  VAR (var0)
+  INT_CONST (0)
+DECL_STMT
+  SCALAR_TYPE (INT)
+  VAR (var1)
+  INT_CONST (0)
+IF_STMT
+  GT_EXPR
+    VAR_EXPR
+      VAR (var0)
+    INT_CONST (25)
+  STMT_BLOCK
+    BREAK_STMT
+  STMT_BLOCK
+    EXPR_STMT
+      ASSIGN_EXPR
+        VAR_EXPR
+          VAR (var1)
+        PLUS_EXPR
+          VAR_EXPR
+            VAR (var1)
+          INT_CONST (1)

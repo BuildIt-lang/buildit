@@ -1,0 +1,121 @@
+STMT_BLOCK
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (var0)
+    NO_INITIALIZATION
+  EXPR_STMT
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (var0)
+      PLUS_EXPR
+        VAR_EXPR
+          VAR (var0)
+        INT_CONST (1)
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (var1)
+    NO_INITIALIZATION
+  EXPR_STMT
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (var1)
+      PLUS_EXPR
+        VAR_EXPR
+          VAR (var1)
+        INT_CONST (1)
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (var2)
+    NO_INITIALIZATION
+  EXPR_STMT
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (var2)
+      PLUS_EXPR
+        VAR_EXPR
+          VAR (var2)
+        INT_CONST (1)
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (var3)
+    NO_INITIALIZATION
+  EXPR_STMT
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (var3)
+      PLUS_EXPR
+        VAR_EXPR
+          VAR (var3)
+        INT_CONST (1)
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (var4)
+    NO_INITIALIZATION
+  EXPR_STMT
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (var4)
+      PLUS_EXPR
+        VAR_EXPR
+          VAR (var4)
+        INT_CONST (1)
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (var5)
+    NO_INITIALIZATION
+  EXPR_STMT
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (var5)
+      PLUS_EXPR
+        VAR_EXPR
+          VAR (var5)
+        INT_CONST (1)
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (var6)
+    NO_INITIALIZATION
+  EXPR_STMT
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (var6)
+      PLUS_EXPR
+        VAR_EXPR
+          VAR (var6)
+        INT_CONST (1)
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (var7)
+    NO_INITIALIZATION
+  EXPR_STMT
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (var7)
+      PLUS_EXPR
+        VAR_EXPR
+          VAR (var7)
+        INT_CONST (1)
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (var8)
+    NO_INITIALIZATION
+  EXPR_STMT
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (var8)
+      PLUS_EXPR
+        VAR_EXPR
+          VAR (var8)
+        INT_CONST (1)
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (var9)
+    NO_INITIALIZATION
+  EXPR_STMT
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (var9)
+      PLUS_EXPR
+        VAR_EXPR
+          VAR (var9)
+        INT_CONST (1)

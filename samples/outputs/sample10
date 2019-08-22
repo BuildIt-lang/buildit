@@ -1,0 +1,16 @@
+STMT_BLOCK
+  DECL_STMT
+    POINTER_TYPE
+      SCALAR_TYPE (INT)
+    VAR (var0)
+    NO_INITIALIZATION
+  EXPR_STMT
+    ASSIGN_EXPR
+      SQ_BKT_EXPR
+        VAR_EXPR
+          VAR (var0)
+        INT_CONST (5)
+      SQ_BKT_EXPR
+        VAR_EXPR
+          VAR (var0)
+        INT_CONST (6)
