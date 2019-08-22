@@ -148,6 +148,13 @@ void sq_bkt_expr::dump(std::ostream &oss, int indent) {
 	var_expr->dump(oss, indent+1);
 	index->dump(oss, indent+1);
 }
+void function_call_expr::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "FUNCTION_CALL_EXPR" << std::endl;
+	expr1->dump(oss, indent+1);
+	for (int i = 0; i < args.size(); i++) 
+		args[i]->dump(oss, indent+1);
+}
 void var_expr::dump(std::ostream &oss, int indent) {
 	printer::indent(oss, indent);
 	oss << "VAR_EXPR" << std::endl;

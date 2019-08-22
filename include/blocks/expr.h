@@ -301,6 +301,7 @@ public:
 	typedef std::shared_ptr<sq_bkt_expr> Ptr;
 	virtual void dump(std::ostream&, int);
 	virtual void accept(block_visitor* visitor) {
+		visitor->visit(self<sq_bkt_expr>());
 	}
 	expr::Ptr var_expr;
 	expr::Ptr index;
@@ -315,6 +316,34 @@ public:
 			return false;
 		if (!index->is_same(other_expr->index))
 			return false;
+		return true;
+	}
+};
+class function_call_expr: public expr {
+public:
+	typedef std::shared_ptr<function_call_expr> Ptr;
+	virtual void dump(std::ostream&, int);
+	virtual void accept(block_visitor* visitor) {
+		visitor->visit(self<function_call_expr>());
+	}	
+	
+	expr::Ptr expr1;
+	std::vector<expr::Ptr> args;
+	
+	virtual bool is_same(block::Ptr other) {
+		if (static_offset != other->static_offset) 
+			return false;
+		if (!isa<function_call_expr>(other))
+			return false;
+		function_call_expr::Ptr other_expr = to<function_call_expr>(other);
+		if (!expr1->is_same(other_expr->expr1))
+			return false;
+		if (args.size() != other_expr->args.size())
+			return false;
+		for (int i = 0; i < args.size(); i++) {
+			if (!args[i]->is_same(other_expr->args[i]))
+				return false;
+		}
 		return true;
 	}
 };

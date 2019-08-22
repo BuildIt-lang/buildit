@@ -119,6 +119,12 @@ void block_visitor::visit(sq_bkt_expr::Ptr a) {
 	a->var_expr->accept(this);
 	a->index->accept(this);
 }
+void block_visitor::visit(function_call_expr::Ptr a) {
+	a->expr1->accept(this);
+	for (int i = 0; i < a->args.size(); i++) {
+		a->args[i]->accept(this);
+	}
+}
 void block_visitor::visit(var::Ptr a) {
 	a->var_type->accept(this);
 }

@@ -301,4 +301,11 @@ std::vector<block::type::Ptr> extract_type_vector<> (void) {
 	std::vector<block::type::Ptr> empty_vector;
 	return empty_vector;
 }
+
+template <>
+std::vector <block::expr::Ptr> extract_call_arguments<> (void) {
+	std::vector<block::expr::Ptr> empty_vector;
+	return empty_vector;
+}
+
 }
