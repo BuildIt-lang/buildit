@@ -98,10 +98,11 @@ static std::vector<block::stmt::Ptr> trim_common_from_back(block::stmt::Ptr ast1
 		while(1) {
 			if (ast1_stmts.size() == 0 || ast2_stmts.size() == 0)
 				break;
-			
-			if (ast1_stmts.back()->static_offset != ast2_stmts.back()->static_offset) {
-				break;
-			}
+			if (!ast1_stmts.back()->is_same(ast2_stmts.back()))
+				break;	
+			//if (ast1_stmts.back()->static_offset != ast2_stmts.back()->static_offset) {
+				//break;
+			//}
 			if (ast1_stmts.back()->static_offset.is_empty()) {
 				// The only possibility is that these two are goto statements. Gotos are same only if they are going to the same label
 				assert(block::isa<block::goto_stmt>(ast1_stmts.back()));

@@ -83,12 +83,17 @@ public:
 	builder operator = (const builder &);
 
 	builder operator ! ();
+
+
+	builder operator = (const var& a) {
+		return operator builder() = a;
+	}
 };
 
 
 class int_var: public var {
 public:
-	using var::operator =;
+	using var::operator = ; 
 	static block::type::Ptr create_block_type(void) {
 		block::scalar_type::Ptr type = std::make_shared<block::scalar_type>();
 		type->scalar_type_id = block::scalar_type::INT_TYPE;
@@ -99,6 +104,9 @@ public:
 	int_var(const int_var&);
 	int_var(const builder&);
 	int_var(const int);
+	builder operator = (const int_var& a) {
+		return operator builder() = a;
+	}
 };
 
 template <typename base_type> 

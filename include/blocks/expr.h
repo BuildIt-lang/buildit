@@ -14,7 +14,14 @@ public:
 	virtual void accept(block_visitor* visitor) {
 		visitor->visit(self<expr>());
 	}
+	virtual bool is_same(block::Ptr other);
 };
+template <typename T>
+bool unary_is_same (std::shared_ptr<T> first, block::Ptr other);
+
+template <typename T>
+bool binary_is_same (std::shared_ptr<T> first, block::Ptr other);
+
 class unary_expr: public expr {
 public:
 	typedef std::shared_ptr<unary_expr> Ptr;
@@ -22,6 +29,9 @@ public:
 	virtual void dump(std::ostream&, int);
 	virtual void accept(block_visitor* visitor) {
 		visitor->visit(self<unary_expr>());
+	}
+	virtual bool is_same(block::Ptr other) {
+		return unary_is_same(self<unary_expr>(), other);
 	}
 	
 };
@@ -36,9 +46,11 @@ public:
 	virtual void accept(block_visitor* visitor) {
 		visitor->visit(self<binary_expr>());
 	}
+	virtual bool is_same(block::Ptr other) {
+		return binary_is_same(self<binary_expr>(), other);
+	}
 
 };
-
 // For the logical not operator
 class not_expr: public unary_expr {
 public:
@@ -47,6 +59,10 @@ public:
 	virtual void accept(block_visitor* visitor) {
 		visitor->visit(self<not_expr>());
 	}
+	virtual bool is_same(block::Ptr other) {
+		return unary_is_same(self<not_expr>(), other);
+	}
+	
 };
 
 
@@ -56,6 +72,9 @@ public:
 	virtual void dump(std::ostream&, int);
 	virtual void accept(block_visitor* visitor) {
 		visitor->visit(self<and_expr>());
+	}
+	virtual bool is_same(block::Ptr other) {
+		return binary_is_same(self<and_expr>(), other);
 	}
 };
 
@@ -67,6 +86,9 @@ public:
 	virtual void accept(block_visitor* visitor) {
 		visitor->visit(self<or_expr>());
 	}
+	virtual bool is_same(block::Ptr other) {
+		return binary_is_same(self<or_expr>(), other);
+	}
 };
 
 
@@ -76,6 +98,9 @@ public:
 	virtual void dump(std::ostream&, int);
 	virtual void accept(block_visitor* visitor) {
 		visitor->visit(self<plus_expr>());
+	}
+	virtual bool is_same(block::Ptr other) {
+		return binary_is_same(self<plus_expr>(), other);
 	}
 };
 
@@ -87,6 +112,9 @@ public:
 	virtual void accept(block_visitor* visitor) {
 		visitor->visit(self<minus_expr>());
 	}
+	virtual bool is_same(block::Ptr other) {
+		return binary_is_same(self<minus_expr>(), other);
+	}
 };
 
 
@@ -96,6 +124,9 @@ public:
 	virtual void dump(std::ostream&, int);
 	virtual void accept(block_visitor* visitor) {
 		visitor->visit(self<mul_expr>());
+	}
+	virtual bool is_same(block::Ptr other) {
+		return binary_is_same(self<mul_expr>(), other);
 	}
 };
 
@@ -107,6 +138,9 @@ public:
 	virtual void accept(block_visitor* visitor) {
 		visitor->visit(self<div_expr>());
 	}
+	virtual bool is_same(block::Ptr other) {
+		return binary_is_same(self<div_expr>(), other);
+	}
 };
 class lt_expr: public binary_expr {
 public:
@@ -114,6 +148,9 @@ public:
 	virtual void dump(std::ostream&, int);
 	virtual void accept(block_visitor* visitor) {
 		visitor->visit(self<lt_expr>());
+	}
+	virtual bool is_same(block::Ptr other) {
+		return binary_is_same(self<lt_expr>(), other);
 	}
 };
 class gt_expr: public binary_expr {
@@ -123,6 +160,9 @@ public:
 	virtual void accept(block_visitor* visitor) {
 		visitor->visit(self<gt_expr>());
 	}
+	virtual bool is_same(block::Ptr other) {
+		return binary_is_same(self<gt_expr>(), other);
+	}
 };
 class lte_expr: public binary_expr {
 public:
@@ -131,6 +171,9 @@ public:
 	virtual void accept(block_visitor* visitor) {
 		visitor->visit(self<lte_expr>());
 	}
+	virtual bool is_same(block::Ptr other) {
+		return binary_is_same(self<lte_expr>(), other);
+	}
 };
 class gte_expr: public binary_expr {
 public:
@@ -138,6 +181,9 @@ public:
 	virtual void dump(std::ostream&, int);
 	virtual void accept(block_visitor* visitor) {
 		visitor->visit(self<gte_expr>());
+	}
+	virtual bool is_same(block::Ptr other) {
+		return binary_is_same(self<gte_expr>(), other);
 	}
 };
 
@@ -148,6 +194,9 @@ public:
 	virtual void accept(block_visitor* visitor) {
 		visitor->visit(self<equals_expr>());
 	}
+	virtual bool is_same(block::Ptr other) {
+		return binary_is_same(self<equals_expr>(), other);
+	}
 };
 
 class ne_expr: public binary_expr {
@@ -156,6 +205,9 @@ public:
 	virtual void dump(std::ostream&, int);
 	virtual void accept(block_visitor* visitor) {
 		visitor->visit(self<ne_expr>());
+	}
+	virtual bool is_same(block::Ptr other) {
+		return binary_is_same(self<ne_expr>(), other);
 	}
 };
 
@@ -168,6 +220,16 @@ public:
 	}
 
 	var::Ptr var1;	
+	virtual bool is_same(block::Ptr other) {
+		if (static_offset != other->static_offset)
+			return false;
+		if (!isa<var_expr>(other))
+			return false;
+		var_expr::Ptr other_expr = to<var_expr>(other);
+		if (!var1->is_same(other_expr->var1))
+			return false;
+		return true;
+	}
 };
 
 class const_expr: public expr {
@@ -176,6 +238,14 @@ public:
 	virtual void dump(std::ostream&, int);
 	virtual void accept(block_visitor* visitor) {
 		visitor->visit(self<const_expr>());
+	}
+
+	virtual bool is_same(block::Ptr other) {
+		if (static_offset != other->static_offset)
+			return false;
+		if (!isa<const_expr>(other))
+			return false;
+		return true;
 	}
 };
 
@@ -188,6 +258,17 @@ public:
 	}
 	
 	long long value;
+		
+	virtual bool is_same(block::Ptr other) {
+		if (static_offset != other->static_offset)
+			return false;
+		if (!isa<int_const>(other))
+			return false;
+		int_const::Ptr other_expr = to<int_const>(other);
+		if (value != other_expr->value)
+			return false;
+		return true;
+	}
 };
 
 class assign_expr: public expr {
@@ -200,6 +281,19 @@ public:
 	
 	expr::Ptr var1;	
 	expr::Ptr expr1;
+	
+	virtual bool is_same(block::Ptr other) {
+		if (static_offset != other->static_offset) 
+			return false;
+		if (!isa<assign_expr>(other))
+			return false;
+		assign_expr::Ptr other_expr = to<assign_expr>(other);
+		if (!var1->is_same(other_expr->var1))
+			return false;
+		if (!expr1->is_same(other_expr->expr1))
+			return false;
+		return true;
+	}
 
 };
 class sq_bkt_expr: public expr {
@@ -210,6 +304,19 @@ public:
 	}
 	expr::Ptr var_expr;
 	expr::Ptr index;
+	
+	virtual bool is_same(block::Ptr other) {
+		if (static_offset != other->static_offset) 
+			return false;
+		if (!isa<sq_bkt_expr>(other))
+			return false;
+		sq_bkt_expr::Ptr other_expr = to<sq_bkt_expr>(other);
+		if (!var_expr->is_same(other_expr->var_expr))
+			return false;
+		if (!index->is_same(other_expr->index))
+			return false;
+		return true;
+	}
 };
 }
 

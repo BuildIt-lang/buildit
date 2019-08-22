@@ -17,6 +17,8 @@ void foo(void) {
 	// This statement should appear AFTER the if statement and not duplicated
 	// in both the above branches
 	c && b;
+
+	a = (c< 10)? c : b;
 	
 }
 
