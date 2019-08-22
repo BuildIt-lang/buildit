@@ -96,6 +96,8 @@ static std::vector<block::stmt::Ptr> trim_common_from_back(block::stmt::Ptr ast1
 	std::vector<block::stmt::Ptr> &ast2_stmts = block::to<block::stmt_block>(ast2)->stmts;
 	if (ast1_stmts.size() > 0 && ast2_stmts.size() > 0) {
 		while(1) {
+			if (ast1_stmts.size() == 0 || ast2_stmts.size() == 0)
+				break;
 			
 			if (ast1_stmts.back()->static_offset != ast2_stmts.back()->static_offset) {
 				break;

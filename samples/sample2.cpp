@@ -9,8 +9,8 @@ void foo(void) {
 	int_var b;
 	int_var c;
 
-	if (c) {
-		a &&b;
+	if (c < 10) {
+		a && b;
 	} else {
 		b && a;
 	}
