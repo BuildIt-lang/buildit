@@ -37,6 +37,7 @@ BLOCKS_OBJS=$(subst $(SRC_DIR),$(BUILD_DIR),$(BLOCKS_SRC:.cpp=.o))
 UTIL_OBJS=$(subst $(SRC_DIR),$(BUILD_DIR),$(UTIL_SRC:.cpp=.o))
 
 LIBRARY_OBJS=$(BUILDER_OBJS) $(BLOCKS_OBJS) $(UTIL_OBJS)
+LIBRARY=$(BUILD_DIR)/builder_library.a
 
 all: executables
 
@@ -56,7 +57,12 @@ $(BUILD_DIR)/util/%.o: $(SRC_DIR)/util/%.cpp $(INCLUDES)
 $(BUILD_DIR)/samples/%.o: $(SAMPLES_DIR)/%.cpp $(INCLUDES)
 	$(CXX) $(CFLAGS) $< -o $@ -I$(INCLUDE_DIR) -c 
 
-$(BUILD_DIR)/sample%: $(BUILD_DIR)/samples/sample%.o $(LIBRARY_OBJS)
+
+$(LIBRARY): $(LIBRARY_OBJS)
+	ar rv $(LIBRARY) $(LIBRARY_OBJS)
+
+
+$(BUILD_DIR)/sample%: $(BUILD_DIR)/samples/sample%.o $(LIBRARY)
 	$(CXX) -o $@ $^ $(LINKER_FLAGS)
 
 
