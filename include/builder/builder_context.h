@@ -68,7 +68,18 @@ public:
 
 
 	std::vector<tracking_tuple> static_var_tuples;
-
+	
+	std::vector<var*> assume_variables;
+	
+	template <typename T>
+	T* assume_variable (std::string name) {
+		T *new_asm_variable = new T(true);
+		new_asm_variable->block_var->var_name = name;
+		assume_variables.push_back(new_asm_variable);
+		
+		return new_asm_variable;	
+	}	
+	~builder_context();
 private:
 	static builder_context *current_builder_context;
 	friend builder;

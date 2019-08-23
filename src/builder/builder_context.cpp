@@ -5,6 +5,7 @@
 #include "blocks/var_namer.h"
 #include "blocks/label_inserter.h"
 #include "blocks/loop_finder.h"
+#include "builder/builder.h"
 
 namespace builder {
 builder_context* builder_context::current_builder_context = nullptr;
@@ -26,6 +27,11 @@ tracer::tag get_offset_in_function(builder_context::ast_function_type _function)
 builder_context::builder_context() {
 	current_block_stmt = nullptr;
 	ast = nullptr;
+}
+builder_context::~builder_context() {
+	for (int i = 0; i < assume_variables.size(); i++) {
+		delete assume_variables[i];
+	}
 }
 bool builder_context::is_visited_tag(tracer::tag &new_tag) {
 	for (int i = 0; i < visited_offsets.size(); i++) {

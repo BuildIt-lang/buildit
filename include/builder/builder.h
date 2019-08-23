@@ -44,6 +44,7 @@ public:
 
 	template<typename... types>	
 	builder operator () (types&... args);
+
 };
 builder operator && (const int &a, const builder &);
 builder operator || (const int &a, const builder &);
@@ -97,6 +98,8 @@ public:
 	builder operator = (const var& a) {
 		return operator builder() = a;
 	}
+
+	virtual ~var() = default;
 };
 
 
@@ -108,14 +111,18 @@ public:
 		type->scalar_type_id = block::scalar_type::INT_TYPE;
 		return type;
 	}
-	void create_int_var(void);
-	int_var();
+	void create_int_var(bool create_without_context = false);
+	int_var(bool create_without_context = false);
 	int_var(const int_var&);
 	int_var(const builder&);
-	int_var(const int);
+	int_var(const int&);
 	builder operator = (const int_var& a) {
 		return operator builder() = a;
 	}
+	builder operator = (const int &a) {
+		return operator = ((builder)a);
+	}
+	virtual ~int_var() = default;
 };
 class void_var: public var {
 public:
@@ -136,13 +143,20 @@ public:
 		type->pointee_type = base_type::create_block_type();
 		return type;
 	}
-	void create_pointer_var(void);
-	pointer_var();
+	void create_pointer_var(bool create_without_context = false);
+	pointer_var(bool create_without_context = false);
 	pointer_var(const pointer_var&);
 	pointer_var(const builder&);	
+	virtual ~pointer_var() = default;
 };
 template <typename base_type>
-void pointer_var<base_type>::create_pointer_var(void) {
+void pointer_var<base_type>::create_pointer_var(bool create_without_context) {
+	if (create_without_context) {
+		block::var::Ptr pointer_var = std::make_shared<block::var>();	
+		pointer_var->var_type = create_block_type();
+		block_var = pointer_var;
+		return;
+	}
 	assert(builder_context::current_builder_context != nullptr);
 	assert(builder_context::current_builder_context->current_block_stmt != nullptr);
 	builder_context::current_builder_context->commit_uncommitted();
@@ -160,8 +174,8 @@ void pointer_var<base_type>::create_pointer_var(void) {
 }	
 
 template <typename base_type>
-pointer_var<base_type>::pointer_var() {
-	create_pointer_var();
+pointer_var<base_type>::pointer_var(bool create_without_context) {
+	create_pointer_var(create_without_context);
 }		
 template <typename base_type>
 pointer_var<base_type>::pointer_var(const pointer_var<base_type>& a): pointer_var<base_type>((builder)a) {
@@ -203,11 +217,18 @@ public:
 		std::reverse(type->arg_types.begin(), type->arg_types.end());
 		return type;
 	}	
-	void create_function_var(void);
-	function_var();
+	void create_function_var(bool create_without_context = false);
+	function_var(bool create_without_context = false);
+	virtual ~function_var() = default;
 };
 template <typename r_type, typename... a_types>
-void function_var<r_type, a_types...>::create_function_var(void) {
+void function_var<r_type, a_types...>::create_function_var(bool create_without_context) {
+	if (create_without_context) {
+		block::var::Ptr function_var = std::make_shared<block::var>();	
+		function_var->var_type = create_block_type();
+		block_var = function_var;
+		return;
+	}
 	assert(builder_context::current_builder_context != nullptr);
 	assert(builder_context::current_builder_context->current_block_stmt != nullptr);
 	builder_context::current_builder_context->commit_uncommitted();
@@ -224,8 +245,8 @@ void function_var<r_type, a_types...>::create_function_var(void) {
 	function_var->static_offset = offset;
 }	
 template <typename r_type, typename... a_types>
-function_var<r_type, a_types...>::function_var() {
-	create_function_var();
+function_var<r_type, a_types...>::function_var(bool create_without_context) {
+	create_function_var(create_without_context);
 }		
 
 void annotate(std::string);

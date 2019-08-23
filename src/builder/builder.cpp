@@ -18,7 +18,14 @@ var::operator builder () const {
 	
 	return ret_block;
 }
-void int_var::create_int_var(void) {
+void int_var::create_int_var(bool create_without_context) {
+
+	if (create_without_context) {	
+		block::var::Ptr int_var = std::make_shared<block::var>();	
+		int_var->var_type = create_block_type();	
+		block_var = int_var;
+		return;
+	}
 	assert(builder_context::current_builder_context != nullptr);
 	assert(builder_context::current_builder_context->current_block_stmt != nullptr);
 	
@@ -41,8 +48,8 @@ void int_var::create_int_var(void) {
 	int_var->static_offset = offset;
 	
 }	
-int_var::int_var() {
-	create_int_var();
+int_var::int_var(bool create_without_context) {
+	create_int_var(create_without_context);
 }		
 int_var::int_var(const int_var& a): int_var((builder)a) {
 }
@@ -51,7 +58,7 @@ int_var::int_var(const builder& a) {
 	create_int_var();
 	block_decl_stmt->init_expr = a.block_expr;	
 }
-int_var::int_var(const int a): int_var((builder)a) {
+int_var::int_var(const int& a): int_var((builder)a) {
 }
 
 
