@@ -61,7 +61,8 @@ void interpret_bf(void) {
 			tape[pointer] = (*get_value)();
 		} else if (bf_program[pc] == '[') {
 			int closing = find_matching_closing(pc);		
-			if (tape[pointer] == 0) {
+			if (tape[pointer] != 0) {
+			} else {
 				pc = closing;
 			}
 		} else if (bf_program[pc] == ']') {
@@ -70,6 +71,7 @@ void interpret_bf(void) {
 		}
 		pc += 1;
 	}
+	(*free_func)(tape);
 	
 }
 void print_wrapper_code(std::ostream& oss) {

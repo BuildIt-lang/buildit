@@ -5,8 +5,6 @@ namespace block {
 void ensure_back_has_goto(stmt_block::Ptr a, label::Ptr label_detect, std::vector<stmt_block::Ptr> &parents) {
 
 	if (a->stmts.size() == 0) {
-		//break_stmt::Ptr new_break = std::make_shared<break_stmt>();
-		//a->stmts.push_back(new_break);
 		parents.push_back(a);
 		return;
 	}
@@ -17,7 +15,6 @@ void ensure_back_has_goto(stmt_block::Ptr a, label::Ptr label_detect, std::vecto
 
 		stmt_block::Ptr then_block = to<stmt_block>(if_stmt_ptr->then_stmt);
 		stmt_block::Ptr else_block = to<stmt_block>(if_stmt_ptr->else_stmt);
-
 		std::vector<stmt_block::Ptr> if_parents;	
 		ensure_back_has_goto(then_block, label_detect, if_parents);
 		ensure_back_has_goto(else_block, label_detect, if_parents);
@@ -29,17 +26,13 @@ void ensure_back_has_goto(stmt_block::Ptr a, label::Ptr label_detect, std::vecto
 			}
 		}
 	} else if (isa<goto_stmt>(last_stmt) && to<goto_stmt>(last_stmt)->label1 == label_detect) {
-		a->stmts.pop_back();
-		
+		a->stmts.pop_back();		
 	} else if (isa<goto_stmt>(last_stmt) && to<goto_stmt>(last_stmt)->label1 != label_detect) {
 		parents.push_back(a);
 	} else if (isa<break_stmt>(last_stmt)) {
-		assert("How is there already a break?");
+		assert(false);
 	} else {
-		//break_stmt::Ptr new_break = std::make_shared<break_stmt>();
-		//a->stmts.push_back(new_break);
 		parents.push_back(a);
-
 	}
 	return;
 }
@@ -136,6 +129,13 @@ void loop_finder::visit_label(label_stmt::Ptr a, stmt_block::Ptr parent) {
 	to<stmt_block>(new_while->body)->stmts = stmts_in_body;
 
 	std::vector<stmt_block::Ptr> parents;
+
+	//Clean up all loops in this body  
+	loop_finder finder;
+	finder.ast = new_while->body;
+	new_while->body->accept(&finder);
+
+	
 	ensure_back_has_goto(to<stmt_block>(new_while->body), a->label1, parents);
 	
 	std::vector<stmt::Ptr> trimmed;
@@ -144,8 +144,10 @@ void loop_finder::visit_label(label_stmt::Ptr a, stmt_block::Ptr parent) {
 	
 	// Now push a break to the end of every parent
 	for (stmt_block::Ptr block: parents) {
-		if (block->stmts.size() > 0 && isa<goto_stmt>(block->stmts.back()))
-			continue;
+		
+		//if (block->stmts.size() > 0 && isa<goto_stmt>(block->stmts.back()))
+			//continue;
+		
 		break_stmt::Ptr new_break = std::make_shared<break_stmt>();
 		block->stmts.push_back(new_break);
 		
