@@ -61,8 +61,7 @@ void interpret_bf(void) {
 			tape[pointer] = (*get_value)();
 		} else if (bf_program[pc] == '[') {
 			int closing = find_matching_closing(pc);		
-			if (tape[pointer] != 0) {
-			} else {
+			if (tape[pointer] == 0) {
 				pc = closing;
 			}
 		} else if (bf_program[pc] == ']') {

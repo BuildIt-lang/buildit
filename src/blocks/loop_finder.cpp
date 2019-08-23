@@ -179,6 +179,17 @@ void loop_finder::visit_label(label_stmt::Ptr a, stmt_block::Ptr parent) {
 				new_while->cond = if_body->cond;
 				//new_while->body = std::make_shared<stmt_block>();
 				new_while->body = then_stmt;
+				return;
+			}
+		}
+		if (isa<stmt_block> (then_stmt) && to<stmt_block> (then_stmt)->stmts.size() == 1) {
+			if (isa<break_stmt>(to<stmt_block>(then_stmt)->stmts[0])) {
+				not_expr::Ptr new_cond = std::make_shared<not_expr>();
+				new_cond->static_offset = if_body->cond->static_offset;
+				new_cond->expr1 = if_body->cond;
+				new_while->cond = new_cond;
+				new_while->body = else_stmt;
+				return;
 			}
 		}
 	}
