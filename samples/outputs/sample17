@@ -1,0 +1,127 @@
+#include <stdio.h>
+#include <stdlib.h>
+void print_value(int x) {printf("%c", x);}
+int get_value(void) {char x; scanf(" %c", &x); return x;}
+int main(int argc, char* argv[]) {
+  int var0 = 0;
+  int* var1;
+  var1 = malloc(256);
+  var1[var0] = var1[var0] + 1;
+  var1[var0] = var1[var0] + 1;
+  var1[var0] = var1[var0] + 1;
+  var1[var0] = var1[var0] + 1;
+  var1[var0] = var1[var0] + 1;
+  var1[var0] = var1[var0] + 1;
+  var1[var0] = var1[var0] + 1;
+  var1[var0] = var1[var0] + 1;
+  while (1) {
+    if (var1[var0] == 0) {
+      var0 = var0 + 1;
+      var0 = var0 + 1;
+      print_value(var1[var0]);
+      var0 = var0 + 1;
+      var1[var0] = var1[var0] - 1;
+      var1[var0] = var1[var0] - 1;
+      var1[var0] = var1[var0] - 1;
+      print_value(var1[var0]);
+      var1[var0] = var1[var0] + 1;
+      var1[var0] = var1[var0] + 1;
+      var1[var0] = var1[var0] + 1;
+      var1[var0] = var1[var0] + 1;
+      var1[var0] = var1[var0] + 1;
+      var1[var0] = var1[var0] + 1;
+      var1[var0] = var1[var0] + 1;
+      print_value(var1[var0]);
+      print_value(var1[var0]);
+      var1[var0] = var1[var0] + 1;
+      var1[var0] = var1[var0] + 1;
+      var1[var0] = var1[var0] + 1;
+      print_value(var1[var0]);
+      var0 = var0 + 1;
+      var0 = var0 + 1;
+      print_value(var1[var0]);
+      var0 = var0 - 1;
+      var1[var0] = var1[var0] - 1;
+      print_value(var1[var0]);
+      var0 = var0 - 1;
+      print_value(var1[var0]);
+      var1[var0] = var1[var0] + 1;
+      var1[var0] = var1[var0] + 1;
+      var1[var0] = var1[var0] + 1;
+      print_value(var1[var0]);
+      var1[var0] = var1[var0] - 1;
+      var1[var0] = var1[var0] - 1;
+      var1[var0] = var1[var0] - 1;
+      var1[var0] = var1[var0] - 1;
+      var1[var0] = var1[var0] - 1;
+      var1[var0] = var1[var0] - 1;
+      print_value(var1[var0]);
+      var1[var0] = var1[var0] - 1;
+      var1[var0] = var1[var0] - 1;
+      var1[var0] = var1[var0] - 1;
+      var1[var0] = var1[var0] - 1;
+      var1[var0] = var1[var0] - 1;
+      var1[var0] = var1[var0] - 1;
+      var1[var0] = var1[var0] - 1;
+      var1[var0] = var1[var0] - 1;
+      print_value(var1[var0]);
+      var0 = var0 + 1;
+      var0 = var0 + 1;
+      var1[var0] = var1[var0] + 1;
+      print_value(var1[var0]);
+      var0 = var0 + 1;
+      var1[var0] = var1[var0] + 1;
+      var1[var0] = var1[var0] + 1;
+      print_value(var1[var0]);
+      break;
+    } else {
+      var0 = var0 + 1;
+      var1[var0] = var1[var0] + 1;
+      var1[var0] = var1[var0] + 1;
+      var1[var0] = var1[var0] + 1;
+      var1[var0] = var1[var0] + 1;
+      while (1) {
+        if (var1[var0] == 0) {
+          break;
+        } else {
+          var0 = var0 + 1;
+          var1[var0] = var1[var0] + 1;
+          var1[var0] = var1[var0] + 1;
+          var0 = var0 + 1;
+          var1[var0] = var1[var0] + 1;
+          var1[var0] = var1[var0] + 1;
+          var1[var0] = var1[var0] + 1;
+          var0 = var0 + 1;
+          var1[var0] = var1[var0] + 1;
+          var1[var0] = var1[var0] + 1;
+          var1[var0] = var1[var0] + 1;
+          var0 = var0 + 1;
+          var1[var0] = var1[var0] + 1;
+          var0 = var0 - 1;
+          var0 = var0 - 1;
+          var0 = var0 - 1;
+          var0 = var0 - 1;
+          var1[var0] = var1[var0] - 1;
+        }
+      }
+      var0 = var0 + 1;
+      var1[var0] = var1[var0] + 1;
+      var0 = var0 + 1;
+      var1[var0] = var1[var0] + 1;
+      var0 = var0 + 1;
+      var1[var0] = var1[var0] - 1;
+      var0 = var0 + 1;
+      var0 = var0 + 1;
+      var1[var0] = var1[var0] + 1;
+      while (1) {
+        if (var1[var0] == 0) {
+          break;
+        } else {
+          var0 = var0 - 1;
+        }
+      }
+      var0 = var0 - 1;
+      var1[var0] = var1[var0] - 1;
+    }
+  }
+}

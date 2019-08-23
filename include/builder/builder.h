@@ -43,7 +43,7 @@ public:
 	builder (const int&);
 
 	template<typename... types>	
-	builder operator () (types&... args);
+	builder operator () (const types&... args);
 
 };
 builder operator && (const int &a, const builder &);
@@ -90,7 +90,7 @@ public:
 	builder operator ! ();
 
 	template<typename... types>	
-	builder operator () (types&... args) {
+	builder operator () (const types&... args) {
 		return (operator builder()) (args...);
 	}
 
@@ -253,10 +253,10 @@ void annotate(std::string);
 
 // The implementation for () operator on builder
 template <typename... arg_types>
-std::vector <block::expr::Ptr> extract_call_arguments (arg_types&... args);
+std::vector <block::expr::Ptr> extract_call_arguments (const arg_types&... args);
 
 template <typename... arg_types>
-std::vector <block::expr::Ptr> extract_call_arguments_helper (const builder& first_arg, arg_types&... rest_args) {
+std::vector <block::expr::Ptr> extract_call_arguments_helper (const builder& first_arg, const arg_types&... rest_args) {
 	assert(builder_context::current_builder_context != nullptr);
 	builder_context::current_builder_context->remove_node_from_sequence(first_arg.block_expr);
 		
@@ -266,7 +266,7 @@ std::vector <block::expr::Ptr> extract_call_arguments_helper (const builder& fir
 }
 
 template <typename... arg_types>
-std::vector <block::expr::Ptr> extract_call_arguments (arg_types&... args) {
+std::vector <block::expr::Ptr> extract_call_arguments (const arg_types&... args) {
 	return extract_call_arguments_helper(args...);
 }
 
@@ -275,7 +275,7 @@ std::vector <block::expr::Ptr> extract_call_arguments<> (void);
 
 
 template <typename ...arg_types>
-builder builder::operator () (arg_types& ... args) {
+builder builder::operator () (const arg_types& ... args) {
 	assert(builder_context::current_builder_context != nullptr);
 	
 	builder_context::current_builder_context->remove_node_from_sequence(block_expr);

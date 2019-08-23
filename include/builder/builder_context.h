@@ -18,7 +18,7 @@ class static_var;
 template <typename r_type, typename... a_types>
 class function_var; 
 template <typename... arg_types>
-std::vector <block::expr::Ptr> extract_call_arguments_helper (const builder& first_arg, arg_types&... rest_args);
+std::vector <block::expr::Ptr> extract_call_arguments_helper (const builder& first_arg, const arg_types&... rest_args);
 
 class tracking_tuple {
 public:
@@ -94,7 +94,7 @@ private:
 	friend class function_var;
 
 	template <typename... arg_types>
-	friend std::vector <block::expr::Ptr> extract_call_arguments_helper (const builder& first_arg, arg_types&... rest_args);
+	friend std::vector <block::expr::Ptr> extract_call_arguments_helper (const builder& first_arg, const arg_types&... rest_args);
 
 	friend void annotate(std::string);
 	friend tracer::tag get_offset_in_function(ast_function_type _function);
