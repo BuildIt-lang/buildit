@@ -13,10 +13,10 @@ using builder::static_var;
 
 
 const char *bf_program;
-function_var<void_var, int_var> *print_value;
-function_var<int_var> *get_value;
-function_var<pointer_var<void_var>> *malloc_func;
-function_var<void_var, pointer_var<void_var>> *free_func;
+function_var<void_var, int_var> *print_value_ptr;
+function_var<int_var> *get_value_ptr;
+function_var<pointer_var<void_var>> *malloc_func_ptr;
+function_var<void_var, pointer_var<void_var>> *free_func_ptr;
 
 int find_matching_closing(int pc) {
 	int count = 1;
@@ -42,10 +42,15 @@ int find_matching_opening(int pc) {
 }
 // BF interpreter
 void interpret_bf(void) {
+	auto &malloc_func = *malloc_func_ptr;
+	auto &free_func = *free_func_ptr;
+	auto &get_value = *get_value_ptr;
+	auto &print_value = *print_value_ptr;
+
 	int_var pointer = 0;
 	static_var<int> pc = 0;
 	pointer_var<int_var> tape;
-	tape = (*malloc_func)(256);
+	tape = malloc_func(256);
 	while (bf_program[pc] != 0) {
 		if (bf_program[pc] == '>') {
 			pointer = pointer + 1;
@@ -56,9 +61,9 @@ void interpret_bf(void) {
 		} else if (bf_program[pc] == '-') {
 			tape[pointer] = tape[pointer] - 1;
 		} else if (bf_program[pc] == '.') {
-			(*print_value) (tape[pointer]);
+			print_value(tape[pointer]);
 		} else if (bf_program[pc] == ',') {
-			tape[pointer] = (*get_value)();
+			tape[pointer] = get_value();
 		} else if (bf_program[pc] == '[') {
 			int closing = find_matching_closing(pc);		
 			if (tape[pointer] == 0) {
@@ -70,8 +75,7 @@ void interpret_bf(void) {
 		}
 		pc += 1;
 	}
-	(*free_func)(tape);
-	
+	free_func(tape);	
 }
 void print_wrapper_code(std::ostream& oss) {
 	oss << "#include <stdio.h>\n";
@@ -86,10 +90,10 @@ int main(int argc, char* argv[]) {
 	// BF program that prints hello world
 	bf_program = "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.";
 
-	print_value = context.assume_variable<function_var<void_var, int_var>>("print_value");
-	get_value = context.assume_variable<function_var<int_var>>("get_value");
-	malloc_func = context.assume_variable<function_var<pointer_var<void_var>>>("malloc");
-	free_func = context.assume_variable<function_var<void_var, pointer_var<void_var>>>("free");
+	print_value_ptr = context.assume_variable<function_var<void_var, int_var>>("print_value");
+	get_value_ptr = context.assume_variable<function_var<int_var>>("get_value");
+	malloc_func_ptr = context.assume_variable<function_var<pointer_var<void_var>>>("malloc");
+	free_func_ptr = context.assume_variable<function_var<void_var, pointer_var<void_var>>>("free");
 
 	auto ast = context.extract_ast_from_function(interpret_bf);	
 	
