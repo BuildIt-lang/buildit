@@ -5,6 +5,7 @@
 #include "blocks/expr.h"
 #include "blocks/stmt.h"
 #include <unordered_set>
+#include <unordered_map>
 
 
 namespace builder {
@@ -36,6 +37,12 @@ public:
 	}
 };
 
+
+class tag_map {
+public:
+	std::unordered_map<std::string, block::stmt_block::Ptr> map;	
+	
+};
 class builder_context {
 public:
 
@@ -48,16 +55,28 @@ public:
 	ast_function_type current_function;
 	std::vector<bool> bool_vector;
 	std::vector<tracer::tag> visited_offsets;
+
+	tag_map _internal_tags;
+	tag_map *memoized_tags;
+
 	bool is_visited_tag (tracer::tag &new_tag);
 	void erase_tag(tracer::tag &erase_tag);
 		
-	builder_context();
+	builder_context(tag_map *_map = nullptr) {
+		if (_map == nullptr) {
+			memoized_tags = &_internal_tags;
+		} else {
+			memoized_tags = _map;
+		}
+		current_block_stmt = nullptr;
+		ast = nullptr;
+	}
 
 	void commit_uncommitted(void);	
 	void remove_node_from_sequence(block::expr::Ptr);
 	void add_node_to_sequence(block::expr::Ptr);
 	
-	void add_stmt_to_current_block(block::stmt::Ptr);
+	void add_stmt_to_current_block(block::stmt::Ptr, bool check_for_conflicts = true);
 
 
 	block::stmt::Ptr extract_ast(void);

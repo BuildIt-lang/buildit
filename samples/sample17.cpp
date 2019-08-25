@@ -58,7 +58,11 @@ void interpret_bf(void) {
 			pointer = pointer - 1;
 		} else if (bf_program[pc] == '+') {
 			tape[pointer] = tape[pointer] + 1;
+			if (tape[pointer] == 256)
+				tape[pointer] = 0;
 		} else if (bf_program[pc] == '-') {
+			if (tape[pointer] == 0)
+				tape[pointer] = 256;
 			tape[pointer] = tape[pointer] - 1;
 		} else if (bf_program[pc] == '.') {
 			print_value(tape[pointer]);

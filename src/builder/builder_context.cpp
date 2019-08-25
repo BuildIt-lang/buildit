@@ -9,13 +9,28 @@
 
 namespace builder {
 builder_context* builder_context::current_builder_context = nullptr;
-void builder_context::add_stmt_to_current_block(block::stmt::Ptr s) {
+void builder_context::add_stmt_to_current_block(block::stmt::Ptr s, bool check_for_conflicts) {
 	if (current_label != "") {
 		s->annotation = current_label;
 		current_label = "";
 	}
 	if (!s->static_offset.is_empty() && is_visited_tag(s->static_offset) > 0) {
+		
 		throw LoopBackException(s->static_offset);
+	}
+	std::string tag_string = s->static_offset.stringify();
+	if (memoized_tags->map.find(tag_string) != memoized_tags->map.end() && check_for_conflicts && bool_vector.size() == 0) {
+		// This tag has been seen on some other execution. We can reuse. 
+		// First find the tag - 
+
+		block::stmt_block::Ptr parent = memoized_tags->map[tag_string];
+		int i = 0; 
+		for (i = 0; i < parent->stmts.size(); i++) {
+			if (parent->stmts[i]->static_offset == s->static_offset) 
+				break;
+		}
+		if (parent->stmts[i]->is_same(s))
+			throw MemoizationException(s->static_offset, parent, i);
 	}
 	visited_offsets.push_back(s->static_offset);
 	current_block_stmt->stmts.push_back(s);
@@ -23,10 +38,6 @@ void builder_context::add_stmt_to_current_block(block::stmt::Ptr s) {
 tracer::tag get_offset_in_function(builder_context::ast_function_type _function) {
 	tracer::tag offset = tracer::get_offset_in_function_impl(_function, builder_context::current_builder_context);
 	return offset;
-}
-builder_context::builder_context() {
-	current_block_stmt = nullptr;
-	ast = nullptr;
 }
 builder_context::~builder_context() {
 	for (int i = 0; i < assume_variables.size(); i++) {
@@ -73,7 +84,7 @@ block::stmt::Ptr builder_context::extract_ast(void) {
 
 bool get_next_bool_from_context(builder_context *context, block::expr::Ptr expr) {	
 	if (context->bool_vector.size() == 0) {
-		tracer::tag offset = expr->static_offset; 
+		tracer::tag offset = expr->static_offset; 	
 		throw OutOfBoolsException(offset);
 	}
 	bool ret_val = context->bool_vector.back();
@@ -173,7 +184,6 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(ast_functio
 
 	} catch (OutOfBoolsException &e) {
 		
-		commit_uncommitted();
 		current_builder_context = nullptr;
 		
 		block::expr_stmt::Ptr last_stmt = block::to<block::expr_stmt>(current_block_stmt->stmts.back());
@@ -182,19 +192,20 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(ast_functio
 		
 		block::expr::Ptr cond_expr = last_stmt->expr1;	
 
-		builder_context true_context;
+		builder_context true_context(memoized_tags);
 		std::vector<bool> true_bv;
 		true_bv.push_back(true);
 		std::copy(b.begin(), b.end(), std::back_inserter(true_bv));	
 		block::stmt_block::Ptr true_ast = block::to<block::stmt_block>(true_context.extract_ast_from_function_internal(function, true_bv));
-		trim_ast_at_offset(true_ast, e.static_offset);
 
 
-		builder_context false_context;
+		builder_context false_context(memoized_tags);
 		std::vector<bool> false_bv;
 		false_bv.push_back(false);
 		std::copy(b.begin(), b.end(), std::back_inserter(false_bv));
 		block::stmt_block::Ptr false_ast = block::to<block::stmt_block>(false_context.extract_ast_from_function_internal(function, false_bv));
+
+		trim_ast_at_offset(true_ast, e.static_offset);
 		trim_ast_at_offset(false_ast, e.static_offset);
 
 
@@ -212,7 +223,7 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(ast_functio
 		new_if_stmt->then_stmt = true_ast;
 		new_if_stmt->else_stmt = false_ast;
 		
-		add_stmt_to_current_block(new_if_stmt);
+		add_stmt_to_current_block(new_if_stmt, false);
 		
 		std::copy(trimmed_stmts.begin(), trimmed_stmts.end(), std::back_inserter(current_block_stmt->stmts));
 		ret_ast = ast;
@@ -223,12 +234,23 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(ast_functio
 		goto_stmt->static_offset.clear();
 		goto_stmt->temporary_label_number = e.static_offset;
 		
-		add_stmt_to_current_block(goto_stmt);
+		add_stmt_to_current_block(goto_stmt, false);
 		ret_ast = ast;	
+	} catch (MemoizationException &e) {
+		for (int i = e.child_id; i < e.parent->stmts.size(); i++) {
+			add_stmt_to_current_block(e.parent->stmts[i], false);
+		}		
+		ret_ast = ast;
 	}
 	
+
+	// Update the memoized table with the stmt block we just created 
+	for (int i = 0; i < current_block_stmt->stmts.size(); i++) {
+		block::stmt::Ptr s = current_block_stmt->stmts[i];
+		memoized_tags->map[s->static_offset.stringify()] = current_block_stmt;
+	}
+
 	ast = current_block_stmt = nullptr;
 	return ret_ast;	
 }
-
 }

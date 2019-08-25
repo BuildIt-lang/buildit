@@ -156,12 +156,15 @@ void c_code_generator::visit(if_stmt::Ptr a) {
 		oss << std::endl;
 		curr_indent--;	
 	}
-	oss << "else";
 	
 	if (isa<stmt_block>(a->else_stmt)) {
+		if (to<stmt_block>(a->else_stmt)->stmts.size() == 0)
+			return;
+		oss << "else";
 		oss << " ";
 		a->else_stmt->accept(this);
 	} else {
+		oss << "else";
 		oss << std::endl;
 		curr_indent++;
 		printer::indent(oss, curr_indent);
