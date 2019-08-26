@@ -253,4 +253,5 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(ast_functio
 	ast = current_block_stmt = nullptr;
 	return ret_ast;	
 }
+
 }
