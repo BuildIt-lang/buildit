@@ -41,7 +41,7 @@ void builder_context::add_stmt_to_current_block(block::stmt::Ptr s, bool check_f
 			throw MemoizationException(s->static_offset, parent, i);
 			
 	}
-	visited_offsets.push_back(s->static_offset);
+	visited_offsets.insert(s->static_offset.stringify());
 	current_block_stmt->stmts.push_back(s);
 }
 tracer::tag get_offset_in_function(builder_context::ast_function_type _function) {
@@ -54,19 +54,12 @@ builder_context::~builder_context() {
 	}
 }
 bool builder_context::is_visited_tag(tracer::tag &new_tag) {
-	for (int i = 0; i < visited_offsets.size(); i++) {
-		if (visited_offsets[i] == new_tag)
-			return true;
-	}
+	if (visited_offsets.find(new_tag.stringify()) != visited_offsets.end())
+		return true;
 	return false;
 }
 void builder_context::erase_tag(tracer::tag &erase_tag) {
-	std::vector<tracer::tag> new_tags;
-	for (int i = 0; i < visited_offsets.size(); i++) {
-		if (visited_offsets[i] != erase_tag)
-			new_tags.push_back(visited_offsets[i]);
-	}
-	visited_offsets = new_tags;
+	visited_offsets.erase(erase_tag.stringify());
 }
 void builder_context::commit_uncommitted(void) {
 	for (auto block_ptr: uncommitted_sequence) {
@@ -127,9 +120,6 @@ static std::vector<block::stmt::Ptr> trim_common_from_back(block::stmt::Ptr ast1
 				break;
 			if (!ast1_stmts.back()->is_same(ast2_stmts.back()))
 				break;	
-			//if (ast1_stmts.back()->static_offset != ast2_stmts.back()->static_offset) {
-				//break;
-			//}
 			if (ast1_stmts.back()->static_offset.is_empty()) {
 				// The only possibility is that these two are goto statements. Gotos are same only if they are going to the same label
 				assert(block::isa<block::goto_stmt>(ast1_stmts.back()));

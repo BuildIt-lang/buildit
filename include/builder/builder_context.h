@@ -54,7 +54,7 @@ public:
 	block::stmt_block::Ptr current_block_stmt;	
 	ast_function_type current_function;
 	std::vector<bool> bool_vector;
-	std::vector<tracer::tag> visited_offsets;
+	std::unordered_set<std::string> visited_offsets;
 
 	tag_map _internal_tags;
 	tag_map *memoized_tags;
