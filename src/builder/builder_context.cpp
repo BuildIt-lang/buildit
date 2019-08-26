@@ -29,8 +29,17 @@ void builder_context::add_stmt_to_current_block(block::stmt::Ptr s, bool check_f
 			if (parent->stmts[i]->static_offset == s->static_offset) 
 				break;
 		}
+		// Special case of stmt expr and if_stmt
+		if (block::isa<block::expr_stmt>(s) && block::isa<block::if_stmt>(parent->stmts[i])){
+			block::if_stmt::Ptr p_stmt = block::to<block::if_stmt>(parent->stmts[i]);
+			block::expr_stmt::Ptr expr = block::to<block::expr_stmt>(s);
+			if (p_stmt->cond->is_same(expr->expr1))
+				throw MemoizationException(s->static_offset, parent, i);
+				
+		}
 		if (parent->stmts[i]->is_same(s))
 			throw MemoizationException(s->static_offset, parent, i);
+			
 	}
 	visited_offsets.push_back(s->static_offset);
 	current_block_stmt->stmts.push_back(s);
@@ -83,6 +92,7 @@ block::stmt::Ptr builder_context::extract_ast(void) {
 }
 
 bool get_next_bool_from_context(builder_context *context, block::expr::Ptr expr) {	
+	context->commit_uncommitted();
 	if (context->bool_vector.size() == 0) {
 		tracer::tag offset = expr->static_offset; 	
 		throw OutOfBoolsException(offset);
