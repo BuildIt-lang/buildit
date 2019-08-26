@@ -106,7 +106,7 @@ static void trim_ast_at_offset(block::stmt::Ptr ast, tracer::tag offset) {
 		if (stmts[i]->static_offset == offset)
 			break;
 	}
-	for (++; i < stmts.size(); i++) {
+	for (i++; i < stmts.size(); i++) {
 		new_stmts.push_back(stmts[i]);
 	}
 	top_level_block->stmts = new_stmts;
