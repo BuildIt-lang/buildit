@@ -99,15 +99,17 @@ bool get_next_bool_from_context(builder_context *context, block::expr::Ptr expr)
 static void trim_ast_at_offset(block::stmt::Ptr ast, tracer::tag offset) {
 	block::stmt_block::Ptr top_level_block = block::to<block::stmt_block>(ast);
 	std::vector<block::stmt::Ptr> &stmts = top_level_block->stmts;
-	auto it = stmts.begin();
-	while (it != stmts.end()) {
-		if ((*it)->static_offset != offset) {
-			it = stmts.erase(it);	
-		} else {
-			it = stmts.erase(it);
+	std::vector<block::stmt::Ptr> new_stmts;
+	
+	int i;
+	for (i = 0; i < stmts.size(); i++) {
+		if (stmts[i]->static_offset == offset)
 			break;
-		}
-	}		
+	}
+	for (++; i < stmts.size(); i++) {
+		new_stmts.push_back(stmts[i]);
+	}
+	top_level_block->stmts = new_stmts;
 }
 
 static std::vector<block::stmt::Ptr> trim_common_from_back(block::stmt::Ptr ast1, block::stmt::Ptr ast2) {
