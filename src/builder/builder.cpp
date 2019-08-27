@@ -3,7 +3,10 @@
 #include "builder/builder_context.h"
 
 namespace builder {
+builder builder::sentinel_builder;
 var::operator builder () const {
+	if (builder_context::current_builder_context->bool_vector.size() > 0)
+		return builder::sentinel_builder;
 	assert(block_var != nullptr);
 	tracer::tag offset = get_offset_in_function(builder_context::current_builder_context->current_function);
 		
@@ -19,7 +22,7 @@ var::operator builder () const {
 	return ret_block;
 }
 void int_var::create_int_var(bool create_without_context) {
-
+	
 	if (create_without_context) {	
 		block::var::Ptr int_var = std::make_shared<block::var>();	
 		int_var->var_type = create_block_type();	
@@ -36,6 +39,10 @@ void int_var::create_int_var(bool create_without_context) {
 	block_var = int_var;
 	
 	tracer::tag offset = get_offset_in_function(builder_context::current_builder_context->current_function);
+
+	int_var->static_offset = offset;
+	if (builder_context::current_builder_context->bool_vector.size() > 0)
+		return;
 		
 	block::decl_stmt::Ptr decl_stmt = std::make_shared<block::decl_stmt>();
 	decl_stmt->static_offset = offset;
@@ -45,7 +52,6 @@ void int_var::create_int_var(bool create_without_context) {
 	block_decl_stmt = decl_stmt;
 	
 	builder_context::current_builder_context->add_stmt_to_current_block(decl_stmt);
-	int_var->static_offset = offset;
 	
 }	
 int_var::int_var(bool create_without_context) {
@@ -56,6 +62,8 @@ int_var::int_var(const int_var& a): int_var((builder)a) {
 int_var::int_var(const builder& a) {
 	builder_context::current_builder_context->remove_node_from_sequence(a.block_expr);
 	create_int_var();
+	if (builder_context::current_builder_context->bool_vector.size() > 0)
+		return;
 	block_decl_stmt->init_expr = a.block_expr;	
 }
 int_var::int_var(const int& a): int_var((builder)a) {
@@ -64,6 +72,8 @@ int_var::int_var(const int& a): int_var((builder)a) {
 
 builder::builder (const int &a) {	
 	assert(builder_context::current_builder_context != nullptr);
+	if (builder_context::current_builder_context->bool_vector.size() > 0)
+		return;
 	block::int_const::Ptr int_const = std::make_shared<block::int_const>();
 	tracer::tag offset = get_offset_in_function(builder_context::current_builder_context->current_function);
 	//assert(offset != -1);
@@ -77,6 +87,8 @@ builder::builder (const int &a) {
 template <typename T>
 builder builder::builder_unary_op() {
 	assert(builder_context::current_builder_context != nullptr);
+	if (builder_context::current_builder_context->bool_vector.size() > 0)
+		return builder::sentinel_builder;
 	
 	builder_context::current_builder_context->remove_node_from_sequence(block_expr);
 	tracer::tag offset = get_offset_in_function(builder_context::current_builder_context->current_function);
@@ -97,6 +109,8 @@ builder builder::builder_unary_op() {
 template <typename T>
 builder builder::builder_binary_op(const builder &a) {
 	assert(builder_context::current_builder_context != nullptr);
+	if (builder_context::current_builder_context->bool_vector.size() > 0)
+		return builder::sentinel_builder;
 	
 	builder_context::current_builder_context->remove_node_from_sequence(block_expr);
 	builder_context::current_builder_context->remove_node_from_sequence(a.block_expr);
@@ -241,6 +255,8 @@ builder operator != (const int &a, const builder &b) {
 
 builder builder::operator [] (const builder &a) {
 	assert(builder_context::current_builder_context != nullptr);
+	if (builder_context::current_builder_context->bool_vector.size() > 0)
+		return builder::sentinel_builder;
 	
 	builder_context::current_builder_context->remove_node_from_sequence(block_expr);
 	builder_context::current_builder_context->remove_node_from_sequence(a.block_expr);
@@ -273,6 +289,8 @@ builder var::operator! () {
 }
 builder builder::operator = (const builder &a) {
 	assert(builder_context::current_builder_context != nullptr);
+	if (builder_context::current_builder_context->bool_vector.size() > 0)
+		return builder::sentinel_builder;
 	
 	builder_context::current_builder_context->remove_node_from_sequence(block_expr);
 	builder_context::current_builder_context->remove_node_from_sequence(a.block_expr);

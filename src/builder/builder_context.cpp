@@ -97,6 +97,7 @@ bool get_next_bool_from_context(builder_context *context, block::expr::Ptr expr)
 
 
 static void trim_ast_at_offset(block::stmt::Ptr ast, tracer::tag offset) {
+	return;
 	block::stmt_block::Ptr top_level_block = block::to<block::stmt_block>(ast);
 	std::vector<block::stmt::Ptr> &stmts = top_level_block->stmts;
 	std::vector<block::stmt::Ptr> new_stmts;
@@ -190,11 +191,12 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(ast_functio
 		
 		block::expr_stmt::Ptr last_stmt = block::to<block::expr_stmt>(current_block_stmt->stmts.back());
 		current_block_stmt->stmts.pop_back();
-		erase_tag(e.static_offset);
+		//erase_tag(e.static_offset);
 		
 		block::expr::Ptr cond_expr = last_stmt->expr1;	
 
 		builder_context true_context(memoized_tags);
+		true_context.visited_offsets = visited_offsets;
 		std::vector<bool> true_bv;
 		true_bv.push_back(true);
 		std::copy(b.begin(), b.end(), std::back_inserter(true_bv));	
@@ -202,6 +204,7 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(ast_functio
 
 
 		builder_context false_context(memoized_tags);
+		false_context.visited_offsets = visited_offsets;
 		std::vector<bool> false_bv;
 		false_bv.push_back(false);
 		std::copy(b.begin(), b.end(), std::back_inserter(false_bv));
@@ -214,6 +217,7 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(ast_functio
 
 		std::vector<block::stmt::Ptr> trimmed_stmts = trim_common_from_back(true_ast, false_ast);
 		
+		erase_tag(e.static_offset);
 		
 
 

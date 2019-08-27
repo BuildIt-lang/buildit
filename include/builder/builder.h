@@ -44,7 +44,7 @@ public:
 
 	template<typename... types>	
 	builder operator () (const types&... args);
-
+	static builder sentinel_builder;
 };
 builder operator && (const int &a, const builder &);
 builder operator || (const int &a, const builder &);
@@ -164,13 +164,15 @@ void pointer_var<base_type>::create_pointer_var(bool create_without_context) {
 	pointer_var->var_type = create_block_type();
 	block_var = pointer_var;
 	tracer::tag offset = get_offset_in_function(builder_context::current_builder_context->current_function);
+	pointer_var->static_offset = offset;
+	if (builder_context::current_builder_context->bool_vector.size() > 0)
+		return;
 	block::decl_stmt::Ptr decl_stmt = std::make_shared<block::decl_stmt>();
 	decl_stmt->static_offset = offset;
 	decl_stmt->decl_var = pointer_var;
 	decl_stmt->init_expr = nullptr;
 	block_decl_stmt = decl_stmt;
 	builder_context::current_builder_context->add_stmt_to_current_block(decl_stmt);
-	pointer_var->static_offset = offset;
 }	
 
 template <typename base_type>
@@ -236,13 +238,15 @@ void function_var<r_type, a_types...>::create_function_var(bool create_without_c
 	function_var->var_type = create_block_type();
 	block_var = function_var;
 	tracer::tag offset = get_offset_in_function(builder_context::current_builder_context->current_function);
+	function_var->static_offset = offset;
+	if (builder_context::current_builder_context->bool_vector.size() > 0)
+		return;
 	block::decl_stmt::Ptr decl_stmt = std::make_shared<block::decl_stmt>();
 	decl_stmt->static_offset = offset;
 	decl_stmt->decl_var = function_var;
 	decl_stmt->init_expr = nullptr;
 	block_decl_stmt = decl_stmt;
 	builder_context::current_builder_context->add_stmt_to_current_block(decl_stmt);
-	function_var->static_offset = offset;
 }	
 template <typename r_type, typename... a_types>
 function_var<r_type, a_types...>::function_var(bool create_without_context) {
@@ -277,6 +281,8 @@ std::vector <block::expr::Ptr> extract_call_arguments<> (void);
 template <typename ...arg_types>
 builder builder::operator () (const arg_types& ... args) {
 	assert(builder_context::current_builder_context != nullptr);
+	if (builder_context::current_builder_context->bool_vector.size() > 0)
+		return builder::sentinel_builder;
 	
 	builder_context::current_builder_context->remove_node_from_sequence(block_expr);
 	tracer::tag offset = get_offset_in_function(builder_context::current_builder_context->current_function);
