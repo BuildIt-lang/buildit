@@ -14,8 +14,16 @@ void set_call_point(ast_function_type _function) {
 	for (i = 0; i < backtrace_size; i++) {
 		int offset;
 		unsigned long long address;
+#ifdef __linux
 		if (sscanf(backtrace_functions[i], "%*[^+]+%x) [%llx]", &offset, &address) != 2)
 			continue;
+#elif __APPLE__
+		if (sscanf(backtrace_functions[i], "%*[^+]+ %i", &offset) != 1)
+			continue;
+		address = (unsigned long long)buffer[i];
+#else
+		#error Backtracer currently only supported for Linux and MacOS
+#endif
 		if (function == address - offset)
 			break;	
 	}
