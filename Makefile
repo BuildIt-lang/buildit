@@ -72,13 +72,19 @@ executables: $(SAMPLES)
 SORTED_SAMPLES=$(shell echo $(SAMPLES) | tr " " "\n" | sort -V | tr "\n" " ")
 
 
+TEST ?=
 run: SHELL:=/bin/bash
 run: $(SAMPLES)
-	@ for sample in $(SORTED_SAMPLES); do \
-		sample_name=$$(basename $$sample); \
-		diff $(SAMPLES_DIR)/outputs/$$sample_name <($$sample) || exit 1; \
-		echo $$sample_name: OK; \
-	done 
-	
+	@ if [ "$(TEST)" == "" ]; then \
+		for sample in $(SORTED_SAMPLES); do \
+			sample_name=$$(basename $$sample); \
+			diff $(SAMPLES_DIR)/outputs/$$sample_name <($$sample) || exit 1; \
+			echo $$sample_name: OK; \
+		done \
+	else \
+		diff $(SAMPLES_DIR)/outputs/$(TEST) <($(BUILD_DIR)/$(TEST)) || exit 1;	\
+		echo $(TEST): OK; \
+	fi
+
 clean:
 	- rm -rf build
