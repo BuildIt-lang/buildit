@@ -10,11 +10,11 @@ namespace block{
 class expr: public block {
 public:
 	typedef std::shared_ptr<expr> Ptr; 		
-	virtual void dump(std::ostream&, int);
-	virtual void accept(block_visitor* visitor) {
-		visitor->visit(self<expr>());
+	virtual void dump(std::ostream&, int) override;
+	virtual void accept(block_visitor* a) override {
+		a->visit(self<expr>());
 	}
-	virtual bool is_same(block::Ptr other);
+	virtual bool is_same(block::Ptr other) override;
 };
 template <typename T>
 bool unary_is_same (std::shared_ptr<T> first, block::Ptr other);
@@ -26,11 +26,11 @@ class unary_expr: public expr {
 public:
 	typedef std::shared_ptr<unary_expr> Ptr;
 	expr::Ptr expr1;
-	virtual void dump(std::ostream&, int);
-	virtual void accept(block_visitor* visitor) {
-		visitor->visit(self<unary_expr>());
+	virtual void dump(std::ostream&, int) override;
+	virtual void accept(block_visitor* a) override {
+		a->visit(self<unary_expr>());
 	}
-	virtual bool is_same(block::Ptr other) {
+	virtual bool is_same(block::Ptr other) override {
 		return unary_is_same(self<unary_expr>(), other);
 	}
 	
@@ -40,13 +40,13 @@ class binary_expr: public expr {
 public:
 	typedef std::shared_ptr<binary_expr> Ptr;
 	
-	virtual void dump(std::ostream&, int);
+	virtual void dump(std::ostream&, int) override;
 	expr::Ptr expr1;
 	expr::Ptr expr2;
-	virtual void accept(block_visitor* visitor) {
-		visitor->visit(self<binary_expr>());
+	virtual void accept(block_visitor* a) override {
+		a->visit(self<binary_expr>());
 	}
-	virtual bool is_same(block::Ptr other) {
+	virtual bool is_same(block::Ptr other) override {
 		return binary_is_same(self<binary_expr>(), other);
 	}
 
@@ -55,11 +55,11 @@ public:
 class not_expr: public unary_expr {
 public:
 	typedef std::shared_ptr<not_expr> Ptr;
-	virtual void dump(std::ostream&, int);
-	virtual void accept(block_visitor* visitor) {
-		visitor->visit(self<not_expr>());
+	virtual void dump(std::ostream&, int) override;
+	virtual void accept(block_visitor* a) override {
+		a->visit(self<not_expr>());
 	}
-	virtual bool is_same(block::Ptr other) {
+	virtual bool is_same(block::Ptr other) override {
 		return unary_is_same(self<not_expr>(), other);
 	}
 	
@@ -69,11 +69,11 @@ public:
 class and_expr: public binary_expr {
 public: 
 	typedef std::shared_ptr<and_expr> Ptr;	
-	virtual void dump(std::ostream&, int);
-	virtual void accept(block_visitor* visitor) {
-		visitor->visit(self<and_expr>());
+	virtual void dump(std::ostream&, int) override;
+	virtual void accept(block_visitor* a) override {
+		a->visit(self<and_expr>());
 	}
-	virtual bool is_same(block::Ptr other) {
+	virtual bool is_same(block::Ptr other) override {
 		return binary_is_same(self<and_expr>(), other);
 	}
 };
@@ -82,11 +82,11 @@ public:
 class or_expr: public binary_expr {
 public:
 	typedef std::shared_ptr<or_expr> Ptr;
-	virtual void dump(std::ostream&, int);
-	virtual void accept(block_visitor* visitor) {
-		visitor->visit(self<or_expr>());
+	virtual void dump(std::ostream&, int) override;
+	virtual void accept(block_visitor* a) override {
+		a->visit(self<or_expr>());
 	}
-	virtual bool is_same(block::Ptr other) {
+	virtual bool is_same(block::Ptr other) override {
 		return binary_is_same(self<or_expr>(), other);
 	}
 };
@@ -95,11 +95,11 @@ public:
 class plus_expr: public binary_expr {
 public: 
 	typedef std::shared_ptr<plus_expr> Ptr;
-	virtual void dump(std::ostream&, int);
-	virtual void accept(block_visitor* visitor) {
-		visitor->visit(self<plus_expr>());
+	virtual void dump(std::ostream&, int) override;
+	virtual void accept(block_visitor* a) override {
+		a->visit(self<plus_expr>());
 	}
-	virtual bool is_same(block::Ptr other) {
+	virtual bool is_same(block::Ptr other) override {
 		return binary_is_same(self<plus_expr>(), other);
 	}
 };
@@ -108,11 +108,11 @@ public:
 class minus_expr: public binary_expr {
 public:
 	typedef std::shared_ptr<minus_expr> Ptr;
-	virtual void dump(std::ostream&, int);
-	virtual void accept(block_visitor* visitor) {
-		visitor->visit(self<minus_expr>());
+	virtual void dump(std::ostream&, int) override;
+	virtual void accept(block_visitor* a) override {
+		a->visit(self<minus_expr>());
 	}
-	virtual bool is_same(block::Ptr other) {
+	virtual bool is_same(block::Ptr other) override {
 		return binary_is_same(self<minus_expr>(), other);
 	}
 };
@@ -121,11 +121,11 @@ public:
 class mul_expr: public binary_expr {
 public: 
 	typedef std::shared_ptr<mul_expr> Ptr;
-	virtual void dump(std::ostream&, int);
-	virtual void accept(block_visitor* visitor) {
-		visitor->visit(self<mul_expr>());
+	virtual void dump(std::ostream&, int) override;
+	virtual void accept(block_visitor* a) override {
+		a->visit(self<mul_expr>());
 	}
-	virtual bool is_same(block::Ptr other) {
+	virtual bool is_same(block::Ptr other) override {
 		return binary_is_same(self<mul_expr>(), other);
 	}
 };
@@ -134,55 +134,55 @@ public:
 class div_expr: public binary_expr {
 public: 
 	typedef std::shared_ptr<div_expr> Ptr;
-	virtual void dump(std::ostream&, int);
-	virtual void accept(block_visitor* visitor) {
-		visitor->visit(self<div_expr>());
+	virtual void dump(std::ostream&, int) override;
+	virtual void accept(block_visitor* a) override {
+		a->visit(self<div_expr>());
 	}
-	virtual bool is_same(block::Ptr other) {
+	virtual bool is_same(block::Ptr other) override {
 		return binary_is_same(self<div_expr>(), other);
 	}
 };
 class lt_expr: public binary_expr {
 public:
 	typedef std::shared_ptr<lt_expr> Ptr;
-	virtual void dump(std::ostream&, int);
-	virtual void accept(block_visitor* visitor) {
-		visitor->visit(self<lt_expr>());
+	virtual void dump(std::ostream&, int) override;
+	virtual void accept(block_visitor* a) override {
+		a->visit(self<lt_expr>());
 	}
-	virtual bool is_same(block::Ptr other) {
+	virtual bool is_same(block::Ptr other) override {
 		return binary_is_same(self<lt_expr>(), other);
 	}
 };
 class gt_expr: public binary_expr {
 public:
 	typedef std::shared_ptr<gt_expr> Ptr;
-	virtual void dump(std::ostream&, int);
-	virtual void accept(block_visitor* visitor) {
-		visitor->visit(self<gt_expr>());
+	virtual void dump(std::ostream&, int) override;
+	virtual void accept(block_visitor* a) override {
+		a->visit(self<gt_expr>());
 	}
-	virtual bool is_same(block::Ptr other) {
+	virtual bool is_same(block::Ptr other) override {
 		return binary_is_same(self<gt_expr>(), other);
 	}
 };
 class lte_expr: public binary_expr {
 public:
 	typedef std::shared_ptr<lte_expr> Ptr;
-	virtual void dump(std::ostream&, int);
-	virtual void accept(block_visitor* visitor) {
-		visitor->visit(self<lte_expr>());
+	virtual void dump(std::ostream&, int) override;
+	virtual void accept(block_visitor* a) override {
+		a->visit(self<lte_expr>());
 	}
-	virtual bool is_same(block::Ptr other) {
+	virtual bool is_same(block::Ptr other) override {
 		return binary_is_same(self<lte_expr>(), other);
 	}
 };
 class gte_expr: public binary_expr {
 public:
 	typedef std::shared_ptr<gte_expr> Ptr;
-	virtual void dump(std::ostream&, int);
-	virtual void accept(block_visitor* visitor) {
-		visitor->visit(self<gte_expr>());
+	virtual void dump(std::ostream&, int) override;
+	virtual void accept(block_visitor* a) override {
+		a->visit(self<gte_expr>());
 	}
-	virtual bool is_same(block::Ptr other) {
+	virtual bool is_same(block::Ptr other) override {
 		return binary_is_same(self<gte_expr>(), other);
 	}
 };
@@ -190,11 +190,11 @@ public:
 class equals_expr: public binary_expr {
 public:
 	typedef std::shared_ptr<equals_expr> Ptr;
-	virtual void dump(std::ostream&, int);
-	virtual void accept(block_visitor* visitor) {
-		visitor->visit(self<equals_expr>());
+	virtual void dump(std::ostream&, int) override;
+	virtual void accept(block_visitor* a) override {
+		a->visit(self<equals_expr>());
 	}
-	virtual bool is_same(block::Ptr other) {
+	virtual bool is_same(block::Ptr other) override {
 		return binary_is_same(self<equals_expr>(), other);
 	}
 };
@@ -202,11 +202,11 @@ public:
 class ne_expr: public binary_expr {
 public:
 	typedef std::shared_ptr<ne_expr> Ptr;
-	virtual void dump(std::ostream&, int);
-	virtual void accept(block_visitor* visitor) {
-		visitor->visit(self<ne_expr>());
+	virtual void dump(std::ostream&, int) override;
+	virtual void accept(block_visitor* a) override {
+		a->visit(self<ne_expr>());
 	}
-	virtual bool is_same(block::Ptr other) {
+	virtual bool is_same(block::Ptr other) override {
 		return binary_is_same(self<ne_expr>(), other);
 	}
 };
@@ -214,13 +214,13 @@ public:
 class var_expr: public expr {
 public:
 	typedef std::shared_ptr<var_expr> Ptr;
-	virtual void dump(std::ostream&, int);
-	virtual void accept(block_visitor* visitor) {
-		visitor->visit(self<var_expr>());
+	virtual void dump(std::ostream&, int) override;
+	virtual void accept(block_visitor* a) override {
+		a->visit(self<var_expr>());
 	}
 
 	var::Ptr var1;	
-	virtual bool is_same(block::Ptr other) {
+	virtual bool is_same(block::Ptr other) override {
 		if (static_offset != other->static_offset)
 			return false;
 		if (!isa<var_expr>(other))
@@ -235,12 +235,12 @@ public:
 class const_expr: public expr {
 public:
 	typedef std::shared_ptr<const_expr> Ptr;
-	virtual void dump(std::ostream&, int);
-	virtual void accept(block_visitor* visitor) {
-		visitor->visit(self<const_expr>());
+	virtual void dump(std::ostream&, int) override;
+	virtual void accept(block_visitor* a) override {
+		a->visit(self<const_expr>());
 	}
 
-	virtual bool is_same(block::Ptr other) {
+	virtual bool is_same(block::Ptr other) override {
 		if (static_offset != other->static_offset)
 			return false;
 		if (!isa<const_expr>(other))
@@ -252,14 +252,14 @@ public:
 class int_const: public const_expr {
 public:
 	typedef std::shared_ptr<int_const> Ptr;
-	virtual void dump(std::ostream&, int);
-	virtual void accept(block_visitor* visitor) {
-		visitor->visit(self<int_const>());
+	virtual void dump(std::ostream&, int) override;
+	virtual void accept(block_visitor* a) override {
+		a->visit(self<int_const>());
 	}
 	
 	long long value;
 		
-	virtual bool is_same(block::Ptr other) {
+	virtual bool is_same(block::Ptr other) override {
 		if (static_offset != other->static_offset)
 			return false;
 		if (!isa<int_const>(other))
@@ -274,15 +274,15 @@ public:
 class assign_expr: public expr {
 public:
 	typedef std::shared_ptr<assign_expr> Ptr;
-	virtual void dump(std::ostream&, int);
-	virtual void accept(block_visitor* visitor) {
-		visitor->visit(self<assign_expr>());
+	virtual void dump(std::ostream&, int) override;
+	virtual void accept(block_visitor* a) override {
+		a->visit(self<assign_expr>());
 	}
 	
 	expr::Ptr var1;	
 	expr::Ptr expr1;
 	
-	virtual bool is_same(block::Ptr other) {
+	virtual bool is_same(block::Ptr other) override {
 		if (static_offset != other->static_offset) 
 			return false;
 		if (!isa<assign_expr>(other))
@@ -299,14 +299,14 @@ public:
 class sq_bkt_expr: public expr {
 public:
 	typedef std::shared_ptr<sq_bkt_expr> Ptr;
-	virtual void dump(std::ostream&, int);
-	virtual void accept(block_visitor* visitor) {
-		visitor->visit(self<sq_bkt_expr>());
+	virtual void dump(std::ostream&, int) override;
+	virtual void accept(block_visitor* a) override {
+		a->visit(self<sq_bkt_expr>());
 	}
 	expr::Ptr var_expr;
 	expr::Ptr index;
 	
-	virtual bool is_same(block::Ptr other) {
+	virtual bool is_same(block::Ptr other) override {
 		if (static_offset != other->static_offset) 
 			return false;
 		if (!isa<sq_bkt_expr>(other))
@@ -322,15 +322,15 @@ public:
 class function_call_expr: public expr {
 public:
 	typedef std::shared_ptr<function_call_expr> Ptr;
-	virtual void dump(std::ostream&, int);
-	virtual void accept(block_visitor* visitor) {
-		visitor->visit(self<function_call_expr>());
+	virtual void dump(std::ostream&, int) override;
+	virtual void accept(block_visitor* a) override {
+		a->visit(self<function_call_expr>());
 	}	
 	
 	expr::Ptr expr1;
 	std::vector<expr::Ptr> args;
 	
-	virtual bool is_same(block::Ptr other) {
+	virtual bool is_same(block::Ptr other) override {
 		if (static_offset != other->static_offset) 
 			return false;
 		if (!isa<function_call_expr>(other))
