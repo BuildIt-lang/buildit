@@ -1,7 +1,8 @@
-# mirror-cpp [![Build Status](https://api.travis-ci.org/AjayBrahmakshatriya/mirror-cpp.svg?branch=master)](https://travis-ci.org/AjayBrahmakshatriya/mirror-cpp)
-Mirror-CPP is a library for bringing reflection into C++ by overloading the basic operators. Mirror-CPP also extracts the control flow in the function by repeated execution and exploration of all branches. 
+# BuildIt [![Build Status](https://api.travis-ci.org/AjayBrahmakshatriya/mirror-cpp.svg?branch=master)](https://travis-ci.org/AjayBrahmakshatriya/mirror-cpp)
 
-Mirror-CPP does not require any special compiler support and provides a library for embedding any DSL in C++. 
+BuildIt is a type based library framework for multi-stage impoerative programming. BuildIt supports programmatically generating AST for an embedded language in C++. BuildIt extracts expressions and statements by overloading the basic operators. BuildIt also extracts the control flow by repeated execution and exploration of all branches. BuildIt uses static tags to detect loops and unroll static loops. 
+
+BuildIt is a pure library framework and does not require and special compiler support. 
 
 To build the library, clone the repository, navigate to the top-level directory and run - 
 
@@ -22,4 +23,3 @@ make run
 ```
 
 The make system will report the first failing test case if any. 
-
