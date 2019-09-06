@@ -1,6 +1,6 @@
 BASE_DIR=$(shell pwd)
 SRC_DIR=$(BASE_DIR)/src
-BUILD_DIR=$(BASE_DIR)/build
+BUILD_DIR?=$(BASE_DIR)/build
 INCLUDE_DIR=$(BASE_DIR)/include
 SAMPLES_DIR=$(BASE_DIR)/samples
 
@@ -87,4 +87,4 @@ run: $(SAMPLES)
 	fi
 
 clean:
-	- rm -rf build
+	- rm -rf $(BUILD_DIR)
