@@ -13,6 +13,7 @@ void foo(void) {
 	a && b;
 	b + 1;
 	1 + b;
+	a % 2;
 }
 int main(int argc, char* argv[]) {
 	builder::builder_context context;

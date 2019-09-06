@@ -211,6 +211,18 @@ public:
 	}
 };
 
+
+class mod_expr: public binary_expr {
+public:
+	typedef std::shared_ptr<mod_expr> Ptr;
+	virtual void dump(std::ostream&, int) override;
+	virtual void accept(block_visitor* a) override {
+		a->visit(self<mod_expr>());
+	}
+	virtual bool is_same(block::Ptr other) override {
+		return binary_is_same(self<mod_expr>(), other);
+	}
+};
 class var_expr: public expr {
 public:
 	typedef std::shared_ptr<var_expr> Ptr;

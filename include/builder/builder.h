@@ -32,6 +32,7 @@ public:
 	builder operator >= (const builder &);
 	builder operator == (const builder &);
 	builder operator != (const builder &);
+	builder operator % (const builder &);
 	
 	builder operator [] (const builder &);
 	
@@ -82,6 +83,7 @@ public:
 	builder operator >= (const builder &);
 	builder operator == (const builder &);
 	builder operator != (const builder &);
+	builder operator % (const builder &);
 	
 	builder operator [] (const builder &);
 	

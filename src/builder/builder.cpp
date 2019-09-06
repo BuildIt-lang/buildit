@@ -253,6 +253,16 @@ builder operator != (const int &a, const builder &b) {
 }
 
 
+builder builder::operator % (const builder &a) {
+	return builder_binary_op<block::mod_expr>(a);
+}
+builder var::operator % (const builder &a) {
+	return this->operator builder() % a;
+}
+builder operator % (const int &a, const builder &b) {
+	return (builder)a % b;
+}
+
 builder builder::operator [] (const builder &a) {
 	assert(builder_context::current_builder_context != nullptr);
 	if (builder_context::current_builder_context->bool_vector.size() > 0)

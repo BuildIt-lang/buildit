@@ -27,6 +27,7 @@ public:
 	virtual void visit(gte_expr::Ptr);
 	virtual void visit(equals_expr::Ptr);
 	virtual void visit(ne_expr::Ptr);
+	virtual void visit(mod_expr::Ptr);
 	virtual void visit(var_expr::Ptr);
 	virtual void visit(int_const::Ptr);
 	virtual void visit(assign_expr::Ptr);

@@ -20,6 +20,7 @@ class lte_expr;
 class gte_expr;
 class equals_expr;
 class ne_expr;
+class mod_expr;
 class var_expr;
 class const_expr;
 class int_const;
@@ -63,6 +64,7 @@ public:
 	virtual void visit (std::shared_ptr<gte_expr>);
 	virtual void visit (std::shared_ptr<equals_expr>);
 	virtual void visit (std::shared_ptr<ne_expr>);
+	virtual void visit (std::shared_ptr<mod_expr>);
 	virtual void visit (std::shared_ptr<var_expr>);
 	virtual void visit (std::shared_ptr<const_expr>);
 	virtual void visit (std::shared_ptr<int_const>);

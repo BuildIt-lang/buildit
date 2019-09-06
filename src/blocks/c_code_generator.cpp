@@ -65,6 +65,9 @@ void c_code_generator::visit(equals_expr::Ptr a) {
 void c_code_generator::visit(ne_expr::Ptr a) {
 	emit_binary_expr(a, "!=");
 }
+void c_code_generator::visit(mod_expr::Ptr a) {
+	emit_binary_expr(a, "%");
+}
 void c_code_generator::visit(var_expr::Ptr a) {
 	oss << a->var1->var_name;
 }

@@ -136,6 +136,12 @@ void ne_expr::dump(std::ostream &oss, int indent) {
 	expr1->dump(oss, indent+1);
 	expr2->dump(oss, indent+1);
 }
+void mod_expr::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "MOD_EXPR" << std::endl;	
+	expr1->dump(oss, indent+1);
+	expr2->dump(oss, indent+1);
+}
 void assign_expr::dump(std::ostream &oss, int indent) {
 	printer::indent(oss, indent);
 	oss << "ASSIGN_EXPR" << std::endl;
