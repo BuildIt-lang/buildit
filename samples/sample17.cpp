@@ -2,6 +2,7 @@
 #include "builder/builder.h"
 #include <iostream>
 #include "blocks/c_code_generator.h"
+#include "builder/static_var.h"
 
 using int_var = builder::int_var;
 template <typename r_type, typename... a_types>
@@ -57,13 +58,9 @@ void interpret_bf(void) {
 		} else if (bf_program[pc] == '<') {
 			pointer = pointer - 1;
 		} else if (bf_program[pc] == '+') {
-			tape[pointer] = tape[pointer] + 1;
-			if (tape[pointer] == 256)
-				tape[pointer] = 0;
+			tape[pointer] = (tape[pointer] + 1) % 256;
 		} else if (bf_program[pc] == '-') {
-			if (tape[pointer] == 0)
-				tape[pointer] = 256;
-			tape[pointer] = tape[pointer] - 1;
+			tape[pointer] = (tape[pointer] - 1) % 256;
 		} else if (bf_program[pc] == '.') {
 			print_value(tape[pointer]);
 		} else if (bf_program[pc] == ',') {

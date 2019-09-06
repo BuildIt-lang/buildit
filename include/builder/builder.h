@@ -5,7 +5,6 @@
 #include <string>
 #include "blocks/var.h"
 #include "builder/builder_context.h"
-#include "builder/static_var.h"
 #include <algorithm>
 
 namespace builder {

@@ -2,6 +2,8 @@
 #include "builder/builder.h"
 #include <iostream>
 #include "blocks/c_code_generator.h"
+#include "builder/static_var.h"
+
 using int_var = builder::int_var;
 template <typename T>
 using static_var = builder::static_var<T>;

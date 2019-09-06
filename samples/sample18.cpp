@@ -4,30 +4,26 @@
 #include "blocks/c_code_generator.h"
 #include "builder/static_var.h"
 
-
 using int_var = builder::int_var;
-template <typename T>
-using static_var = builder::static_var<T>;
+using void_var = builder::void_var;
+using builder::static_var;
 
 
-
-// Static loop combined with dynamic loop
-// Outer loop should be unrolled and inner should be a loop
+// Function with unrolled branches
 void foo(void) {
-
-	int_var a = 0;
-	for (static_var<int> x = 1; x <= 2; x++) {
-		for (int_var y = 0; y < x * 100; y = y + 1) {
-			a = a * 1;	
+	int_var a;
+	for(static_var<int> i = 0; i < 128; i++) {
+		if (a) {
+			a = a + i;
+		} else {
+			a = a - i;
 		}
 	}
-	a = a - 1;
 }
 int main(int argc, char* argv[]) {
-	builder::builder_context context;
+	builder::builder_context context;	
 	auto ast = context.extract_ast_from_function(foo);	
-	ast->dump(std::cout, 0);
+	ast->dump(std::cout, 0);	
 	block::c_code_generator::generate_code(ast, std::cout, 0);	
 	return 0;
 }
-

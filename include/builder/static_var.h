@@ -1,6 +1,7 @@
 #ifndef STATIC_VAR_H
 #define STATIC_VAR_H
 
+#include "builder/builder.h"
 #include "builder/builder_context.h"
 
 #define STRINGIFY(x) #x
@@ -36,6 +37,9 @@ public:
 		assert(builder_context::current_builder_context->static_var_tuples.size() > 0);
 		assert(builder_context::current_builder_context->static_var_tuples.back().ptr == (unsigned char*)&val);
 		builder_context::current_builder_context->static_var_tuples.pop_back();
+	}
+	operator builder() {
+		return (builder)val;
 	}
 };
 
