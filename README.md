@@ -1,4 +1,4 @@
-# BuildIt [![Build Status](https://api.travis-ci.org/AjayBrahmakshatriya/mirror-cpp.svg?branch=master)](https://travis-ci.org/AjayBrahmakshatriya/mirror-cpp)
+# BuildIt [![Build Status](https://api.travis-ci.org/AjayBrahmakshatriya/buildit.svg?branch=master)](https://travis-ci.org/AjayBrahmakshatriya/buidit)
 
 BuildIt is a type based library framework for multi-stage impoerative programming. BuildIt supports programmatically generating AST for an embedded language in C++. BuildIt extracts expressions and statements by overloading the basic operators. BuildIt also extracts the control flow by repeated execution and exploration of all branches. BuildIt uses static tags to detect loops and unroll static loops. 
 
