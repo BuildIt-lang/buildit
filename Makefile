@@ -10,6 +10,7 @@ INCLUDES=$(wildcard $(INCLUDE_DIR)/*.h) $(wildcard $(INCLUDE_DIR)/*/*.h)
 $(shell mkdir -p $(BUILD_DIR))
 $(shell mkdir -p $(BUILD_DIR)/blocks)
 $(shell mkdir -p $(BUILD_DIR)/builder)
+$(shell mkdir -p $(BUILD_DIR)/builder_asm)
 $(shell mkdir -p $(BUILD_DIR)/util)
 $(shell mkdir -p $(BUILD_DIR)/samples)
 
@@ -29,25 +30,32 @@ endif
 
 
 BUILDER_SRC=$(wildcard $(SRC_DIR)/builder/*.cpp)
+BUILDER_ASM_SRC=$(wildcard $(SRC_DIR)/builder/*.S)
+
 BLOCKS_SRC=$(wildcard $(SRC_DIR)/blocks/*.cpp)
 UTIL_SRC=$(wildcard $(SRC_DIR)/util/*.cpp)
 
 BUILDER_OBJS=$(subst $(SRC_DIR),$(BUILD_DIR),$(BUILDER_SRC:.cpp=.o))
+BUILDER_ASM_OBJS=$(subst $(SRC_DIR)/builder,$(BUILD_DIR)/builder_asm,$(BUILDER_ASM_SRC:.S=.o))
+
 BLOCKS_OBJS=$(subst $(SRC_DIR),$(BUILD_DIR),$(BLOCKS_SRC:.cpp=.o))
 UTIL_OBJS=$(subst $(SRC_DIR),$(BUILD_DIR),$(UTIL_SRC:.cpp=.o))
 
-LIBRARY_OBJS=$(BUILDER_OBJS) $(BLOCKS_OBJS) $(UTIL_OBJS)
+LIBRARY_OBJS=$(BUILDER_OBJS) $(BUILDER_ASM_OBJS) $(BLOCKS_OBJS) $(UTIL_OBJS) 
 LIBRARY=$(BUILD_DIR)/builder_library.a
 
 all: executables
 
 .PRECIOUS: $(BUILD_DIR)/builder/%.o 
+.PRECIOUS: $(BUILD_DIR)/builder_asm/%.o 
 .PRECIOUS: $(BUILD_DIR)/blocks/%.o 
 .PRECIOUS: $(BUILD_DIR)/samples/%.o 
 .PRECIOUS: $(BUILD_DIR)/util/%.o
 
 $(BUILD_DIR)/builder/%.o: $(SRC_DIR)/builder/%.cpp $(INCLUDES)
 	$(CXX) $(CFLAGS) $< -o $@ -I$(INCLUDE_DIR) -c
+$(BUILD_DIR)/builder_asm/%.o: $(SRC_DIR)/builder/%.S 
+	$(CXX) $(CFLAGS) $< -o $@ -c 
 $(BUILD_DIR)/blocks/%.o: $(SRC_DIR)/blocks/%.cpp $(INCLUDES)
 	$(CXX) $(CFLAGS) $< -o $@ -I$(INCLUDE_DIR) -c
 $(BUILD_DIR)/util/%.o: $(SRC_DIR)/util/%.cpp $(INCLUDES)

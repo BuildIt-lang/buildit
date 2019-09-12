@@ -141,6 +141,10 @@ static std::vector<block::stmt::Ptr> trim_common_from_back(block::stmt::Ptr ast1
 	std::reverse(trimmed_stmts.begin(), trimmed_stmts.end());
 	return trimmed_stmts;
 }
+block::stmt::Ptr builder_context::extract_ast_from_function(std::function <void (void)> lambda) {
+	internal_stored_lambda = lambda;
+	return extract_ast_from_function(lambda_wrapper);
+}
 block::stmt::Ptr builder_context::extract_ast_from_function(ast_function_type function) {
 	std::vector<bool> b;
 	block::stmt::Ptr ast = extract_ast_from_function_internal(function, b);
@@ -197,6 +201,7 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(ast_functio
 
 		builder_context true_context(memoized_tags);
 		true_context.visited_offsets = visited_offsets;
+		true_context.internal_stored_lambda = internal_stored_lambda;
 		std::vector<bool> true_bv;
 		true_bv.push_back(true);
 		std::copy(b.begin(), b.end(), std::back_inserter(true_bv));	
@@ -205,6 +210,7 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(ast_functio
 
 		builder_context false_context(memoized_tags);
 		false_context.visited_offsets = visited_offsets;
+		false_context.internal_stored_lambda = internal_stored_lambda;	
 		std::vector<bool> false_bv;
 		false_bv.push_back(false);
 		std::copy(b.begin(), b.end(), std::back_inserter(false_bv));
@@ -258,6 +264,10 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(ast_functio
 
 	ast = current_block_stmt = nullptr;
 	return ret_ast;	
+}
+
+void lambda_wrapper_impl(void) {
+	builder_context::current_builder_context->internal_stored_lambda();	
 }
 
 }

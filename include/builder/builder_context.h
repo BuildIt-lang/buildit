@@ -6,6 +6,7 @@
 #include "blocks/stmt.h"
 #include <unordered_set>
 #include <unordered_map>
+#include <functional>
 
 
 namespace builder {
@@ -43,6 +44,10 @@ public:
 	std::unordered_map<std::string, block::stmt_block::Ptr> map;	
 	
 };
+extern "C" {
+void lambda_wrapper(void);
+void lambda_wrapper_impl(void);
+}
 class builder_context {
 public:
 
@@ -53,6 +58,8 @@ public:
 	block::stmt::Ptr ast;
 	block::stmt_block::Ptr current_block_stmt;	
 	ast_function_type current_function;
+
+	
 	std::vector<bool> bool_vector;
 	std::unordered_set<std::string> visited_offsets;
 
@@ -80,6 +87,7 @@ public:
 
 
 	block::stmt::Ptr extract_ast(void);
+	block::stmt::Ptr extract_ast_from_function(std::function<void (void)>);
 	block::stmt::Ptr extract_ast_from_function(ast_function_type);
 	block::stmt::Ptr extract_ast_from_function_internal(ast_function_type, std::vector<bool> bl = std::vector<bool>());
 	
@@ -100,6 +108,8 @@ public:
 	}	
 	~builder_context();
 private:
+	std::function<void (void)> internal_stored_lambda;
+
 	static builder_context *current_builder_context;
 	friend builder;
 	friend var;
@@ -117,6 +127,7 @@ private:
 
 	friend void annotate(std::string);
 	friend tracer::tag get_offset_in_function(ast_function_type _function);
+	friend void lambda_wrapper_impl(void);
 };
 bool get_next_bool_from_context(builder_context *context, block::expr::Ptr);
 tracer::tag get_offset_in_function(builder_context::ast_function_type _function);
