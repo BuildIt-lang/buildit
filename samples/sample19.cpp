@@ -9,7 +9,7 @@ using int_var = builder::int_var;
 // A simple straight line code that uses lambda instead of function
 int main(int argc, char* argv[]) {
 	builder::builder_context context;
-	auto ast = context.extract_ast_from_function([=] (void) {	
+	auto ast = context.extract_ast_from_lambda([=] (void) {	
 		int_var a;
 		int_var b;
 		int_var c;

@@ -141,7 +141,7 @@ static std::vector<block::stmt::Ptr> trim_common_from_back(block::stmt::Ptr ast1
 	std::reverse(trimmed_stmts.begin(), trimmed_stmts.end());
 	return trimmed_stmts;
 }
-block::stmt::Ptr builder_context::extract_ast_from_function(std::function <void (void)> lambda) {
+block::stmt::Ptr builder_context::extract_ast_from_lambda(std::function <void (void)> lambda) {
 	internal_stored_lambda = lambda;
 	return extract_ast_from_function(lambda_wrapper);
 }

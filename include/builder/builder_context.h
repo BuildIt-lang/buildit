@@ -87,7 +87,7 @@ public:
 
 
 	block::stmt::Ptr extract_ast(void);
-	block::stmt::Ptr extract_ast_from_function(std::function<void (void)>);
+	block::stmt::Ptr extract_ast_from_lambda(std::function<void (void)>);
 	block::stmt::Ptr extract_ast_from_function(ast_function_type);
 	block::stmt::Ptr extract_ast_from_function_internal(ast_function_type, std::vector<bool> bl = std::vector<bool>());
 	
