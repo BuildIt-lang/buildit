@@ -4,14 +4,13 @@
 #include "blocks/c_code_generator.h"
 #include "builder/static_var.h"
 
-using int_var = builder::int_var;
-using void_var = builder::void_var;
 using builder::static_var;
+using builder::dyn_var;
 
 
 // Function with unrolled branches
 void foo(void) {
-	int_var a;
+	dyn_var<int> a;
 	for(static_var<int> i = 0; i < 128; i++) {
 		if (a) {
 			a = a + i;

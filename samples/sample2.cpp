@@ -2,13 +2,13 @@
 #include "builder/builder.h"
 #include <iostream>
 #include "blocks/c_code_generator.h"
-using int_var = builder::int_var;
+using builder::dyn_var;
 
 // A simple if condition with two stmts
 void foo(void) {
-	int_var a;
-	int_var b;
-	int_var c;
+	dyn_var<int> a;
+	dyn_var<int> b;
+	dyn_var<int> c;
 
 	if (c < 10) {
 		a && b;

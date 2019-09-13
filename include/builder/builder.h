@@ -95,7 +95,6 @@ public:
 		return (operator builder()) (args...);
 	}
 
-
 	builder operator = (const var& a) {
 		return operator builder() = a;
 	}
@@ -103,156 +102,130 @@ public:
 	virtual ~var() = default;
 };
 
-
-class int_var: public var {
+template <typename T>
+class type_extractor {
 public:
-	using var::operator = ; 
-	static block::type::Ptr create_block_type(void) {
+	static block::type::Ptr extract_type(void);
+};
+
+template <>
+class type_extractor<int> {
+public:
+	static block::type::Ptr extract_type(void) {
 		block::scalar_type::Ptr type = std::make_shared<block::scalar_type>();
 		type->scalar_type_id = block::scalar_type::INT_TYPE;
 		return type;
 	}
-	void create_int_var(bool create_without_context = false);
-	int_var(bool create_without_context = false);
-	int_var(const int_var&);
-	int_var(const builder&);
-	int_var(const int&);
-	builder operator = (const int_var& a) {
+};
+
+template <typename T>
+class type_extractor<T*> {
+public:
+	static block::type::Ptr extract_type(void) {
+		block::pointer_type::Ptr type = std::make_shared<block::pointer_type>();
+		type->pointee_type = type_extractor<T>::extract_type();
+		return type;
+	}
+};
+template <>
+class type_extractor<void> {
+public:
+	static block::type::Ptr extract_type(void) {
+		block::scalar_type::Ptr type = std::make_shared<block::scalar_type>();
+		type->scalar_type_id = block::scalar_type::VOID_TYPE;
+		return type;	
+	}
+};
+
+template <typename... args>
+std::vector<block::type::Ptr> extract_type_vector_dyn(void);
+
+template <typename T, typename... args> 
+std::vector<block::type::Ptr> extract_type_vector_helper_dyn(void) {
+	std::vector<block::type::Ptr> rest = extract_type_vector_dyn<args...>();
+	rest.push_back(type_extractor<T>::extract_type());
+	return rest;
+}
+
+template <typename... args>
+std::vector<block::type::Ptr> extract_type_vector_dyn(void) {
+	return extract_type_vector_helper_dyn<args...>();
+}
+
+template <>
+std::vector<block::type::Ptr> extract_type_vector_dyn<> (void);
+
+template <typename r_type, typename... a_types>
+class type_extractor<r_type (a_types...)> {
+public:
+	static block::type::Ptr extract_type(void) {
+		block::function_type::Ptr type = std::make_shared<block::function_type>();
+		type->return_type = type_extractor<r_type>::extract_type();
+		type->arg_types = extract_type_vector_dyn<a_types...>();
+		std::reverse(type->arg_types.begin(), type->arg_types.end());
+		return type;	
+	}
+};
+
+template <typename T>
+class dyn_var: public var{
+public:
+	using var::operator = ; 
+	static block::type::Ptr create_block_type(void) {
+		return type_extractor<T>::extract_type();	
+	}	
+	void create_dyn_var(bool create_without_context = false) {
+		if (create_without_context) {
+			block::var::Ptr dyn_var = std::make_shared<block::var>();	
+			dyn_var->var_type = create_block_type();
+			block_var = dyn_var;
+			return;
+		}
+		assert(builder_context::current_builder_context != nullptr);
+		assert(builder_context::current_builder_context->current_block_stmt != nullptr);
+		builder_context::current_builder_context->commit_uncommitted();
+		block::var::Ptr dyn_var = std::make_shared<block::var>();	
+		dyn_var->var_type = create_block_type();
+		block_var = dyn_var;
+		tracer::tag offset = get_offset_in_function(builder_context::current_builder_context->current_function);
+		dyn_var->static_offset = offset;
+		block_decl_stmt = nullptr;
+		if (builder_context::current_builder_context->bool_vector.size() > 0)
+			return;
+		block::decl_stmt::Ptr decl_stmt = std::make_shared<block::decl_stmt>();
+		decl_stmt->static_offset = offset;
+		decl_stmt->decl_var = dyn_var;
+		decl_stmt->init_expr = nullptr;
+		block_decl_stmt = decl_stmt;
+		builder_context::current_builder_context->add_stmt_to_current_block(decl_stmt);
+	}
+	dyn_var(bool create_without_context=false) {
+		create_dyn_var(create_without_context);
+	}		
+	dyn_var(const dyn_var<T>& a): dyn_var<T>((builder)a) {
+	}
+	template <typename TO>
+	dyn_var(const dyn_var<TO>& a): dyn_var<TO>((builder)a) {
+	}
+	dyn_var(const builder& a) {
+		builder_context::current_builder_context->remove_node_from_sequence(a.block_expr);
+		create_dyn_var();
+		if (builder_context::current_builder_context->bool_vector.size() > 0)
+			return;
+		block_decl_stmt->init_expr = a.block_expr;	
+	}
+	dyn_var(const int& a): dyn_var((builder)a) {
+	}
+	virtual ~dyn_var() = default;
+
+	template <typename TO>
+	builder operator = (const dyn_var<TO>& a) {
 		return operator builder() = a;
 	}
 	builder operator = (const int &a) {
 		return operator = ((builder)a);
 	}
-	virtual ~int_var() = default;
 };
-class void_var: public var {
-public:
-	static block::type::Ptr create_block_type(void) {
-		block::scalar_type::Ptr type = std::make_shared<block::scalar_type>();
-		type->scalar_type_id = block::scalar_type::VOID_TYPE;
-		return type;	
-	}
-private:
-	void_var();
-};
-template <typename base_type> 
-class pointer_var: public var {
-public:
-	using var::operator =;
-	static block::type::Ptr create_block_type(void) {
-		block::pointer_type::Ptr type = std::make_shared<block::pointer_type>();
-		type->pointee_type = base_type::create_block_type();
-		return type;
-	}
-	void create_pointer_var(bool create_without_context = false);
-	pointer_var(bool create_without_context = false);
-	pointer_var(const pointer_var&);
-	pointer_var(const builder&);	
-	virtual ~pointer_var() = default;
-};
-template <typename base_type>
-void pointer_var<base_type>::create_pointer_var(bool create_without_context) {
-	if (create_without_context) {
-		block::var::Ptr pointer_var = std::make_shared<block::var>();	
-		pointer_var->var_type = create_block_type();
-		block_var = pointer_var;
-		return;
-	}
-	assert(builder_context::current_builder_context != nullptr);
-	assert(builder_context::current_builder_context->current_block_stmt != nullptr);
-	builder_context::current_builder_context->commit_uncommitted();
-	block::var::Ptr pointer_var = std::make_shared<block::var>();	
-	pointer_var->var_type = create_block_type();
-	block_var = pointer_var;
-	tracer::tag offset = get_offset_in_function(builder_context::current_builder_context->current_function);
-	pointer_var->static_offset = offset;
-	if (builder_context::current_builder_context->bool_vector.size() > 0)
-		return;
-	block::decl_stmt::Ptr decl_stmt = std::make_shared<block::decl_stmt>();
-	decl_stmt->static_offset = offset;
-	decl_stmt->decl_var = pointer_var;
-	decl_stmt->init_expr = nullptr;
-	block_decl_stmt = decl_stmt;
-	builder_context::current_builder_context->add_stmt_to_current_block(decl_stmt);
-}	
-
-template <typename base_type>
-pointer_var<base_type>::pointer_var(bool create_without_context) {
-	create_pointer_var(create_without_context);
-}		
-template <typename base_type>
-pointer_var<base_type>::pointer_var(const pointer_var<base_type>& a): pointer_var<base_type>((builder)a) {
-}
-template <typename base_type>
-pointer_var<base_type>::pointer_var(const builder& a) {
-	builder_context::current_builder_context->remove_node_from_sequence(a.block_expr);
-	create_pointer_var();
-	block_decl_stmt->init_expr = a.block_expr;	
-}
-
-template <typename... args>
-std::vector<block::type::Ptr> extract_type_vector (void);
-
-template <typename T, typename... args> 
-std::vector<block::type::Ptr> extract_type_vector_helper (void) {
-	std::vector<block::type::Ptr> rest = extract_type_vector<args...>();
-	rest.push_back(T::create_block_type());
-	return rest;
-}
-
-template <typename... args>
-std::vector<block::type::Ptr> extract_type_vector (void) {
-	return extract_type_vector_helper<args...>();
-}
-
-template <>
-std::vector<block::type::Ptr> extract_type_vector<> (void);
-
-
-template <typename r_type, typename... a_types> 
-class function_var: public var {
-public:
-	using var::operator =;
-	static block::type::Ptr create_block_type(void) {
-		block::function_type::Ptr type = std::make_shared<block::function_type>();
-		type->return_type = r_type::create_block_type();	
-		type->arg_types = extract_type_vector<a_types...>();
-		std::reverse(type->arg_types.begin(), type->arg_types.end());
-		return type;
-	}	
-	void create_function_var(bool create_without_context = false);
-	function_var(bool create_without_context = false);
-	virtual ~function_var() = default;
-};
-template <typename r_type, typename... a_types>
-void function_var<r_type, a_types...>::create_function_var(bool create_without_context) {
-	if (create_without_context) {
-		block::var::Ptr function_var = std::make_shared<block::var>();	
-		function_var->var_type = create_block_type();
-		block_var = function_var;
-		return;
-	}
-	assert(builder_context::current_builder_context != nullptr);
-	assert(builder_context::current_builder_context->current_block_stmt != nullptr);
-	builder_context::current_builder_context->commit_uncommitted();
-	block::var::Ptr function_var = std::make_shared<block::var>();	
-	function_var->var_type = create_block_type();
-	block_var = function_var;
-	tracer::tag offset = get_offset_in_function(builder_context::current_builder_context->current_function);
-	function_var->static_offset = offset;
-	if (builder_context::current_builder_context->bool_vector.size() > 0)
-		return;
-	block::decl_stmt::Ptr decl_stmt = std::make_shared<block::decl_stmt>();
-	decl_stmt->static_offset = offset;
-	decl_stmt->decl_var = function_var;
-	decl_stmt->init_expr = nullptr;
-	block_decl_stmt = decl_stmt;
-	builder_context::current_builder_context->add_stmt_to_current_block(decl_stmt);
-}	
-template <typename r_type, typename... a_types>
-function_var<r_type, a_types...>::function_var(bool create_without_context) {
-	create_function_var(create_without_context);
-}		
 
 void annotate(std::string);
 

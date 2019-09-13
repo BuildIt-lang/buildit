@@ -12,13 +12,8 @@
 namespace builder {
 class builder;
 class var;
-class int_var;
 template <typename T>
-class pointer_var;
-template <typename T>
-class static_var;
-template <typename r_type, typename... a_types>
-class function_var; 
+class dyn_var;
 template <typename... arg_types>
 std::vector <block::expr::Ptr> extract_call_arguments_helper (const builder& first_arg, const arg_types&... rest_args);
 
@@ -111,14 +106,11 @@ private:
 	static builder_context *current_builder_context;
 	friend builder;
 	friend var;
-	friend int_var;
 
 	template <typename T>
-	friend class pointer_var;
+	friend class dyn_var;
 	template <typename T>
 	friend class static_var;
-	template <typename r_type, typename... a_types>
-	friend class function_var;
 
 	template <typename... arg_types>
 	friend std::vector <block::expr::Ptr> extract_call_arguments_helper (const builder& first_arg, const arg_types&... rest_args);

@@ -21,57 +21,11 @@ var::operator builder () const {
 	
 	return ret_block;
 }
-void int_var::create_int_var(bool create_without_context) {
-	
-	if (create_without_context) {	
-		block::var::Ptr int_var = std::make_shared<block::var>();	
-		int_var->var_type = create_block_type();	
-		block_var = int_var;
-		return;
-	}
-	assert(builder_context::current_builder_context != nullptr);
-	assert(builder_context::current_builder_context->current_block_stmt != nullptr);
-	
-	builder_context::current_builder_context->commit_uncommitted();
-	
-	block::var::Ptr int_var = std::make_shared<block::var>();	
-	int_var->var_type = create_block_type();	
-	block_var = int_var;
-	
-	tracer::tag offset = get_offset_in_function(builder_context::current_builder_context->current_function);
-
-	int_var->static_offset = offset;
-	if (builder_context::current_builder_context->bool_vector.size() > 0)
-		return;
-		
-	block::decl_stmt::Ptr decl_stmt = std::make_shared<block::decl_stmt>();
-	decl_stmt->static_offset = offset;
-	
-	decl_stmt->decl_var = int_var;
-	decl_stmt->init_expr = nullptr;
-	block_decl_stmt = decl_stmt;
-	
-	builder_context::current_builder_context->add_stmt_to_current_block(decl_stmt);
-	
-}	
-int_var::int_var(bool create_without_context) {
-	create_int_var(create_without_context);
-}		
-int_var::int_var(const int_var& a): int_var((builder)a) {
-}
-int_var::int_var(const builder& a) {
-	builder_context::current_builder_context->remove_node_from_sequence(a.block_expr);
-	create_int_var();
-	if (builder_context::current_builder_context->bool_vector.size() > 0)
-		return;
-	block_decl_stmt->init_expr = a.block_expr;	
-}
-int_var::int_var(const int& a): int_var((builder)a) {
-}
 
 
 builder::builder (const int &a) {	
 	assert(builder_context::current_builder_context != nullptr);
+	block_expr = nullptr;
 	if (builder_context::current_builder_context->bool_vector.size() > 0)
 		return;
 	block::int_const::Ptr int_const = std::make_shared<block::int_const>();
@@ -331,8 +285,9 @@ builder::operator bool() {
 var::operator bool() {
 	return (bool)this->operator builder();
 }
+
 template <>
-std::vector<block::type::Ptr> extract_type_vector<> (void) {
+std::vector<block::type::Ptr> extract_type_vector_dyn<> (void) {
 	std::vector<block::type::Ptr> empty_vector;
 	return empty_vector;
 }

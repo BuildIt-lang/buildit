@@ -2,14 +2,12 @@
 #include "builder/builder.h"
 #include <iostream>
 #include "blocks/c_code_generator.h"
-using int_var = builder::int_var;
-
-
+using builder::dyn_var;
 
 // A simple straight line code that calls another function. Should not detect this as a loop
 void bar(void) {
-	int_var a = 0;
-	int_var b = a;
+	dyn_var<int> a = 0;
+	dyn_var<int> b = a;
 	a && b;
 }
 void foo(void) {

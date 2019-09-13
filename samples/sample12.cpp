@@ -4,16 +4,14 @@
 #include "blocks/c_code_generator.h"
 #include "builder/static_var.h"
 
-using int_var = builder::int_var;
-template <typename T>
-using static_var = builder::static_var<T>;
-
+using builder::dyn_var;
+using builder::static_var;
 
 
 // A simple straight line code enclosed in a static loop. This should be unrolled 10 times. There shouldn't be a loop in the AST
 void foo(void) {
 	for (static_var<int> x = 0; x < 10; x++) {
-		int_var a;
+		dyn_var<int> a;
 		a = a + 1;
 	}	
 }

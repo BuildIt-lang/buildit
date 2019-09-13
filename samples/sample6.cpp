@@ -2,14 +2,12 @@
 #include "builder/builder.h"
 #include <iostream>
 #include "blocks/c_code_generator.h"
-using int_var = builder::int_var;
-
-
+using builder::dyn_var;
 
 // A simple for loop with break and continue
 void foo(void) {
-	int_var a = 0;
-	for (int_var b = 0; b < 10; b = b + 1) {
+	dyn_var<int> a = 0;
+	for (dyn_var<int> b = 0; b < 10; b = b + 1) {
 		if (b == 5)
 			continue;
 		a = a + b;

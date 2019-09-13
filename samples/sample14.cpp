@@ -2,17 +2,15 @@
 #include "builder/builder.h"
 #include <iostream>
 #include "blocks/c_code_generator.h"
-using int_var = builder::int_var;
+using builder::dyn_var;
 
-
-
-// An example of int_var being passed around and returning expressions back from the functions
-int_var bar(int_var x) {
+// An example of dyn_var<int> being passed around and returning expressions back from the functions
+dyn_var<int> bar(dyn_var<int> x) {
 	return x + 1;	
 }
 void foo(void) {
-	int_var a = 0;
-	int_var b = bar(a);
+	dyn_var<int> a = 0;
+	dyn_var<int> b = bar(a);
 }
 int main(int argc, char* argv[]) {
 	builder::builder_context context;

@@ -2,14 +2,11 @@
 #include "builder/builder.h"
 #include <iostream>
 #include "blocks/c_code_generator.h"
-using int_var = builder::int_var;
-template <typename T>
-using pointer_var = builder::pointer_var<T>;
-
+using builder::dyn_var;
 
 // Pointer variables
 void foo(void) {
-	pointer_var<int_var> a;
+	dyn_var<int*> a;
 	a[5] = a[6];
 	
 }

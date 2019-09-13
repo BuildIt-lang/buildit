@@ -2,15 +2,13 @@
 #include "builder/builder.h"
 #include <iostream>
 #include "blocks/c_code_generator.h"
-using int_var = builder::int_var;
-
-
+using builder::dyn_var;
 
 // A simple straight line code with three variables and assignment
 void foo(void) {
-	int_var a;
-	int_var b;
-	int_var c;
+	dyn_var<int> a;
+	dyn_var<int> b;
+	dyn_var<int> c;
 	c = a + b;
 }
 int main(int argc, char* argv[]) {

@@ -4,20 +4,17 @@
 #include "blocks/c_code_generator.h"
 #include "builder/static_var.h"
 
-
-using int_var = builder::int_var;
-template <typename T>
-using static_var = builder::static_var<T>;
-
+using builder::dyn_var;
+using builder::static_var;
 
 
 // Static loop combined with dynamic loop
 // Outer loop should be unrolled and inner should be a loop
 void foo(void) {
 
-	int_var a = 0;
+	dyn_var<int> a = 0;
 	for (static_var<int> x = 1; x <= 2; x++) {
-		for (int_var y = 0; y < x * 100; y = y + 1) {
+		for (dyn_var<int> y = 0; y < x * 100; y = y + 1) {
 			a = a * 1;	
 		}
 	}
