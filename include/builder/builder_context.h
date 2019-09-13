@@ -44,10 +44,8 @@ public:
 	std::unordered_map<std::string, block::stmt_block::Ptr> map;	
 	
 };
-extern "C" {
 void lambda_wrapper(void);
 void lambda_wrapper_impl(void);
-}
 class builder_context {
 public:
 
