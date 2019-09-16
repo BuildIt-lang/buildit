@@ -14,11 +14,3 @@ IF_STMT
   STMT_BLOCK
     BREAK_STMT
   STMT_BLOCK
-    EXPR_STMT
-      ASSIGN_EXPR
-        VAR_EXPR
-          VAR (var1)
-        PLUS_EXPR
-          VAR_EXPR
-            VAR (var1)
-          INT_CONST (1)
