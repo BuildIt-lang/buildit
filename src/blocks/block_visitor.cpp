@@ -119,6 +119,12 @@ void block_visitor::visit(while_stmt::Ptr a) {
 	a->cond->accept(this);
 	a->body->accept(this);
 }
+void block_visitor::visit(for_stmt::Ptr a) {
+	a->decl_stmt->accept(this);
+	a->cond->accept(this);
+	a->update->accept(this);
+	a->body->accept(this);
+}
 void block_visitor::visit(sq_bkt_expr::Ptr a) {
 	a->var_expr->accept(this);
 	a->index->accept(this);

@@ -36,6 +36,7 @@ public:
 	virtual void visit(decl_stmt::Ptr);
 	virtual void visit(if_stmt::Ptr);
 	virtual void visit(while_stmt::Ptr);
+	virtual void visit(for_stmt::Ptr);
 	virtual void visit(break_stmt::Ptr);
 	virtual void visit(sq_bkt_expr::Ptr);
 	virtual void visit(function_call_expr::Ptr);

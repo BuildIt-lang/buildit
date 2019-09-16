@@ -7,7 +7,7 @@ STMT_BLOCK
     SCALAR_TYPE (INT)
     VAR (var1)
     INT_CONST (0)
-  WHILE_SMT
+  WHILE_STMT
     LT_EXPR
       VAR_EXPR
         VAR (var1)

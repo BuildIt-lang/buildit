@@ -218,6 +218,36 @@ public:
 		return true;
 	}
 };
+class for_stmt: public stmt {
+public:
+	typedef std::shared_ptr<for_stmt> Ptr;
+	virtual void dump(std::ostream&, int) override;
+	virtual void accept(block_visitor* a) override {
+		a->visit(self<for_stmt>());
+	}
+	stmt::Ptr decl_stmt;
+	expr::Ptr cond;
+	expr::Ptr update;
+	stmt::Ptr body;
+
+	virtual bool is_same(block::Ptr other) override {
+		if (static_offset != other->static_offset)
+			return false;
+		if (!isa<for_stmt>(other))
+			return false;
+		for_stmt::Ptr other_stmt = to<for_stmt>(other);
+		if (!decl_stmt->is_same(other_stmt->decl_stmt))
+			return false;
+		if (!cond->is_same(other_stmt->cond))
+			return false;
+		if (!update->is_same(other_stmt->update))
+			return false;
+		if (!body->is_same(other_stmt->body))
+			return false;
+		return true;
+	}
+
+};
 class break_stmt: public stmt {
 public:
 	typedef std::shared_ptr<break_stmt> Ptr;

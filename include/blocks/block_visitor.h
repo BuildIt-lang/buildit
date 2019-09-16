@@ -34,6 +34,7 @@ class label;
 class label_stmt;
 class goto_stmt;	
 class while_stmt;
+class for_stmt;
 class break_stmt;
 class sq_bkt_expr;
 class function_call_expr;
@@ -78,6 +79,7 @@ public:
 	virtual void visit (std::shared_ptr<label_stmt>);
 	virtual void visit (std::shared_ptr<goto_stmt>);	
 	virtual void visit (std::shared_ptr<while_stmt>);	
+	virtual void visit (std::shared_ptr<for_stmt>);	
 	virtual void visit (std::shared_ptr<break_stmt>);	
 	virtual void visit (std::shared_ptr<sq_bkt_expr>);
 	virtual void visit (std::shared_ptr<function_call_expr>);

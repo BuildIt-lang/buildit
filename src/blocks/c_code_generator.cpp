@@ -190,6 +190,25 @@ void c_code_generator::visit(while_stmt::Ptr a) {
 		curr_indent--;
 	}
 }
+void c_code_generator::visit(for_stmt::Ptr a) {
+	oss << "for (";
+	a->decl_stmt->accept(this);
+	oss << " ";
+	a->cond->accept(this);
+	oss << "; ";
+	a->update->accept(this);
+	oss << ")";
+	if (isa<stmt_block>(a->body)) {
+		oss << " ";
+		a->body->accept(this);
+	} else {
+		oss << std::endl;
+		curr_indent++;
+		printer::indent(oss, curr_indent);
+		a->body->accept(this);
+		curr_indent--;
+	}
+}
 void c_code_generator::visit(break_stmt::Ptr a) {
 	oss << "break;";
 }

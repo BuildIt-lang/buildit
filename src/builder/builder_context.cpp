@@ -6,6 +6,7 @@
 #include "blocks/label_inserter.h"
 #include "blocks/loop_finder.h"
 #include "builder/builder.h"
+#include "blocks/for_loop_finder.h"
 
 namespace builder {
 builder_context* builder_context::current_builder_context = nullptr;
@@ -168,6 +169,11 @@ block::stmt::Ptr builder_context::extract_ast_from_function(ast_function_type fu
 	block::loop_finder finder;
 	finder.ast = ast;
 	ast->accept(&finder);
+
+
+	block::for_loop_finder for_finder;
+	for_finder.ast  = ast;
+	ast->accept(&for_finder);
 
 	return ast;
 }
