@@ -37,7 +37,7 @@ BLOCKS_OBJS=$(subst $(SRC_DIR),$(BUILD_DIR),$(BLOCKS_SRC:.cpp=.o))
 UTIL_OBJS=$(subst $(SRC_DIR),$(BUILD_DIR),$(UTIL_SRC:.cpp=.o))
 
 LIBRARY_OBJS=$(BUILDER_OBJS) $(BLOCKS_OBJS) $(UTIL_OBJS) 
-LIBRARY=$(BUILD_DIR)/builder_library.a
+LIBRARY=$(BUILD_DIR)/libbuildit.a
 
 all: executables
 
