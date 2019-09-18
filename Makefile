@@ -1,3 +1,4 @@
+LIBRARY_NAME=buildit
 BASE_DIR=$(shell pwd)
 SRC_DIR=$(BASE_DIR)/src
 BUILD_DIR?=$(BASE_DIR)/build
@@ -21,11 +22,14 @@ SAMPLES=$(subst $(SAMPLES_DIR),$(BUILD_DIR),$(SAMPLES_SRCS:.cpp=))
 DEBUG ?= 0
 ifeq ($(DEBUG),1)
 CFLAGS=-g -std=c++11
-LINKER_FLAGS=-rdynamic -g
+LINKER_FLAGS=-rdynamic -l$(LIBRARY_NAME) -g
 else
 CFLAGS=-std=c++11 -O3
-LINKER_FLAGS=-rdynamic
+LINKER_FLAGS=-rdynamic -l$(LIBRARY_NAME)
 endif
+
+
+LINKER_FLAGS+=-L$(BUILD_DIR)/
 
 
 BUILDER_SRC=$(wildcard $(SRC_DIR)/builder/*.cpp)
@@ -63,7 +67,7 @@ $(LIBRARY): $(LIBRARY_OBJS)
 
 
 $(BUILD_DIR)/sample%: $(BUILD_DIR)/samples/sample%.o $(LIBRARY)
-	$(CXX) -o $@ $^ $(LINKER_FLAGS)
+	$(CXX) -o $@ $< $(LINKER_FLAGS)
 
 
 .PHONY: executables
