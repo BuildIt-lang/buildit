@@ -31,6 +31,8 @@ std::shared_ptr<T> to(std::shared_ptr<block> p) {
 
 class block: public std::enable_shared_from_this<block> {
 public:
+	virtual ~block() = default;
+
 	typedef std::shared_ptr<block> Ptr;
 
 	tracer::tag static_offset;
