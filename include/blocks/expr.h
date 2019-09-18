@@ -352,7 +352,7 @@ public:
 			return false;
 		if (args.size() != other_expr->args.size())
 			return false;
-		for (int i = 0; i < args.size(); i++) {
+		for (unsigned int i = 0; i < args.size(); i++) {
 			if (!args[i]->is_same(other_expr->args[i]))
 				return false;
 		}

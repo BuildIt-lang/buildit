@@ -123,7 +123,7 @@ void c_code_generator::visit(decl_stmt::Ptr a) {
 		oss << " ";
 		oss << a->decl_var->var_name;
 		oss << "(";
-		for (int i = 0; i < type->arg_types.size(); i++) {
+		for (unsigned int i = 0; i < type->arg_types.size(); i++) {
 			type->arg_types[i]->accept(this);
 			if (i != type->arg_types.size()-1) 
 				oss << ", ";
@@ -233,7 +233,7 @@ void c_code_generator::visit(function_call_expr::Ptr a) {
 		oss << ")";
 	}	
 	oss << "(";
-	for (int i = 0; i < a->args.size(); i++) {
+	for (unsigned int i = 0; i < a->args.size(); i++) {
 		a->args[i]->accept(this);
 		if (i != a->args.size() - 1)
 			oss << ", ";	

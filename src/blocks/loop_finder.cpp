@@ -2,7 +2,7 @@
 #include <algorithm>
 namespace block {
 
-void ensure_back_has_goto(stmt_block::Ptr a, label::Ptr label_detect, std::vector<stmt_block::Ptr> &parents) {
+static void ensure_back_has_goto(stmt_block::Ptr a, label::Ptr label_detect, std::vector<stmt_block::Ptr> &parents) {
 
 	if (a->stmts.size() == 0) {
 		parents.push_back(a);
@@ -21,7 +21,7 @@ void ensure_back_has_goto(stmt_block::Ptr a, label::Ptr label_detect, std::vecto
 		if (if_parents.size() == 2 && if_parents[0] == then_block && if_parents[1] == else_block) {
 			parents.push_back(a);
 		} else {
-			for (int i = 0; i < if_parents.size(); i++) {
+			for (unsigned int i = 0; i < if_parents.size(); i++) {
 				parents.push_back(if_parents[i]);
 			}
 		}
@@ -38,9 +38,9 @@ void ensure_back_has_goto(stmt_block::Ptr a, label::Ptr label_detect, std::vecto
 }
 
 
-bool check_last_choppable(std::vector<stmt_block::Ptr> &parents) {
+static bool check_last_choppable(std::vector<stmt_block::Ptr> &parents) {
 	// Check if everyone has atleast one stmt
-	for (int i = 0; i < parents.size(); i++) {
+	for (unsigned int i = 0; i < parents.size(); i++) {
 		if (parents[i]->stmts.size() == 0)
 			return false;
 	}
@@ -49,19 +49,19 @@ bool check_last_choppable(std::vector<stmt_block::Ptr> &parents) {
 		return true;
 
 	tracer::tag first_tag = parents[0]->stmts.back()->static_offset;
-	for (int i = 1; i < parents.size(); i++) {
+	for (unsigned int i = 1; i < parents.size(); i++) {
 		if (parents[i]->stmts.back()->static_offset != first_tag)
 			return false;
 	}
 	return true;
 }
-void trim_from_parents(std::vector<stmt_block::Ptr> &parents, std::vector<stmt::Ptr> &trimmed) {
+static void trim_from_parents(std::vector<stmt_block::Ptr> &parents, std::vector<stmt::Ptr> &trimmed) {
 	
 	// First check if the ends are all same
 	if (check_last_choppable(parents)) {
 		// Chop a stmt off of everyone
 		stmt::Ptr chopped = parents[0]->stmts.back();
-		for (int i = 0; i < parents.size(); i++) {
+		for (unsigned int i = 0; i < parents.size(); i++) {
 			parents[i]->stmts.pop_back();
 		}
 		trimmed.push_back(chopped);

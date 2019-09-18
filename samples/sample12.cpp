@@ -9,7 +9,7 @@ using builder::static_var;
 
 
 // A simple straight line code enclosed in a static loop. This should be unrolled 10 times. There shouldn't be a loop in the AST
-void foo(void) {
+static void foo(void) {
 	for (static_var<int> x = 0; x < 10; x++) {
 		dyn_var<int> a;
 		a = a + 1;

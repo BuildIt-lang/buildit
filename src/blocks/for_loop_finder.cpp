@@ -1,7 +1,7 @@
 #include "blocks/for_loop_finder.h"
 
 namespace block {
-bool is_update(var::Ptr decl_var, stmt::Ptr last_stmt) {
+static bool is_update(var::Ptr decl_var, stmt::Ptr last_stmt) {
 	if (!isa<expr_stmt>(last_stmt))
 		return false;
 	expr::Ptr last_stmt_expr = to<expr_stmt>(last_stmt)->expr1;
@@ -23,7 +23,7 @@ bool is_update(var::Ptr decl_var, stmt::Ptr last_stmt) {
 		return false;		
 	return true;
 }
-bool is_last_update(var::Ptr decl_var, stmt_block::Ptr block, std::vector<stmt_block::Ptr> &parents) {
+static bool is_last_update(var::Ptr decl_var, stmt_block::Ptr block, std::vector<stmt_block::Ptr> &parents) {
 	if (block->stmts.size() == 0)
 		return false;
 	if (isa<break_stmt>(block->stmts.back()))
@@ -50,7 +50,7 @@ void for_loop_finder::visit(stmt_block::Ptr a) {
 	while (1) {
 		int while_loop_index = -1;
 		std::vector<stmt_block::Ptr> parents;
-		for (int i = 0; i < a->stmts.size(); i++) {
+		for (unsigned int i = 0; i < a->stmts.size(); i++) {
 			parents.clear();
 			if (isa<while_stmt>(a->stmts[i])) {
 				while_stmt::Ptr loop = to<while_stmt>(a->stmts[i]);
@@ -92,17 +92,17 @@ void for_loop_finder::visit(stmt_block::Ptr a) {
 			for_loop->decl_stmt = a->stmts[while_loop_index];
 			for_loop->cond = loop->cond;
 			for_loop->update = to<expr_stmt>(parents[0]->stmts.back())->expr1;
-			for (int i = 0; i < parents.size(); i++) 
+			for (unsigned int i = 0; i < parents.size(); i++) 
 				parents[i]->stmts.pop_back();
 			for_loop->body = loop->body;
 			new_stmts.push_back(for_loop);
-			for (int i = while_loop_index + 2; i < a->stmts.size(); i++)
+			for (unsigned int i = while_loop_index + 2; i < a->stmts.size(); i++)
 				new_stmts.push_back(a->stmts[i]);
 			a->stmts = new_stmts;
 		} else
 			break;
 	}
-	for (int i = 0; i < a->stmts.size(); i++)
+	for (unsigned int i = 0; i < a->stmts.size(); i++)
 		a->stmts[i]->accept(this);
 }
 }

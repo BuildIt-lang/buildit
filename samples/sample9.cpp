@@ -7,7 +7,7 @@ using builder::dyn_var;
 
 
 // A simple for loop with break and continue
-void foo(void) {
+static void foo(void) {
 	annotate("s1");
 	dyn_var<int> a = 0;
 	annotate("s2");

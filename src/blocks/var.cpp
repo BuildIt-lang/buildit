@@ -26,7 +26,7 @@ void function_type::dump(std::ostream &oss, int indent) {
 	printer::indent(oss, indent);
 	oss << "FUNCITON_TYPE" << std::endl;
 	return_type->dump(oss, indent+1);
-	for (int i = 0; i < arg_types.size(); i++) 
+	for (unsigned int i = 0; i < arg_types.size(); i++) 
 		arg_types[i]->dump(oss, indent+1);
 }
 }

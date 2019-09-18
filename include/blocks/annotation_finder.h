@@ -6,6 +6,7 @@
 namespace block {
 class annotation_finder: public block_visitor {
 public:
+	using block_visitor::visit;
 	std::string annotation_to_find;
 	stmt::Ptr found_stmt = nullptr;
 	virtual void visit(expr_stmt::Ptr);

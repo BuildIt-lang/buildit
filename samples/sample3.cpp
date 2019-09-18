@@ -5,7 +5,7 @@
 using builder::dyn_var;
 
 // A nested if condition 
-void foo(void) {
+static void foo(void) {
 	dyn_var<int> a;
 	dyn_var<int> b;
 	dyn_var<int> c;

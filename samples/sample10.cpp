@@ -5,7 +5,7 @@
 using builder::dyn_var;
 
 // Pointer variables
-void foo(void) {
+static void foo(void) {
 	dyn_var<int*> a;
 	a[5] = a[6];
 	

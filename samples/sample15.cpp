@@ -5,7 +5,7 @@
 
 using builder::dyn_var;
 // A simple function_var declaration
-void foo(void) {
+static void foo(void) {
 	dyn_var<void (int, int*)> bar;
 	dyn_var<int ()> bar2;
 	

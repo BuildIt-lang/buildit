@@ -10,7 +10,7 @@ using builder::static_var;
 
 // Static loop combined with dynamic loop
 // Outer loop should be unrolled and inner should be a loop
-void foo(void) {
+static void foo(void) {
 
 	dyn_var<int> a = 0;
 	for (static_var<int> x = 1; x <= 2; x++) {

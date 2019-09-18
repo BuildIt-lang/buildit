@@ -7,7 +7,7 @@ void label_collector::visit(goto_stmt::Ptr a) {
 }
 static void erase_tag(std::vector<tracer::tag> &list, tracer::tag &erase) {
 	std::vector<tracer::tag> new_list;
-	for (int i = 0; i < list.size(); i++) {
+	for (unsigned int i = 0; i < list.size(); i++) {
 		if (list[i] != erase) {
 			new_list.push_back(list[i]);
 		}

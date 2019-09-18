@@ -14,7 +14,7 @@ dyn_var<int ()> *get_value_ptr;
 dyn_var<void* (int)> *malloc_func_ptr;
 dyn_var<void (void*)> *free_func_ptr;
 
-int find_matching_closing(int pc) {
+static int find_matching_closing(int pc) {
 	int count = 1;
 	while (bf_program[pc] != 0 && count > 0) {
 		pc++;
@@ -25,7 +25,7 @@ int find_matching_closing(int pc) {
 	}
 	return pc;
 }
-int find_matching_opening(int pc) {
+static int find_matching_opening(int pc) {
 	int count = 1;
 	while (pc >= 0 && count > 0) {
 		pc--;
@@ -37,7 +37,7 @@ int find_matching_opening(int pc) {
 	return pc;
 }
 // BF interpreter
-void interpret_bf(void) {
+static void interpret_bf(void) {
 	auto &malloc_func = *malloc_func_ptr;
 	auto &free_func = *free_func_ptr;
 	auto &get_value = *get_value_ptr;
@@ -73,7 +73,7 @@ void interpret_bf(void) {
 	}
 	free_func(tape);	
 }
-void print_wrapper_code(std::ostream& oss) {
+static void print_wrapper_code(std::ostream& oss) {
 	oss << "#include <stdio.h>\n";
 	oss << "#include <stdlib.h>\n";
 	oss << "void print_value(int x) {printf(\"%c\", x);}\n";

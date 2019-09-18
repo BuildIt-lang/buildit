@@ -9,7 +9,7 @@ using builder::dyn_var;
 
 
 // Function with unrolled branches
-void foo(void) {
+static void foo(void) {
 	dyn_var<int> a;
 	for(static_var<int> i = 0; i < 128; i++) {
 		if (a) {

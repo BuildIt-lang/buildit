@@ -61,7 +61,7 @@ public:
 		if (stmts.size() != other_stmt->stmts.size())
 			return false;
 		
-		for (int i = 0; i < stmts.size(); i++) {
+		for (unsigned int i = 0; i < stmts.size(); i++) {
 			if (!stmts[i]->is_same(other_stmt->stmts[i]))
 				return false;
 		}

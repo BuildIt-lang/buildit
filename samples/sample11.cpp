@@ -5,12 +5,12 @@
 using builder::dyn_var;
 
 // A simple straight line code that calls another function. Should not detect this as a loop
-void bar(void) {
+static void bar(void) {
 	dyn_var<int> a = 0;
 	dyn_var<int> b = a;
 	a && b;
 }
-void foo(void) {
+static void foo(void) {
 	bar();
 	bar();
 }

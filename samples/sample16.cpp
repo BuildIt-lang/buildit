@@ -6,7 +6,7 @@ using builder::dyn_var;
 
 // A simple example with an assumed variable in the builder context
 dyn_var<int> *assumed_variable_ref;
-void foo(void) {
+static void foo(void) {
 	dyn_var<int> a;
 	a = 20;
 	*assumed_variable_ref = 10 + a;

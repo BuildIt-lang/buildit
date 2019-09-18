@@ -25,7 +25,7 @@ void builder_context::add_stmt_to_current_block(block::stmt::Ptr s, bool check_f
 		// First find the tag - 
 
 		block::stmt_block::Ptr parent = memoized_tags->map[tag_string];
-		int i = 0; 
+		unsigned int i = 0; 
 		for (i = 0; i < parent->stmts.size(); i++) {
 			if (parent->stmts[i]->static_offset == s->static_offset) 
 				break;
@@ -50,7 +50,7 @@ tracer::tag get_offset_in_function(builder_context::ast_function_type _function)
 	return offset;
 }
 builder_context::~builder_context() {
-	for (int i = 0; i < assume_variables.size(); i++) {
+	for (unsigned int i = 0; i < assume_variables.size(); i++) {
 		delete assume_variables[i];
 	}
 }
@@ -103,7 +103,7 @@ static void trim_ast_at_offset(block::stmt::Ptr ast, tracer::tag offset) {
 	std::vector<block::stmt::Ptr> &stmts = top_level_block->stmts;
 	std::vector<block::stmt::Ptr> new_stmts;
 	
-	int i;
+	unsigned int i;
 	for (i = 0; i < stmts.size(); i++) {
 		if (stmts[i]->static_offset == offset)
 			break;
@@ -144,9 +144,13 @@ static std::vector<block::stmt::Ptr> trim_common_from_back(block::stmt::Ptr ast1
 }
 block::stmt::Ptr builder_context::extract_ast_from_lambda(std::function <void (void)> lambda) {
 	internal_stored_lambda = lambda;
-	return extract_ast_from_function(lambda_wrapper);
+	return extract_ast_from_function_impl(lambda_wrapper);
 }
 block::stmt::Ptr builder_context::extract_ast_from_function(ast_function_type function) {
+	internal_stored_function = function;
+	return extract_ast_from_function_impl(function_wrapper);
+}
+block::stmt::Ptr builder_context::extract_ast_from_function_impl(ast_function_type function) {
 	std::vector<bool> b;
 	block::stmt::Ptr ast = extract_ast_from_function_internal(function, b);
 	
@@ -208,6 +212,7 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(ast_functio
 		builder_context true_context(memoized_tags);
 		true_context.visited_offsets = visited_offsets;
 		true_context.internal_stored_lambda = internal_stored_lambda;
+		true_context.internal_stored_function = internal_stored_function;
 		std::vector<bool> true_bv;
 		true_bv.push_back(true);
 		std::copy(b.begin(), b.end(), std::back_inserter(true_bv));	
@@ -217,6 +222,7 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(ast_functio
 		builder_context false_context(memoized_tags);
 		false_context.visited_offsets = visited_offsets;
 		false_context.internal_stored_lambda = internal_stored_lambda;	
+		false_context.internal_stored_function = internal_stored_function;
 		std::vector<bool> false_bv;
 		false_bv.push_back(false);
 		std::copy(b.begin(), b.end(), std::back_inserter(false_bv));
@@ -255,7 +261,7 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(ast_functio
 		add_stmt_to_current_block(goto_stmt, false);
 		ret_ast = ast;	
 	} catch (MemoizationException &e) {
-		for (int i = e.child_id; i < e.parent->stmts.size(); i++) {
+		for (unsigned int i = e.child_id; i < e.parent->stmts.size(); i++) {
 			add_stmt_to_current_block(e.parent->stmts[i], false);
 		}		
 		ret_ast = ast;
@@ -263,7 +269,7 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(ast_functio
 	
 
 	// Update the memoized table with the stmt block we just created 
-	for (int i = 0; i < current_block_stmt->stmts.size(); i++) {
+	for (unsigned int i = 0; i < current_block_stmt->stmts.size(); i++) {
 		block::stmt::Ptr s = current_block_stmt->stmts[i];
 		memoized_tags->map[s->static_offset.stringify()] = current_block_stmt;
 	}
@@ -274,6 +280,9 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(ast_functio
 
 void lambda_wrapper_impl(void) {
 	builder_context::current_builder_context->internal_stored_lambda();	
+}
+void function_wrapper_impl(void) {
+	builder_context::current_builder_context->internal_stored_function();
 }
 
 }

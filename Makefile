@@ -24,10 +24,11 @@ ifeq ($(DEBUG),1)
 CFLAGS=-g -std=c++11
 LINKER_FLAGS=-rdynamic -l$(LIBRARY_NAME) -g
 else
-CFLAGS=-std=c++11 -O3
+CFLAGS=-std=c++11
 LINKER_FLAGS=-rdynamic -l$(LIBRARY_NAME)
 endif
 
+CFLAGS+=-Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wmissing-declarations -Woverloaded-virtual -pedantic-errors -Wno-deprecated
 
 LINKER_FLAGS+=-L$(BUILD_DIR)/
 

@@ -20,12 +20,12 @@ public:
 	bool operator== (const tag &other) {
 		if (other.pointers.size() != pointers.size())
 			return false;
-		for (int i = 0; i < pointers.size(); i++) 
+		for (unsigned int i = 0; i < pointers.size(); i++) 
 			if (pointers[i] != other.pointers[i])
 				return false;
 		if (other.static_var_snapshots.size() != static_var_snapshots.size())
 			return false;
-		for (int i = 0; i < static_var_snapshots.size(); i++) 
+		for (unsigned int i = 0; i < static_var_snapshots.size(); i++) 
 			if (static_var_snapshots[i] != other.static_var_snapshots[i])
 				return false;
 		return true;
@@ -42,7 +42,7 @@ public:
 	}
 	std::string stringify(void) {
 		std::string output_string = "[";
-		for (int i = 0; i < pointers.size(); i++) {
+		for (unsigned int i = 0; i < pointers.size(); i++) {
 			char temp[128];
 			sprintf(temp, "%llx", pointers[i]);
 			output_string += temp;
@@ -50,7 +50,7 @@ public:
 				output_string += ", ";
 		}
 		output_string += "]:[";
-		for (int i = 0; i < static_var_snapshots.size(); i++) {
+		for (unsigned int i = 0; i < static_var_snapshots.size(); i++) {
 			output_string += static_var_snapshots[i];
 			if (i != static_var_snapshots.size() -1)
 				output_string += ", ";

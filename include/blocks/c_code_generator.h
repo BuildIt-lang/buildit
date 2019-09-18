@@ -11,6 +11,7 @@ class c_code_generator: public block_visitor {
 private:
 	void emit_binary_expr(binary_expr::Ptr, std::string);
 public:
+	using block_visitor::visit;
 	c_code_generator(std::ostream &_oss): oss(_oss) {}
 	std::ostream &oss;
 	int curr_indent = 0;

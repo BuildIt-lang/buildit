@@ -158,7 +158,7 @@ void function_call_expr::dump(std::ostream &oss, int indent) {
 	printer::indent(oss, indent);
 	oss << "FUNCTION_CALL_EXPR" << std::endl;
 	expr1->dump(oss, indent+1);
-	for (int i = 0; i < args.size(); i++) 
+	for (unsigned int i = 0; i < args.size(); i++) 
 		args[i]->dump(oss, indent+1);
 }
 void var_expr::dump(std::ostream &oss, int indent) {

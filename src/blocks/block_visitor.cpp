@@ -131,7 +131,7 @@ void block_visitor::visit(sq_bkt_expr::Ptr a) {
 }
 void block_visitor::visit(function_call_expr::Ptr a) {
 	a->expr1->accept(this);
-	for (int i = 0; i < a->args.size(); i++) {
+	for (unsigned int i = 0; i < a->args.size(); i++) {
 		a->args[i]->accept(this);
 	}
 }
@@ -148,7 +148,7 @@ void block_visitor::visit(pointer_type::Ptr a) {
 }
 void block_visitor::visit(function_type::Ptr a) {
 	a->return_type->accept(this);
-	for (int i = 0; i < a->arg_types.size(); i++)
+	for (unsigned int i = 0; i < a->arg_types.size(); i++)
 		a->arg_types[i]->accept(this);
 }
 

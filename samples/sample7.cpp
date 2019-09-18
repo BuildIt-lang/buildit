@@ -5,7 +5,7 @@
 using builder::dyn_var;
 
 // A nested loop 
-void foo(void) {
+static void foo(void) {
 	dyn_var<int> a = 0;
 	for (dyn_var<int> c = 0; c < 100; c = c + 3) {
 		for (dyn_var<int> b = 0; b < 10; b = b + 1) {

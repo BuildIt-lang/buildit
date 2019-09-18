@@ -25,7 +25,7 @@ public:
 	std::string snapshot(void) {
 		std::string output_string;
 		char temp[4];
-		for (int i = 0; i < size; i++) {
+		for (unsigned int i = 0; i < size; i++) {
 			sprintf(temp, "%02x", ptr[i]);
 			output_string += temp;	
 		}
@@ -41,6 +41,11 @@ public:
 };
 void lambda_wrapper(void);
 void lambda_wrapper_impl(void);
+
+
+void function_wrapper(void);
+void function_wrapper_impl(void);
+
 class builder_context {
 public:
 
@@ -82,6 +87,7 @@ public:
 	block::stmt::Ptr extract_ast(void);
 	block::stmt::Ptr extract_ast_from_lambda(std::function<void (void)>);
 	block::stmt::Ptr extract_ast_from_function(ast_function_type);
+	block::stmt::Ptr extract_ast_from_function_impl(ast_function_type);
 	block::stmt::Ptr extract_ast_from_function_internal(ast_function_type, std::vector<bool> bl = std::vector<bool>());
 	
 	std::string current_label;
@@ -102,6 +108,8 @@ public:
 	~builder_context();
 private:
 	std::function<void (void)> internal_stored_lambda;
+	ast_function_type internal_stored_function;
+	
 
 	static builder_context *current_builder_context;
 	friend builder;
@@ -118,6 +126,7 @@ private:
 	friend void annotate(std::string);
 	friend tracer::tag get_offset_in_function(ast_function_type _function);
 	friend void lambda_wrapper_impl(void);
+	friend void function_wrapper_impl(void);
 };
 bool get_next_bool_from_context(builder_context *context, block::expr::Ptr);
 tracer::tag get_offset_in_function(builder_context::ast_function_type _function);

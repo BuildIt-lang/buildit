@@ -5,7 +5,7 @@
 using builder::dyn_var;
 
 // A simple for loop with break and continue
-void foo(void) {
+static void foo(void) {
 	dyn_var<int> a = 0;
 	for (dyn_var<int> b = 0; b < 10; b = b + 1) {
 		if (b == 5)

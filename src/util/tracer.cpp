@@ -5,14 +5,14 @@
 namespace tracer {
 static unsigned long long call_point = 0;
 
-void set_call_point(ast_function_type _function) {
+static void set_call_point(ast_function_type _function) {
 	unsigned long long function = (unsigned long long) (void*) _function;
 	void *buffer[20];
 	int backtrace_size = backtrace(buffer, 20);	
 	char** backtrace_functions = backtrace_symbols(buffer, backtrace_size);
 	int i;
 	for (i = 0; i < backtrace_size; i++) {
-		int offset;
+		unsigned int offset;
 		unsigned long long address;
 #ifdef __linux
 		if (sscanf(backtrace_functions[i], "%*[^+]+%x) [%llx]", &offset, &address) != 2)

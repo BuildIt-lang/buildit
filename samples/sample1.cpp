@@ -6,7 +6,7 @@ using builder::dyn_var;
 
 
 // A simple straight line code with 2 variable declarations and one operator
-void foo(void) {
+static void foo(void) {
 	dyn_var<int> a = 0;
 	dyn_var<int> b = a;
 	a && b;
