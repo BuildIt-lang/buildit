@@ -28,7 +28,7 @@ CFLAGS=-std=c++11
 LINKER_FLAGS=-rdynamic -l$(LIBRARY_NAME)
 endif
 
-CFLAGS+=-Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wmissing-declarations -Woverloaded-virtual -pedantic-errors -Wno-deprecated -Wdelete-non-virtual-dtor
+CFLAGS+=-Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wmissing-declarations -Woverloaded-virtual -pedantic-errors -Wno-deprecated -Wdelete-non-virtual-dtor -Werror
 
 LINKER_FLAGS+=-L$(BUILD_DIR)/
 

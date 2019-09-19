@@ -22,6 +22,32 @@ bool unary_is_same (std::shared_ptr<T> first, block::Ptr other);
 template <typename T>
 bool binary_is_same (std::shared_ptr<T> first, block::Ptr other);
 
+template <typename T>
+bool unary_is_same(std::shared_ptr<T> first, block::Ptr other) {
+	if (first->static_offset != other->static_offset)
+		return false;
+	if (!isa<unary_expr>(other))
+		return false;
+	typename T::Ptr other_expr = to<T>(other);
+	if (!(first->expr1->is_same(other_expr->expr1)))
+		return false;
+	return true;	
+	
+}
+template <typename T>
+bool binary_is_same (std::shared_ptr<T> first, block::Ptr second) {
+	if (first->static_offset != second->static_offset)
+		return false;
+	if (!isa<T>(second))
+		return false;
+	typename T::Ptr other_expr = to<T>(second);
+	if (!(first->expr1->is_same(other_expr->expr1)))
+		return false;
+	if (!(first->expr2->is_same(other_expr->expr2)))
+		return false;
+	return true;
+}
+
 class unary_expr: public expr {
 public:
 	typedef std::shared_ptr<unary_expr> Ptr;
