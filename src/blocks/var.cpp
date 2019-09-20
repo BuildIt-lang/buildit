@@ -29,4 +29,12 @@ void function_type::dump(std::ostream &oss, int indent) {
 	for (unsigned int i = 0; i < arg_types.size(); i++) 
 		arg_types[i]->dump(oss, indent+1);
 }
+void array_type::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "ARRAY_TYPE" << std::endl;
+	element_type->dump(oss, indent+1);
+	printer::indent(oss, indent+1);
+	oss << size << std::endl;
+	
+}
 }

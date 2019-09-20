@@ -46,6 +46,17 @@ public:
 
 	virtual void dump(std::ostream&, int) override;
 };
+class array_type: public type {
+public:
+	typedef std::shared_ptr<array_type> Ptr;
+	virtual void accept(block_visitor* a) override {
+		a->visit(self<array_type>());
+	}
+	type::Ptr element_type;
+	int size;
+	
+	virtual void dump(std::ostream&, int) override;
+};
 class var: public block {
 public:
 	typedef std::shared_ptr<var> Ptr;

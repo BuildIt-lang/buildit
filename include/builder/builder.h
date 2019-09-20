@@ -145,6 +145,27 @@ public:
 	}
 };
 
+template <typename T, int x>
+class type_extractor<T[x]> {
+public:
+	static block::type::Ptr extract_type(void) {
+		block::array_type::Ptr type = std::make_shared<block::array_type>();
+		type->element_type = type_extractor<T>::extract_type();
+		type->size = x;
+		return type;
+	}
+};
+
+template <typename T>
+class type_extractor<T[]> {
+public:
+	static block::type::Ptr extract_type(void) {
+		block::array_type::Ptr type = block::to<block::array_type>(type_extractor<T[1]>::extract_type());
+		type->size = -1;
+		return type;
+	}
+};
+
 template <typename... args>
 std::vector<block::type::Ptr> extract_type_vector_dyn(void);
 

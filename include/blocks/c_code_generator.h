@@ -45,6 +45,7 @@ public:
 	virtual void visit(var::Ptr);
 	virtual void visit(scalar_type::Ptr);
 	virtual void visit(pointer_type::Ptr);
+	virtual void visit(array_type::Ptr);
 	
 	static void generate_code(block::Ptr ast, std::ostream &oss, int indent = 0) {
 		c_code_generator generator (oss);

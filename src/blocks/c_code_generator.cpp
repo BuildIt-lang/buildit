@@ -110,8 +110,19 @@ void c_code_generator::visit(scalar_type::Ptr type) {
 	}
 }
 void c_code_generator::visit(pointer_type::Ptr type) {
+	if (!isa<scalar_type>(type->pointee_type) && !isa<pointer_type>(type->pointee_type))
+		assert(false && "Printing pointers of complex type is not supported yet");
 	type->pointee_type->accept(this);
 	oss << "*";
+}
+void c_code_generator::visit(array_type::Ptr type) {
+	if (!isa<scalar_type>(type->element_type) && !isa<pointer_type>(type->element_type))
+		assert(false && "Printing arrays of complex type is not supported yet");
+	type->element_type->accept(this);
+	if (type->size != -1)
+		oss << "[" << type->size << "]";
+	else 
+		oss << "[]";
 }
 void c_code_generator::visit(var::Ptr var) {
 	oss << var->var_name;
@@ -130,6 +141,18 @@ void c_code_generator::visit(decl_stmt::Ptr a) {
 		}
 		oss << ");";
 		return;	
+	} else if (isa<array_type> (a->decl_var->var_type)) {
+		array_type::Ptr type = to<array_type>(a->decl_var->var_type);
+		if (!isa<scalar_type>(type->element_type) && !isa<pointer_type>(type->element_type))
+			assert(false && "Printing arrays of complex type is not supported yet");
+		type->element_type->accept(this);
+		oss << " ";
+		oss << a->decl_var->var_name;
+		oss << "[";
+		if (type->size != -1)
+			oss << type->size;
+		oss << "];";
+		return;
 	}
 
 	a->decl_var->var_type->accept(this);

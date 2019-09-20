@@ -151,6 +151,8 @@ void block_visitor::visit(function_type::Ptr a) {
 	for (unsigned int i = 0; i < a->arg_types.size(); i++)
 		a->arg_types[i]->accept(this);
 }
-
+void block_visitor::visit(array_type::Ptr a) {
+	a->element_type->accept(this);
+}
 }
 

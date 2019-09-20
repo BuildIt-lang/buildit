@@ -1,0 +1,33 @@
+STMT_BLOCK
+  DECL_STMT
+    ARRAY_TYPE
+      SCALAR_TYPE (INT)
+      10
+    VAR (var0)
+    NO_INITIALIZATION
+  EXPR_STMT
+    ASSIGN_EXPR
+      SQ_BKT_EXPR
+        VAR_EXPR
+          VAR (var0)
+        INT_CONST (0)
+      INT_CONST (1)
+  DECL_STMT
+    ARRAY_TYPE
+      SCALAR_TYPE (INT)
+      -1
+    VAR (var1)
+    NO_INITIALIZATION
+  EXPR_STMT
+    ASSIGN_EXPR
+      SQ_BKT_EXPR
+        VAR_EXPR
+          VAR (var1)
+        INT_CONST (0)
+      INT_CONST (5)
+{
+  int var0[10];
+  var0[0] = 1;
+  int var1[];
+  var1[0] = 5;
+}
