@@ -1,0 +1,12 @@
+STMT_BLOCK
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (var0)
+    INT_CONST (2)
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (var1)
+    PLUS_EXPR
+      FOREIGN_EXPR
+      VAR_EXPR
+        VAR (var0)

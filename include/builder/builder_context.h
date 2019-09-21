@@ -17,6 +17,11 @@ class dyn_var;
 template <typename... arg_types>
 std::vector <block::expr::Ptr> extract_call_arguments_helper (const builder& first_arg, const arg_types&... rest_args);
 
+template <typename T>
+block::expr::Ptr create_foreign_expr (const T t);
+template <typename T>
+builder create_foreign_expr_builder (const T t);
+
 class tracking_tuple {
 public:
         const unsigned char* ptr;
@@ -127,6 +132,11 @@ private:
 	friend tracer::tag get_offset_in_function(ast_function_type _function);
 	friend void lambda_wrapper_impl(void);
 	friend void function_wrapper_impl(void);
+
+	template <typename T>
+	friend block::expr::Ptr create_foreign_expr (const T t);
+	template <typename T>
+	friend builder create_foreign_expr_builder (const T t);
 };
 bool get_next_bool_from_context(builder_context *context, block::expr::Ptr);
 tracer::tag get_offset_in_function(builder_context::ast_function_type _function);

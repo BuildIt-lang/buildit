@@ -385,6 +385,44 @@ public:
 		return true;
 	}
 };
+
+// We first implement a base class for foreign_expr for visitor purposes
+class foreign_expr_base: public expr {
+public:
+	typedef std::shared_ptr<foreign_expr_base> Ptr;
+	// We do not need any other functions because this class is guaranteed to abstract
+protected:
+	// We will add a protected constructor to make sure that this is truly abstract
+	foreign_expr_base() = default;	
+};
+template <typename T>
+class foreign_expr: public foreign_expr_base {
+public:
+	typedef std::shared_ptr<foreign_expr> Ptr;
+	virtual void dump(std::ostream& oss, int i) override {
+		printer::indent(oss, i);
+		oss << "FOREIGN_EXPR" << std::endl;
+	}
+	virtual void accept(block_visitor *a) override {
+		// We will call the visit function for the base class
+		// because we cannot write visitor for template class
+		// The base class visit function then has to check using isa<>
+		a->visit(self<foreign_expr_base>());
+	}
+	
+	T inner_expr;
+	virtual bool is_same(block::Ptr other) override {
+		if (static_offset != other->static_offset)
+			return false;
+		if (!isa<foreign_expr<T>>(other))
+			return false;
+		foreign_expr<T>::Ptr other_expr = to<foreign_expr>(other);
+		// We assume that T has == operator and that is the best we can check
+		if (!(inner_expr == other_expr->inner_expr))
+			return false;
+		return true;
+	}
+};
 }
 
 #endif

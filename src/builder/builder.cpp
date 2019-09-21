@@ -16,12 +16,10 @@ var::operator builder () const {
 	var_expr->var1 = block_var;
 	builder_context::current_builder_context->add_node_to_sequence(var_expr);
 	
-	builder ret_block;
-	ret_block.block_expr = var_expr;
-	
-	return ret_block;
+	builder ret_builder;
+	ret_builder.block_expr = var_expr;
+	return ret_builder;
 }
-
 
 builder::builder (const int &a) {	
 	assert(builder_context::current_builder_context != nullptr);
@@ -39,7 +37,7 @@ builder::builder (const int &a) {
 	
 }
 template <typename T>
-builder builder::builder_unary_op() {
+builder builder::builder_unary_op() const {
 	assert(builder_context::current_builder_context != nullptr);
 	if (builder_context::current_builder_context->bool_vector.size() > 0)
 		return builder::sentinel_builder;
@@ -61,7 +59,7 @@ builder builder::builder_unary_op() {
 	return ret_builder;	
 }
 template <typename T>
-builder builder::builder_binary_op(const builder &a) {
+builder builder::builder_binary_op(const builder &a) const {
 	assert(builder_context::current_builder_context != nullptr);
 	if (builder_context::current_builder_context->bool_vector.size() > 0)
 		return builder::sentinel_builder;
@@ -86,135 +84,101 @@ builder builder::builder_binary_op(const builder &a) {
 	return ret_builder;	
 }
 
-builder builder::operator && (const builder &a) {
-	return builder_binary_op<block::and_expr>(a);
-}
-builder var::operator && (const builder &a) {
-	return this->operator builder() && a;
-}
-builder operator && (const int &a, const builder &b) {
-	return (builder)a && b;
+builder operator && (const builder &a, const builder& b) {
+	return a.builder_binary_op<block::and_expr>(b);
 }
 
-builder builder::operator || (const builder &a) {
-	return builder_binary_op<block::or_expr>(a);
-}
-builder var::operator || (const builder &a) {
-	return this->operator builder() || a;
-}
-builder operator || (const int &a, const builder &b) {
-	return (builder)a || b;
-}
-
-builder builder::operator + (const builder &a) {
-	return builder_binary_op<block::plus_expr>(a);
-}
-builder var::operator + (const builder &a) {
-	return this->operator builder() + a;
-}
-builder operator + (const int &a, const builder &b) {
-	return (builder)a + b;
-}
-
-builder builder::operator - (const builder &a) {
-	return builder_binary_op<block::minus_expr>(a);
-}
-builder var::operator - (const builder &a) {
-	return this->operator builder() - a;
-}
-builder operator - (const int &a, const builder &b) {
-	return (builder)a - b;
-}
-
-builder builder::operator * (const builder &a) {
-	return builder_binary_op<block::mul_expr>(a);
-}
-builder var::operator * (const builder &a) {
-	return this->operator builder() * a;
-}
-builder operator * (const int &a, const builder &b) {
-	return (builder)a * b;
-}
-
-builder builder::operator / (const builder &a) {
-	return builder_binary_op<block::div_expr>(a);
-}
-builder var::operator / (const builder &a) {
-	return this->operator builder() / a;
-}
-builder operator / (const int &a, const builder &b) {
-	return (builder)a / b;
-}
-
-builder builder::operator < (const builder &a) {
-	return builder_binary_op<block::lt_expr>(a);
-}
-builder var::operator < (const builder &a) {
-	return this->operator builder() < a;
-}
-builder operator < (const int &a, const builder &b) {
-	return (builder)a < b;
-}
-
-builder builder::operator > (const builder &a) {
-	return builder_binary_op<block::gt_expr>(a);
-}
-builder var::operator > (const builder &a) {
-	return this->operator builder() > a;
-}
-builder operator > (const int &a, const builder &b) {
-	return (builder)a > b;
-}
-
-builder builder::operator <= (const builder &a) {
-	return builder_binary_op<block::lte_expr>(a);
-}
-builder var::operator <= (const builder &a) {
-	return this->operator builder() <= a;
-}
-builder operator <= (const int &a, const builder &b) {
-	return (builder)a <= b;
-}
-
-builder builder::operator >= (const builder &a) {
-	return builder_binary_op<block::gte_expr>(a);
-}
-builder var::operator >= (const builder &a) {
-	return this->operator builder() >= a;
-}
-builder operator >= (const int &a, const builder &b) {
-	return (builder)a >= b;
-}
-
-builder builder::operator == (const builder &a) {
-	return builder_binary_op<block::equals_expr>(a);
-}
-builder var::operator == (const builder &a) {
-	return this->operator builder() == a;
-}
-builder operator == (const int &a, const builder &b) {
-	return (builder)a == b;
-}
-
-builder builder::operator != (const builder &a) {
-	return builder_binary_op<block::ne_expr>(a);
-}
-builder var::operator != (const builder &a) {
-	return this->operator builder() != a;
-}
-builder operator != (const int &a, const builder &b) {
-	return (builder)a != b;
+builder operator || (const builder &a, const builder &b) {
+	return a.builder_binary_op<block::or_expr>(b);
 }
 
 
-builder builder::operator % (const builder &a) {
-	return builder_binary_op<block::mod_expr>(a);
+builder operator + (const builder &a, const builder &b) {
+	return a.builder_binary_op<block::plus_expr>(b);
 }
-builder var::operator % (const builder &a) {
-	return this->operator builder() % a;
+
+builder operator - (const builder &a, const builder &b) {
+	return a.builder_binary_op<block::minus_expr>(b);
 }
-builder operator % (const int &a, const builder &b) {
-	return (builder)a % b;
+
+builder operator * (const builder &a, const builder &b) {
+	return a.builder_binary_op<block::mul_expr>(b);
+}
+
+builder operator / (const builder &a, const builder &b) {
+	return a.builder_binary_op<block::div_expr>(b);
+}
+
+builder operator < (const builder &a, const builder &b) {
+	return a.builder_binary_op<block::lt_expr>(b);
+}
+
+builder operator > (const builder &a, const builder &b) {
+	return a.builder_binary_op<block::gt_expr>(b);
+}
+
+builder operator <= (const builder &a, const builder &b) {
+	return a.builder_binary_op<block::lte_expr>(b);
+}
+
+builder operator >= (const builder &a, const builder &b) {
+	return a.builder_binary_op<block::gte_expr>(b);
+}
+
+builder operator == (const builder &a, const builder &b) {
+	return a.builder_binary_op<block::equals_expr>(b);
+}
+
+builder operator != (const builder &a, const builder &b) {
+	return a.builder_binary_op<block::ne_expr>(b);
+}
+
+builder operator % (const builder &a, const builder &b) {
+	return a.builder_binary_op<block::mod_expr>(b);
+}
+
+builder var::operator && (const builder& a) {
+	return (builder)*this && a;
+}
+
+builder var::operator || (const builder& a) {
+	return (builder)*this || a;
+}
+builder var::operator + (const builder& a) {
+	return (builder)*this + a;
+}
+builder var::operator - (const builder& a) {
+	return (builder)*this - a;
+}
+builder var::operator * (const builder& a) {
+	return (builder)*this * a;
+}
+builder var::operator / (const builder& a) {
+	return (builder)*this / a;
+}
+builder var::operator < (const builder& a) {
+	return (builder)*this < a;
+}
+builder var::operator > (const builder& a) {
+	return (builder)*this > a;
+}
+builder var::operator <= (const builder& a) {
+	return (builder)*this <= a;
+}
+builder var::operator >= (const builder& a) {
+	return (builder)*this >= a;
+}
+builder var::operator == (const builder& a) {
+	return (builder)*this == a;
+}
+builder var::operator != (const builder& a) {
+	return (builder)*this != a;
+}
+builder var::operator % (const builder& a) {
+	return (builder)*this % a;
+}
+builder var::operator ! () {
+	return !(builder)*this;
 }
 
 builder builder::operator [] (const builder &a) {
@@ -245,12 +209,10 @@ builder var::operator [] (const builder &a) {
 	return this->operator builder () [a];
 }
 
-builder builder::operator ! () {
-	return builder_unary_op<block::not_expr>();
+builder operator ! (const builder &a) {
+	return a.builder_unary_op<block::not_expr>();
 }
-builder var::operator! () {
-	return !this->operator builder();
-}
+
 builder builder::operator = (const builder &a) {
 	assert(builder_context::current_builder_context != nullptr);
 	if (builder_context::current_builder_context->bool_vector.size() > 0)
@@ -282,9 +244,11 @@ builder::operator bool() {
 	builder_context::current_builder_context->commit_uncommitted();
 	return get_next_bool_from_context(builder_context::current_builder_context, block_expr);
 }
+
 var::operator bool() {
 	return (bool)this->operator builder();
 }
+
 
 template <>
 std::vector<block::type::Ptr> extract_type_vector_dyn<> (void) {

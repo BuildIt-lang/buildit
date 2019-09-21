@@ -6,60 +6,53 @@
 #include "blocks/var.h"
 #include "builder/builder_context.h"
 #include <algorithm>
+#include <type_traits>
 
 namespace builder {
 // Builder objects are always alive only for duration of the RUN/SEQUENCE. 
 // Never store pointers to these objects (across runs) or heap allocate them.
 class var;
+template <typename T>
+class dyn_var;
 class builder {
 public:
 	builder() = default;	
 	block::expr::Ptr block_expr;
 	template <typename T>	
-	builder builder_binary_op(const builder &);
+	builder builder_binary_op(const builder &) const;
 	template <typename T>	
-	builder builder_unary_op();
-	builder operator && (const builder &);	
-	builder operator || (const builder &);
-	builder operator + (const builder &);
-	builder operator - (const builder &);
-	builder operator * (const builder &);
-	builder operator / (const builder &);
-	builder operator < (const builder &);
-	builder operator > (const builder &);
-	builder operator <= (const builder &);
-	builder operator >= (const builder &);
-	builder operator == (const builder &);
-	builder operator != (const builder &);
-	builder operator % (const builder &);
-	
+	builder builder_unary_op() const;
+
 	builder operator [] (const builder &);
-	
 	builder operator = (const builder &);
-	
-	builder operator ! ();
+
 	explicit operator bool();
 
 	builder (const int&);
-
+	
 	template<typename... types>	
 	builder operator () (const types&... args);
 	static builder sentinel_builder;
-};
-builder operator && (const int &a, const builder &);
-builder operator || (const int &a, const builder &);
-builder operator + (const int &a, const builder &);
-builder operator - (const int &a, const builder &);
-builder operator * (const int &a, const builder &);
-builder operator / (const int &a, const builder &);
 
-builder operator < (const int &a, const builder &);
-builder operator > (const int &a, const builder &);
-builder operator <= (const int &a, const builder &);
-builder operator >= (const int &a, const builder &);
-builder operator == (const int &a, const builder &);
-builder operator != (const int &a, const builder &);
-builder operator % (const int &a, const builder &);
+
+	// Experimental feature
+};
+
+builder operator && (const builder &, const builder &);
+builder operator || (const builder &, const builder &);
+builder operator + (const builder &, const builder &);
+builder operator - (const builder &, const builder &);
+builder operator * (const builder &, const builder &);
+builder operator / (const builder &, const builder &);
+builder operator < (const builder &, const builder &);
+builder operator > (const builder &, const builder &);
+builder operator <= (const builder &, const builder &);
+builder operator >= (const builder &, const builder &);
+builder operator == (const builder &, const builder &);
+builder operator != (const builder &, const builder &);
+builder operator % (const builder &, const builder &);
+builder operator ! (const builder &);
+
 
 class var {
 public:
@@ -75,9 +68,25 @@ public:
 
 	var() = default;
 	
-	operator builder() const;
+	operator builder () const;
 
 	explicit operator bool();
+
+	builder operator [] (const builder &);	
+	builder operator = (const builder &);
+
+
+	template<typename... types>	
+	builder operator () (const types&... args) {
+		return (operator builder()) (args...);
+	}
+
+	builder operator = (const var& a) {
+		return operator builder() = a;
+	}
+
+	virtual ~var() = default;
+
 	builder operator && (const builder &);
 	builder operator || (const builder &);
 	builder operator + (const builder &);
@@ -91,23 +100,7 @@ public:
 	builder operator == (const builder &);
 	builder operator != (const builder &);
 	builder operator % (const builder &);
-	
-	builder operator [] (const builder &);
-	
-	builder operator = (const builder &);
-
 	builder operator ! ();
-
-	template<typename... types>	
-	builder operator () (const types&... args) {
-		return (operator builder()) (args...);
-	}
-
-	builder operator = (const var& a) {
-		return operator builder() = a;
-	}
-
-	virtual ~var() = default;
 };
 
 template <typename T>
@@ -200,6 +193,8 @@ template <typename T>
 class dyn_var: public var{
 public:
 	using var::operator = ; 
+	using var::operator builder;
+
 	static block::type::Ptr create_block_type(void) {
 		return type_extractor<T>::extract_type();	
 	}	
@@ -236,7 +231,7 @@ public:
 	template <typename TO>
 	dyn_var(const dyn_var<TO>& a): dyn_var<TO>((builder)a) {
 	}
-	dyn_var(const builder& a) {
+	dyn_var(const builder a) {
 		builder_context::current_builder_context->remove_node_from_sequence(a.block_expr);
 		create_dyn_var();
 		if (builder_context::current_builder_context->bool_vector.size() > 0)
@@ -302,6 +297,32 @@ builder builder::operator () (const arg_types& ... args) {
 	builder ret_builder;
 	ret_builder.block_expr = expr;
 	return ret_builder;
+}
+
+
+template<typename T>
+block::expr::Ptr create_foreign_expr (const T t) {
+	assert(builder_context::current_builder_context != nullptr);
+	
+	tracer::tag offset = get_offset_in_function(builder_context::current_builder_context->current_function);
+	
+	typename block::foreign_expr<T>::Ptr expr = std::make_shared<block::foreign_expr<T>>();
+	expr->static_offset = offset;
+	
+	expr->inner_expr = t;
+	
+	builder_context::current_builder_context->add_node_to_sequence(expr);
+	
+	return expr;
+}
+
+template <typename T>
+builder create_foreign_expr_builder (const T t) {
+	if (builder_context::current_builder_context->bool_vector.size() > 0)
+		return builder::sentinel_builder;
+	builder ret_builder;
+	ret_builder.block_expr = create_foreign_expr(t);
+	return ret_builder;	
 }
 
 }

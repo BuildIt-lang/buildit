@@ -39,6 +39,7 @@ class break_stmt;
 class sq_bkt_expr;
 class function_call_expr;
 
+class foreign_expr_base;
 
 class var;
 class type;
@@ -84,6 +85,9 @@ public:
 	virtual void visit (std::shared_ptr<break_stmt>);	
 	virtual void visit (std::shared_ptr<sq_bkt_expr>);
 	virtual void visit (std::shared_ptr<function_call_expr>);
+
+	virtual void visit (std::shared_ptr<foreign_expr_base>);
+	
 
 	virtual void visit (std::shared_ptr<var>);
 	virtual void visit (std::shared_ptr<type>);

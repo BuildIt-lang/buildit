@@ -135,6 +135,9 @@ void block_visitor::visit(function_call_expr::Ptr a) {
 		a->args[i]->accept(this);
 	}
 }
+void block_visitor::visit(foreign_expr_base::Ptr a) {
+	// Since this is an abstract class, we do nothing
+}
 void block_visitor::visit(var::Ptr a) {
 	a->var_type->accept(this);
 }
