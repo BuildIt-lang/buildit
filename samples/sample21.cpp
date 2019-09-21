@@ -18,10 +18,12 @@ public:
 		return false;
 	}		
 };
-
+// We add it in the name space to make sure that the template is properly specialized
+namespace builder {
 template<>
-builder::builder::builder (const dummy& t) {
+builder::builder (const dummy& t) {
 	construct_builder_from_foreign_expr(t);
+}
 }
 
 // A simple straight line code with 2 variable declarations and one operator
