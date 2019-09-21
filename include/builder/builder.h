@@ -14,6 +14,9 @@ namespace builder {
 class var;
 template <typename T>
 class dyn_var;
+template <typename T>
+class static_var;
+
 class builder {
 public:
 	builder() = default;	
@@ -66,6 +69,10 @@ public:
 			return;
 		block_expr = create_foreign_expr(t);	
 		
+	}
+	
+	template <typename T>
+	builder(const static_var<T> &a): builder((const T)a) {
 	}
 };
 
@@ -279,6 +286,11 @@ public:
 		return (builder)*this = a;
 	}
 	builder operator = (const int &a) {
+		return operator = ((builder)a);
+	}
+
+	template <typename Ts>
+	builder operator = (const static_var<Ts> &a) {
 		return operator = ((builder)a);
 	}
 };

@@ -19,6 +19,9 @@ public:
 	operator T&() {
 		return val;
 	}	
+	operator const T&() const {
+		return val;
+	}
 	const T& operator =(const T& t) {
 		val = t;
 		return t;
