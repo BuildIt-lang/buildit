@@ -4,6 +4,7 @@
 
 namespace builder {
 builder builder::sentinel_builder;
+/*
 var::operator builder () const {
 	if (builder_context::current_builder_context->bool_vector.size() > 0)
 		return builder::sentinel_builder;
@@ -20,6 +21,25 @@ var::operator builder () const {
 	ret_builder.block_expr = var_expr;
 	return ret_builder;
 }
+*/
+
+builder::builder(const var& a) {
+	assert(builder_context::current_builder_context != nullptr);
+	block_expr = nullptr;
+	if (builder_context::current_builder_context->bool_vector.size() > 0)
+		return;
+	assert(a.block_var != nullptr);
+	tracer::tag offset = get_offset_in_function(builder_context::current_builder_context->current_function);
+		
+	block::var_expr::Ptr var_expr = std::make_shared<block::var_expr>();
+	var_expr->static_offset = offset;
+	
+	var_expr->var1 = a.block_var;
+	builder_context::current_builder_context->add_node_to_sequence(var_expr);
+	
+	block_expr = var_expr;
+}
+
 
 builder::builder (const int &a) {	
 	assert(builder_context::current_builder_context != nullptr);
@@ -206,7 +226,7 @@ builder builder::operator [] (const builder &a) {
 	return ret_builder;	
 }
 builder var::operator [] (const builder &a) {
-	return this->operator builder () [a];
+	return ((builder)(*this))  [a];
 }
 
 builder operator ! (const builder &a) {
@@ -237,7 +257,7 @@ builder builder::operator = (const builder &a) {
 	return ret_builder;	
 }
 builder var::operator = (const builder &a) {
-	return this->operator builder() = a;
+	return (builder)*this = a;
 }
 
 builder::operator bool() {
@@ -246,7 +266,7 @@ builder::operator bool() {
 }
 
 var::operator bool() {
-	return (bool)this->operator builder();
+	return (bool)(builder)*this;
 }
 
 

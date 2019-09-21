@@ -34,9 +34,41 @@ public:
 	builder operator () (const types&... args);
 	static builder sentinel_builder;
 
+	template <typename T>
+	builder (const T&);
+	
+	builder (const var&);
+	
 
-	// Experimental feature
+	template <typename T>
+	builder(const dyn_var<T>& a) {
+		assert(builder_context::current_builder_context != nullptr);
+		block_expr = nullptr;
+		if (builder_context::current_builder_context->bool_vector.size() > 0)
+			return;
+		assert(a.block_var != nullptr);
+		tracer::tag offset = get_offset_in_function(builder_context::current_builder_context->current_function);
+			
+		block::var_expr::Ptr var_expr = std::make_shared<block::var_expr>();
+		var_expr->static_offset = offset;
+		
+		var_expr->var1 = a.block_var;
+		builder_context::current_builder_context->add_node_to_sequence(var_expr);
+		
+		block_expr = var_expr;
+	}
+
+	template <typename T>
+	void construct_builder_from_foreign_expr(const T &t) {
+		assert(builder_context::current_builder_context != nullptr);
+		block_expr = nullptr;
+		if (builder_context::current_builder_context->bool_vector.size() > 0)
+			return;
+		block_expr = create_foreign_expr(t);	
+		
+	}
 };
+
 
 builder operator && (const builder &, const builder &);
 builder operator || (const builder &, const builder &);
@@ -68,7 +100,7 @@ public:
 
 	var() = default;
 	
-	operator builder () const;
+	//operator builder () const;
 
 	explicit operator bool();
 
@@ -78,11 +110,11 @@ public:
 
 	template<typename... types>	
 	builder operator () (const types&... args) {
-		return (operator builder()) (args...);
+		return ((builder) *this) (args...);
 	}
 
 	builder operator = (const var& a) {
-		return operator builder() = a;
+		return (builder)*this = a;
 	}
 
 	virtual ~var() = default;
@@ -193,7 +225,7 @@ template <typename T>
 class dyn_var: public var{
 public:
 	using var::operator = ; 
-	using var::operator builder;
+	//using var::operator builder;
 
 	static block::type::Ptr create_block_type(void) {
 		return type_extractor<T>::extract_type();	
@@ -244,7 +276,7 @@ public:
 
 	template <typename TO>
 	builder operator = (const dyn_var<TO>& a) {
-		return operator builder() = a;
+		return (builder)*this = a;
 	}
 	builder operator = (const int &a) {
 		return operator = ((builder)a);

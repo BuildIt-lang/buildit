@@ -14,10 +14,13 @@ public:
 			return true;
 		return false;
 	}		
-	operator builder::builder() const {
-		return builder::create_foreign_expr_builder(*this);
-	}
 };
+
+template<>
+builder::builder::builder (const dummy& t) {
+	construct_builder_from_foreign_expr(t);
+}
+
 // A simple straight line code with 2 variable declarations and one operator
 int main(int argc, char* argv[]) {
 	builder::builder_context context;
