@@ -135,6 +135,11 @@ void block_visitor::visit(function_call_expr::Ptr a) {
 		a->args[i]->accept(this);
 	}
 }
+void block_visitor::visit(initializer_list_expr::Ptr a) {
+	for (unsigned int i = 0; i < a->elems.size(); i++) {
+		a->elems[i]->accept(this);
+	}
+}
 void block_visitor::visit(foreign_expr_base::Ptr a) {
 	// Since this is an abstract class, we do nothing
 }

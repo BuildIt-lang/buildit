@@ -38,15 +38,14 @@ static int find_matching_opening(int pc) {
 }
 // BF interpreter
 static void interpret_bf(void) {
-	auto &malloc_func = *malloc_func_ptr;
-	auto &free_func = *free_func_ptr;
+	//auto &malloc_func = *malloc_func_ptr;
+	//auto &free_func = *free_func_ptr;
 	auto &get_value = *get_value_ptr;
 	auto &print_value = *print_value_ptr;
 
 	dyn_var<int> pointer = 0;
 	static_var<int> pc = 0;
-	dyn_var<int*> tape;
-	tape = malloc_func(256);
+	dyn_var<int[256]> tape = {0, 2};
 	while (bf_program[pc] != 0) {
 		if (bf_program[pc] == '>') {
 			pointer = pointer + 1;
@@ -71,7 +70,6 @@ static void interpret_bf(void) {
 		}
 		pc += 1;
 	}
-	free_func(tape);	
 }
 static void print_wrapper_code(std::ostream& oss) {
 	oss << "#include <stdio.h>\n";
@@ -92,6 +90,7 @@ int main(int argc, char* argv[]) {
 	free_func_ptr = context.assume_variable<dyn_var<void (void*)>>("free");
 
 	auto ast = context.extract_ast_from_function(interpret_bf);	
+	ast->dump(std::cout, 0);
 	
 	print_wrapper_code(std::cout);		
 	block::c_code_generator::generate_code(ast, std::cout, 0);	

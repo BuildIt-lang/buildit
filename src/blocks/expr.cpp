@@ -130,6 +130,12 @@ void function_call_expr::dump(std::ostream &oss, int indent) {
 	for (unsigned int i = 0; i < args.size(); i++) 
 		args[i]->dump(oss, indent+1);
 }
+void initializer_list_expr::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "INITIALIZER_LIST_EXPR" << std::endl;
+	for (unsigned int i = 0; i < elems.size(); i++)
+		elems[i]->dump(oss, indent+1);
+}
 void var_expr::dump(std::ostream &oss, int indent) {
 	printer::indent(oss, indent);
 	oss << "VAR_EXPR" << std::endl;

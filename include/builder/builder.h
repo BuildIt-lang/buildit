@@ -279,6 +279,7 @@ public:
 	}
 	dyn_var(const int& a): dyn_var((builder)a) {
 	}
+	dyn_var(const std::initializer_list<builder> &a);
 	virtual ~dyn_var() = default;
 
 	template <typename TO>

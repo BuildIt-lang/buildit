@@ -386,6 +386,31 @@ public:
 	}
 };
 
+class initializer_list_expr: public expr {
+public:
+	typedef std::shared_ptr<initializer_list_expr> Ptr;
+	virtual void dump(std::ostream&, int) override;
+	virtual void accept(block_visitor* a) override {
+		a->visit(self<initializer_list_expr>());
+	}
+
+	std::vector<expr::Ptr> elems;
+	virtual bool is_same(block::Ptr other) override {
+		if (static_offset != other->static_offset) 
+			return false;
+		if (!isa<initializer_list_expr>(other)) 
+			return false;
+		initializer_list_expr::Ptr other_expr = to<initializer_list_expr>(other);
+		if (elems.size() != other_expr->elems.size())
+			return false;
+		for (unsigned int i = 0; i < elems.size(); i++) {
+			if (!elems[i]->is_same(other_expr->elems[i]))
+				return false;
+		}
+		return true;
+	}
+};
+
 // We first implement a base class for foreign_expr for visitor purposes
 class foreign_expr_base: public expr {
 public:

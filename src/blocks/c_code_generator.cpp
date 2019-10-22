@@ -263,4 +263,13 @@ void c_code_generator::visit(function_call_expr::Ptr a) {
 	}
 	oss << ")";
 }
+void c_code_generator::visit(initializer_list_expr::Ptr a) {
+	oss << "{";
+	for (unsigned int i = 0; i < a->elems.size(); i++) {
+		a->elems[i]->accept(this);
+		if (i != a->elems.size() - 1)
+			oss << ", ";
+	}
+	oss << "}";
+}
 }
