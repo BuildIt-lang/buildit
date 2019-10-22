@@ -4,8 +4,7 @@ void print_value(int x) {printf("%c", x);}
 int get_value(void) {char x; scanf(" %c", &x); return x;}
 int main(int argc, char* argv[]) {
   int var0 = 0;
-  int* var1;
-  var1 = malloc(256);
+  int var1[256] = {0};
   var1[var0] = (var1[var0] + 1) % 256;
   var1[var0] = (var1[var0] + 1) % 256;
   var1[var0] = (var1[var0] + 1) % 256;
@@ -112,5 +111,4 @@ int main(int argc, char* argv[]) {
   var1[var0] = (var1[var0] + 1) % 256;
   var1[var0] = (var1[var0] + 1) % 256;
   print_value(var1[var0]);
-  free(var1);
 }

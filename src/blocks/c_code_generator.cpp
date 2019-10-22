@@ -151,7 +151,12 @@ void c_code_generator::visit(decl_stmt::Ptr a) {
 		oss << "[";
 		if (type->size != -1)
 			oss << type->size;
-		oss << "];";
+		oss << "]";
+		if (a->init_expr != nullptr) {
+			oss << " = ";
+			a->init_expr->accept(this);
+		}
+		oss << ";";
 		return;
 	}
 

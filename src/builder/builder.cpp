@@ -41,6 +41,7 @@ builder::builder(const var& a) {
 }
 
 
+
 builder::builder (const int &a) {	
 	assert(builder_context::current_builder_context != nullptr);
 	block_expr = nullptr;
@@ -268,6 +269,7 @@ builder::operator bool() {
 var::operator bool() {
 	return (bool)(builder)*this;
 }
+
 
 
 template <>

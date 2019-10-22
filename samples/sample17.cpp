@@ -11,8 +11,6 @@ using builder::dyn_var;
 const char *bf_program;
 dyn_var<void (int)> *print_value_ptr;
 dyn_var<int ()> *get_value_ptr;
-dyn_var<void* (int)> *malloc_func_ptr;
-dyn_var<void (void*)> *free_func_ptr;
 
 static int find_matching_closing(int pc) {
 	int count = 1;
@@ -38,14 +36,12 @@ static int find_matching_opening(int pc) {
 }
 // BF interpreter
 static void interpret_bf(void) {
-	//auto &malloc_func = *malloc_func_ptr;
-	//auto &free_func = *free_func_ptr;
 	auto &get_value = *get_value_ptr;
 	auto &print_value = *print_value_ptr;
 
 	dyn_var<int> pointer = 0;
 	static_var<int> pc = 0;
-	dyn_var<int[256]> tape = {0, 2};
+	dyn_var<int[256]> tape = {0};
 	while (bf_program[pc] != 0) {
 		if (bf_program[pc] == '>') {
 			pointer = pointer + 1;
@@ -86,11 +82,8 @@ int main(int argc, char* argv[]) {
 
 	print_value_ptr = context.assume_variable<dyn_var<void (int)>>("print_value");
 	get_value_ptr = context.assume_variable<dyn_var<int (void)>>("get_value");
-	malloc_func_ptr = context.assume_variable<dyn_var<void* (int)>>("malloc");
-	free_func_ptr = context.assume_variable<dyn_var<void (void*)>>("free");
 
 	auto ast = context.extract_ast_from_function(interpret_bf);	
-	ast->dump(std::cout, 0);
 	
 	print_wrapper_code(std::cout);		
 	block::c_code_generator::generate_code(ast, std::cout, 0);	

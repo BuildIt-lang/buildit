@@ -7,6 +7,7 @@
 #include "builder/builder_context.h"
 #include <algorithm>
 #include <type_traits>
+#include <initializer_list>
 
 namespace builder {
 // Builder objects are always alive only for duration of the RUN/SEQUENCE. 
@@ -279,7 +280,25 @@ public:
 	}
 	dyn_var(const int& a): dyn_var((builder)a) {
 	}
-	dyn_var(const std::initializer_list<builder> &a);
+	dyn_var(const std::initializer_list<builder> &_a) {
+		std::vector<builder> a (_a);
+		
+		assert(builder_context::current_builder_context != nullptr);
+		for (unsigned int i = 0; i < a.size(); i++) {
+			builder_context::current_builder_context->remove_node_from_sequence(a[i].block_expr);
+		}	
+		create_dyn_var();
+		if (builder_context::current_builder_context->bool_vector.size() > 0)
+			return;
+		
+		tracer::tag offset = get_offset_in_function(builder_context::current_builder_context->current_function);
+		block::initializer_list_expr::Ptr list_expr = std::make_shared<block::initializer_list_expr>();
+		list_expr->static_offset = offset;
+		for (unsigned int i = 0; i < a.size(); i++) {
+			list_expr->elems.push_back(a[i].block_expr);
+		}	
+		block_decl_stmt->init_expr = list_expr;
+	}
 	virtual ~dyn_var() = default;
 
 	template <typename TO>
