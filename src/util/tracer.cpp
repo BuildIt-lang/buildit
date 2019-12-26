@@ -17,7 +17,7 @@ static void set_call_point(ast_function_type _function) {
 		unsigned long long address;
 #ifdef __linux
 		if (sscanf(backtrace_functions[i], "%*[^+]+%x) [%llx]", &offset, &address) != 2) {
-			printf("Scanning of backtrace failed, result might be bad\n");
+			//printf("Scanning of backtrace failed, result might be bad\n");
 			continue;
 		}
 #elif __APPLE__
