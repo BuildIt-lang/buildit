@@ -108,9 +108,15 @@ builder builder::builder_binary_op(const builder &a) const {
 builder operator && (const builder &a, const builder& b) {
 	return a.builder_binary_op<block::and_expr>(b);
 }
+builder operator && (const builder &a, const bool& b) {
+	return a.builder_binary_op<block::and_expr>((builder)b);
+}
 
 builder operator || (const builder &a, const builder &b) {
 	return a.builder_binary_op<block::or_expr>(b);
+}
+builder operator || (const builder &a, const bool& b) {
+	return a.builder_binary_op<block::or_expr>((builder)b);
 }
 
 

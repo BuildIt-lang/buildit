@@ -11,22 +11,31 @@ static void set_call_point(ast_function_type _function) {
 	int backtrace_size = backtrace(buffer, 20);	
 	char** backtrace_functions = backtrace_symbols(buffer, backtrace_size);
 	int i;
+	bool found = false;
 	for (i = 0; i < backtrace_size; i++) {
 		unsigned int offset;
 		unsigned long long address;
 #ifdef __linux
-		if (sscanf(backtrace_functions[i], "%*[^+]+%x) [%llx]", &offset, &address) != 2)
+		if (sscanf(backtrace_functions[i], "%*[^+]+%x) [%llx]", &offset, &address) != 2) {
+			printf("Scanning of backtrace failed, result might be bad\n");
 			continue;
+		}
 #elif __APPLE__
-		if (sscanf(backtrace_functions[i], "%*[^+]+ %i", &offset) != 1)
+		if (sscanf(backtrace_functions[i], "%*[^+]+ %i", &offset) != 1) {
+			printf("Scanning of backtrace failed, result might be bad\n");
 			continue;
+		}
 		address = (unsigned long long)buffer[i];
 #else
 		#error Backtracer currently only supported for Linux and MacOS
 #endif
-		if (function == address - offset)
+		if (function == address - offset) {
+			found = true;
 			break;	
+		}
 	}
+	if (!found)
+		assert(false && "Call point not found\n");
 	call_point = (unsigned long long)buffer[i + 1];
 	free (backtrace_functions);	
 }

@@ -33,6 +33,9 @@ public:
 	explicit operator bool();
 
 	builder (const int&);
+	builder (const bool& b): builder((int)b) {}
+	builder (const char& c): builder((int)c) {}
+	builder (unsigned char &c): builder((int)c) {}
 	
 	template<typename... types>	
 	builder operator () (const types&... args);
@@ -79,7 +82,9 @@ public:
 
 
 builder operator && (const builder &, const builder &);
+builder operator && (const builder &, const bool &);
 builder operator || (const builder &, const builder &);
+builder operator || (const builder &, const bool &);
 builder operator + (const builder &, const builder &);
 builder operator - (const builder &, const builder &);
 builder operator * (const builder &, const builder &);
@@ -158,6 +163,17 @@ public:
 		return type;
 	}
 };
+
+template <>
+class type_extractor<char> {
+public:
+	static block::type::Ptr extract_type(void) {
+		block::scalar_type::Ptr type = std::make_shared<block::scalar_type>();
+		type->scalar_type_id = block::scalar_type::CHAR_TYPE;
+		return type;
+	}
+};
+
 
 template <typename T>
 class type_extractor<T*> {

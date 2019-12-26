@@ -5,6 +5,11 @@ namespace block{
 void var::dump(std::ostream &oss, int indent) {
 	printer::indent(oss, indent);
 	oss << "VAR (" << var_name << ")" << std::endl;	
+
+#ifdef DEBUG_VARS	
+	printer::indent(oss, indent);
+	oss << static_offset.stringify() << std::endl;
+#endif
 }
 void type::dump(std::ostream &oss, int indent) {
 }
@@ -13,6 +18,8 @@ void scalar_type::dump(std::ostream &oss, int indent) {
 	oss << "SCALAR_TYPE (";
 	if (scalar_type_id == INT_TYPE)
 		oss << "INT";
+	if (scalar_type_id == CHAR_TYPE)
+		oss << "CHAR";
 	else if (scalar_type_id == VOID_TYPE)
 		oss << "VOID";
 	oss << ")" << std::endl;

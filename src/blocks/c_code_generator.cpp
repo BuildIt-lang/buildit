@@ -105,6 +105,8 @@ void c_code_generator::visit(stmt_block::Ptr a) {
 void c_code_generator::visit(scalar_type::Ptr type) {
 	if (type->scalar_type_id == scalar_type::INT_TYPE) {
 		oss << "int";
+	} else if (type->scalar_type_id == scalar_type::CHAR_TYPE) {
+		oss << "char";
 	} else if (type->scalar_type_id == scalar_type::VOID_TYPE) {
 		oss << "void";
 	}
