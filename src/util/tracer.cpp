@@ -22,7 +22,7 @@ static void set_call_point(ast_function_type _function) {
 		}
 #elif __APPLE__
 		if (sscanf(backtrace_functions[i], "%*[^+]+ %i", &offset) != 1) {
-			printf("Scanning of backtrace failed, result might be bad\n");
+			//printf("Scanning of backtrace failed, result might be bad\n");
 			continue;
 		}
 		address = (unsigned long long)buffer[i];
