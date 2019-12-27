@@ -1,0 +1,89 @@
+STMT_BLOCK
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (var0)
+    NO_INITIALIZATION
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (var1)
+    VAR_EXPR
+      VAR (var0)
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (var2)
+    NO_INITIALIZATION
+  IF_STMT
+    GT_EXPR
+      VAR_EXPR
+        VAR (var1)
+      INT_CONST (10)
+    STMT_BLOCK
+      DECL_STMT
+        SCALAR_TYPE (INT)
+        VAR (var3)
+        INT_CONST (9)
+      EXPR_STMT
+        ASSIGN_EXPR
+          VAR_EXPR
+            VAR (var2)
+          VAR_EXPR
+            VAR (var3)
+    STMT_BLOCK
+      DECL_STMT
+        SCALAR_TYPE (INT)
+        VAR (var4)
+        INT_CONST (0)
+      EXPR_STMT
+        ASSIGN_EXPR
+          VAR_EXPR
+            VAR (var2)
+          VAR_EXPR
+            VAR (var4)
+  IF_STMT
+    VAR_EXPR
+      VAR (var2)
+    STMT_BLOCK
+      DECL_STMT
+        SCALAR_TYPE (INT)
+        VAR (var5)
+        INT_CONST (0)
+      EXPR_STMT
+        ASSIGN_EXPR
+          VAR_EXPR
+            VAR (var5)
+          INT_CONST (0)
+    STMT_BLOCK
+  IF_STMT
+    VAR_EXPR
+      VAR (var0)
+    STMT_BLOCK
+      DECL_STMT
+        SCALAR_TYPE (INT)
+        VAR (var6)
+        INT_CONST (0)
+      EXPR_STMT
+        ASSIGN_EXPR
+          VAR_EXPR
+            VAR (var6)
+          INT_CONST (0)
+    STMT_BLOCK
+{
+  int var0;
+  int var1 = var0;
+  int var2;
+  if (var1 > 10) {
+    int var3 = 9;
+    var2 = var3;
+  } else {
+    int var4 = 0;
+    var2 = var4;
+  }
+  if (var2) {
+    int var5 = 0;
+    var5 = 0;
+  } 
+  if (var0) {
+    int var6 = 0;
+    var6 = 0;
+  } 
+}

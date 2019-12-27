@@ -125,6 +125,19 @@ public:
 			return false;	
 		return true;
 	}
+	virtual bool needs_splitting(if_stmt::Ptr other) {
+		if (is_same(other))
+			return false;
+		if (static_offset != other->static_offset)
+			return false;
+		if (!then_stmt->is_same(other->then_stmt))
+			return false;
+		if (!else_stmt->is_same(other->else_stmt))
+			return false;
+		if (!cond->is_same(other->cond))
+			return true;
+		assert(false && "Statement unreachable");	
+	}
 
 };
 class label: public block {

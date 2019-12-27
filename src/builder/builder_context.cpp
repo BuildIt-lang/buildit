@@ -34,12 +34,16 @@ void builder_context::add_stmt_to_current_block(block::stmt::Ptr s, bool check_f
 		if (block::isa<block::expr_stmt>(s) && block::isa<block::if_stmt>(parent->stmts[i])){
 			block::if_stmt::Ptr p_stmt = block::to<block::if_stmt>(parent->stmts[i]);
 			block::expr_stmt::Ptr expr = block::to<block::expr_stmt>(s);
+			
 			if (p_stmt->cond->is_same(expr->expr1))
 				throw MemoizationException(s->static_offset, parent, i);
+			
 				
 		}
+		
 		if (parent->stmts[i]->is_same(s))
 			throw MemoizationException(s->static_offset, parent, i);
+		
 			
 	}
 	visited_offsets.insert(s->static_offset.stringify());
@@ -114,16 +118,75 @@ static void trim_ast_at_offset(block::stmt::Ptr ast, tracer::tag offset) {
 	top_level_block->stmts = new_stmts;
 }
 
-static std::vector<block::stmt::Ptr> trim_common_from_back(block::stmt::Ptr ast1, block::stmt::Ptr ast2) {
+static std::pair<std::vector<block::stmt::Ptr>, std::vector<block::stmt::Ptr>> trim_common_from_back(block::stmt::Ptr ast1, block::stmt::Ptr ast2) {
 	std::vector<block::stmt::Ptr> trimmed_stmts;
 	std::vector<block::stmt::Ptr> &ast1_stmts = block::to<block::stmt_block>(ast1)->stmts;
 	std::vector<block::stmt::Ptr> &ast2_stmts = block::to<block::stmt_block>(ast2)->stmts;
+	
+	std::vector<block::stmt::Ptr> split_decls;
+
 	if (ast1_stmts.size() > 0 && ast2_stmts.size() > 0) {
 		while(1) {
 			if (ast1_stmts.size() == 0 || ast2_stmts.size() == 0)
 				break;
-			if (!ast1_stmts.back()->is_same(ast2_stmts.back()))
+			if (!ast1_stmts.back()->is_same(ast2_stmts.back())) {
+				// There is a special case where there could be an if stmt with same body but different conditions
+				// We handle that by splitting the condition from the if stmt using a variable
+				if (block::isa<block::if_stmt>(ast1_stmts.back()) && block::isa<block::if_stmt>(ast2_stmts.back())) {
+					block::if_stmt::Ptr if1 = block::to<block::if_stmt>(ast1_stmts.back());
+					block::if_stmt::Ptr if2 = block::to<block::if_stmt>(ast2_stmts.back());
+					if (if1->needs_splitting(if2)) {
+						ast1_stmts.pop_back();
+						ast2_stmts.pop_back();
+						
+						block::var::Ptr cond_var = std::make_shared<block::var>();
+						cond_var->var_type = type_extractor<int>::extract_type();
+						cond_var->static_offset = if1->static_offset;
+						
+						block::decl_stmt::Ptr decl_stmt = std::make_shared<block::decl_stmt>();
+						decl_stmt->static_offset = if1->static_offset;
+						decl_stmt->decl_var = cond_var;
+						decl_stmt->init_expr = nullptr;
+						
+						split_decls.push_back(decl_stmt);
+						
+						block::expr_stmt::Ptr stmt1 = std::make_shared<block::expr_stmt>();
+						stmt1->static_offset = if1->static_offset;
+						block::assign_expr::Ptr assign1 = std::make_shared<block::assign_expr>();
+						assign1->static_offset = if1->static_offset;
+						block::var_expr::Ptr varexpr1 = std::make_shared<block::var_expr>();
+						varexpr1->static_offset = if1->static_offset;
+						varexpr1->var1 = cond_var;
+						assign1->var1 = varexpr1;
+						assign1->expr1 = if1->cond;
+						stmt1->expr1 = assign1;
+						ast1_stmts.push_back(stmt1);
+									
+						block::expr_stmt::Ptr stmt2 = std::make_shared<block::expr_stmt>();
+						stmt2->static_offset = if2->static_offset;
+						block::assign_expr::Ptr assign2 = std::make_shared<block::assign_expr>();
+						assign2->static_offset = if2->static_offset;
+						block::var_expr::Ptr varexpr2 = std::make_shared<block::var_expr>();
+						varexpr2->static_offset = if2->static_offset;
+						varexpr2->var1 = cond_var;
+						assign2->var1 = varexpr2;
+						assign2->expr1 = if2->cond;
+						stmt2->expr1 = assign2;
+						ast2_stmts.push_back(stmt2);
+							
+						block::var_expr::Ptr varexpr3 = std::make_shared<block::var_expr>();
+						varexpr3->static_offset = if2->static_offset;
+						varexpr3->var1 = cond_var;
+						if1->cond = varexpr3;
+						trimmed_stmts.push_back(if1);		
+						continue;
+
+					} else {
+						break;
+					}
+				}
 				break;	
+			}
 			if (ast1_stmts.back()->static_offset.is_empty()) {
 				// The only possibility is that these two are goto statements. Gotos are same only if they are going to the same label
 				assert(block::isa<block::goto_stmt>(ast1_stmts.back()));
@@ -140,7 +203,7 @@ static std::vector<block::stmt::Ptr> trim_common_from_back(block::stmt::Ptr ast1
 		}
 	}
 	std::reverse(trimmed_stmts.begin(), trimmed_stmts.end());
-	return trimmed_stmts;
+	return {trimmed_stmts, split_decls};
 }
 block::stmt::Ptr builder_context::extract_ast_from_lambda(std::function <void (void)> lambda) {
 	internal_stored_lambda = lambda;
@@ -232,8 +295,10 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(ast_functio
 		trim_ast_at_offset(false_ast, e.static_offset);
 
 
-
-		std::vector<block::stmt::Ptr> trimmed_stmts = trim_common_from_back(true_ast, false_ast);
+		std::pair<std::vector<block::stmt::Ptr>, std::vector<block::stmt::Ptr>> trim_pair = trim_common_from_back(true_ast, false_ast);
+		
+		std::vector<block::stmt::Ptr> trimmed_stmts = trim_pair.first;
+		std::vector<block::stmt::Ptr> split_decls = trim_pair.second;
 		
 		erase_tag(e.static_offset);
 		
@@ -247,6 +312,8 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(ast_functio
 		new_if_stmt->then_stmt = true_ast;
 		new_if_stmt->else_stmt = false_ast;
 		
+		for (auto stmt: split_decls)
+			add_stmt_to_current_block(stmt, false);
 		add_stmt_to_current_block(new_if_stmt, false);
 		
 		std::copy(trimmed_stmts.begin(), trimmed_stmts.end(), std::back_inserter(current_block_stmt->stmts));
@@ -271,6 +338,22 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(ast_functio
 	// Update the memoized table with the stmt block we just created 
 	for (unsigned int i = 0; i < current_block_stmt->stmts.size(); i++) {
 		block::stmt::Ptr s = current_block_stmt->stmts[i];
+		// If any of the statements are if conditions, remove the internal statements from the table
+		if (block::isa<block::if_stmt>(s)) {
+			block::if_stmt::Ptr if1 = block::to<block::if_stmt>(s);
+			assert(block::isa<block::stmt_block>(if1->then_stmt));
+			assert(block::isa<block::stmt_block>(if1->else_stmt));
+			for (auto &stmt: block::to<block::stmt_block>(if1->then_stmt)->stmts) {
+				auto it = memoized_tags->map.find(stmt->static_offset.stringify());
+				if (it != memoized_tags->map.end())
+					memoized_tags->map.erase(it);
+			}				
+			for (auto &stmt: block::to<block::stmt_block>(if1->else_stmt)->stmts) {
+				auto it = memoized_tags->map.find(stmt->static_offset.stringify());
+				if (it != memoized_tags->map.end())
+					memoized_tags->map.erase(it);
+			}				
+		} 
 		memoized_tags->map[s->static_offset.stringify()] = current_block_stmt;
 	}
 
