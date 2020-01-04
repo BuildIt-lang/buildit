@@ -60,6 +60,10 @@ public:
 		return output_string;
 	}
 };
+
+
+tag get_unique_tag(void);
+
 typedef void (*ast_function_type) (void);
 
 

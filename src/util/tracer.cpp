@@ -60,4 +60,14 @@ tag get_offset_in_function_impl(ast_function_type _function, builder::builder_co
 	}
 	return new_tag;
 }
+
+static unsigned long long unique_tag_counter = 0;
+tag get_unique_tag(void) {
+	tag new_tag;
+	new_tag.pointers.push_back(0);
+	new_tag.pointers.push_back(unique_tag_counter);
+	unique_tag_counter++;
+	return new_tag;
+}
+
 }
