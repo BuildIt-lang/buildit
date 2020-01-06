@@ -1,0 +1,353 @@
+STMT_BLOCK
+  FOR_STMT
+    DECL_STMT
+      BUILDER_VAR_TYPE (STATIC_VAR)
+        SCALAR_TYPE (INT)
+      VAR (var0)
+      INT_CONST (0)
+    LT_EXPR
+      VAR_EXPR
+        VAR (var0)
+      INT_CONST (0)
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (var0)
+      PLUS_EXPR
+        VAR_EXPR
+          VAR (var0)
+        INT_CONST (1)
+    STMT_BLOCK
+      DECL_STMT
+        BUILDER_VAR_TYPE (DYN_VAR)
+          SCALAR_TYPE (INT)
+        VAR (var1)
+        INT_CONST (0)
+      EXPR_STMT
+        ASSIGN_EXPR
+          VAR_EXPR
+            VAR (var1)
+          PLUS_EXPR
+            VAR_EXPR
+              VAR (var1)
+            INT_CONST (1)
+  FOR_STMT
+    DECL_STMT
+      BUILDER_VAR_TYPE (STATIC_VAR)
+        SCALAR_TYPE (INT)
+      VAR (var2)
+      INT_CONST (0)
+    LT_EXPR
+      VAR_EXPR
+        VAR (var2)
+      INT_CONST (1)
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (var2)
+      PLUS_EXPR
+        VAR_EXPR
+          VAR (var2)
+        INT_CONST (1)
+    STMT_BLOCK
+      DECL_STMT
+        BUILDER_VAR_TYPE (DYN_VAR)
+          SCALAR_TYPE (INT)
+        VAR (var3)
+        INT_CONST (1)
+      EXPR_STMT
+        ASSIGN_EXPR
+          VAR_EXPR
+            VAR (var3)
+          PLUS_EXPR
+            VAR_EXPR
+              VAR (var3)
+            INT_CONST (1)
+  FOR_STMT
+    DECL_STMT
+      BUILDER_VAR_TYPE (STATIC_VAR)
+        SCALAR_TYPE (INT)
+      VAR (var4)
+      INT_CONST (0)
+    LT_EXPR
+      VAR_EXPR
+        VAR (var4)
+      INT_CONST (2)
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (var4)
+      PLUS_EXPR
+        VAR_EXPR
+          VAR (var4)
+        INT_CONST (1)
+    STMT_BLOCK
+      DECL_STMT
+        BUILDER_VAR_TYPE (DYN_VAR)
+          SCALAR_TYPE (INT)
+        VAR (var5)
+        INT_CONST (2)
+      EXPR_STMT
+        ASSIGN_EXPR
+          VAR_EXPR
+            VAR (var5)
+          PLUS_EXPR
+            VAR_EXPR
+              VAR (var5)
+            INT_CONST (1)
+  FOR_STMT
+    DECL_STMT
+      BUILDER_VAR_TYPE (STATIC_VAR)
+        SCALAR_TYPE (INT)
+      VAR (var6)
+      INT_CONST (0)
+    LT_EXPR
+      VAR_EXPR
+        VAR (var6)
+      INT_CONST (3)
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (var6)
+      PLUS_EXPR
+        VAR_EXPR
+          VAR (var6)
+        INT_CONST (1)
+    STMT_BLOCK
+      DECL_STMT
+        BUILDER_VAR_TYPE (DYN_VAR)
+          SCALAR_TYPE (INT)
+        VAR (var7)
+        INT_CONST (3)
+      EXPR_STMT
+        ASSIGN_EXPR
+          VAR_EXPR
+            VAR (var7)
+          PLUS_EXPR
+            VAR_EXPR
+              VAR (var7)
+            INT_CONST (1)
+  FOR_STMT
+    DECL_STMT
+      BUILDER_VAR_TYPE (STATIC_VAR)
+        SCALAR_TYPE (INT)
+      VAR (var8)
+      INT_CONST (0)
+    LT_EXPR
+      VAR_EXPR
+        VAR (var8)
+      INT_CONST (4)
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (var8)
+      PLUS_EXPR
+        VAR_EXPR
+          VAR (var8)
+        INT_CONST (1)
+    STMT_BLOCK
+      DECL_STMT
+        BUILDER_VAR_TYPE (DYN_VAR)
+          SCALAR_TYPE (INT)
+        VAR (var9)
+        INT_CONST (4)
+      EXPR_STMT
+        ASSIGN_EXPR
+          VAR_EXPR
+            VAR (var9)
+          PLUS_EXPR
+            VAR_EXPR
+              VAR (var9)
+            INT_CONST (1)
+  FOR_STMT
+    DECL_STMT
+      BUILDER_VAR_TYPE (STATIC_VAR)
+        SCALAR_TYPE (INT)
+      VAR (var10)
+      INT_CONST (0)
+    LT_EXPR
+      VAR_EXPR
+        VAR (var10)
+      INT_CONST (5)
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (var10)
+      PLUS_EXPR
+        VAR_EXPR
+          VAR (var10)
+        INT_CONST (1)
+    STMT_BLOCK
+      DECL_STMT
+        BUILDER_VAR_TYPE (DYN_VAR)
+          SCALAR_TYPE (INT)
+        VAR (var11)
+        INT_CONST (5)
+      EXPR_STMT
+        ASSIGN_EXPR
+          VAR_EXPR
+            VAR (var11)
+          PLUS_EXPR
+            VAR_EXPR
+              VAR (var11)
+            INT_CONST (1)
+  FOR_STMT
+    DECL_STMT
+      BUILDER_VAR_TYPE (STATIC_VAR)
+        SCALAR_TYPE (INT)
+      VAR (var12)
+      INT_CONST (0)
+    LT_EXPR
+      VAR_EXPR
+        VAR (var12)
+      INT_CONST (6)
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (var12)
+      PLUS_EXPR
+        VAR_EXPR
+          VAR (var12)
+        INT_CONST (1)
+    STMT_BLOCK
+      DECL_STMT
+        BUILDER_VAR_TYPE (DYN_VAR)
+          SCALAR_TYPE (INT)
+        VAR (var13)
+        INT_CONST (6)
+      EXPR_STMT
+        ASSIGN_EXPR
+          VAR_EXPR
+            VAR (var13)
+          PLUS_EXPR
+            VAR_EXPR
+              VAR (var13)
+            INT_CONST (1)
+  FOR_STMT
+    DECL_STMT
+      BUILDER_VAR_TYPE (STATIC_VAR)
+        SCALAR_TYPE (INT)
+      VAR (var14)
+      INT_CONST (0)
+    LT_EXPR
+      VAR_EXPR
+        VAR (var14)
+      INT_CONST (7)
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (var14)
+      PLUS_EXPR
+        VAR_EXPR
+          VAR (var14)
+        INT_CONST (1)
+    STMT_BLOCK
+      DECL_STMT
+        BUILDER_VAR_TYPE (DYN_VAR)
+          SCALAR_TYPE (INT)
+        VAR (var15)
+        INT_CONST (7)
+      EXPR_STMT
+        ASSIGN_EXPR
+          VAR_EXPR
+            VAR (var15)
+          PLUS_EXPR
+            VAR_EXPR
+              VAR (var15)
+            INT_CONST (1)
+  FOR_STMT
+    DECL_STMT
+      BUILDER_VAR_TYPE (STATIC_VAR)
+        SCALAR_TYPE (INT)
+      VAR (var16)
+      INT_CONST (0)
+    LT_EXPR
+      VAR_EXPR
+        VAR (var16)
+      INT_CONST (8)
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (var16)
+      PLUS_EXPR
+        VAR_EXPR
+          VAR (var16)
+        INT_CONST (1)
+    STMT_BLOCK
+      DECL_STMT
+        BUILDER_VAR_TYPE (DYN_VAR)
+          SCALAR_TYPE (INT)
+        VAR (var17)
+        INT_CONST (8)
+      EXPR_STMT
+        ASSIGN_EXPR
+          VAR_EXPR
+            VAR (var17)
+          PLUS_EXPR
+            VAR_EXPR
+              VAR (var17)
+            INT_CONST (1)
+  FOR_STMT
+    DECL_STMT
+      BUILDER_VAR_TYPE (STATIC_VAR)
+        SCALAR_TYPE (INT)
+      VAR (var18)
+      INT_CONST (0)
+    LT_EXPR
+      VAR_EXPR
+        VAR (var18)
+      INT_CONST (9)
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (var18)
+      PLUS_EXPR
+        VAR_EXPR
+          VAR (var18)
+        INT_CONST (1)
+    STMT_BLOCK
+      DECL_STMT
+        BUILDER_VAR_TYPE (DYN_VAR)
+          SCALAR_TYPE (INT)
+        VAR (var19)
+        INT_CONST (9)
+      EXPR_STMT
+        ASSIGN_EXPR
+          VAR_EXPR
+            VAR (var19)
+          PLUS_EXPR
+            VAR_EXPR
+              VAR (var19)
+            INT_CONST (1)
+{
+  for (builder::static_var<int> var0 = 0; var0 < 0; var0 = var0 + 1) {
+    builder::dyn_var<int> var1 = 0;
+    var1 = var1 + 1;
+  }
+  for (builder::static_var<int> var2 = 0; var2 < 1; var2 = var2 + 1) {
+    builder::dyn_var<int> var3 = 1;
+    var3 = var3 + 1;
+  }
+  for (builder::static_var<int> var4 = 0; var4 < 2; var4 = var4 + 1) {
+    builder::dyn_var<int> var5 = 2;
+    var5 = var5 + 1;
+  }
+  for (builder::static_var<int> var6 = 0; var6 < 3; var6 = var6 + 1) {
+    builder::dyn_var<int> var7 = 3;
+    var7 = var7 + 1;
+  }
+  for (builder::static_var<int> var8 = 0; var8 < 4; var8 = var8 + 1) {
+    builder::dyn_var<int> var9 = 4;
+    var9 = var9 + 1;
+  }
+  for (builder::static_var<int> var10 = 0; var10 < 5; var10 = var10 + 1) {
+    builder::dyn_var<int> var11 = 5;
+    var11 = var11 + 1;
+  }
+  for (builder::static_var<int> var12 = 0; var12 < 6; var12 = var12 + 1) {
+    builder::dyn_var<int> var13 = 6;
+    var13 = var13 + 1;
+  }
+  for (builder::static_var<int> var14 = 0; var14 < 7; var14 = var14 + 1) {
+    builder::dyn_var<int> var15 = 7;
+    var15 = var15 + 1;
+  }
+  for (builder::static_var<int> var16 = 0; var16 < 8; var16 = var16 + 1) {
+    builder::dyn_var<int> var17 = 8;
+    var17 = var17 + 1;
+  }
+  for (builder::static_var<int> var18 = 0; var18 < 9; var18 = var18 + 1) {
+    builder::dyn_var<int> var19 = 9;
+    var19 = var19 + 1;
+  }
+}

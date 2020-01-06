@@ -57,6 +57,21 @@ public:
 	
 	virtual void dump(std::ostream&, int) override;
 };
+
+//Types for complete closure
+class builder_var_type: public type {
+public:
+	typedef std::shared_ptr<builder_var_type> Ptr;
+	enum {DYN_VAR, STATIC_VAR} builder_var_type_id;
+	virtual void accept(block_visitor* a) override {
+		a->visit(self<builder_var_type>());
+	}
+	type::Ptr closure_type;
+	
+	virtual void dump(std::ostream&, int) override;
+};
+
+
 class var: public block {
 public:
 	typedef std::shared_ptr<var> Ptr;

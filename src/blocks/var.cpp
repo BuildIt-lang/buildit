@@ -18,7 +18,7 @@ void scalar_type::dump(std::ostream &oss, int indent) {
 	oss << "SCALAR_TYPE (";
 	if (scalar_type_id == INT_TYPE)
 		oss << "INT";
-	if (scalar_type_id == CHAR_TYPE)
+	else if (scalar_type_id == CHAR_TYPE)
 		oss << "CHAR";
 	else if (scalar_type_id == VOID_TYPE)
 		oss << "VOID";
@@ -43,5 +43,15 @@ void array_type::dump(std::ostream &oss, int indent) {
 	printer::indent(oss, indent+1);
 	oss << size << std::endl;
 	
+}
+void builder_var_type::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "BUILDER_VAR_TYPE (";
+	if (builder_var_type_id == builder_var_type::DYN_VAR)
+		oss << "DYN_VAR";
+	else if (builder_var_type_id == builder_var_type::STATIC_VAR)
+		oss << "STATIC_VAR";
+	oss << ")" << std::endl;
+	closure_type->dump(oss, indent+1);
 }
 }

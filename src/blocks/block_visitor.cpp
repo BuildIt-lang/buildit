@@ -162,5 +162,8 @@ void block_visitor::visit(function_type::Ptr a) {
 void block_visitor::visit(array_type::Ptr a) {
 	a->element_type->accept(this);
 }
+void block_visitor::visit(builder_var_type::Ptr a) {
+	a->closure_type->accept(this);
+}
 }
 

@@ -126,6 +126,14 @@ void c_code_generator::visit(array_type::Ptr type) {
 	else 
 		oss << "[]";
 }
+void c_code_generator::visit(builder_var_type::Ptr type) {
+	if (type->builder_var_type_id == builder_var_type::DYN_VAR)
+		oss << "builder::dyn_var<";
+	else if (type->builder_var_type_id == builder_var_type::STATIC_VAR)
+		oss << "builder::static_var<";
+	type->closure_type->accept(this);
+	oss << ">";
+}
 void c_code_generator::visit(var::Ptr var) {
 	oss << var->var_name;
 }

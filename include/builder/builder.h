@@ -245,6 +245,31 @@ public:
 	}
 };
 
+
+// Type extractor for complete closure
+template <typename T>
+class type_extractor<dyn_var<T>> {
+public:
+	static block::type::Ptr extract_type(void) {
+		block::builder_var_type::Ptr type = std::make_shared<block::builder_var_type>();
+		type->builder_var_type_id = block::builder_var_type::DYN_VAR;
+		type->closure_type = type_extractor<T>::extract_type();
+		return type;
+	}
+};
+template <typename T>
+class type_extractor<static_var<T>> {
+public:
+	static block::type::Ptr extract_type(void) {
+		block::builder_var_type::Ptr type = std::make_shared<block::builder_var_type>();
+		type->builder_var_type_id = block::builder_var_type::STATIC_VAR;
+		type->closure_type = type_extractor<T>::extract_type();
+		return type;
+	}
+};
+
+
+
 template <typename T>
 class dyn_var: public var{
 public:
@@ -286,6 +311,9 @@ public:
 	}
 	template <typename TO>
 	dyn_var(const dyn_var<TO>& a): dyn_var<TO>((builder)a) {
+	}
+	template <typename TO>
+	dyn_var(const static_var<TO> &a): dyn_var<T>((TO)a) {
 	}
 	dyn_var(const builder a) {
 		builder_context::current_builder_context->remove_node_from_sequence(a.block_expr);
