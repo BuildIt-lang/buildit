@@ -49,6 +49,7 @@ class pointer_type;
 class function_type;
 class array_type;
 class builder_var_type;
+class named_type;
 
 class block_visitor {
 public:
@@ -99,6 +100,7 @@ public:
 	virtual void visit (std::shared_ptr<function_type>);
 	virtual void visit (std::shared_ptr<array_type>);
 	virtual void visit (std::shared_ptr<builder_var_type>);
+	virtual void visit (std::shared_ptr<named_type>);
 
 };
 }

@@ -71,6 +71,17 @@ public:
 	virtual void dump(std::ostream&, int) override;
 };
 
+class named_type: public type {
+public:
+	typedef std::shared_ptr<named_type> Ptr;
+	std::string type_name;
+	virtual void accept(block_visitor *a) override {
+		a->visit(self<named_type>());		
+	}
+	
+	virtual void dump(std::ostream&, int) override;
+};
+
 
 class var: public block {
 public:
@@ -91,6 +102,7 @@ public:
 		return true;
 	}
 };
+
 
 
 }

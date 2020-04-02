@@ -7,6 +7,7 @@
 #include <unordered_set>
 #include <unordered_map>
 #include <functional>
+#include "function_type_traits.h"
 
 
 namespace builder {
@@ -21,6 +22,13 @@ template <typename T>
 block::expr::Ptr create_foreign_expr (const T t);
 template <typename T>
 builder create_foreign_expr_builder (const T t);
+
+
+template <typename...AllArgs>
+class extract_signature;
+
+template <typename T>
+struct extract_signature_from_lambda;
 
 class tracking_tuple {
 public:
@@ -94,6 +102,16 @@ public:
 	block::stmt::Ptr extract_ast_from_function(ast_function_type);
 	block::stmt::Ptr extract_ast_from_function_impl(ast_function_type);
 	block::stmt::Ptr extract_ast_from_function_internal(ast_function_type, std::vector<bool> bl = std::vector<bool>());
+
+
+
+	template <typename F>
+	block::stmt::Ptr extract_function_ast(F func_input) {
+		//using function_type = typename lambda_function_type<F>::type;
+		//function_type func = function_type(func_input);
+		return extract_ast_from_lambda(extract_signature_from_lambda<F>::from(this, func_input));
+	}
+
 	
 	std::string current_label;
 

@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <type_traits>
 #include <initializer_list>
+#include "builder/signature_extract.h"
 
 namespace builder {
 // Builder objects are always alive only for duration of the RUN/SEQUENCE. 

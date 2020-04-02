@@ -54,4 +54,9 @@ void builder_var_type::dump(std::ostream &oss, int indent) {
 	oss << ")" << std::endl;
 	closure_type->dump(oss, indent+1);
 }
+void named_type::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "NAMED_TYPE (";
+	oss << type_name << ")" << std::endl;
+}
 }
