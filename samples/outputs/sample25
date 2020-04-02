@@ -1,0 +1,33 @@
+STMT_BLOCK
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (var0)
+    VAR_EXPR
+      VAR (arg2)
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (var1)
+    VAR_EXPR
+      VAR (arg1)
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (var2)
+    VAR_EXPR
+      VAR (arg0)
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (var3)
+    MINUS_EXPR
+      MINUS_EXPR
+        VAR_EXPR
+          VAR (var2)
+        VAR_EXPR
+          VAR (var1)
+      VAR_EXPR
+        VAR (var0)
+{
+  int var0 = arg2;
+  int var1 = arg1;
+  int var2 = arg0;
+  int var3 = (var2 - var1) - var0;
+}
