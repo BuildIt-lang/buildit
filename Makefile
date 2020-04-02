@@ -83,8 +83,10 @@ run: $(SAMPLES)
 	@ if [ "$(TEST)" == "" ]; then \
 		for sample in $(SORTED_SAMPLES); do \
 			sample_name=$$(basename $$sample); \
-			diff $(SAMPLES_DIR)/outputs/$$sample_name <($$sample) || exit 1; \
-			echo $$sample_name: OK; \
+			if [[ $$(head -n1 $(SAMPLES_DIR)/$$sample_name".cpp") != "/*NO_TEST*/" ]]; then \
+				diff $(SAMPLES_DIR)/outputs/$$sample_name <($$sample) || exit 1; \
+				echo $$sample_name: OK; \
+			fi; \
 		done \
 	else \
 		diff $(SAMPLES_DIR)/outputs/$(TEST) <($(BUILD_DIR)/$(TEST)) || exit 1;	\

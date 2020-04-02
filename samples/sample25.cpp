@@ -1,3 +1,4 @@
+/*NO_TEST*/
 #include "builder/builder_context.h"
 #include "builder/builder.h"
 #include <iostream>
