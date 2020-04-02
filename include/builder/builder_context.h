@@ -25,7 +25,7 @@ builder create_foreign_expr_builder (const T t);
 
 
 template <typename...AllArgs>
-class extract_signature;
+struct extract_signature;
 
 template <typename T>
 struct extract_signature_from_lambda;
