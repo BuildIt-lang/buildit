@@ -12,7 +12,7 @@ int main(int argc, char* argv[]) {
 	// Code to test assignments between static var and normal vars
 	auto ast = context.extract_function_ast ([=] (dyn_var<int> x, dyn_var<int> y, dyn_var<int> w) {	
 		dyn_var <int> z = x - y - w;
-	});
+	}, "func1");
 	ast->dump(std::cout, 0);
 	block::c_code_generator::generate_code(ast, std::cout, 0);	
 	return 0;

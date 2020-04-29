@@ -31,6 +31,8 @@ public:
 	virtual void visit(mod_expr::Ptr);
 	virtual void visit(var_expr::Ptr);
 	virtual void visit(int_const::Ptr);
+	virtual void visit(double_const::Ptr);
+	virtual void visit(float_const::Ptr);
 	virtual void visit(assign_expr::Ptr);
 	virtual void visit(expr_stmt::Ptr);
 	virtual void visit(stmt_block::Ptr);
@@ -49,6 +51,8 @@ public:
 	virtual void visit(array_type::Ptr);
 	virtual void visit(builder_var_type::Ptr);
 	
+	virtual void visit(func_decl::Ptr);	
+
 	static void generate_code(block::Ptr ast, std::ostream &oss, int indent = 0) {
 		c_code_generator generator (oss);
 		generator.curr_indent = indent;

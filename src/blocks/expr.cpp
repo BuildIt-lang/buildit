@@ -146,6 +146,14 @@ void int_const::dump(std::ostream &oss, int indent) {
 	printer::indent(oss, indent);
 	oss << "INT_CONST (" << value << ")" << std::endl;
 }
+void double_const::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "DOUBLE_CONST (" << value << ")" << std::endl;
+}
+void float_const::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "FLOAT_CONST (" << value << ")" << std::endl;
+}
 
 }
 

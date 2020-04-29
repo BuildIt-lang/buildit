@@ -57,6 +57,34 @@ builder::builder (const int &a) {
 	block_expr = int_const;
 	
 }
+builder::builder (const double &a) {	
+	assert(builder_context::current_builder_context != nullptr);
+	block_expr = nullptr;
+	if (builder_context::current_builder_context->bool_vector.size() > 0)
+		return;
+	block::double_const::Ptr double_const = std::make_shared<block::double_const>();
+	tracer::tag offset = get_offset_in_function(builder_context::current_builder_context->current_function);
+	double_const->static_offset = offset;
+	double_const->value = a; 
+	builder_context::current_builder_context->add_node_to_sequence(double_const);	
+	
+	block_expr = double_const;
+	
+}
+builder::builder (const float &a) {	
+	assert(builder_context::current_builder_context != nullptr);
+	block_expr = nullptr;
+	if (builder_context::current_builder_context->bool_vector.size() > 0)
+		return;
+	block::float_const::Ptr float_const = std::make_shared<block::float_const>();
+	tracer::tag offset = get_offset_in_function(builder_context::current_builder_context->current_function);
+	float_const->static_offset = offset;
+	float_const->value = a; 
+	builder_context::current_builder_context->add_node_to_sequence(float_const);	
+	
+	block_expr = float_const;
+	
+}
 template <typename T>
 builder builder::builder_unary_op() const {
 	assert(builder_context::current_builder_context != nullptr);

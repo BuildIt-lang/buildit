@@ -73,4 +73,15 @@ void break_stmt::dump(std::ostream &oss, int indent) {
 	printer::indent(oss, indent);
 	oss << "BREAK_STMT" << std::endl;
 }
+
+void func_decl::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "FUNC_DECL" << std::endl;
+	return_type->dump(oss, indent+1);
+	for (auto arg: args) {
+		arg->dump(oss, indent+1);
+	}	
+	body->dump(oss, indent+1);
+}
+
 }

@@ -106,10 +106,10 @@ public:
 
 
 	template <typename F>
-	block::stmt::Ptr extract_function_ast(F func_input) {
+	block::stmt::Ptr extract_function_ast(F func_input, std::string func_name) {
 		//using function_type = typename lambda_function_type<F>::type;
 		//function_type func = function_type(func_input);
-		return extract_ast_from_lambda(extract_signature_from_lambda<F>::from(this, func_input));
+		return extract_ast_from_lambda(extract_signature_from_lambda<F>::from(this, func_input, func_name));
 	}
 
 	

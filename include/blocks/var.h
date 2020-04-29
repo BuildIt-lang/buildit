@@ -18,7 +18,7 @@ public:
 class scalar_type: public type {
 public:
 	typedef std::shared_ptr<scalar_type> Ptr;
-	enum {INT_TYPE, CHAR_TYPE, VOID_TYPE} scalar_type_id;
+	enum {INT_TYPE, CHAR_TYPE, VOID_TYPE, FLOAT_TYPE} scalar_type_id;
 	virtual void accept(block_visitor* a) override {
 		a->visit(self<scalar_type>());
 	}

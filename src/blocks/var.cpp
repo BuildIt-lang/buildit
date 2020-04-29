@@ -22,6 +22,8 @@ void scalar_type::dump(std::ostream &oss, int indent) {
 		oss << "CHAR";
 	else if (scalar_type_id == VOID_TYPE)
 		oss << "VOID";
+	else if (scalar_type_id == FLOAT_TYPE)
+		oss << "FLOAT";
 	oss << ")" << std::endl;
 }
 void pointer_type::dump(std::ostream &oss, int indent) {

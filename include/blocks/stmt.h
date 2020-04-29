@@ -274,5 +274,36 @@ public:
 		return true;
 	}
 };
+
+
+class func_decl: public stmt {
+public:
+	typedef std::shared_ptr<func_decl> Ptr;
+	virtual void dump(std::ostream&, int) override;
+	virtual void accept(block_visitor *a) override {
+		a->visit(self<func_decl>());
+	}
+	std::string func_name;
+	type::Ptr return_type;	
+	std::vector<var::Ptr> args;	
+	stmt::Ptr body;		
+	virtual bool is_same(block::Ptr other) override {
+		// Functions don't have static offsets
+		if (!isa<func_decl>(other))
+			return false;
+		func_decl::Ptr other_func = to<func_decl>(other);
+		if (!return_type->is_same(other_func->return_type))
+			return false;
+		if (args.size() != other_func->args.size())
+			return false;
+		for (unsigned int i = 0; i < args.size(); i++) {
+			if (!args[i]->var_type->is_same(other_func->args[i]->var_type))
+				return false;
+		}	
+		if (!body->is_same(other_func->body))
+			return false;
+		return true;
+	}
+};
 }
 #endif

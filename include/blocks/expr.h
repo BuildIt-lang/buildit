@@ -308,6 +308,48 @@ public:
 		return true;
 	}
 };
+class double_const: public const_expr {
+public:
+	typedef std::shared_ptr<double_const> Ptr;
+	virtual void dump(std::ostream&, int) override;
+	virtual void accept(block_visitor* a) override {
+		a->visit(self<double_const>());
+	}
+	
+	double value;
+		
+	virtual bool is_same(block::Ptr other) override {
+		if (static_offset != other->static_offset)
+			return false;
+		if (!isa<double_const>(other))
+			return false;
+		double_const::Ptr other_expr = to<double_const>(other);
+		if (value != other_expr->value)
+			return false;
+		return true;
+	}
+};
+class float_const: public const_expr {
+public:
+	typedef std::shared_ptr<float_const> Ptr;
+	virtual void dump(std::ostream&, int) override;
+	virtual void accept(block_visitor* a) override {
+		a->visit(self<float_const>());
+	}
+	
+	float value;
+		
+	virtual bool is_same(block::Ptr other) override {
+		if (static_offset != other->static_offset)
+			return false;
+		if (!isa<float_const>(other))
+			return false;
+		float_const::Ptr other_expr = to<float_const>(other);
+		if (value != other_expr->value)
+			return false;
+		return true;
+	}
+};
 
 class assign_expr: public expr {
 public:

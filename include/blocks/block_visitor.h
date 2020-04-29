@@ -24,6 +24,8 @@ class mod_expr;
 class var_expr;
 class const_expr;
 class int_const;
+class double_const;
+class float_const;
 class assign_expr;
 class stmt;
 class expr_stmt;
@@ -51,6 +53,8 @@ class array_type;
 class builder_var_type;
 class named_type;
 
+class func_decl;
+
 class block_visitor {
 public:
 	virtual void visit (std::shared_ptr<block>);
@@ -74,6 +78,8 @@ public:
 	virtual void visit (std::shared_ptr<var_expr>);
 	virtual void visit (std::shared_ptr<const_expr>);
 	virtual void visit (std::shared_ptr<int_const>);
+	virtual void visit (std::shared_ptr<double_const>);
+	virtual void visit (std::shared_ptr<float_const>);
 	virtual void visit (std::shared_ptr<assign_expr>);
 	virtual void visit (std::shared_ptr<stmt>);
 	virtual void visit (std::shared_ptr<expr_stmt>);
@@ -101,6 +107,8 @@ public:
 	virtual void visit (std::shared_ptr<array_type>);
 	virtual void visit (std::shared_ptr<builder_var_type>);
 	virtual void visit (std::shared_ptr<named_type>);
+
+	virtual void visit (std::shared_ptr<func_decl>);
 
 };
 }

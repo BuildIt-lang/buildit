@@ -39,7 +39,7 @@ struct extract_signature_from_lambda: public extract_signature_from_lambda<declt
 
 template <typename ClassType, typename ReturnType, typename...Args>
 struct extract_signature_from_lambda<ReturnType(ClassType::*)(Args...) const> {	
-	static std::function<void(void)> from(builder_context* context, ClassType func) {
+	static std::function<void(void)> from(builder_context* context, ClassType func, std::string func_name) {
 		return extract_signature<ClassType, ReturnType, Args...>::template from<>::call(context, 0, func);
 	}
 };

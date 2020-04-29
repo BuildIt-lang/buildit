@@ -77,6 +77,10 @@ void block_visitor::visit(const_expr::Ptr a) {
 }
 void block_visitor::visit(int_const::Ptr a) {
 }
+void block_visitor::visit(double_const::Ptr a) {
+}
+void block_visitor::visit(float_const::Ptr a) {
+}
 void block_visitor::visit(assign_expr::Ptr a) {
 	a->var1->accept(this);
 	a->expr1->accept(this);
@@ -168,5 +172,12 @@ void block_visitor::visit(builder_var_type::Ptr a) {
 void block_visitor::visit(named_type::Ptr a) {
 	
 }
+void block_visitor::visit(func_decl::Ptr a) {
+	a->return_type->accept(this);
+	for (auto arg: a->args)
+		arg->accept(this);
+	a->body->accept(this);	
+}
+
 }
 

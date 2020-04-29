@@ -34,6 +34,8 @@ public:
 	explicit operator bool();
 
 	builder (const int&);
+	builder (const double&);
+	builder (const float&);
 	builder (const bool& b): builder((int)b) {}
 	builder (const char& c): builder((int)c) {}
 	builder (unsigned char &c): builder((int)c) {}
@@ -175,6 +177,16 @@ public:
 	}
 };
 
+
+template <>
+class type_extractor<float> {
+public:
+	static block::type::Ptr extract_type(void) {
+		block::scalar_type::Ptr type = std::make_shared<block::scalar_type>();
+		type->scalar_type_id = block::scalar_type::FLOAT_TYPE;
+		return type;
+	}
+};
 
 template <typename T>
 class type_extractor<T*> {
@@ -325,6 +337,10 @@ public:
 	}
 	dyn_var(const int& a): dyn_var((builder)a) {
 	}
+	dyn_var(const double& a): dyn_var((builder)a) {
+	}
+	dyn_var(const float& a): dyn_var((builder)a) {
+	}
 	dyn_var(const std::initializer_list<builder> &_a) {
 		std::vector<builder> a (_a);
 		
@@ -351,6 +367,9 @@ public:
 		return (builder)*this = a;
 	}
 	builder operator = (const int &a) {
+		return operator = ((builder)a);
+	}
+	builder operator = (const double &a) {
 		return operator = ((builder)a);
 	}
 

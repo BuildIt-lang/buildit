@@ -1,4 +1,7 @@
 #include "blocks/c_code_generator.h"
+#include <math.h>
+#include <limits>
+#include <iomanip>
 
 namespace block {
 void c_code_generator::visit(not_expr::Ptr a) {
@@ -74,6 +77,19 @@ void c_code_generator::visit(var_expr::Ptr a) {
 void c_code_generator::visit(int_const::Ptr a) {
 	oss << a->value;
 }
+void c_code_generator::visit(double_const::Ptr a) {
+	oss << std::setprecision (15);
+	oss << a->value;
+	if (floor(a->value) == a->value)
+		oss << ".0";
+}
+void c_code_generator::visit(float_const::Ptr a) {
+	oss << std::setprecision (15);
+	oss << a->value;
+	if (floor(a->value) == a->value)
+		oss << ".0";
+	oss << "f";
+}
 void c_code_generator::visit(assign_expr::Ptr a) {
 	if (expr_needs_bracket(a->var1)) {
 		oss << "(";
@@ -109,6 +125,8 @@ void c_code_generator::visit(scalar_type::Ptr type) {
 		oss << "char";
 	} else if (type->scalar_type_id == scalar_type::VOID_TYPE) {
 		oss << "void";
+	} else if (type->scalar_type_id == scalar_type::FLOAT_TYPE) {
+		oss << "float";
 	}
 }
 void c_code_generator::visit(pointer_type::Ptr type) {
@@ -286,5 +304,33 @@ void c_code_generator::visit(initializer_list_expr::Ptr a) {
 			oss << ", ";
 	}
 	oss << "}";
+}
+void c_code_generator::visit(func_decl::Ptr a) {
+	a->return_type->accept(this);
+	oss << " " << a->func_name;
+	oss << " (";
+	bool printDelim = false;
+	for (auto arg: a->args) {
+		if (printDelim)
+			oss << ", ";
+		printDelim = true;	
+		arg->var_type->accept(this);
+		oss << " " << arg->var_name;
+	}	
+	if (!printDelim)
+		oss << "void";
+	oss << ")";
+	if (isa<stmt_block>(a->body)) {
+		oss << " ";
+		a->body->accept(this);
+		oss << std::endl;
+	} else {
+		oss << std::endl;
+		curr_indent++;
+		printer::indent(oss, curr_indent);
+		a->body->accept(this);
+		oss << std::endl;
+		curr_indent--;	
+	}
 }
 }
