@@ -41,6 +41,7 @@ public:
 	virtual void visit(while_stmt::Ptr);
 	virtual void visit(for_stmt::Ptr);
 	virtual void visit(break_stmt::Ptr);
+	virtual void visit(continue_stmt::Ptr);
 	virtual void visit(sq_bkt_expr::Ptr);
 	virtual void visit(function_call_expr::Ptr);
 	virtual void visit(initializer_list_expr::Ptr);
@@ -52,6 +53,8 @@ public:
 	virtual void visit(builder_var_type::Ptr);
 	
 	virtual void visit(func_decl::Ptr);	
+	
+	virtual void visit(goto_stmt::Ptr);
 
 	static void generate_code(block::Ptr ast, std::ostream &oss, int indent = 0) {
 		c_code_generator generator (oss);

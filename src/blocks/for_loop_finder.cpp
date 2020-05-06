@@ -78,6 +78,12 @@ void for_loop_finder::visit(stmt_block::Ptr a) {
 					continue;
 				if (parents.size() == 0)
 					continue;
+				for (auto stmt: loop->continue_blocks) {
+					if (loop->continue_blocks.size() < 2)
+						continue;
+					if (!is_update(decl_var, stmt->stmts[stmt->stmts.size()-2]))
+						continue;	
+				}
 				while_loop_index = i - 1;
 				break;
 			}
@@ -94,6 +100,12 @@ void for_loop_finder::visit(stmt_block::Ptr a) {
 			for_loop->update = to<expr_stmt>(parents[0]->stmts.back())->expr1;
 			for (unsigned int i = 0; i < parents.size(); i++) 
 				parents[i]->stmts.pop_back();
+			for (auto stmt: loop->continue_blocks) {
+				auto cont_stmt = stmt->stmts.back();
+				stmt->stmts.pop_back();
+				stmt->stmts.pop_back();
+				stmt->stmts.push_back(cont_stmt);	
+			}
 			for_loop->body = loop->body;
 			new_stmts.push_back(for_loop);
 			for (unsigned int i = while_loop_index + 2; i < a->stmts.size(); i++)

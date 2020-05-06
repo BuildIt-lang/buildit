@@ -268,6 +268,9 @@ void c_code_generator::visit(for_stmt::Ptr a) {
 void c_code_generator::visit(break_stmt::Ptr a) {
 	oss << "break;";
 }
+void c_code_generator::visit(continue_stmt::Ptr a) {
+	oss << "continue;";
+}
 void c_code_generator::visit(sq_bkt_expr::Ptr a) {
 	if (expr_needs_bracket(a->var_expr)) {
 		oss << "(";
@@ -332,5 +335,8 @@ void c_code_generator::visit(func_decl::Ptr a) {
 		oss << std::endl;
 		curr_indent--;	
 	}
+}
+void c_code_generator::visit(goto_stmt::Ptr a) {
+	a->dump(oss, 1);
 }
 }

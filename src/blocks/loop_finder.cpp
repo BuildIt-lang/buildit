@@ -37,6 +37,55 @@ static void ensure_back_has_goto(stmt_block::Ptr a, label::Ptr label_detect, std
 	return;
 }
 
+static void insert_continues(stmt_block::Ptr a, label::Ptr label_detect, std::vector<stmt_block::Ptr> &collect) {
+	for (auto stmt: a->stmts) {
+		if (isa<if_stmt>(stmt)) {
+			if_stmt::Ptr if_stmt_ptr = to<if_stmt>(stmt);
+			stmt_block::Ptr then_block = to<stmt_block>(if_stmt_ptr->then_stmt);
+			stmt_block::Ptr else_block = to<stmt_block>(if_stmt_ptr->else_stmt);
+			insert_continues(then_block, label_detect, collect);
+			insert_continues(else_block, label_detect, collect);
+		}
+	}
+	if (a->stmts.size() > 0 && isa<goto_stmt>(a->stmts.back())) {
+		if (to<goto_stmt>(a->stmts.back())->label1 == label_detect) {
+			a->stmts.pop_back();
+			continue_stmt::Ptr cont = std::make_shared<continue_stmt>();
+			a->stmts.push_back(cont);
+			collect.push_back(a);
+		}
+	}
+}
+static void insert_breaks(stmt_block::Ptr a, label::Ptr label_detect, std::vector<stmt_block::Ptr> &parents) {
+	for (auto stmt: a->stmts) {
+		if (isa<if_stmt>(stmt)) {
+			if_stmt::Ptr if_stmt_ptr = to<if_stmt>(stmt);
+			stmt_block::Ptr then_block = to<stmt_block>(if_stmt_ptr->then_stmt);
+			stmt_block::Ptr else_block = to<stmt_block>(if_stmt_ptr->else_stmt);
+			insert_breaks(then_block, label_detect, parents);
+			insert_breaks(else_block, label_detect, parents);
+		}
+	}
+
+	if (a->stmts.size() == 0)
+		return;
+
+	if (a->stmts.size() > 0 && isa<goto_stmt>(a->stmts.back())) {
+		if (to<goto_stmt>(a->stmts.back())->label1 == label_detect) {
+			return;
+		}
+	}
+	// This needs a break because it doesn't continue
+	// But before we add, we should check if parents already has it
+
+	if (a->stmts.size() > 0 && isa<goto_stmt>(a->stmts.back())) {
+		for (auto stmt: parents) {
+			if (stmt == a)
+				return;
+		}
+		parents.push_back(a);
+	}	
+}
 
 static bool check_last_choppable(std::vector<stmt_block::Ptr> &parents) {
 	// Check if everyone has atleast one stmt
@@ -128,6 +177,7 @@ void loop_finder::visit_label(label_stmt::Ptr a, stmt_block::Ptr parent) {
 	new_while->body = std::make_shared<stmt_block>();	
 	to<stmt_block>(new_while->body)->stmts = stmts_in_body;
 
+
 	std::vector<stmt_block::Ptr> parents;
 
 	//Clean up all loops in this body  
@@ -135,13 +185,22 @@ void loop_finder::visit_label(label_stmt::Ptr a, stmt_block::Ptr parent) {
 	finder.ast = new_while->body;
 	new_while->body->accept(&finder);
 
-	
+
 	ensure_back_has_goto(to<stmt_block>(new_while->body), a->label1, parents);
+
+	std::vector<stmt_block::Ptr> collects;	
+
+	insert_continues(to<stmt_block>(new_while->body), a->label1, collects);
+	new_while->continue_blocks = collects;
+
+	insert_breaks(to<stmt_block>(new_while->body), a->label1, parents);
 	
 	std::vector<stmt::Ptr> trimmed;
+
+
 	if (parents.size() > 0)
 		trim_from_parents(parents, trimmed);
-	
+
 	// Now push a break to the end of every parent
 	for (stmt_block::Ptr block: parents) {
 		
@@ -190,6 +249,27 @@ void loop_finder::visit_label(label_stmt::Ptr a, stmt_block::Ptr parent) {
 				new_while->cond = new_cond;
 				new_while->body = else_stmt;
 				return;
+			}
+		}
+	}
+	// Other patter is if the loops first statement is a if condition that breaks
+	if (isa<if_stmt>(to<stmt_block>(new_while->body)->stmts[0])) {	
+		if_stmt::Ptr if_body = to<if_stmt>(to<stmt_block>(new_while->body)->stmts[0]);
+		stmt::Ptr then_stmt = if_body->then_stmt;
+		
+		if (isa<stmt_block> (then_stmt) && to<stmt_block> (then_stmt)->stmts.size() == 1) {
+			if (isa<break_stmt>(to<stmt_block>(then_stmt)->stmts[0])) {
+				not_expr::Ptr new_cond = std::make_shared<not_expr>();
+				new_cond->static_offset = if_body->cond->static_offset;
+				new_cond->expr1 = if_body->cond;
+				new_while->cond = new_cond;
+				auto new_body = std::make_shared<stmt_block>();
+				for (unsigned int i = 1; i < to<stmt_block>(new_while->body)->stmts.size(); i++) {
+					new_body->stmts.push_back(to<stmt_block>(new_while->body)->stmts[i]);
+				}
+				new_while->body = new_body;
+				return;
+
 			}
 		}
 	}

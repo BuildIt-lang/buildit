@@ -218,6 +218,9 @@ public:
 	}
 	stmt::Ptr body;
 	expr::Ptr cond;
+
+	// Extra metadata
+	std::vector<stmt_block::Ptr> continue_blocks;
 	virtual bool is_same(block::Ptr other) override {
 		if (static_offset != other->static_offset)
 			return false;
@@ -263,6 +266,7 @@ public:
 };
 class break_stmt: public stmt {
 public:
+	std::string type;
 	typedef std::shared_ptr<break_stmt> Ptr;
 	virtual void dump(std::ostream&, int) override;
 	virtual void accept(block_visitor* a) override {
@@ -270,6 +274,19 @@ public:
 	}
 	virtual bool is_same(block::Ptr other) override {
 		if (!isa<break_stmt>(other))
+			return false;
+		return true;
+	}
+};
+class continue_stmt: public stmt {
+public:
+	typedef std::shared_ptr<continue_stmt> Ptr;
+	virtual void dump(std::ostream&, int) override;
+	virtual void accept(block_visitor* a) override {
+		a->visit(self<continue_stmt>());
+	}
+	virtual bool is_same(block::Ptr other) override {
+		if (!isa<continue_stmt>(other))
 			return false;
 		return true;
 	}

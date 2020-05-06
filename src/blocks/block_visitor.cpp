@@ -119,6 +119,8 @@ void block_visitor::visit(goto_stmt::Ptr a) {
 }
 void block_visitor::visit(break_stmt::Ptr a) {
 }
+void block_visitor::visit(continue_stmt::Ptr a) {
+}
 void block_visitor::visit(while_stmt::Ptr a) {
 	a->cond->accept(this);
 	a->body->accept(this);
