@@ -180,6 +180,9 @@ void block_visitor::visit(func_decl::Ptr a) {
 		arg->accept(this);
 	a->body->accept(this);	
 }
+void block_visitor::visit(return_stmt::Ptr a) {
+	a->return_val->accept(this);
+}
 
 }
 

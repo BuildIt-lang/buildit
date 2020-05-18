@@ -322,5 +322,24 @@ public:
 		return true;
 	}
 };
+
+class return_stmt: public stmt {
+public:
+	typedef std::shared_ptr<return_stmt> Ptr;
+	virtual void dump(std::ostream&, int) override;
+	virtual void accept(block_visitor *a) override {
+		a->visit(self<return_stmt>());
+	}
+	expr::Ptr return_val;
+
+	virtual bool is_same(block::Ptr other) override {
+		if (static_offset != other->static_offset)
+			return false;
+		return_stmt::Ptr other_stmt = to<return_stmt>(other);
+		if (!return_val->is_same(other_stmt->return_val))
+			return false;
+		return true;
+	}
+};
 }
 #endif

@@ -53,6 +53,7 @@ public:
 	virtual void visit(builder_var_type::Ptr);
 	
 	virtual void visit(func_decl::Ptr);	
+	virtual void visit(return_stmt::Ptr);	
 	
 	virtual void visit(goto_stmt::Ptr);
 

@@ -339,4 +339,9 @@ void c_code_generator::visit(func_decl::Ptr a) {
 void c_code_generator::visit(goto_stmt::Ptr a) {
 	a->dump(oss, 1);
 }
+void c_code_generator::visit(return_stmt::Ptr a) {
+	oss << "return ";
+	a->return_val->accept(this);
+	oss << ";";
+}
 }

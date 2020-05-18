@@ -62,7 +62,7 @@ void function_wrapper_impl(void);
 class builder_context {
 public:
 
-	typedef void (*ast_function_type)();
+	typedef void (*ast_function_type)(void);
 
 	
 	std::list <block::block::Ptr> uncommitted_sequence;
@@ -104,12 +104,14 @@ public:
 	block::stmt::Ptr extract_ast_from_function_internal(ast_function_type, std::vector<bool> bl = std::vector<bool>());
 
 
-
+	block::func_decl::Ptr current_func_decl;
 	template <typename F>
 	block::stmt::Ptr extract_function_ast(F func_input, std::string func_name) {
-		//using function_type = typename lambda_function_type<F>::type;
-		//function_type func = function_type(func_input);
-		return extract_ast_from_lambda(extract_signature_from_lambda<F>::from(this, func_input, func_name));
+		current_func_decl = std::make_shared<block::func_decl>();
+		current_func_decl->func_name = func_name;
+		// The extract_signature_from_lambda will update the return type 
+		current_func_decl->body = extract_ast_from_lambda(extract_signature_from_lambda<F>::from(this, func_input, func_name));
+		return current_func_decl;
 	}
 
 	
@@ -155,6 +157,8 @@ private:
 	friend block::expr::Ptr create_foreign_expr (const T t);
 	template <typename T>
 	friend builder create_foreign_expr_builder (const T t);
+	
+	friend void create_return_stmt(const builder a);
 };
 bool get_next_bool_from_context(builder_context *context, block::expr::Ptr);
 tracer::tag get_offset_in_function(builder_context::ast_function_type _function);

@@ -87,5 +87,10 @@ void func_decl::dump(std::ostream &oss, int indent) {
 	}	
 	body->dump(oss, indent+1);
 }
+void return_stmt::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "RETURN_STMT" << std::endl;
+	return_val->dump(oss, indent+1);
+}
 
 }

@@ -141,11 +141,9 @@ static std::pair<std::vector<block::stmt::Ptr>, std::vector<block::stmt::Ptr>> t
 						
 						block::var::Ptr cond_var = std::make_shared<block::var>();
 						cond_var->var_type = type_extractor<int>::extract_type();
-						//cond_var->static_offset = if1->static_offset;
 						cond_var->static_offset = tracer::get_unique_tag();
 						
 						block::decl_stmt::Ptr decl_stmt = std::make_shared<block::decl_stmt>();
-						//std::cout << "Creating split decl with tag " << if1->static_offset.stringify() << std::endl;
 						decl_stmt->static_offset = if1->static_offset;
 						
 						decl_stmt->decl_var = cond_var;

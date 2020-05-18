@@ -453,5 +453,8 @@ builder create_foreign_expr_builder (const T t) {
 	return ret_builder;	
 }
 
+
+void create_return_stmt(const builder a);
+
 }
 #endif
