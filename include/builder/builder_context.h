@@ -27,7 +27,7 @@ builder create_foreign_expr_builder (const T t);
 template <typename...AllArgs>
 struct extract_signature;
 
-template <typename T>
+template <typename T, typename...OtherArgs>
 struct extract_signature_from_lambda;
 
 class tracking_tuple {
@@ -105,12 +105,12 @@ public:
 
 
 	block::func_decl::Ptr current_func_decl;
-	template <typename F>
-	block::stmt::Ptr extract_function_ast(F func_input, std::string func_name) {
+	template <typename F, typename...OtherArgs>
+	block::stmt::Ptr extract_function_ast(F func_input, std::string func_name, OtherArgs&...other_args) {
 		current_func_decl = std::make_shared<block::func_decl>();
 		current_func_decl->func_name = func_name;
 		// The extract_signature_from_lambda will update the return type 
-		current_func_decl->body = extract_ast_from_lambda(extract_signature_from_lambda<F>::from(this, func_input, func_name));
+		current_func_decl->body = extract_ast_from_lambda(extract_signature_from_lambda<F, OtherArgs&...>::from(this, func_input, func_name, other_args...));
 		return current_func_decl;
 	}
 

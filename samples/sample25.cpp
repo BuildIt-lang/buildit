@@ -16,6 +16,14 @@ static void bar(dyn_var<int> x) {
 	dyn_var<int> b = x;
 	x = b + 1;
 }
+
+static dyn_var<int> foobar(dyn_var<int> x, int &iter, dyn_var<void(int)>& print_val) {
+	dyn_var<int> t = 0;
+	for (static_var<int> i = 0; i < iter; i++) 
+		t = t + x + 1;
+        print_val(t);
+	return t;	
+}
 int main(int argc, char* argv[]) {
 	builder::builder_context context;
 
@@ -33,6 +41,12 @@ int main(int argc, char* argv[]) {
 	auto ast3 = context.extract_function_ast(bar, "func3");
 	ast3->dump(std::cout, 0);
 	block::c_code_generator::generate_code(ast3, std::cout, 0);	
+	
+        auto &print_val = *(context.assume_variable<dyn_var<void(int)>>("print_val"));
+	int iter = 2;
+	auto ast4 = context.extract_function_ast(foobar, "func4", iter, print_val);
+	ast4->dump(std::cout, 0);
+	block::c_code_generator::generate_code(ast4, std::cout, 0);	
 	return 0;
 }
 

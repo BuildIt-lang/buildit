@@ -321,6 +321,7 @@ void create_return_stmt(const builder a) {
 	assert(builder_context::current_builder_context != nullptr);
 	builder_context::current_builder_context->remove_node_from_sequence(a.block_expr);
 	assert(builder_context::current_builder_context->current_block_stmt != nullptr);
+	builder_context::current_builder_context->commit_uncommitted();
 	
 	block::return_stmt::Ptr ret_stmt = std::make_shared<block::return_stmt>();
 	ret_stmt->static_offset = a.block_expr->static_offset;
