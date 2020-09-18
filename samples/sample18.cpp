@@ -11,7 +11,7 @@ using builder::dyn_var;
 // Function with unrolled branches
 static void foo(void) {
 	dyn_var<int> a;
-	for(static_var<int> i = 0; i < 128; i++) {
+	for (static_var<int> i = 0; i < 128; i++) {
 		if (a) {
 			a = a + i;
 		} else {

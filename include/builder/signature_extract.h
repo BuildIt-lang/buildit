@@ -54,8 +54,7 @@ struct extract_signature<ClassType, RetType, T, FutureArgTypes...> {
                 template <typename TO, typename...OtherArgs>
                 struct with {
 			static std::function<void(void)> call(builder_context *context, int arg_count, ClassType func, RestArgTypes&...rest_args, TO to, OtherArgs...other_args) {
-                                static_assert(std::is_reference<T>::value, "Non dynamic arguments should all be passed by reference");
-				return extract_signature<ClassType, RetType, FutureArgTypes...>::template from<RestArgTypes..., T&>::template with<OtherArgs...>::call(context, arg_count + 1, func, rest_args..., to, other_args...);
+				return extract_signature<ClassType, RetType, FutureArgTypes...>::template from<RestArgTypes..., TO&>::template with<OtherArgs...>::call(context, arg_count + 1, func, rest_args..., to, other_args...);
 			}
 		};
 	};
