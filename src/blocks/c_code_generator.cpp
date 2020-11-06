@@ -104,6 +104,8 @@ void c_code_generator::visit(assign_expr::Ptr a) {
 void c_code_generator::visit(expr_stmt::Ptr a) {
 	a->expr1->accept(this);
 	oss << ";";
+	if (a->annotation != "")
+		oss << " //" << a->annotation;
 }
 void c_code_generator::visit(stmt_block::Ptr a) {
 	oss << "{" << std::endl;

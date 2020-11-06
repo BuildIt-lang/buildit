@@ -13,7 +13,7 @@ namespace builder{
 template <typename T>
 class static_var {
 public:
-	static_assert(std::is_same<T, int>::value || std::is_pointer<T>::value, "Currently builder::static_var is only supported for basic types\n");
+	static_assert(std::is_same<T, int>::value || std::is_pointer<T>::value || std::is_same<T, unsigned int>::value, "Currently builder::static_var is only supported for basic types\n");
 	static_assert(sizeof (T) < MAX_TRACKING_VAR_SIZE, "Currently builder::static_var supports variables of max size = " TOSTRING(MAX_TRACKING_VARIABLE_SIZE));
 	T val;
 	operator T&() {

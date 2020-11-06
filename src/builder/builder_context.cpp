@@ -7,6 +7,7 @@
 #include "blocks/loop_finder.h"
 #include "builder/builder.h"
 #include "blocks/for_loop_finder.h"
+#include "blocks/loop_roll.h"
 
 namespace builder {
 builder_context* builder_context::current_builder_context = nullptr;
@@ -264,6 +265,9 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(ast_function_ty
 	block::for_loop_finder for_finder;
 	for_finder.ast  = ast;
 	ast->accept(&for_finder);
+
+	block::loop_roll_finder loop_roll_finder;
+	ast->accept(&loop_roll_finder);
 
 	return ast;
 }
