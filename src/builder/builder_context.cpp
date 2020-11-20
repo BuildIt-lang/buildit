@@ -11,6 +11,9 @@
 
 namespace builder {
 builder_context *builder_context::current_builder_context = nullptr;
+
+int builder_context::debug_creation_counter = 0;
+
 void builder_context::add_stmt_to_current_block(block::stmt::Ptr s,
 						bool check_for_conflicts) {
 	if (current_label != "") {

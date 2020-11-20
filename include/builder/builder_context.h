@@ -52,6 +52,9 @@ void lambda_wrapper_impl(void);
 
 class builder_context {
 public:
+	static int debug_creation_counter;
+
+
 	std::list<block::block::Ptr> uncommitted_sequence;
 	block::stmt::Ptr ast;
 	block::stmt_block::Ptr current_block_stmt;
@@ -77,6 +80,8 @@ public:
 		}
 		current_block_stmt = nullptr;
 		ast = nullptr;
+
+		debug_creation_counter++;
 	}
 
 	void commit_uncommitted(void);
