@@ -27,6 +27,10 @@ public:
 	builder builder_binary_op(const builder &) const;
 	template <typename T>
 	builder builder_unary_op() const;
+	
+	builder(const builder& other) {
+		block_expr = other.block_expr;
+	}
 
 	builder operator[](const builder &);
 	builder operator=(const builder &);
