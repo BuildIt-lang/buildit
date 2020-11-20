@@ -281,6 +281,8 @@ public:
 	using var::operator=;
 	// using var::operator builder;
 
+	builder operator=(const dyn_var<T> &a) { return (builder) * this = a; }
+	
 	static block::type::Ptr create_block_type(void) { return type_extractor<T>::extract_type(); }
 	void create_dyn_var(bool create_without_context = false) {
 		if (create_without_context) {
