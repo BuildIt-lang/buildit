@@ -1,7 +1,7 @@
 #include "blocks/c_code_generator.h"
-#include <math.h>
-#include <limits>
 #include <iomanip>
+#include <limits>
+#include <math.h>
 
 namespace block {
 void c_code_generator::visit(not_expr::Ptr a) {
@@ -17,12 +17,13 @@ static bool expr_needs_bracket(expr::Ptr a) {
 		return true;
 	return false;
 }
-void c_code_generator::emit_binary_expr(binary_expr::Ptr a, std::string character) {
+void c_code_generator::emit_binary_expr(binary_expr::Ptr a,
+					std::string character) {
 	if (expr_needs_bracket(a->expr1)) {
 		oss << "(";
 		a->expr1->accept(this);
 		oss << ")";
-	} else 
+	} else
 		a->expr1->accept(this);
 	oss << " " << character << " ";
 	if (expr_needs_bracket(a->expr2)) {
@@ -32,59 +33,29 @@ void c_code_generator::emit_binary_expr(binary_expr::Ptr a, std::string characte
 	} else
 		a->expr2->accept(this);
 }
-void c_code_generator::visit(and_expr::Ptr a) {
-	emit_binary_expr(a, "&&");
-}
-void c_code_generator::visit(or_expr::Ptr a) {
-	emit_binary_expr(a, "||");
-}
-void c_code_generator::visit(plus_expr::Ptr a) {
-	emit_binary_expr(a, "+");
-}
-void c_code_generator::visit(minus_expr::Ptr a) {
-	emit_binary_expr(a, "-");
-}
-void c_code_generator::visit(mul_expr::Ptr a) {
-	emit_binary_expr(a, "*");
-}
-void c_code_generator::visit(div_expr::Ptr a) {
-	emit_binary_expr(a, "/");
-}
-void c_code_generator::visit(lt_expr::Ptr a) {
-	emit_binary_expr(a, "<");
-}
-void c_code_generator::visit(gt_expr::Ptr a) {
-	emit_binary_expr(a, ">");
-}
-void c_code_generator::visit(lte_expr::Ptr a) {
-	emit_binary_expr(a, "<=");
-}
-void c_code_generator::visit(gte_expr::Ptr a) {
-	emit_binary_expr(a, ">=");
-}
-void c_code_generator::visit(equals_expr::Ptr a) {
-	emit_binary_expr(a, "==");
-}
-void c_code_generator::visit(ne_expr::Ptr a) {
-	emit_binary_expr(a, "!=");
-}
-void c_code_generator::visit(mod_expr::Ptr a) {
-	emit_binary_expr(a, "%");
-}
-void c_code_generator::visit(var_expr::Ptr a) {
-	oss << a->var1->var_name;
-}
-void c_code_generator::visit(int_const::Ptr a) {
-	oss << a->value;
-}
+void c_code_generator::visit(and_expr::Ptr a) { emit_binary_expr(a, "&&"); }
+void c_code_generator::visit(or_expr::Ptr a) { emit_binary_expr(a, "||"); }
+void c_code_generator::visit(plus_expr::Ptr a) { emit_binary_expr(a, "+"); }
+void c_code_generator::visit(minus_expr::Ptr a) { emit_binary_expr(a, "-"); }
+void c_code_generator::visit(mul_expr::Ptr a) { emit_binary_expr(a, "*"); }
+void c_code_generator::visit(div_expr::Ptr a) { emit_binary_expr(a, "/"); }
+void c_code_generator::visit(lt_expr::Ptr a) { emit_binary_expr(a, "<"); }
+void c_code_generator::visit(gt_expr::Ptr a) { emit_binary_expr(a, ">"); }
+void c_code_generator::visit(lte_expr::Ptr a) { emit_binary_expr(a, "<="); }
+void c_code_generator::visit(gte_expr::Ptr a) { emit_binary_expr(a, ">="); }
+void c_code_generator::visit(equals_expr::Ptr a) { emit_binary_expr(a, "=="); }
+void c_code_generator::visit(ne_expr::Ptr a) { emit_binary_expr(a, "!="); }
+void c_code_generator::visit(mod_expr::Ptr a) { emit_binary_expr(a, "%"); }
+void c_code_generator::visit(var_expr::Ptr a) { oss << a->var1->var_name; }
+void c_code_generator::visit(int_const::Ptr a) { oss << a->value; }
 void c_code_generator::visit(double_const::Ptr a) {
-	oss << std::setprecision (15);
+	oss << std::setprecision(15);
 	oss << a->value;
 	if (floor(a->value) == a->value)
 		oss << ".0";
 }
 void c_code_generator::visit(float_const::Ptr a) {
-	oss << std::setprecision (15);
+	oss << std::setprecision(15);
 	oss << a->value;
 	if (floor(a->value) == a->value)
 		oss << ".0";
@@ -95,9 +66,9 @@ void c_code_generator::visit(assign_expr::Ptr a) {
 		oss << "(";
 		a->var1->accept(this);
 		oss << ")";
-	} else 
+	} else
 		a->var1->accept(this);
-	
+
 	oss << " = ";
 	a->expr1->accept(this);
 }
@@ -110,7 +81,7 @@ void c_code_generator::visit(expr_stmt::Ptr a) {
 void c_code_generator::visit(stmt_block::Ptr a) {
 	oss << "{" << std::endl;
 	curr_indent += 1;
-	for (auto stmt: a->stmts) {
+	for (auto stmt : a->stmts) {
 		printer::indent(oss, curr_indent);
 		stmt->accept(this);
 		oss << std::endl;
@@ -118,7 +89,7 @@ void c_code_generator::visit(stmt_block::Ptr a) {
 	curr_indent -= 1;
 	printer::indent(oss, curr_indent);
 
-	oss << "}";	
+	oss << "}";
 }
 void c_code_generator::visit(scalar_type::Ptr type) {
 	if (type->scalar_type_id == scalar_type::INT_TYPE) {
@@ -132,18 +103,23 @@ void c_code_generator::visit(scalar_type::Ptr type) {
 	}
 }
 void c_code_generator::visit(pointer_type::Ptr type) {
-	if (!isa<scalar_type>(type->pointee_type) && !isa<pointer_type>(type->pointee_type))
-		assert(false && "Printing pointers of complex type is not supported yet");
+	if (!isa<scalar_type>(type->pointee_type) &&
+	    !isa<pointer_type>(type->pointee_type))
+		assert(
+		    false &&
+		    "Printing pointers of complex type is not supported yet");
 	type->pointee_type->accept(this);
 	oss << "*";
 }
 void c_code_generator::visit(array_type::Ptr type) {
-	if (!isa<scalar_type>(type->element_type) && !isa<pointer_type>(type->element_type))
-		assert(false && "Printing arrays of complex type is not supported yet");
+	if (!isa<scalar_type>(type->element_type) &&
+	    !isa<pointer_type>(type->element_type))
+		assert(false &&
+		       "Printing arrays of complex type is not supported yet");
 	type->element_type->accept(this);
 	if (type->size != -1)
 		oss << "[" << type->size << "]";
-	else 
+	else
 		oss << "[]";
 }
 void c_code_generator::visit(builder_var_type::Ptr type) {
@@ -154,27 +130,28 @@ void c_code_generator::visit(builder_var_type::Ptr type) {
 	type->closure_type->accept(this);
 	oss << ">";
 }
-void c_code_generator::visit(var::Ptr var) {
-	oss << var->var_name;
-}
+void c_code_generator::visit(var::Ptr var) { oss << var->var_name; }
 void c_code_generator::visit(decl_stmt::Ptr a) {
-	if (isa<function_type> (a->decl_var->var_type)) {
-		function_type::Ptr type = to<function_type>(a->decl_var->var_type);
+	if (isa<function_type>(a->decl_var->var_type)) {
+		function_type::Ptr type =
+		    to<function_type>(a->decl_var->var_type);
 		type->return_type->accept(this);
 		oss << " ";
 		oss << a->decl_var->var_name;
 		oss << "(";
 		for (unsigned int i = 0; i < type->arg_types.size(); i++) {
 			type->arg_types[i]->accept(this);
-			if (i != type->arg_types.size()-1) 
+			if (i != type->arg_types.size() - 1)
 				oss << ", ";
 		}
 		oss << ");";
-		return;	
-	} else if (isa<array_type> (a->decl_var->var_type)) {
+		return;
+	} else if (isa<array_type>(a->decl_var->var_type)) {
 		array_type::Ptr type = to<array_type>(a->decl_var->var_type);
-		if (!isa<scalar_type>(type->element_type) && !isa<pointer_type>(type->element_type))
-			assert(false && "Printing arrays of complex type is not supported yet");
+		if (!isa<scalar_type>(type->element_type) &&
+		    !isa<pointer_type>(type->element_type))
+			assert(false && "Printing arrays of complex type is "
+					"not supported yet");
 		type->element_type->accept(this);
 		oss << " ";
 		oss << a->decl_var->var_name;
@@ -215,9 +192,9 @@ void c_code_generator::visit(if_stmt::Ptr a) {
 		printer::indent(oss, curr_indent);
 		a->then_stmt->accept(this);
 		oss << std::endl;
-		curr_indent--;	
+		curr_indent--;
 	}
-	
+
 	if (isa<stmt_block>(a->else_stmt)) {
 		if (to<stmt_block>(a->else_stmt)->stmts.size() == 0)
 			return;
@@ -267,12 +244,8 @@ void c_code_generator::visit(for_stmt::Ptr a) {
 		curr_indent--;
 	}
 }
-void c_code_generator::visit(break_stmt::Ptr a) {
-	oss << "break;";
-}
-void c_code_generator::visit(continue_stmt::Ptr a) {
-	oss << "continue;";
-}
+void c_code_generator::visit(break_stmt::Ptr a) { oss << "break;"; }
+void c_code_generator::visit(continue_stmt::Ptr a) { oss << "continue;"; }
 void c_code_generator::visit(sq_bkt_expr::Ptr a) {
 	if (expr_needs_bracket(a->var_expr)) {
 		oss << "(";
@@ -283,7 +256,7 @@ void c_code_generator::visit(sq_bkt_expr::Ptr a) {
 	}
 	oss << "[";
 	a->index->accept(this);
-	oss << "]";	
+	oss << "]";
 }
 void c_code_generator::visit(function_call_expr::Ptr a) {
 	if (expr_needs_bracket(a->expr1)) {
@@ -292,12 +265,12 @@ void c_code_generator::visit(function_call_expr::Ptr a) {
 	a->expr1->accept(this);
 	if (expr_needs_bracket(a->expr1)) {
 		oss << ")";
-	}	
+	}
 	oss << "(";
 	for (unsigned int i = 0; i < a->args.size(); i++) {
 		a->args[i]->accept(this);
 		if (i != a->args.size() - 1)
-			oss << ", ";	
+			oss << ", ";
 	}
 	oss << ")";
 }
@@ -315,13 +288,13 @@ void c_code_generator::visit(func_decl::Ptr a) {
 	oss << " " << a->func_name;
 	oss << " (";
 	bool printDelim = false;
-	for (auto arg: a->args) {
+	for (auto arg : a->args) {
 		if (printDelim)
 			oss << ", ";
-		printDelim = true;	
+		printDelim = true;
 		arg->var_type->accept(this);
 		oss << " " << arg->var_name;
-	}	
+	}
 	if (!printDelim)
 		oss << "void";
 	oss << ")";
@@ -335,15 +308,13 @@ void c_code_generator::visit(func_decl::Ptr a) {
 		printer::indent(oss, curr_indent);
 		a->body->accept(this);
 		oss << std::endl;
-		curr_indent--;	
+		curr_indent--;
 	}
 }
-void c_code_generator::visit(goto_stmt::Ptr a) {
-	a->dump(oss, 1);
-}
+void c_code_generator::visit(goto_stmt::Ptr a) { a->dump(oss, 1); }
 void c_code_generator::visit(return_stmt::Ptr a) {
 	oss << "return ";
 	a->return_val->accept(this);
 	oss << ";";
 }
-}
+} // namespace block

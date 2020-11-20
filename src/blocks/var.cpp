@@ -1,18 +1,17 @@
 #include "blocks/var.h"
 #include "util/printer.h"
 
-namespace block{
+namespace block {
 void var::dump(std::ostream &oss, int indent) {
 	printer::indent(oss, indent);
-	oss << "VAR (" << var_name << ")" << std::endl;	
+	oss << "VAR (" << var_name << ")" << std::endl;
 
-#ifdef DEBUG_VARS	
+#ifdef DEBUG_VARS
 	printer::indent(oss, indent);
 	oss << static_offset.stringify() << std::endl;
 #endif
 }
-void type::dump(std::ostream &oss, int indent) {
-}
+void type::dump(std::ostream &oss, int indent) {}
 void scalar_type::dump(std::ostream &oss, int indent) {
 	printer::indent(oss, indent);
 	oss << "SCALAR_TYPE (";
@@ -29,22 +28,21 @@ void scalar_type::dump(std::ostream &oss, int indent) {
 void pointer_type::dump(std::ostream &oss, int indent) {
 	printer::indent(oss, indent);
 	oss << "POINTER_TYPE" << std::endl;
-	pointee_type->dump(oss, indent+1);
+	pointee_type->dump(oss, indent + 1);
 }
 void function_type::dump(std::ostream &oss, int indent) {
 	printer::indent(oss, indent);
 	oss << "FUNCITON_TYPE" << std::endl;
-	return_type->dump(oss, indent+1);
-	for (unsigned int i = 0; i < arg_types.size(); i++) 
-		arg_types[i]->dump(oss, indent+1);
+	return_type->dump(oss, indent + 1);
+	for (unsigned int i = 0; i < arg_types.size(); i++)
+		arg_types[i]->dump(oss, indent + 1);
 }
 void array_type::dump(std::ostream &oss, int indent) {
 	printer::indent(oss, indent);
 	oss << "ARRAY_TYPE" << std::endl;
-	element_type->dump(oss, indent+1);
-	printer::indent(oss, indent+1);
+	element_type->dump(oss, indent + 1);
+	printer::indent(oss, indent + 1);
 	oss << size << std::endl;
-	
 }
 void builder_var_type::dump(std::ostream &oss, int indent) {
 	printer::indent(oss, indent);
@@ -54,11 +52,11 @@ void builder_var_type::dump(std::ostream &oss, int indent) {
 	else if (builder_var_type_id == builder_var_type::STATIC_VAR)
 		oss << "STATIC_VAR";
 	oss << ")" << std::endl;
-	closure_type->dump(oss, indent+1);
+	closure_type->dump(oss, indent + 1);
 }
 void named_type::dump(std::ostream &oss, int indent) {
 	printer::indent(oss, indent);
 	oss << "NAMED_TYPE (";
 	oss << type_name << ")" << std::endl;
 }
-}
+} // namespace block

@@ -8,7 +8,7 @@ static bool is_update(var::Ptr decl_var, stmt::Ptr last_stmt) {
 	if (!isa<assign_expr>(last_stmt_expr))
 		return false;
 	assign_expr::Ptr update_expr = to<assign_expr>(last_stmt_expr);
-	if(!isa<var_expr>(update_expr->var1))
+	if (!isa<var_expr>(update_expr->var1))
 		return false;
 	var_expr::Ptr lhs_expr = to<var_expr>(update_expr->var1);
 	if (decl_var != lhs_expr->var1)
@@ -20,10 +20,11 @@ static bool is_update(var::Ptr decl_var, stmt::Ptr last_stmt) {
 		return false;
 	lhs_expr = to<var_expr>(rhs_expr->expr1);
 	if (decl_var != lhs_expr->var1)
-		return false;		
+		return false;
 	return true;
 }
-static bool is_last_update(var::Ptr decl_var, stmt_block::Ptr block, std::vector<stmt_block::Ptr> &parents) {
+static bool is_last_update(var::Ptr decl_var, stmt_block::Ptr block,
+			   std::vector<stmt_block::Ptr> &parents) {
 	if (block->stmts.size() == 0)
 		return false;
 	if (isa<break_stmt>(block->stmts.back()))
@@ -38,8 +39,10 @@ static bool is_last_update(var::Ptr decl_var, stmt_block::Ptr block, std::vector
 			return false;
 		if (!isa<stmt_block>(last_stmt->else_stmt))
 			return false;
-		bool then_res = is_last_update(decl_var, to<stmt_block>(last_stmt->then_stmt), parents);
-		bool else_res = is_last_update(decl_var, to<stmt_block>(last_stmt->else_stmt), parents);
+		bool then_res = is_last_update(
+		    decl_var, to<stmt_block>(last_stmt->then_stmt), parents);
+		bool else_res = is_last_update(
+		    decl_var, to<stmt_block>(last_stmt->else_stmt), parents);
 		if (then_res && else_res)
 			return true;
 		return false;
@@ -53,62 +56,76 @@ void for_loop_finder::visit(stmt_block::Ptr a) {
 		for (unsigned int i = 0; i < a->stmts.size(); i++) {
 			parents.clear();
 			if (isa<while_stmt>(a->stmts[i])) {
-				while_stmt::Ptr loop = to<while_stmt>(a->stmts[i]);
-				// All checks for while loop -> for loop conversion
+				while_stmt::Ptr loop =
+				    to<while_stmt>(a->stmts[i]);
+				// All checks for while loop -> for loop
+				// conversion
 				if (i == 0)
 					continue;
-				if (!isa<decl_stmt>(a->stmts[i-1]))
+				if (!isa<decl_stmt>(a->stmts[i - 1]))
 					continue;
-				decl_stmt::Ptr decl = to<decl_stmt>(a->stmts[i-1]);
+				decl_stmt::Ptr decl =
+				    to<decl_stmt>(a->stmts[i - 1]);
 				var::Ptr decl_var = decl->decl_var;
 				if (!isa<lt_expr>(loop->cond))
 					continue;
-				lt_expr::Ptr cond_expr = to<lt_expr>(loop->cond);
+				lt_expr::Ptr cond_expr =
+				    to<lt_expr>(loop->cond);
 				if (!isa<var_expr>(cond_expr->expr1))
 					continue;
-				var_expr::Ptr lhs_expr = to<var_expr>(cond_expr->expr1);
+				var_expr::Ptr lhs_expr =
+				    to<var_expr>(cond_expr->expr1);
 				if (decl_var != lhs_expr->var1)
 					continue;
 				if (!isa<stmt_block>(loop->body))
 					continue;
-				stmt_block::Ptr loop_body = to<stmt_block>(loop->body);
+				stmt_block::Ptr loop_body =
+				    to<stmt_block>(loop->body);
 				if (loop_body->stmts.size() < 1)
 					continue;
-				if (!is_last_update(decl_var, loop_body, parents))
+				if (!is_last_update(decl_var, loop_body,
+						    parents))
 					continue;
 				if (parents.size() == 0)
 					continue;
-				for (auto stmt: loop->continue_blocks) {
+				for (auto stmt : loop->continue_blocks) {
 					if (loop->continue_blocks.size() < 2)
 						continue;
-					if (!is_update(decl_var, stmt->stmts[stmt->stmts.size()-2]))
-						continue;	
+					if (!is_update(
+						decl_var,
+						stmt->stmts[stmt->stmts.size() -
+							    2]))
+						continue;
 				}
 				while_loop_index = i - 1;
 				break;
 			}
 		}
 		if (while_loop_index != -1) {
-			while_stmt::Ptr loop = to<while_stmt>(a->stmts[while_loop_index + 1]);
+			while_stmt::Ptr loop =
+			    to<while_stmt>(a->stmts[while_loop_index + 1]);
 			std::vector<stmt::Ptr> new_stmts;
 			for (int i = 0; i < while_loop_index; i++)
 				new_stmts.push_back(a->stmts[i]);
 			for_stmt::Ptr for_loop = std::make_shared<for_stmt>();
-			for_loop->static_offset = a->stmts[while_loop_index]->static_offset;
+			for_loop->static_offset =
+			    a->stmts[while_loop_index]->static_offset;
 			for_loop->decl_stmt = a->stmts[while_loop_index];
 			for_loop->cond = loop->cond;
-			for_loop->update = to<expr_stmt>(parents[0]->stmts.back())->expr1;
-			for (unsigned int i = 0; i < parents.size(); i++) 
+			for_loop->update =
+			    to<expr_stmt>(parents[0]->stmts.back())->expr1;
+			for (unsigned int i = 0; i < parents.size(); i++)
 				parents[i]->stmts.pop_back();
-			for (auto stmt: loop->continue_blocks) {
+			for (auto stmt : loop->continue_blocks) {
 				auto cont_stmt = stmt->stmts.back();
 				stmt->stmts.pop_back();
 				stmt->stmts.pop_back();
-				stmt->stmts.push_back(cont_stmt);	
+				stmt->stmts.push_back(cont_stmt);
 			}
 			for_loop->body = loop->body;
 			new_stmts.push_back(for_loop);
-			for (unsigned int i = while_loop_index + 2; i < a->stmts.size(); i++)
+			for (unsigned int i = while_loop_index + 2;
+			     i < a->stmts.size(); i++)
 				new_stmts.push_back(a->stmts[i]);
 			a->stmts = new_stmts;
 		} else
@@ -117,4 +134,4 @@ void for_loop_finder::visit(stmt_block::Ptr a) {
 	for (unsigned int i = 0; i < a->stmts.size(); i++)
 		a->stmts[i]->accept(this);
 }
-}
+} // namespace block

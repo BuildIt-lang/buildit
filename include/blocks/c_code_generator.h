@@ -3,16 +3,17 @@
 #include "blocks/block_visitor.h"
 #include "blocks/stmt.h"
 #include "util/printer.h"
-#include <unordered_set>
 #include <unordered_map>
+#include <unordered_set>
 
 namespace block {
-class c_code_generator: public block_visitor {
+class c_code_generator : public block_visitor {
 private:
 	void emit_binary_expr(binary_expr::Ptr, std::string);
+
 public:
 	using block_visitor::visit;
-	c_code_generator(std::ostream &_oss): oss(_oss) {}
+	c_code_generator(std::ostream &_oss) : oss(_oss) {}
 	std::ostream &oss;
 	int curr_indent = 0;
 	virtual void visit(not_expr::Ptr);
@@ -51,19 +52,18 @@ public:
 	virtual void visit(pointer_type::Ptr);
 	virtual void visit(array_type::Ptr);
 	virtual void visit(builder_var_type::Ptr);
-	
-	virtual void visit(func_decl::Ptr);	
-	virtual void visit(return_stmt::Ptr);	
-	
+
+	virtual void visit(func_decl::Ptr);
+	virtual void visit(return_stmt::Ptr);
+
 	virtual void visit(goto_stmt::Ptr);
 
 	static void generate_code(block::Ptr ast, std::ostream &oss, int indent = 0) {
-		c_code_generator generator (oss);
+		c_code_generator generator(oss);
 		generator.curr_indent = indent;
 		ast->accept(&generator);
 		oss << std::endl;
-	
 	}
 };
-}
+} // namespace block
 #endif

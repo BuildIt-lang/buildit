@@ -22,4 +22,4 @@ void var_replacer::visit(var_expr::Ptr a) {
 		a->var1 = to_replace;
 	}
 }
-}
+} // namespace block

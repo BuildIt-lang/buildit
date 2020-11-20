@@ -4,22 +4,21 @@
 #include "blocks/stmt.h"
 
 namespace block {
-class var_namer: public block_visitor {
+class var_namer : public block_visitor {
 public:
 	using block_visitor::visit;
 	int var_counter = 0;
 	stmt::Ptr ast;
 	virtual void visit(decl_stmt::Ptr);
 };
-class var_replacer: public block_visitor {
+class var_replacer : public block_visitor {
 public:
 	using block_visitor::visit;
 	var::Ptr to_replace;
 	tracer::tag offset_to_replace;
-	
-	//virtual void visit(assign_expr::Ptr);
+
+	// virtual void visit(assign_expr::Ptr);
 	virtual void visit(var_expr::Ptr);
-	
 };
-}
+} // namespace block
 #endif

@@ -1,16 +1,15 @@
-#include "builder/builder_context.h"
-#include "builder/builder.h"
-#include <iostream>
 #include "blocks/c_code_generator.h"
+#include "builder/builder.h"
+#include "builder/builder_context.h"
 #include "builder/static_var.h"
+#include <iostream>
 
-using builder::static_var;
 using builder::dyn_var;
-
+using builder::static_var;
 
 const char *bf_program;
-dyn_var<void (int)> *print_value_ptr;
-dyn_var<int ()> *get_value_ptr;
+dyn_var<void(int)> *print_value_ptr;
+dyn_var<int()> *get_value_ptr;
 
 static int find_matching_closing(int pc) {
 	int count = 1;
@@ -19,7 +18,7 @@ static int find_matching_closing(int pc) {
 		if (bf_program[pc] == '[')
 			count++;
 		else if (bf_program[pc] == ']')
-			count--;	
+			count--;
 	}
 	return pc;
 }
@@ -56,36 +55,40 @@ static void interpret_bf(void) {
 		} else if (bf_program[pc] == ',') {
 			tape[pointer] = get_value();
 		} else if (bf_program[pc] == '[') {
-			int closing = find_matching_closing(pc);		
+			int closing = find_matching_closing(pc);
 			if (tape[pointer] == 0) {
 				pc = closing;
 			}
 		} else if (bf_program[pc] == ']') {
 			int opening = find_matching_opening(pc);
-			pc = opening - 1;	
+			pc = opening - 1;
 		}
 		pc += 1;
 	}
 }
-static void print_wrapper_code(std::ostream& oss) {
+static void print_wrapper_code(std::ostream &oss) {
 	oss << "#include <stdio.h>\n";
 	oss << "#include <stdlib.h>\n";
 	oss << "void print_value(int x) {printf(\"%c\", x);}\n";
 	oss << "int get_value(void) {char x; scanf(\" %c\", &x); return x;}\n";
 	oss << "int main(int argc, char* argv[]) ";
 }
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
 	builder::builder_context context;
-	
+
 	// BF program that prints hello world
-	bf_program = "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.";
+	bf_program =
+	    "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.++++++"
+	    "+..+++.>>.<-.<.+++.------.--------.>>+.>++.";
 
-	print_value_ptr = context.assume_variable<dyn_var<void (int)>>("print_value");
-	get_value_ptr = context.assume_variable<dyn_var<int (void)>>("get_value");
+	print_value_ptr =
+	    context.assume_variable<dyn_var<void(int)>>("print_value");
+	get_value_ptr =
+	    context.assume_variable<dyn_var<int(void)>>("get_value");
 
-	auto ast = context.extract_ast_from_function(interpret_bf);	
-	
-	print_wrapper_code(std::cout);		
-	block::c_code_generator::generate_code(ast, std::cout, 0);	
+	auto ast = context.extract_ast_from_function(interpret_bf);
+
+	print_wrapper_code(std::cout);
+	block::c_code_generator::generate_code(ast, std::cout, 0);
 	return 0;
 }

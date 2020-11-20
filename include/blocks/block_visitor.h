@@ -34,7 +34,7 @@ class decl_stmt;
 class if_stmt;
 class label;
 class label_stmt;
-class goto_stmt;	
+class goto_stmt;
 class while_stmt;
 class for_stmt;
 class break_stmt;
@@ -59,62 +59,60 @@ class return_stmt;
 
 class block_visitor {
 public:
-	virtual void visit (std::shared_ptr<block>);
-	virtual void visit (std::shared_ptr<expr>);
-	virtual void visit (std::shared_ptr<unary_expr>);
-	virtual void visit (std::shared_ptr<binary_expr>);
-	virtual void visit (std::shared_ptr<not_expr>);
-	virtual void visit (std::shared_ptr<and_expr>);
-	virtual void visit (std::shared_ptr<or_expr>);
-	virtual void visit (std::shared_ptr<plus_expr>);
-	virtual void visit (std::shared_ptr<minus_expr>);
-	virtual void visit (std::shared_ptr<mul_expr>);
-	virtual void visit (std::shared_ptr<div_expr>);
-	virtual void visit (std::shared_ptr<lt_expr>);
-	virtual void visit (std::shared_ptr<gt_expr>);
-	virtual void visit (std::shared_ptr<lte_expr>);
-	virtual void visit (std::shared_ptr<gte_expr>);
-	virtual void visit (std::shared_ptr<equals_expr>);
-	virtual void visit (std::shared_ptr<ne_expr>);
-	virtual void visit (std::shared_ptr<mod_expr>);
-	virtual void visit (std::shared_ptr<var_expr>);
-	virtual void visit (std::shared_ptr<const_expr>);
-	virtual void visit (std::shared_ptr<int_const>);
-	virtual void visit (std::shared_ptr<double_const>);
-	virtual void visit (std::shared_ptr<float_const>);
-	virtual void visit (std::shared_ptr<assign_expr>);
-	virtual void visit (std::shared_ptr<stmt>);
-	virtual void visit (std::shared_ptr<expr_stmt>);
-	virtual void visit (std::shared_ptr<stmt_block>);
-	virtual void visit (std::shared_ptr<decl_stmt>);
-	virtual void visit (std::shared_ptr<if_stmt>);
-	virtual void visit (std::shared_ptr<label>);
-	virtual void visit (std::shared_ptr<label_stmt>);
-	virtual void visit (std::shared_ptr<goto_stmt>);	
-	virtual void visit (std::shared_ptr<while_stmt>);	
-	virtual void visit (std::shared_ptr<for_stmt>);	
-	virtual void visit (std::shared_ptr<break_stmt>);	
-	virtual void visit (std::shared_ptr<continue_stmt>);	
-	virtual void visit (std::shared_ptr<sq_bkt_expr>);
-	virtual void visit (std::shared_ptr<function_call_expr>);
-	virtual void visit (std::shared_ptr<initializer_list_expr>);
+	virtual void visit(std::shared_ptr<block>);
+	virtual void visit(std::shared_ptr<expr>);
+	virtual void visit(std::shared_ptr<unary_expr>);
+	virtual void visit(std::shared_ptr<binary_expr>);
+	virtual void visit(std::shared_ptr<not_expr>);
+	virtual void visit(std::shared_ptr<and_expr>);
+	virtual void visit(std::shared_ptr<or_expr>);
+	virtual void visit(std::shared_ptr<plus_expr>);
+	virtual void visit(std::shared_ptr<minus_expr>);
+	virtual void visit(std::shared_ptr<mul_expr>);
+	virtual void visit(std::shared_ptr<div_expr>);
+	virtual void visit(std::shared_ptr<lt_expr>);
+	virtual void visit(std::shared_ptr<gt_expr>);
+	virtual void visit(std::shared_ptr<lte_expr>);
+	virtual void visit(std::shared_ptr<gte_expr>);
+	virtual void visit(std::shared_ptr<equals_expr>);
+	virtual void visit(std::shared_ptr<ne_expr>);
+	virtual void visit(std::shared_ptr<mod_expr>);
+	virtual void visit(std::shared_ptr<var_expr>);
+	virtual void visit(std::shared_ptr<const_expr>);
+	virtual void visit(std::shared_ptr<int_const>);
+	virtual void visit(std::shared_ptr<double_const>);
+	virtual void visit(std::shared_ptr<float_const>);
+	virtual void visit(std::shared_ptr<assign_expr>);
+	virtual void visit(std::shared_ptr<stmt>);
+	virtual void visit(std::shared_ptr<expr_stmt>);
+	virtual void visit(std::shared_ptr<stmt_block>);
+	virtual void visit(std::shared_ptr<decl_stmt>);
+	virtual void visit(std::shared_ptr<if_stmt>);
+	virtual void visit(std::shared_ptr<label>);
+	virtual void visit(std::shared_ptr<label_stmt>);
+	virtual void visit(std::shared_ptr<goto_stmt>);
+	virtual void visit(std::shared_ptr<while_stmt>);
+	virtual void visit(std::shared_ptr<for_stmt>);
+	virtual void visit(std::shared_ptr<break_stmt>);
+	virtual void visit(std::shared_ptr<continue_stmt>);
+	virtual void visit(std::shared_ptr<sq_bkt_expr>);
+	virtual void visit(std::shared_ptr<function_call_expr>);
+	virtual void visit(std::shared_ptr<initializer_list_expr>);
 
-	virtual void visit (std::shared_ptr<foreign_expr_base>);
-	
+	virtual void visit(std::shared_ptr<foreign_expr_base>);
 
-	virtual void visit (std::shared_ptr<var>);
-	virtual void visit (std::shared_ptr<type>);
-	virtual void visit (std::shared_ptr<scalar_type>);
-	virtual void visit (std::shared_ptr<pointer_type>);
-	virtual void visit (std::shared_ptr<function_type>);
-	virtual void visit (std::shared_ptr<array_type>);
-	virtual void visit (std::shared_ptr<builder_var_type>);
-	virtual void visit (std::shared_ptr<named_type>);
+	virtual void visit(std::shared_ptr<var>);
+	virtual void visit(std::shared_ptr<type>);
+	virtual void visit(std::shared_ptr<scalar_type>);
+	virtual void visit(std::shared_ptr<pointer_type>);
+	virtual void visit(std::shared_ptr<function_type>);
+	virtual void visit(std::shared_ptr<array_type>);
+	virtual void visit(std::shared_ptr<builder_var_type>);
+	virtual void visit(std::shared_ptr<named_type>);
 
-	virtual void visit (std::shared_ptr<func_decl>);
-	virtual void visit (std::shared_ptr<return_stmt>);
-
+	virtual void visit(std::shared_ptr<func_decl>);
+	virtual void visit(std::shared_ptr<return_stmt>);
 };
-}
+} // namespace block
 
 #endif

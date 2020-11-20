@@ -1,0 +1,5 @@
+UseTab: Always
+IndentWidth: 8
+AlwaysBreakTemplateDeclarations: true
+AccessModifierOffset: -8
+ColumnLimit: 200

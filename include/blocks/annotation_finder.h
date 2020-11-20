@@ -4,7 +4,7 @@
 #include "blocks/stmt.h"
 
 namespace block {
-class annotation_finder: public block_visitor {
+class annotation_finder : public block_visitor {
 public:
 	using block_visitor::visit;
 	std::string annotation_to_find;
@@ -15,5 +15,5 @@ public:
 	virtual void visit(while_stmt::Ptr);
 	static stmt::Ptr find_annotation(block::Ptr, std::string);
 };
-}
+} // namespace block
 #endif

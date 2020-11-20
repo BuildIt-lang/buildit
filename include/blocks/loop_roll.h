@@ -4,13 +4,13 @@
 #include "blocks/stmt.h"
 
 namespace block {
-class loop_roll_finder: public block_visitor {		
+class loop_roll_finder : public block_visitor {
 public:
 	using block_visitor::visit;
 	virtual void visit(stmt_block::Ptr);
 };
 
-class constant_expr_finder: public block_visitor {
+class constant_expr_finder : public block_visitor {
 public:
 	using block_visitor::visit;
 	std::vector<const_expr::Ptr> constants;
@@ -19,12 +19,12 @@ public:
 	virtual void visit(int_const::Ptr);
 };
 
-class constant_replacer: public block_visitor {
+class constant_replacer : public block_visitor {
 public:
 	using block_visitor::visit;
 	std::vector<expr::Ptr> replace;
 	int curr_index = 0;
-	
+
 	// Handle plus expr for now
 	// Add more expressions later or use expression rewriter instead
 	virtual void visit(plus_expr::Ptr);
@@ -34,6 +34,6 @@ public:
 	virtual void visit(sq_bkt_expr::Ptr);
 };
 
-}
+} // namespace block
 
 #endif

@@ -8,6 +8,6 @@ static inline void indent(std::ostream &oss, int indent) {
 		oss << INDENT_CHAR;
 	}
 }
-}
+} // namespace printer
 
 #endif

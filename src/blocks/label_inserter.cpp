@@ -17,18 +17,22 @@ static void erase_tag(std::vector<tracer::tag> &list, tracer::tag &erase) {
 void label_creator::visit(stmt_block::Ptr a) {
 	std::vector<stmt::Ptr> new_stmts;
 
-	for (stmt::Ptr stmt: a->stmts) {
-		if (std::find(collected_labels.begin(), collected_labels.end(), stmt->static_offset) != collected_labels.end()) {
+	for (stmt::Ptr stmt : a->stmts) {
+		if (std::find(collected_labels.begin(), collected_labels.end(),
+			      stmt->static_offset) != collected_labels.end()) {
 			label::Ptr new_label = std::make_shared<label>();
 			new_label->static_offset = stmt->static_offset;
-			new_label->label_name = "label" + stmt->static_offset.stringify();
-			label_stmt::Ptr new_label_stmt = std::make_shared<label_stmt>();
+			new_label->label_name =
+			    "label" + stmt->static_offset.stringify();
+			label_stmt::Ptr new_label_stmt =
+			    std::make_shared<label_stmt>();
 			new_label_stmt->static_offset.clear();
-			new_label_stmt->label1 = new_label;	
+			new_label_stmt->label1 = new_label;
 			new_stmts.push_back(new_label_stmt);
-			//collected_labels.erase(stmt->static_offset);
+			// collected_labels.erase(stmt->static_offset);
 			erase_tag(collected_labels, stmt->static_offset);
-			offset_to_label[stmt->static_offset.stringify()] = new_label;
+			offset_to_label[stmt->static_offset.stringify()] =
+			    new_label;
 		}
 		new_stmts.push_back(stmt);
 		stmt->accept(this);
@@ -38,4 +42,4 @@ void label_creator::visit(stmt_block::Ptr a) {
 void label_inserter::visit(goto_stmt::Ptr a) {
 	a->label1 = offset_to_label[a->temporary_label_number.stringify()];
 }
-}
+} // namespace block
