@@ -137,7 +137,7 @@ void loop_roll_finder::visit(stmt_block::Ptr b) {
 	// Now find opportunities for rolling
 	while (1) {
 		int match_start = -1;
-		int match_end;
+		int match_end = -1;
 		for (unsigned int i = 0; i < b->stmts.size(); i++) {
 			auto stmt = b->stmts[i];
 			if (is_roll(stmt->annotation)) {
