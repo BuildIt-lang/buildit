@@ -23,7 +23,7 @@ void builder_context::add_stmt_to_current_block(block::stmt::Ptr s,
 		throw LoopBackException(s->static_offset);
 	}
 	std::string tag_string = s->static_offset.stringify();
-	if (memoized_tags->map.find(tag_string) != memoized_tags->map.end() &&
+	if (use_memoization && memoized_tags->map.find(tag_string) != memoized_tags->map.end() &&
 	    check_for_conflicts && bool_vector.size() == 0) {
 		// This tag has been seen on some other execution. We can reuse.
 		// First find the tag -
@@ -349,6 +349,7 @@ builder_context::extract_ast_from_function_internal(std::vector<bool> b) {
 		block::expr::Ptr cond_expr = last_stmt->expr1;
 
 		builder_context true_context(memoized_tags);
+		true_context.use_memoization = use_memoization;
 		true_context.visited_offsets = visited_offsets;
 		true_context.internal_stored_lambda = internal_stored_lambda;
 		std::vector<bool> true_bv;
@@ -358,6 +359,7 @@ builder_context::extract_ast_from_function_internal(std::vector<bool> b) {
 		    true_context.extract_ast_from_function_internal(true_bv));
 
 		builder_context false_context(memoized_tags);
+		false_context.use_memoization = use_memoization;
 		false_context.visited_offsets = visited_offsets;
 		false_context.internal_stored_lambda = internal_stored_lambda;
 		std::vector<bool> false_bv;
