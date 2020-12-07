@@ -15,14 +15,32 @@ void type::dump(std::ostream &oss, int indent) {}
 void scalar_type::dump(std::ostream &oss, int indent) {
 	printer::indent(oss, indent);
 	oss << "SCALAR_TYPE (";
-	if (scalar_type_id == INT_TYPE)
+	if (scalar_type_id == SHORT_INT_TYPE)
+		oss << "SHORT_INT";
+	else if (scalar_type_id == UNSIGNED_SHORT_INT_TYPE)
+		oss << "UNSIGNED_SHORT_INT";
+	else if (scalar_type_id == INT_TYPE)
 		oss << "INT";
+	else if (scalar_type_id == UNSIGNED_INT_TYPE)
+		oss << "UNSIGNED_INT";	
+	else if (scalar_type_id == LONG_INT_TYPE)
+		oss << "LONG_INT";	
+	else if (scalar_type_id == UNSIGNED_LONG_INT_TYPE)
+		oss << "UNSIGNED_LONG_INT";	
+	else if (scalar_type_id == LONG_LONG_INT_TYPE)
+		oss << "LONG_LONG_INT";	
+	else if (scalar_type_id == UNSIGNED_LONG_LONG_INT_TYPE)
+		oss << "UNSIGNED_LONG_LONG_INT";	
 	else if (scalar_type_id == CHAR_TYPE)
 		oss << "CHAR";
+	else if (scalar_type_id == UNSIGNED_CHAR_TYPE)
+		oss << "UNSIGNED_CHAR";
 	else if (scalar_type_id == VOID_TYPE)
 		oss << "VOID";
 	else if (scalar_type_id == FLOAT_TYPE)
 		oss << "FLOAT";
+	else if (scalar_type_id == DOUBLE_TYPE)
+		oss << "DOUBLE";
 	oss << ")" << std::endl;
 }
 void pointer_type::dump(std::ostream &oss, int indent) {

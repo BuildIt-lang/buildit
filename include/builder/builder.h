@@ -154,11 +154,80 @@ public:
 };
 
 template <>
+class type_extractor<short int> {
+public:
+	static block::type::Ptr extract_type(void) {
+		block::scalar_type::Ptr type = std::make_shared<block::scalar_type>();
+		type->scalar_type_id = block::scalar_type::SHORT_INT_TYPE;
+		return type;
+	}
+};
+
+template <>
+class type_extractor<unsigned short int> {
+public:
+	static block::type::Ptr extract_type(void) {
+		block::scalar_type::Ptr type = std::make_shared<block::scalar_type>();
+		type->scalar_type_id = block::scalar_type::UNSIGNED_SHORT_INT_TYPE;
+		return type;
+	}
+};
+
+
+template <>
 class type_extractor<int> {
 public:
 	static block::type::Ptr extract_type(void) {
 		block::scalar_type::Ptr type = std::make_shared<block::scalar_type>();
 		type->scalar_type_id = block::scalar_type::INT_TYPE;
+		return type;
+	}
+};
+
+template <>
+class type_extractor<unsigned int> {
+public:
+	static block::type::Ptr extract_type(void) {
+		block::scalar_type::Ptr type = std::make_shared<block::scalar_type>();
+		type->scalar_type_id = block::scalar_type::UNSIGNED_INT_TYPE;
+		return type;
+	}
+};
+template <>
+class type_extractor<long int> {
+public:
+	static block::type::Ptr extract_type(void) {
+		block::scalar_type::Ptr type = std::make_shared<block::scalar_type>();
+		type->scalar_type_id = block::scalar_type::LONG_INT_TYPE;
+		return type;
+	}
+};
+
+template <>
+class type_extractor<unsigned long int> {
+public:
+	static block::type::Ptr extract_type(void) {
+		block::scalar_type::Ptr type = std::make_shared<block::scalar_type>();
+		type->scalar_type_id = block::scalar_type::UNSIGNED_LONG_INT_TYPE;
+		return type;
+	}
+};
+template <>
+class type_extractor<long long int> {
+public:
+	static block::type::Ptr extract_type(void) {
+		block::scalar_type::Ptr type = std::make_shared<block::scalar_type>();
+		type->scalar_type_id = block::scalar_type::LONG_LONG_INT_TYPE;
+		return type;
+	}
+};
+
+template <>
+class type_extractor<unsigned long long int> {
+public:
+	static block::type::Ptr extract_type(void) {
+		block::scalar_type::Ptr type = std::make_shared<block::scalar_type>();
+		type->scalar_type_id = block::scalar_type::UNSIGNED_LONG_LONG_INT_TYPE;
 		return type;
 	}
 };
@@ -174,11 +243,31 @@ public:
 };
 
 template <>
+class type_extractor<unsigned char> {
+public:
+	static block::type::Ptr extract_type(void) {
+		block::scalar_type::Ptr type = std::make_shared<block::scalar_type>();
+		type->scalar_type_id = block::scalar_type::UNSIGNED_CHAR_TYPE;
+		return type;
+	}
+};
+
+template <>
 class type_extractor<float> {
 public:
 	static block::type::Ptr extract_type(void) {
 		block::scalar_type::Ptr type = std::make_shared<block::scalar_type>();
 		type->scalar_type_id = block::scalar_type::FLOAT_TYPE;
+		return type;
+	}
+};
+
+template <>
+class type_extractor<double> {
+public:
+	static block::type::Ptr extract_type(void) {
+		block::scalar_type::Ptr type = std::make_shared<block::scalar_type>();
+		type->scalar_type_id = block::scalar_type::DOUBLE_TYPE;
 		return type;
 	}
 };

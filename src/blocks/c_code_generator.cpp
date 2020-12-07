@@ -92,14 +92,22 @@ void c_code_generator::visit(stmt_block::Ptr a) {
 	oss << "}";
 }
 void c_code_generator::visit(scalar_type::Ptr type) {
-	if (type->scalar_type_id == scalar_type::INT_TYPE) {
-		oss << "int";
-	} else if (type->scalar_type_id == scalar_type::CHAR_TYPE) {
-		oss << "char";
-	} else if (type->scalar_type_id == scalar_type::VOID_TYPE) {
-		oss << "void";
-	} else if (type->scalar_type_id == scalar_type::FLOAT_TYPE) {
-		oss << "float";
+	switch(type->scalar_type_id) {
+		case scalar_type::SHORT_INT_TYPE: oss << "short int"; break;
+		case scalar_type::UNSIGNED_SHORT_INT_TYPE: oss << "unsigned short int"; break;
+		case scalar_type::INT_TYPE: oss << "int"; break;
+		case scalar_type::UNSIGNED_INT_TYPE: oss << "unsigned int"; break;
+		case scalar_type::LONG_INT_TYPE: oss << "long int"; break;
+		case scalar_type::UNSIGNED_LONG_INT_TYPE: oss << "unsigned long int"; break;
+		case scalar_type::LONG_LONG_INT_TYPE: oss << "long long int"; break;
+		case scalar_type::UNSIGNED_LONG_LONG_INT_TYPE: oss << "unsigned long long int"; break;
+		case scalar_type::CHAR_TYPE: oss << "char"; break;
+		case scalar_type::UNSIGNED_CHAR_TYPE: oss << "unsigned char"; break;
+		case scalar_type::VOID_TYPE: oss << "void"; break;
+		case scalar_type::FLOAT_TYPE: oss << "float"; break;
+		case scalar_type::DOUBLE_TYPE: oss << "double"; break;
+		default:
+			assert(false && "Invalid scalar type");
 	}
 }
 void c_code_generator::visit(pointer_type::Ptr type) {
