@@ -1,3 +1,4 @@
+/*NO TEST*/
 #include "blocks/c_code_generator.h"
 #include "builder/builder.h"
 #include "builder/builder_context.h"
@@ -6,7 +7,6 @@
 
 using builder::dyn_var;
 using builder::static_var;
-
 class dummy {
 public:
 	std::string value;
@@ -18,15 +18,14 @@ public:
 			return true;
 		return false;
 	}
+
+	operator builder::builder() const {
+		builder::builder b;
+		b.construct_builder_from_foreign_expr(*this);
+		return b;
+	}	
+
 };
-// We add it in the name space to make sure that the template is properly
-// specialized
-namespace builder {
-template <>
-builder::builder(const dummy &t) {
-	construct_builder_from_foreign_expr(t);
-}
-} // namespace builder
 
 // A simple straight line code with 2 variable declarations and one operator
 int main(int argc, char *argv[]) {

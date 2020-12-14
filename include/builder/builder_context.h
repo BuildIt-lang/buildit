@@ -9,15 +9,20 @@
 #include <vector>
 
 namespace builder {
-class builder;
+
+template <typename BT>
+class builder_base;
+
 class var;
 template <typename T>
 class dyn_var;
-template <typename... arg_types>
-std::vector<block::expr::Ptr> extract_call_arguments_helper(const builder &first_arg, const arg_types &... rest_args);
+template <typename BT, typename... arg_types>
+std::vector<block::expr::Ptr> extract_call_arguments_helper(const builder_base<BT> &first_arg, const arg_types &... rest_args);
 
 template <typename T>
 block::expr::Ptr create_foreign_expr(const T t);
+
+class builder;
 template <typename T>
 builder create_foreign_expr_builder(const T t);
 
@@ -128,16 +133,22 @@ private:
 	std::function<void(void)> internal_stored_lambda;
 
 	static builder_context *current_builder_context;
-	friend builder;
+	template <typename BT>
+	friend class builder_base;
+
 	friend var;
 
 	template <typename T>
 	friend class dyn_var;
+
 	template <typename T>
 	friend class static_var;
 
 	template <typename... arg_types>
 	friend std::vector<block::expr::Ptr> extract_call_arguments_helper(const builder &first_arg, const arg_types &... rest_args);
+
+	template <typename BT, typename... arg_types>
+	friend typename std::enable_if<std::is_base_of<builder_base<BT>, BT>::value, std::vector<block::expr::Ptr>>::type extract_call_arguments_helper(const BT &first_arg, const arg_types &... rest_args);
 
 	friend void annotate(std::string);
 	friend tracer::tag get_offset_in_function(void);

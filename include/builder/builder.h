@@ -13,63 +13,221 @@
 namespace builder {
 // Builder objects are always alive only for duration of the RUN/SEQUENCE.
 // Never store pointers to these objects (across runs) or heap allocate them.
+
 class var;
-template <typename T>
-class dyn_var;
+
 template <typename T>
 class static_var;
 
-class builder {
+template <typename... arg_types>
+std::vector<block::expr::Ptr> extract_call_arguments(const arg_types &... args);
+
+template <typename... arg_types>
+std::vector<block::expr::Ptr> extract_call_arguments_helper(const arg_types &... args);
+
+template <typename BT>
+class builder_base {
 public:
-	builder() = default;
+
+// All members here
 	block::expr::Ptr block_expr;
-	template <typename T>
-	builder builder_binary_op(const builder &) const;
-	template <typename T>
-	builder builder_unary_op() const;
+	static BT sentinel_builder;
 	
-	builder(const builder& other) {
+
+// All the costructors and copy constructors to the top
+
+	// Simple constrcutor, should only be used inside the operator
+	// and set the block_expr immediately
+	builder_base() = default;
+	// Copy constructor from another builder
+	builder_base(const BT& other) {
 		block_expr = other.block_expr;
 	}
-
-	builder operator[](const builder &);
-	builder operator=(const builder &);
-
-	explicit operator bool();
-
-	builder(const int &);
-	builder(const double &);
-	builder(const float &);
-	builder(const bool &b) : builder((int)b) {}
-	builder(const char &c) : builder((int)c) {}
-	builder(unsigned char &c) : builder((int)c) {}
-
-	template <typename... types>
-	builder operator()(const types &... args);
-	static builder sentinel_builder;
-
-	template <typename T>
-	builder(const T &);
-
-	builder(const var &);
-
-	template <typename T>
-	builder(const dyn_var<T> &a) {
+	
+	builder_base(const int &a) {
 		assert(builder_context::current_builder_context != nullptr);
 		block_expr = nullptr;
 		if (builder_context::current_builder_context->bool_vector.size() > 0)
 			return;
-		assert(a.block_var != nullptr);
+		block::int_const::Ptr int_const = std::make_shared<block::int_const>();
+		tracer::tag offset = get_offset_in_function();
+		int_const->static_offset = offset;
+		int_const->value = a;
+		builder_context::current_builder_context->add_node_to_sequence(
+		    int_const);
+		block_expr = int_const;
+	}
+
+	builder_base(const double &a) {
+		assert(builder_context::current_builder_context != nullptr);
+		block_expr = nullptr;
+		if (builder_context::current_builder_context->bool_vector.size() > 0)
+			return;
+		block::double_const::Ptr double_const =
+		    std::make_shared<block::double_const>();
+		tracer::tag offset = get_offset_in_function();
+		double_const->static_offset = offset;
+		double_const->value = a;
+		builder_context::current_builder_context->add_node_to_sequence(
+		    double_const);
+
+		block_expr = double_const;
+	}
+	builder_base(const float &a) {
+		assert(builder_context::current_builder_context != nullptr);
+		block_expr = nullptr;
+		if (builder_context::current_builder_context->bool_vector.size() > 0)
+			return;
+		block::float_const::Ptr float_const =
+		    std::make_shared<block::float_const>();
+		tracer::tag offset = get_offset_in_function();
+		float_const->static_offset = offset;
+		float_const->value = a;
+		builder_context::current_builder_context->add_node_to_sequence(
+		    float_const);
+
+		block_expr = float_const;
+	}
+	builder_base(const bool &b) : builder_base<BT>((int)b) {}
+	builder_base(const char &c) : builder_base<BT>((int)c) {}
+	builder_base(unsigned char &c) : builder_base<BT>((int)c) {}
+
+	builder_base(const var &a);
+
+
+	template <typename T>
+	builder_base(const static_var<T> &a) : builder_base<BT>((const T)a) {}
+
+
+// Other basic functions	
+	template <typename T>
+	BT builder_unary_op() const {
+		assert(builder_context::current_builder_context != nullptr);
+		if (builder_context::current_builder_context->bool_vector.size() > 0)
+			return sentinel_builder;
+
+		builder_context::current_builder_context->remove_node_from_sequence(
+		    block_expr);
 		tracer::tag offset = get_offset_in_function();
 
-		block::var_expr::Ptr var_expr = std::make_shared<block::var_expr>();
-		var_expr->static_offset = offset;
+		typename T::Ptr expr = std::make_shared<T>();
+		expr->static_offset = offset;
 
-		var_expr->var1 = a.block_var;
-		builder_context::current_builder_context->add_node_to_sequence(var_expr);
+		expr->expr1 = block_expr;
 
-		block_expr = var_expr;
+		builder_context::current_builder_context->add_node_to_sequence(expr);
+
+		BT ret_builder;
+		ret_builder.block_expr = expr;
+		return ret_builder;
 	}
+
+
+	template <typename T>
+	BT builder_binary_op(const builder_base<BT> & a) const {
+		assert(builder_context::current_builder_context != nullptr);
+		if (builder_context::current_builder_context->bool_vector.size() > 0)
+			return sentinel_builder;
+
+		builder_context::current_builder_context->remove_node_from_sequence(
+		    block_expr);
+		builder_context::current_builder_context->remove_node_from_sequence(
+		    a.block_expr);
+
+		tracer::tag offset = get_offset_in_function();
+
+		typename T::Ptr expr = std::make_shared<T>();
+		expr->static_offset = offset;
+
+		expr->expr1 = block_expr;
+		expr->expr2 = a.block_expr;
+
+		builder_context::current_builder_context->add_node_to_sequence(expr);
+
+		BT ret_builder;
+		ret_builder.block_expr = expr;
+		return ret_builder;
+	}
+	
+
+	BT operator[](const BT& a) {
+		assert(builder_context::current_builder_context != nullptr);
+		if (builder_context::current_builder_context->bool_vector.size() > 0)
+			return sentinel_builder;
+
+		builder_context::current_builder_context->remove_node_from_sequence(
+		    block_expr);
+		builder_context::current_builder_context->remove_node_from_sequence(
+		    a.block_expr);
+
+		tracer::tag offset = get_offset_in_function();
+		// assert(offset != -1);
+
+		block::sq_bkt_expr::Ptr expr = std::make_shared<block::sq_bkt_expr>();
+		expr->static_offset = offset;
+
+		expr->var_expr = block_expr;
+		expr->index = a.block_expr;
+
+		builder_context::current_builder_context->add_node_to_sequence(expr);
+
+		BT ret_builder;
+		ret_builder.block_expr = expr;
+		return ret_builder;
+	}
+
+	BT assign(const BT& a) {
+		assert(builder_context::current_builder_context != nullptr);
+		if (builder_context::current_builder_context->bool_vector.size() > 0)
+			return sentinel_builder;
+
+		builder_context::current_builder_context->remove_node_from_sequence(
+		    block_expr);
+		builder_context::current_builder_context->remove_node_from_sequence(
+		    a.block_expr);
+		tracer::tag offset = get_offset_in_function();
+		// assert(offset != -1);
+
+		block::assign_expr::Ptr expr = std::make_shared<block::assign_expr>();
+		expr->static_offset = offset;
+
+		expr->var1 = block_expr;
+		expr->expr1 = a.block_expr;
+
+		builder_context::current_builder_context->add_node_to_sequence(expr);
+
+		BT ret_builder;
+		ret_builder.block_expr = expr;
+		return ret_builder;
+	}
+
+	explicit operator bool() {
+		builder_context::current_builder_context->commit_uncommitted();
+		return get_next_bool_from_context(builder_context::current_builder_context, block_expr);
+	}
+
+	template <typename... arg_types>
+	BT operator()(const arg_types &... args) {
+		assert(builder_context::current_builder_context != nullptr);
+		if (builder_context::current_builder_context->bool_vector.size() > 0)
+			return sentinel_builder;
+
+		builder_context::current_builder_context->remove_node_from_sequence(block_expr);
+		tracer::tag offset = get_offset_in_function();
+
+		block::function_call_expr::Ptr expr = std::make_shared<block::function_call_expr>();
+		expr->static_offset = offset;
+
+		expr->expr1 = block_expr;
+		expr->args = extract_call_arguments(args...);
+		std::reverse(expr->args.begin(), expr->args.end());
+		builder_context::current_builder_context->add_node_to_sequence(expr);
+
+		BT ret_builder;
+		ret_builder.block_expr = expr;
+		return ret_builder;
+	}
+
 
 	template <typename T>
 	void construct_builder_from_foreign_expr(const T &t) {
@@ -80,26 +238,43 @@ public:
 		block_expr = create_foreign_expr(t);
 	}
 
-	template <typename T>
-	builder(const static_var<T> &a) : builder((const T)a) {}
 };
 
-builder operator&&(const builder &, const builder &);
-builder operator&&(const builder &, const bool &);
-builder operator||(const builder &, const builder &);
-builder operator||(const builder &, const bool &);
-builder operator+(const builder &, const builder &);
-builder operator-(const builder &, const builder &);
-builder operator*(const builder &, const builder &);
-builder operator/(const builder &, const builder &);
-builder operator<(const builder &, const builder &);
-builder operator>(const builder &, const builder &);
-builder operator<=(const builder &, const builder &);
-builder operator>=(const builder &, const builder &);
-builder operator==(const builder &, const builder &);
-builder operator!=(const builder &, const builder &);
-builder operator%(const builder &, const builder &);
-builder operator!(const builder &);
+template <typename BT>
+BT builder_base<BT>::sentinel_builder;
+
+template <typename T1, typename T2>
+struct allowed_builder_type {
+	constexpr static bool value = (std::is_base_of<builder_base<T1>, T1>::value && std::is_base_of<builder_base<T2>, T2>::value) ||
+		     (std::is_base_of<builder_base<T1>, T1>::value && std::is_convertible<T2, T1>::value) || 
+		     (std::is_base_of<builder_base<T2>, T2>::value && std::is_convertible<T1, T2>::value);
+
+};
+template <typename T1, typename T2, class Enable = void>
+struct allowed_builder_return {
+	typedef T2 type;
+};
+template <typename T1, typename T2>
+struct allowed_builder_return<T1, T2, typename std::enable_if<std::is_base_of<builder_base<T1>, T1>::value>::type> {
+	typedef T1 type;
+};
+
+#include "builder/operator_overload.h.inc"
+
+template <typename BT> 
+BT operator!(const builder_base<BT> &a) {
+	return a.template builder_unary_op<block::not_expr>();
+}
+
+class builder: public builder_base<builder> {
+public:
+	using builder_base<builder>::builder_base;
+	builder operator=(const builder &a) {
+		return assign(a);
+	}
+	using builder_base<builder>::operator[];
+};
+
 
 class var {
 public:
@@ -119,8 +294,6 @@ public:
 
 	explicit operator bool();
 
-	builder operator[](const builder &);
-	builder operator=(const builder &);
 
 	template <typename... types>
 	builder operator()(const types &... args) {
@@ -128,24 +301,49 @@ public:
 	}
 
 	builder operator=(const var &a) { return (builder) * this = a; }
+	builder operator[] (const builder &a) {return ((builder) *this)[a];}
+	builder operator=(const builder &a) {return (builder)*this = a;}
 
 	virtual ~var() = default;
 
-	builder operator&&(const builder &);
-	builder operator||(const builder &);
-	builder operator+(const builder &);
-	builder operator-(const builder &);
-	builder operator*(const builder &);
-	builder operator/(const builder &);
-	builder operator<(const builder &);
-	builder operator>(const builder &);
-	builder operator<=(const builder &);
-	builder operator>=(const builder &);
-	builder operator==(const builder &);
-	builder operator!=(const builder &);
-	builder operator%(const builder &);
 	builder operator!();
 };
+
+template <typename T1, typename T2>
+struct allowed_var_type {
+	constexpr static bool value = !(std::is_base_of<builder_base<T1>, T1>::value || std::is_base_of<builder_base<T2>, T1>::value) &&
+				 (
+				      (std::is_base_of<var, T1>::value && std::is_convertible<T2, builder>::value) ||
+				      (std::is_base_of<var, T2>::value && std::is_convertible<T1, builder>:: value)
+				 );
+};
+
+template <typename T1, typename T2>
+typename std::enable_if<allowed_var_type<T1, T2>::value, builder>::type operator&&(const T1 &a, const T2 &b) { return (builder)a && (builder)b;}
+template <typename T1, typename T2>
+typename std::enable_if<allowed_var_type<T1, T2>::value, builder>::type operator||(const T1 &a, const T2 &b) { return (builder)a || (builder)b;}
+template <typename T1, typename T2>
+typename std::enable_if<allowed_var_type<T1, T2>::value, builder>::type operator+(const T1 &a, const T2 &b) { return (builder)a + (builder)b;}
+template <typename T1, typename T2>
+typename std::enable_if<allowed_var_type<T1, T2>::value, builder>::type operator-(const T1 &a, const T2 &b) { return (builder)a - (builder)b;}
+template <typename T1, typename T2>
+typename std::enable_if<allowed_var_type<T1, T2>::value, builder>::type operator*(const T1 &a, const T2 &b) { return (builder)a * (builder)b;}
+template <typename T1, typename T2>
+typename std::enable_if<allowed_var_type<T1, T2>::value, builder>::type operator/(const T1 &a, const T2 &b) { return (builder)a / (builder)b;}
+template <typename T1, typename T2>
+typename std::enable_if<allowed_var_type<T1, T2>::value, builder>::type operator<(const T1 &a, const T2 &b) { return (builder)a < (builder)b;}
+template <typename T1, typename T2>
+typename std::enable_if<allowed_var_type<T1, T2>::value, builder>::type operator>(const T1 &a, const T2 &b) { return (builder)a > (builder)b;}
+template <typename T1, typename T2>
+typename std::enable_if<allowed_var_type<T1, T2>::value, builder>::type operator<=(const T1 &a, const T2 &b) { return (builder)a <= (builder)b;}
+template <typename T1, typename T2>
+typename std::enable_if<allowed_var_type<T1, T2>::value, builder>::type operator>=(const T1 &a, const T2 &b) { return (builder)a >= (builder)b;}
+template <typename T1, typename T2>
+typename std::enable_if<allowed_var_type<T1, T2>::value, builder>::type operator==(const T1 &a, const T2 &b) { return (builder)a == (builder)b;}
+template <typename T1, typename T2>
+typename std::enable_if<allowed_var_type<T1, T2>::value, builder>::type operator!=(const T1 &a, const T2 &b) { return (builder)a != (builder)b;}
+template <typename T1, typename T2>
+typename std::enable_if<allowed_var_type<T1, T2>::value, builder>::type operator%(const T1 &a, const T2 &b) { return (builder)a % (builder)b;}
 
 template <typename T>
 class type_extractor {
@@ -448,51 +646,34 @@ public:
 	}
 };
 
+
 void annotate(std::string);
 
 // The implementation for () operator on builder
-template <typename... arg_types>
-std::vector<block::expr::Ptr> extract_call_arguments(const arg_types &... args);
 
-template <typename... arg_types>
-std::vector<block::expr::Ptr> extract_call_arguments_helper(const builder &first_arg, const arg_types &... rest_args) {
+
+template <typename BT, typename... arg_types>
+typename std::enable_if<std::is_base_of<builder_base<BT>, BT>::value, std::vector<block::expr::Ptr>>::type extract_call_arguments_helper(const BT &first_arg, const arg_types &... rest_args) {
 	assert(builder_context::current_builder_context != nullptr);
 	builder_context::current_builder_context->remove_node_from_sequence(first_arg.block_expr);
 
-	std::vector<block::expr::Ptr> rest = extract_call_arguments(rest_args...);
+	std::vector<block::expr::Ptr> rest = extract_call_arguments_helper(rest_args...);
 	rest.push_back(first_arg.block_expr);
 	return rest;
 }
+
+
+template <typename T, typename... arg_types>
+std::vector<block::expr::Ptr> extract_call_arguments_helper(const dyn_var<T>& first_arg, const arg_types &... rest_args) {
+	return extract_call_arguments_helper((builder)first_arg, rest_args...);
+}
+
 
 template <typename... arg_types>
 std::vector<block::expr::Ptr> extract_call_arguments(const arg_types &... args) {
 	return extract_call_arguments_helper(args...);
 }
 
-template <>
-std::vector<block::expr::Ptr> extract_call_arguments<>(void);
-
-template <typename... arg_types>
-builder builder::operator()(const arg_types &... args) {
-	assert(builder_context::current_builder_context != nullptr);
-	if (builder_context::current_builder_context->bool_vector.size() > 0)
-		return builder::sentinel_builder;
-
-	builder_context::current_builder_context->remove_node_from_sequence(block_expr);
-	tracer::tag offset = get_offset_in_function();
-
-	block::function_call_expr::Ptr expr = std::make_shared<block::function_call_expr>();
-	expr->static_offset = offset;
-
-	expr->expr1 = block_expr;
-	expr->args = extract_call_arguments(args...);
-	std::reverse(expr->args.begin(), expr->args.end());
-	builder_context::current_builder_context->add_node_to_sequence(expr);
-
-	builder ret_builder;
-	ret_builder.block_expr = expr;
-	return ret_builder;
-}
 
 template <typename T>
 block::expr::Ptr create_foreign_expr(const T t) {
@@ -510,16 +691,38 @@ block::expr::Ptr create_foreign_expr(const T t) {
 	return expr;
 }
 
-template <typename T>
-builder create_foreign_expr_builder(const T t) {
+template <typename BT, typename T>
+BT create_foreign_expr_builder(const T t) {
 	if (builder_context::current_builder_context->bool_vector.size() > 0)
 		return builder::sentinel_builder;
-	builder ret_builder;
+	BT ret_builder;
 	ret_builder.block_expr = create_foreign_expr(t);
 	return ret_builder;
 }
 
 void create_return_stmt(const builder a);
+
+
+template<typename BT>
+builder_base<BT>::builder_base(const var &a) {
+	assert(builder_context::current_builder_context != nullptr);
+	block_expr = nullptr;
+	if (builder_context::current_builder_context->bool_vector.size() > 0)
+		return;
+	assert(a.block_var != nullptr);
+	tracer::tag offset = get_offset_in_function();
+
+	block::var_expr::Ptr var_expr = std::make_shared<block::var_expr>();
+	var_expr->static_offset = offset;
+
+	var_expr->var1 = a.block_var;
+	builder_context::current_builder_context->add_node_to_sequence(
+	    var_expr);
+
+	block_expr = var_expr;
+}
+
+
 
 } // namespace builder
 #endif
