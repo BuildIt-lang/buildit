@@ -159,6 +159,9 @@ private:
 	template <typename T>
 	friend builder create_foreign_expr_builder(const T t);
 
+	template <typename BT, typename T>
+	friend BT create_foreign_expr_builder(const T t);
+
 	friend void create_return_stmt(const builder a);
 };
 bool get_next_bool_from_context(builder_context *context, block::expr::Ptr);

@@ -21,10 +21,10 @@ SAMPLES=$(subst $(SAMPLES_DIR),$(BUILD_DIR),$(SAMPLES_SRCS:.cpp=))
 
 DEBUG ?= 0
 ifeq ($(DEBUG),1)
-CFLAGS=-g -std=c++14
+CFLAGS=-g -std=c++11
 LINKER_FLAGS=-rdynamic -l$(LIBRARY_NAME) -g
 else
-CFLAGS=-std=c++14 -O3
+CFLAGS=-std=c++11 -O3
 LINKER_FLAGS=-rdynamic -l$(LIBRARY_NAME)
 endif
 
