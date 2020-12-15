@@ -6,6 +6,7 @@
 #include "blocks/var_namer.h"
 #include "builder/builder.h"
 #include "builder/exceptions.h"
+#include "builder/dyn_var.h"
 #include "util/tracer.h"
 #include <algorithm>
 

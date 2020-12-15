@@ -1,6 +1,7 @@
 #include "blocks/annotation_finder.h"
 #include "builder/builder.h"
 #include "builder/builder_context.h"
+#include "builder/dyn_var.h"
 #include <iostream>
 using builder::annotate;
 using builder::dyn_var;

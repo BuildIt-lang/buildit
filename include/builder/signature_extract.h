@@ -1,18 +1,15 @@
 #ifndef SIGNATURE_EXTRACT_H
 #define SIGNATURE_EXTRACT_H
 #include "builder/builder_context.h"
+#include "builder/forward_declarations.h"
 #include <functional>
 #include <type_traits>
 
 namespace builder {
-template <typename T>
-class type_extractor;
 
 template <typename... AllArgs>
 struct extract_signature;
 
-template <typename T>
-class dyn_var;
 
 template <typename T>
 struct peel_dyn;
@@ -22,7 +19,6 @@ struct peel_dyn<dyn_var<T>> {
 	typedef T type;
 };
 
-void create_return_stmt(const builder a);
 // This template matches a dyn_var argument and pushes a new argument in the
 // function declaration
 template <typename ClassType, typename RetType, typename T, typename... FutureArgTypes>

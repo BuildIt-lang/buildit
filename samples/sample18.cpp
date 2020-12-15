@@ -2,6 +2,7 @@
 #include "builder/builder.h"
 #include "builder/builder_context.h"
 #include "builder/static_var.h"
+#include "builder/dyn_var.h"
 #include <iostream>
 
 using builder::dyn_var;
