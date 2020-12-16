@@ -17,13 +17,23 @@ class static_var;
 // The var classes declaration
 class var;
 
+
+template <typename T, typename DVT, typename BT>
+class dyn_var_base;
+
 template <typename T>
 class dyn_var;
 
-
-
 template <typename T>
 class type_extractor;
+
+template<bool b> struct booltype {};
+
+template <typename ClassName, typename RetType, class Enable, typename... AllArgs>
+struct extract_signature;
+
+template <typename T, typename... OtherArgs>
+struct extract_signature_from_lambda;
 
 }
 

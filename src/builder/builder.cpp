@@ -5,11 +5,9 @@
 
 namespace builder {
 
-builder var::operator!() { return !(builder) * this; }
 
 
 
-var::operator bool() { return (bool)(builder) * this; }
 
 template <>
 std::vector<block::type::Ptr> extract_type_vector_dyn<>(void) {

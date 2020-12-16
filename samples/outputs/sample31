@@ -1,0 +1,33 @@
+FUNC_DECL
+  SCALAR_TYPE (INT)
+  VAR (arg0)
+  STMT_BLOCK
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var0)
+      VAR_EXPR
+        VAR (arg0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var1)
+      PLUS_EXPR
+        INT_CONST (3)
+        VAR_EXPR
+          VAR (var0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var2)
+      PLUS_EXPR
+        VAR_EXPR
+          VAR (var1)
+        INT_CONST (2)
+    RETURN_STMT
+      VAR_EXPR
+        VAR (var2)
+int func1 (int arg0) {
+  int var0 = arg0;
+  int var1 = 3 + var0;
+  int var2 = var1 + 2;
+  return var2;
+}
+

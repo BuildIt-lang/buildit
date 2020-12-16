@@ -21,11 +21,6 @@ template <typename T>
 builder create_foreign_expr_builder(const T t);
 
 
-template <typename... AllArgs>
-struct extract_signature;
-
-template <typename T, typename... OtherArgs>
-struct extract_signature_from_lambda;
 
 class tracking_tuple {
 public:
@@ -134,8 +129,8 @@ private:
 
 	friend var;
 
-	template <typename T>
-	friend class dyn_var;
+	template <typename T, typename DVT, typename BT>
+	friend class dyn_var_base;
 
 	template <typename T>
 	friend class static_var;
