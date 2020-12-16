@@ -1,15 +1,20 @@
 matrix:
-        include:
-                - os: osx
-                        env:
-                                - MATRIX_EVAL="echo"
-                - os: linux
-                        env:
-                                - MATRIX_EVAL="echo"
+  include:
+    - os: osx
+      env:
+        - MATRIX_EVAL="echo"
+    - os: linux
+      dist: xenial
+      addons:
+        apt:
+          packages:
+            - g++-7
+      env:
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
 
 before_install:
-        - eval "${MATRIX_EVAL}"
-  
+  - eval "${MATRIX_EVAL}"
+
 language: generic
 script:
-        - make run
+  - make run
