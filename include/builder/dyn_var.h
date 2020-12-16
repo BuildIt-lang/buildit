@@ -150,40 +150,20 @@ public:
 
 };
 
-
-template <typename T1, typename T2, class Enable = void>
-struct allowed_var_type_single {
-	constexpr static bool value = false;
-};
-template <typename T1, typename T2>
-struct allowed_var_type_single <T1, T2, typename std::enable_if<std::is_base_of<var, T1>::value>::type> {
-	constexpr static bool value = std::is_convertible<T2, typename T1::associated_BT>::value; 	
-};
+template <typename T1, typename T2, class Enable=void>
+struct allowed_var_return;
 
 template <typename T1, typename T2>
-struct allowed_var_type {
-	constexpr static bool value = !(std::is_base_of<builder_base<T1>, T1>::value || std::is_base_of<builder_base<T2>, T1>::value) &&
-				 (
-				      (allowed_var_type_single<T1, T2>::value || allowed_var_type_single<T2, T1>::value)
-				 );
-};
-
-template <typename T1, typename T2, class Enable = void>
-struct allowed_var_return_helper {
-	
+struct allowed_var_return <T1, T2, typename std::enable_if<std::is_base_of<var, T1>::value && std::is_base_of<var, T2>::value>::type> {
+	typedef typename T1::associated_BT type;
 };
 template <typename T1, typename T2>
-struct allowed_var_return_helper <T1, T2, typename std::enable_if<allowed_var_type<T1, T2>::value>::type> {
-	typedef typename T2::associated_BT type;
-};
-
-// Helper type to identify the return type for the overloads
-template <typename T1, typename T2, class Enable = void>
-struct allowed_var_return : public allowed_var_return_helper<T1, T2> {
+struct allowed_var_return <T1, T2, typename std::enable_if<std::is_convertible<T2, typename T1::associated_BT>::value && !std::is_base_of<var, T2>::value && !std::is_base_of<builder_base<T2>, T2>::value>::type> {
+	typedef typename T1::associated_BT type;
 };
 template <typename T1, typename T2>
-struct allowed_var_return<T1, T2, typename std::enable_if<std::is_base_of<var, T1>::value>::type> : public allowed_var_return_helper<T2, T1> {
-	//typedef typename allowed_var_return_helper<T2, T1>::type type;
+struct allowed_var_return <T2, T1, typename std::enable_if<std::is_convertible<T2, typename T1::associated_BT>::value && !std::is_base_of<var, T2>::value && !std::is_base_of<builder_base<T2>, T2>::value>::type> {
+	typedef typename T1::associated_BT type;
 };
 
 template <typename T1, typename T2>
