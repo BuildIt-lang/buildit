@@ -4,13 +4,8 @@ matrix:
                         env:
                                 - MATRIX_EVAL="echo"
                 - os: linux
-                        dist: xenial
-                        addons:
-                                apt:
-                                        packages:
-                                                - g++-7
                         env:
-                                - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+                                - MATRIX_EVAL="echo"
 
 before_install:
         - eval "${MATRIX_EVAL}"
