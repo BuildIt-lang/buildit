@@ -34,6 +34,7 @@ public:
 	typedef BT associated_BT;
 	typedef T stored_type;
 	typedef DVT my_DVT;
+	typedef my_type super;
 		
 	template <typename... types>
 	BT operator()(const types &... args) {
@@ -240,6 +241,24 @@ template <typename T>
 typename std::enable_if<std::is_base_of<var, T>::value>::type create_return_stmt(const T &a) {
 	create_return_stmt((typename T::associated_BT)a);	
 }
+
+
+
+template <typename T, typename MT, typename BT>
+class dyn_var_final: public dyn_var_base<T, dyn_var_final<T, MT, BT>, BT>, public MT {
+public:
+	using dyn_var_base<T, dyn_var_final<T, MT, BT>, BT>::dyn_var_base;
+	using dyn_var_base<T, dyn_var_final<T, MT, BT>, BT>::operator[];
+	using dyn_var_base<T, dyn_var_final<T, MT, BT>, BT>::operator=;	
+
+	BT operator=(const dyn_var_final<T, MT, BT> &a) {
+		return (*this = (BT)a);
+	}
+	virtual block::expr::Ptr get_parent() const {
+		return ((BT) (*this)).get_parent();
+	}
+};
+
 
 }
 

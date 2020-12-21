@@ -35,6 +35,7 @@ public:
 	block::expr::Ptr block_expr;
 	static BT sentinel_builder;
 	
+	typedef builder_base<BT> super;	
 
 // All the costructors and copy constructors to the top
 
@@ -208,6 +209,9 @@ public:
 		BT ret_builder;
 		ret_builder.block_expr = expr;
 		return ret_builder;
+	}
+	BT operator=(const BT &a) {
+		return assign(a);	
 	}
 
 	explicit operator bool() {
