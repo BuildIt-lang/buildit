@@ -110,6 +110,9 @@ void c_code_generator::visit(scalar_type::Ptr type) {
 			assert(false && "Invalid scalar type");
 	}
 }
+void c_code_generator::visit(named_type::Ptr type) {
+	oss << type->type_name;
+}
 void c_code_generator::visit(pointer_type::Ptr type) {
 	if (!isa<scalar_type>(type->pointee_type) &&
 	    !isa<pointer_type>(type->pointee_type))

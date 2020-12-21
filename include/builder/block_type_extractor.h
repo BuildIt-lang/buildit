@@ -230,6 +230,22 @@ public:
 	}
 };
 
+template <const char* N>
+struct name {
+	
+};
+
+template <const char* N>
+class type_extractor<name<N>> {
+public:
+	static block::type::Ptr extract_type(void) {
+		block::named_type::Ptr type = std::make_shared<block::named_type>();
+		type->type_name = N;
+		return type;	
+	}
+};
+
+
 }
 
 #endif

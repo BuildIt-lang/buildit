@@ -22,7 +22,7 @@ struct member_accessible: public builder::member_base_impl<my_builder> {
 
 template <>
 struct member_accessible<0>: public builder::member_base {
-	member_accessible(builder::member_base* p, std::string mn) {}
+	using member_base::member_base;
 };
 
 

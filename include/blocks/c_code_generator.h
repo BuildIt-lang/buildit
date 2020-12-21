@@ -52,12 +52,14 @@ public:
 	virtual void visit(pointer_type::Ptr);
 	virtual void visit(array_type::Ptr);
 	virtual void visit(builder_var_type::Ptr);
+	virtual void visit(named_type::Ptr);
 
 	virtual void visit(func_decl::Ptr);
 	virtual void visit(return_stmt::Ptr);
 	virtual void visit(member_access_expr::Ptr);
 
 	virtual void visit(goto_stmt::Ptr);
+	
 
 	static void generate_code(block::Ptr ast, std::ostream &oss, int indent = 0) {
 		c_code_generator generator(oss);
