@@ -1,7 +1,7 @@
 #ifndef BUILDER_DYN_VAR_H
 #define BUILDER_DYN_VAR_H
 
-
+#include "builder/builder.h"
 namespace builder {
 
 class var {
@@ -22,12 +22,20 @@ public:
 
 	// This is for enabling dynamic inheritance
 	virtual ~var() = default;
+};
+
+// This class does nothing 
+// Apart from just being used in the copy constructor to
+// tell the constructor to no create without context
+struct dyn_var_sentinel_type {
 
 };
+
 
 template<typename T, typename DVT, typename BT>
 class dyn_var_base: public var {
 public:
+
 	typedef dyn_var_base<T, DVT, BT> my_type;
 	typedef BT associated_BT;
 	typedef T stored_type;
@@ -101,12 +109,16 @@ public:
 		builder_context::current_builder_context->add_stmt_to_current_block(decl_stmt);
 	}
 	// Basic and other constructors
-	dyn_var_base(bool create_without_context = false) { 
-		create_dyn_var(create_without_context); 
+	dyn_var_base() { 
+		create_dyn_var(false); 
 	}
+	dyn_var_base(const dyn_var_sentinel_type& a) {
+		create_dyn_var(true);
+	}
+
 	dyn_var_base(const my_type &a) : my_type((BT)a) {}
 
-
+	
 	template <typename TO>
 	dyn_var_base(const dyn_var_base<TO, DVT, BT> &a) : my_type((BT)a) {}
 	
@@ -122,8 +134,10 @@ public:
 	}
 
 	dyn_var_base(const int &a) : my_type((BT)a) {}
+	dyn_var_base(const bool &a) : my_type((BT)a) {}
 	dyn_var_base(const double &a) : my_type((BT)a) {}
 	dyn_var_base(const float &a) : my_type((BT)a) {}
+	dyn_var_base(const member_base& a): my_type((BT)a) {}
 
 	dyn_var_base(const std::initializer_list<BT> &_a) {
 		std::vector<BT> a(_a);
@@ -200,9 +214,9 @@ builder_base<BT>::builder_base(const var &a) {
 	block_expr = nullptr;
 	if (builder_context::current_builder_context->bool_vector.size() > 0)
 		return;
-	assert(a.block_var != nullptr);
+	
 	tracer::tag offset = get_offset_in_function();
-
+	assert(a.block_var != nullptr);
 	block::var_expr::Ptr var_expr = std::make_shared<block::var_expr>();
 	var_expr->static_offset = offset;
 

@@ -55,6 +55,7 @@ public:
 
 	virtual void visit(func_decl::Ptr);
 	virtual void visit(return_stmt::Ptr);
+	virtual void visit(member_access_expr::Ptr);
 
 	virtual void visit(goto_stmt::Ptr);
 

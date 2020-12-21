@@ -4,6 +4,7 @@
 #include "builder/forward_declarations.h"
 
 #include "blocks/var.h"
+#include "builder/member_base.h"
 #include "builder/builder_context.h"
 #include "builder/signature_extract.h"
 #include "builder/block_type_extractor.h"
@@ -24,6 +25,8 @@ std::vector<block::expr::Ptr> extract_call_arguments(const arg_types &... args);
 template <typename... arg_types>
 std::vector<block::expr::Ptr> extract_call_arguments_helper(const arg_types &... args);
 
+
+
 template <typename BT>
 class builder_base {
 public:
@@ -41,6 +44,11 @@ public:
 	// Copy constructor from another builder
 	builder_base(const BT& other) {
 		block_expr = other.block_expr;
+	}
+
+	template <typename T>	
+	builder_base(const T& a, typename std::enable_if<std::is_base_of<member_base, T>::value && !std::is_base_of<var, T>::value, int>::type = 0) {
+		block_expr = a.get_parent();
 	}
 	
 	builder_base(const int &a) {

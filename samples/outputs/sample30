@@ -52,6 +52,10 @@ STMT_BLOCK
       SCALAR_TYPE (VOID)
     VAR (var12)
     NO_INITIALIZATION
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (var13)
+    INT_CONST (0)
 {
   short int var0;
   unsigned short int var1;
@@ -66,4 +70,5 @@ STMT_BLOCK
   float var10;
   double var11;
   void* var12;
+  int var13 = 0;
 }

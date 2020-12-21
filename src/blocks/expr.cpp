@@ -151,5 +151,10 @@ void float_const::dump(std::ostream &oss, int indent) {
 	printer::indent(oss, indent);
 	oss << "FLOAT_CONST (" << value << ")" << std::endl;
 }
+void member_access_expr::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "MEMBER_ACCESS_EXPR (" << member_name << ")" << std::endl;
+	parent_expr->dump(oss, indent + 1);
+}
 
 } // namespace block

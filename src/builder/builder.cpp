@@ -25,5 +25,8 @@ std::vector<block::expr::Ptr> extract_call_arguments_helper<>(void) {
 	return empty_vector;
 }
 
+block::expr::Ptr member_base::get_parent() const {
+	return nullptr;
+}
 
 } // namespace builder

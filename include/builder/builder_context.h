@@ -112,7 +112,7 @@ public:
 
 	template <typename T>
 	T *assume_variable(std::string name) {
-		T *new_asm_variable = new T(true);
+		T *new_asm_variable = new T(dyn_var_sentinel_type());
 		new_asm_variable->block_var->var_name = name;
 		assume_variables.push_back(new_asm_variable);
 
@@ -151,6 +151,9 @@ private:
 
 	template <typename BT>
 	friend void create_return_stmt(const builder_base<BT> &a);
+
+	template <typename BT>
+	friend struct member_base_impl;
 };
 bool get_next_bool_from_context(builder_context *context, block::expr::Ptr);
 tracer::tag get_offset_in_function(void);

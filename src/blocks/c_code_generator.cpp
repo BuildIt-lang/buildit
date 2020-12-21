@@ -325,4 +325,13 @@ void c_code_generator::visit(return_stmt::Ptr a) {
 	a->return_val->accept(this);
 	oss << ";";
 }
+void c_code_generator::visit(member_access_expr::Ptr a) {
+	if (!isa<var_expr>(a->parent_expr))
+		oss << "(";
+	a->parent_expr->accept(this);
+	if (!isa<var_expr>(a->parent_expr))
+		oss << ")";
+
+	oss << "." << a->member_name;
+}
 } // namespace block

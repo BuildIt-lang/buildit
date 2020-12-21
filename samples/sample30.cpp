@@ -23,6 +23,11 @@ static void foo(void) {
 	dyn_var<float> k;
 	dyn_var<double> l;
 	dyn_var<void*> m;
+	
+	// bool test, fixes a bug
+	// that causes false as an init value creates a variable
+	// without context
+	dyn_var<int> x = false;
 }
 
 int main(int argc, char *argv[]) {

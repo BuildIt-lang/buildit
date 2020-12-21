@@ -35,6 +35,9 @@ struct extract_signature;
 template <typename T, typename... OtherArgs>
 struct extract_signature_from_lambda;
 
+
+struct dyn_var_sentinel_type;
+
 }
 
 #endif

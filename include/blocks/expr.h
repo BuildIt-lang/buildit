@@ -397,6 +397,30 @@ public:
 		return true;
 	}
 };
+
+class member_access_expr: public expr {
+public:
+	expr::Ptr parent_expr;
+	std::string member_name;
+		
+	typedef std::shared_ptr<member_access_expr> Ptr;
+	virtual void dump(std::ostream &oss, int i) override;
+	virtual void accept(block_visitor * a) override {
+		a->visit(self<member_access_expr>());
+	}
+	virtual bool is_same(block::Ptr other) override {
+		if (static_offset != other->static_offset) 
+			return false;
+		if (!isa<member_access_expr>(other))
+			return false;
+		member_access_expr::Ptr other_expr = to<member_access_expr>(other);
+		if (!other_expr->parent_expr->is_same(parent_expr))	
+			return false;
+		if (other_expr->member_name != member_name)
+			return false;
+		return true;
+	}	
+};
 } // namespace block
 
 #endif
