@@ -24,12 +24,6 @@ public:
 	virtual ~var() = default;
 };
 
-// This class does nothing 
-// Apart from just being used in the copy constructor to
-// tell the constructor to no create without context
-struct dyn_var_sentinel_type {
-
-};
 
 
 template<typename T, typename DVT, typename BT>

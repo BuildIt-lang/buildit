@@ -36,8 +36,13 @@ template <typename T, typename... OtherArgs>
 struct extract_signature_from_lambda;
 
 
-struct dyn_var_sentinel_type;
 
+// This class does nothing 
+// Apart from just being used in the copy constructor to
+// tell the constructor to no create without context
+struct dyn_var_sentinel_type {
+
+};
 }
 
 #endif
