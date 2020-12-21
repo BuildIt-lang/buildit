@@ -111,6 +111,8 @@ void for_loop_finder::visit(stmt_block::Ptr a) {
 			for_loop->static_offset =
 			    a->stmts[while_loop_index]->static_offset;
 			for_loop->decl_stmt = a->stmts[while_loop_index];
+			for_loop->annotation = for_loop->decl_stmt->annotation;
+			for_loop->decl_stmt->annotation = "";
 			for_loop->cond = loop->cond;
 			for_loop->update =
 			    to<expr_stmt>(parents[0]->stmts.back())->expr1;

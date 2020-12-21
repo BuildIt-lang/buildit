@@ -13,6 +13,7 @@ public:
 	virtual void visit(decl_stmt::Ptr);
 	virtual void visit(if_stmt::Ptr);
 	virtual void visit(while_stmt::Ptr);
+	virtual void visit(for_stmt::Ptr);
 	static stmt::Ptr find_annotation(block::Ptr, std::string);
 };
 } // namespace block

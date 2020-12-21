@@ -26,6 +26,14 @@ void annotation_finder::visit(while_stmt::Ptr stmt) {
 	}
 	stmt->body->accept(this);
 }
+void annotation_finder::visit(for_stmt::Ptr stmt) {
+	if (annotation_to_find == stmt->annotation) {
+		found_stmt = stmt;
+		return;
+	}
+	stmt->decl_stmt->accept(this);
+	stmt->body->accept(this);
+}
 stmt::Ptr annotation_finder::find_annotation(block::Ptr ast,
 					     std::string label) {
 	annotation_finder finder;
