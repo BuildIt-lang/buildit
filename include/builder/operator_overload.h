@@ -8,9 +8,9 @@ namespace builder {
 // Helper type to restrict the overloads for specific types
 template <typename T1, typename T2>
 struct allowed_builder_type {
-	constexpr static bool value = (std::is_base_of<builder_base<T1>, T1>::value && std::is_base_of<builder_base<T2>, T2>::value) ||
-		     (std::is_base_of<builder_base<T1>, T1>::value && std::is_convertible<T2, T1>::value) || 
-		     (std::is_base_of<builder_base<T2>, T2>::value && std::is_convertible<T1, T2>::value);
+	constexpr static bool value = (is_builder_type<T1>::value && is_builder_type<T2>::value) ||
+		     (is_builder_type<T1>::value && std::is_convertible<T2, T1>::value) || 
+		     (is_builder_type<T2>::value && std::is_convertible<T1, T2>::value);
 
 };
 
@@ -20,7 +20,7 @@ struct allowed_builder_return {
 	typedef T2 type;
 };
 template <typename T1, typename T2>
-struct allowed_builder_return<T1, T2, typename std::enable_if<std::is_base_of<builder_base<T1>, T1>::value>::type> {
+struct allowed_builder_return<T1, T2, typename std::enable_if<is_builder_type<T1>::value>::type> {
 	typedef T1 type;
 };
 
@@ -116,13 +116,13 @@ typename std::enable_if<allowed_builder_type<T1, T2>::value, typename allowed_bu
 }
 
 // Unary operators
-template <typename BT> 
-BT operator!(const builder_base<BT> &a) {
+template <typename MT> 
+builder_base<MT> operator!(const builder_base<MT> &a) {
 	return a.template builder_unary_op<block::not_expr>();
 }
 
-template <typename BT>
-void create_return_stmt(const builder_base<BT> &a) {
+template <typename MT>
+void create_return_stmt(const builder_base<MT> &a) {
 	assert(builder_context::current_builder_context != nullptr);
 	builder_context::current_builder_context->remove_node_from_sequence(
 	    a.block_expr);

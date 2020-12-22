@@ -10,9 +10,10 @@
 template <int recur>
 struct member_accessible;
 
-using my_builder = builder::builder_final<member_accessible<3>>;
+using my_builder = builder::builder_base<member_accessible<3>>;
+
 template <typename T>
-using my_dyn_var = builder::dyn_var_final<T, member_accessible<3>, my_builder>;
+using my_dyn_var = builder::dyn_var_base<T, member_accessible<3>, my_builder>;
 
 template <int recur>
 struct member_accessible: public builder::member_base_impl<my_builder> {

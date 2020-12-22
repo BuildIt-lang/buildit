@@ -22,20 +22,25 @@ namespace builder {
 
 template <typename... arg_types>
 std::vector<block::expr::Ptr> extract_call_arguments(const arg_types &... args);
+
 template <typename... arg_types>
 std::vector<block::expr::Ptr> extract_call_arguments_helper(const arg_types &... args);
 
 
+class builder_root {
+};
 
-template <typename BT>
-class builder_base {
+template <typename MT>
+class builder_base: builder_root, public MT{
+
+	typedef builder_base<MT> BT;
 public:
 
 // All members here
 	block::expr::Ptr block_expr;
 	static BT sentinel_builder;
 	
-	typedef builder_base<BT> super;	
+	typedef builder_base<MT> super;	
 
 // All the costructors and copy constructors to the top
 
@@ -43,7 +48,7 @@ public:
 	// and set the block_expr immediately
 	builder_base() = default;
 	// Copy constructor from another builder
-	builder_base(const BT& other) {
+	builder_base(const BT& other): builder_root(), MT() {
 		block_expr = other.block_expr;
 	}
 
@@ -96,9 +101,9 @@ public:
 
 		block_expr = float_const;
 	}
-	builder_base(const bool &b) : builder_base<BT>((int)b) {}
-	builder_base(const char &c) : builder_base<BT>((int)c) {}
-	builder_base(unsigned char &c) : builder_base<BT>((int)c) {}
+	builder_base(const bool &b) : builder_base<MT>((int)b) {}
+	builder_base(const char &c) : builder_base<MT>((int)c) {}
+	builder_base(unsigned char &c) : builder_base<MT>((int)c) {}
 
 	// This is a template class declaration but requires access to var
 	// So this is defined after the var class definition
@@ -106,7 +111,7 @@ public:
 
 
 	template <typename T>
-	builder_base(const static_var<T> &a) : builder_base<BT>((const T)a) {}
+	builder_base(const static_var<T> &a) : builder_base<MT>((const T)a) {}
 
 
 	bool builder_precheck(void) const {
@@ -138,7 +143,7 @@ public:
 
 
 	template <typename T>
-	BT builder_binary_op(const builder_base<BT> & a) const {
+	BT builder_binary_op(const builder_base<MT> & a) const {
 		if (builder_precheck())
 			return sentinel_builder;
 
@@ -250,18 +255,27 @@ public:
 		block_expr = create_foreign_expr(t);
 	}
 
+	// This is an overload for the virtual function inside member_base
+	virtual block::expr::Ptr get_parent() const {
+		return this->block_expr;
+	}
+
 };
 
-template <typename BT>
-BT builder_base<BT>::sentinel_builder;
+template <typename MT>
+builder_base<MT> builder_base<MT>::sentinel_builder;
 
 
 
 void annotate(std::string);
 
 // Helper function for the implementation of () operator on builder_base
-template <typename BT, typename... arg_types>
-typename std::enable_if<std::is_base_of<builder_base<BT>, BT>::value, std::vector<block::expr::Ptr>>::type extract_call_arguments_helper(const BT &first_arg, const arg_types &... rest_args) {
+
+
+
+
+template <typename MT, typename... arg_types>
+std::vector<block::expr::Ptr> extract_call_arguments_helper(const builder_base<MT> &first_arg, const arg_types &... rest_args) {
 	assert(builder_context::current_builder_context != nullptr);
 	builder_context::current_builder_context->remove_node_from_sequence(first_arg.block_expr);
 

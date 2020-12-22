@@ -12,8 +12,8 @@
 namespace builder {
 
 
-template <typename BT, typename... arg_types>
-std::vector<block::expr::Ptr> extract_call_arguments_helper(const builder_base<BT> &first_arg, const arg_types &... rest_args);
+//template <typename BT, typename... arg_types>
+//std::vector<block::expr::Ptr> extract_call_arguments_helper(const builder_base<BT> &first_arg, const arg_types &... rest_args);
 
 template <typename T>
 block::expr::Ptr create_foreign_expr(const T t);
@@ -136,8 +136,8 @@ private:
 	friend class static_var;
 
 
-	template <typename BT, typename... arg_types>
-	friend typename std::enable_if<std::is_base_of<builder_base<BT>, BT>::value, std::vector<block::expr::Ptr>>::type extract_call_arguments_helper(const BT &first_arg, const arg_types &... rest_args);
+	template <typename MT, typename... arg_types>
+	friend std::vector<block::expr::Ptr> extract_call_arguments_helper(const builder_base<MT> &first_arg, const arg_types &... rest_args);
 
 	friend void annotate(std::string);
 	friend tracer::tag get_offset_in_function(void);

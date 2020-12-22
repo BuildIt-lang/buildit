@@ -25,20 +25,23 @@ public:
 };
 
 
-
-template<typename T, typename DVT, typename BT>
-class dyn_var_base: public var {
+template<typename T, typename MT, typename BT>
+class dyn_var_base: public var, public MT {
 public:
 
-	typedef dyn_var_base<T, DVT, BT> my_type;
+	typedef dyn_var_base<T, MT, BT> my_type;
 	typedef BT associated_BT;
 	typedef T stored_type;
-	typedef DVT my_DVT;
 	typedef my_type super;
 		
 	template <typename... types>
 	BT operator()(const types &... args) {
 		return ((BT) * this)(args...);
+	}
+
+	// Required for the MT's virtual function if it exists
+	virtual block::expr::Ptr get_parent() const {
+		return ((BT) (*this)).get_parent();
 	}
 	
 	// These three need to be defined inside the class, cannot be defined globally
@@ -53,8 +56,12 @@ public:
 		return (BT)*this = a;
 	}
 
+	BT operator=(const dyn_var_base<T, MT, BT> &a) {
+		return (BT) * this = a;
+	}
+
 	template <typename TO>
-	BT operator=(const dyn_var_base<TO, DVT, BT> &a) {
+	BT operator=(const dyn_var_base<TO, MT, BT> &a) {
 		return (BT) * this = a;
 	}
 
@@ -115,7 +122,7 @@ public:
 
 	
 	template <typename TO>
-	dyn_var_base(const dyn_var_base<TO, DVT, BT> &a) : my_type((BT)a) {}
+	dyn_var_base(const dyn_var_base<TO, MT, BT> &a) : my_type((BT)a) {}
 	
 	template <typename TO>
 	dyn_var_base(const static_var<TO> &a) : my_type((TO)a) {}
@@ -167,11 +174,11 @@ struct allowed_var_return <T1, T2, typename std::enable_if<std::is_base_of<var, 
 	typedef typename T1::associated_BT type;
 };
 template <typename T1, typename T2>
-struct allowed_var_return <T1, T2, typename std::enable_if<std::is_convertible<T2, typename T1::associated_BT>::value && !std::is_base_of<var, T2>::value && !std::is_base_of<builder_base<T2>, T2>::value>::type> {
+struct allowed_var_return <T1, T2, typename std::enable_if<std::is_convertible<T2, typename T1::associated_BT>::value && !std::is_base_of<var, T2>::value && !is_builder_type<T2>::value>::type> {
 	typedef typename T1::associated_BT type;
 };
 template <typename T1, typename T2>
-struct allowed_var_return <T2, T1, typename std::enable_if<std::is_convertible<T2, typename T1::associated_BT>::value && !std::is_base_of<var, T2>::value && !std::is_base_of<builder_base<T2>, T2>::value>::type> {
+struct allowed_var_return <T2, T1, typename std::enable_if<std::is_convertible<T2, typename T1::associated_BT>::value && !std::is_base_of<var, T2>::value && !is_builder_type<T2>::value>::type> {
 	typedef typename T1::associated_BT type;
 };
 
@@ -222,27 +229,13 @@ builder_base<BT>::builder_base(const var &a) {
 	block_expr = var_expr;
 }
 
-template <typename T>
-class dyn_var : public dyn_var_base<T, dyn_var<T>, builder> {
-public:
-	virtual ~dyn_var() = default;
-	// using var::operator builder;	
-	using dyn_var_base<T, dyn_var<T>, builder>::dyn_var_base;
-
-	builder operator=(const dyn_var<T> &a) {
-		return (*this = (builder)a);
-	}
-	using dyn_var_base<T, dyn_var<T>, builder>::operator[];
-	using dyn_var_base<T, dyn_var<T>, builder>::operator=;
-
-};
 
 template <typename T>
 typename std::enable_if<std::is_base_of<var, T>::value>::type create_return_stmt(const T &a) {
 	create_return_stmt((typename T::associated_BT)a);	
 }
 
-
+/*
 
 template <typename T, typename MT, typename BT>
 class dyn_var_final: public dyn_var_base<T, dyn_var_final<T, MT, BT>, BT>, public MT {
@@ -258,6 +251,7 @@ public:
 		return ((BT) (*this)).get_parent();
 	}
 };
+*/
 
 
 }
