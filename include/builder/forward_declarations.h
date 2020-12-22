@@ -33,11 +33,19 @@ class dyn_var_base;
 template <typename T>
 using dyn_var = dyn_var_base<T, sentinel_member, builder>;
 
+template <typename T>
+using is_dyn_var_type = std::is_base_of<var, T>;
+
+
+
+struct member_base;
+
+template <typename T>
+using is_member_type = std::is_base_of<member_base, T>;
+
 
 template <typename T>
 class type_extractor;
-
-template<bool b> struct booltype {};
 
 template <typename ClassName, typename RetType, class Enable, typename... AllArgs>
 struct extract_signature;

@@ -166,50 +166,6 @@ public:
 
 };
 
-template <typename T1, typename T2, class Enable=void>
-struct allowed_var_return;
-
-template <typename T1, typename T2>
-struct allowed_var_return <T1, T2, typename std::enable_if<std::is_base_of<var, T1>::value && std::is_base_of<var, T2>::value>::type> {
-	typedef typename T1::associated_BT type;
-};
-template <typename T1, typename T2>
-struct allowed_var_return <T1, T2, typename std::enable_if<std::is_convertible<T2, typename T1::associated_BT>::value && !std::is_base_of<var, T2>::value && !is_builder_type<T2>::value>::type> {
-	typedef typename T1::associated_BT type;
-};
-template <typename T1, typename T2>
-struct allowed_var_return <T2, T1, typename std::enable_if<std::is_convertible<T2, typename T1::associated_BT>::value && !std::is_base_of<var, T2>::value && !is_builder_type<T2>::value>::type> {
-	typedef typename T1::associated_BT type;
-};
-
-template <typename T1, typename T2>
-typename allowed_var_return<T1, T2>::type operator&&(const T1 &a, const T2 &b) { return (typename allowed_var_return<T1, T2>::type)a && (typename allowed_var_return<T1, T2>::type)b;}
-template <typename T1, typename T2>
-typename allowed_var_return<T1, T2>::type operator||(const T1 &a, const T2 &b) { return (typename allowed_var_return<T1, T2>::type)a || (typename allowed_var_return<T1, T2>::type)b;}
-template <typename T1, typename T2>
-typename allowed_var_return<T1, T2>::type operator+(const T1 &a, const T2 &b) { return (typename allowed_var_return<T1, T2>::type)a + (typename allowed_var_return<T1, T2>::type)b;}
-template <typename T1, typename T2>
-typename allowed_var_return<T1, T2>::type operator-(const T1 &a, const T2 &b) { return (typename allowed_var_return<T1, T2>::type)a - (typename allowed_var_return<T1, T2>::type)b;}
-template <typename T1, typename T2>
-typename allowed_var_return<T1, T2>::type operator*(const T1 &a, const T2 &b) { return (typename allowed_var_return<T1, T2>::type)a * (typename allowed_var_return<T1, T2>::type)b;}
-template <typename T1, typename T2>
-typename allowed_var_return<T1, T2>::type operator/(const T1 &a, const T2 &b) { return (typename allowed_var_return<T1, T2>::type)a / (typename allowed_var_return<T1, T2>::type)b;}
-template <typename T1, typename T2>
-typename allowed_var_return<T1, T2>::type operator<(const T1 &a, const T2 &b) { return (typename allowed_var_return<T1, T2>::type)a < (typename allowed_var_return<T1, T2>::type)b;}
-template <typename T1, typename T2>
-typename allowed_var_return<T1, T2>::type operator>(const T1 &a, const T2 &b) { return (typename allowed_var_return<T1, T2>::type)a > (typename allowed_var_return<T1, T2>::type)b;}
-template <typename T1, typename T2>
-typename allowed_var_return<T1, T2>::type operator<=(const T1 &a, const T2 &b) { return (typename allowed_var_return<T1, T2>::type)a <= (typename allowed_var_return<T1, T2>::type)b;}
-template <typename T1, typename T2>
-typename allowed_var_return<T1, T2>::type operator>=(const T1 &a, const T2 &b) { return (typename allowed_var_return<T1, T2>::type)a >= (typename allowed_var_return<T1, T2>::type)b;}
-template <typename T1, typename T2>
-typename allowed_var_return<T1, T2>::type operator==(const T1 &a, const T2 &b) { return (typename allowed_var_return<T1, T2>::type)a == (typename allowed_var_return<T1, T2>::type)b;}
-template <typename T1, typename T2>
-typename allowed_var_return<T1, T2>::type operator!=(const T1 &a, const T2 &b) { return (typename allowed_var_return<T1, T2>::type)a != (typename allowed_var_return<T1, T2>::type)b;}
-template <typename T1, typename T2>
-typename allowed_var_return<T1, T2>::type operator%(const T1 &a, const T2 &b) { return (typename allowed_var_return<T1, T2>::type)a % (typename allowed_var_return<T1, T2>::type)b;}
-
-
 template<typename BT>
 builder_base<BT>::builder_base(const var &a) {
 	assert(builder_context::current_builder_context != nullptr);
@@ -234,24 +190,6 @@ template <typename T>
 typename std::enable_if<std::is_base_of<var, T>::value>::type create_return_stmt(const T &a) {
 	create_return_stmt((typename T::associated_BT)a);	
 }
-
-/*
-
-template <typename T, typename MT, typename BT>
-class dyn_var_final: public dyn_var_base<T, dyn_var_final<T, MT, BT>, BT>, public MT {
-public:
-	using dyn_var_base<T, dyn_var_final<T, MT, BT>, BT>::dyn_var_base;
-	using dyn_var_base<T, dyn_var_final<T, MT, BT>, BT>::operator[];
-	using dyn_var_base<T, dyn_var_final<T, MT, BT>, BT>::operator=;	
-
-	BT operator=(const dyn_var_final<T, MT, BT> &a) {
-		return (*this = (BT)a);
-	}
-	virtual block::expr::Ptr get_parent() const {
-		return ((BT) (*this)).get_parent();
-	}
-};
-*/
 
 
 }
