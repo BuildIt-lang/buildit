@@ -20,10 +20,10 @@ namespace builder {
 // Builder objects are always alive only for duration of the RUN/SEQUENCE.
 // Never store pointers to these objects (across runs) or heap allocate them.
 
-template <typename... arg_types>
+template <typename BT, typename... arg_types>
 std::vector<block::expr::Ptr> extract_call_arguments(const arg_types &... args);
 
-template <typename... arg_types>
+template <typename BT, typename... arg_types>
 std::vector<block::expr::Ptr> extract_call_arguments_helper(const arg_types &... args);
 
 
@@ -236,7 +236,7 @@ public:
 		expr->static_offset = offset;
 
 		expr->expr1 = block_expr;
-		expr->args = extract_call_arguments(args...);
+		expr->args = extract_call_arguments<BT>(args...);
 		std::reverse(expr->args.begin(), expr->args.end());
 		builder_context::current_builder_context->add_node_to_sequence(expr);
 
@@ -274,25 +274,35 @@ void annotate(std::string);
 
 
 
-template <typename MT, typename... arg_types>
-std::vector<block::expr::Ptr> extract_call_arguments_helper(const builder_base<MT> &first_arg, const arg_types &... rest_args) {
+template <typename BT>
+std::vector<block::expr::Ptr> extract_call_arguments_helper(void) {
+	std::vector<block::expr::Ptr> empty_vector;
+	return empty_vector;
+}
+
+template <typename BT, typename T, typename... arg_types> 
+typename std::enable_if<std::is_convertible<T, BT>::value && !std::is_same<BT, T>::value, std::vector<block::expr::Ptr>>::type extract_call_arguments_helper(const T &first_arg, const arg_types&... rest_args) {
+	return extract_call_arguments_helper<BT>((BT)first_arg, rest_args...);
+}
+
+template <typename BT, typename... arg_types>
+std::vector<block::expr::Ptr> extract_call_arguments_helper(const BT &first_arg, const arg_types &... rest_args) {
 	assert(builder_context::current_builder_context != nullptr);
 	builder_context::current_builder_context->remove_node_from_sequence(first_arg.block_expr);
 
-	std::vector<block::expr::Ptr> rest = extract_call_arguments_helper(rest_args...);
+	std::vector<block::expr::Ptr> rest = extract_call_arguments_helper<BT>(rest_args...);
 	rest.push_back(first_arg.block_expr);
 	return rest;
 }
 
-template <typename T, typename... arg_types>
-std::vector<block::expr::Ptr> extract_call_arguments_helper(const dyn_var<T>& first_arg, const arg_types &... rest_args) {
-	return extract_call_arguments_helper((builder)first_arg, rest_args...);
+
+
+template <typename BT, typename... arg_types>
+std::vector<block::expr::Ptr> extract_call_arguments(const arg_types &... args) {
+	return extract_call_arguments_helper<BT>(args...);
 }
 
-template <typename... arg_types>
-std::vector<block::expr::Ptr> extract_call_arguments(const arg_types &... args) {
-	return extract_call_arguments_helper(args...);
-}
+
 
 // Helper functions to create foreign expressions of arbitrary types
 // Theses should be only called from the function to cast the type to builder_base classes

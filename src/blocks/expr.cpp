@@ -157,4 +157,10 @@ void member_access_expr::dump(std::ostream &oss, int indent) {
 	parent_expr->dump(oss, indent + 1);
 }
 
+void addr_of_expr::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "ADDR_OF_EXPR" << std::endl;
+	expr1->dump(oss, indent + 1);
+}
+
 } // namespace block

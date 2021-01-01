@@ -137,6 +137,12 @@ typename return_type_helper<T>::type operator!(const T &a) {
 	return ret_type(a).template builder_unary_op<block::not_expr>();
 }
 
+template <typename T>
+typename return_type_helper<T>::type operator&(const T &a) {
+	typedef typename return_type_helper<T>::type ret_type;
+	return ret_type(a).template builder_unary_op<block::addr_of_expr>();
+}
+
 template <typename MT>
 void create_return_stmt(const builder_base<MT> &a) {
 	assert(builder_context::current_builder_context != nullptr);

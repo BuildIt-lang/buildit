@@ -337,4 +337,9 @@ void c_code_generator::visit(member_access_expr::Ptr a) {
 
 	oss << "." << a->member_name;
 }
+void c_code_generator::visit(addr_of_expr::Ptr a) {
+	oss << "&(";
+	a->expr1->accept(this);
+	oss << ")";
+}
 } // namespace block

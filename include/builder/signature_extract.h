@@ -40,11 +40,8 @@ struct extract_signature<ClassType, RetType, typename std::enable_if<filter_var_
 			static std::function<void(void)> call(builder_context *context, int arg_count, ClassType func, RestArgTypes &... rest_args, OtherArgs... other_args) {
 				std::string arg_name = "arg" + std::to_string(arg_count);
 				T *new_arg = context->assume_variable<T>(arg_name);
-				block::var::Ptr arg = std::make_shared<block::var>();
-				arg->var_name = arg_name;
-				arg->var_type = type_extractor<typename T::stored_type>::extract_type();
-				context->current_func_decl->args.push_back(arg);
-				return extract_signature<ClassType, RetType, void, FutureArgTypes...>::template from<RestArgTypes..., T &>::template with<OtherArgs...>::call(
+				context->current_func_decl->args.push_back(new_arg->block_var);
+				return extract_signature<ClassType, RetType, void, FutureArgTypes...>::template from<RestArgTypes..., T&>::template with<OtherArgs...>::call(
 				    context, arg_count + 1, func, rest_args..., *new_arg, other_args...);
 			}
 		};
@@ -60,7 +57,7 @@ struct extract_signature<ClassType, RetType, typename std::enable_if<!filter_var
 		template <typename TO, typename... OtherArgs>
 		struct with {
 			static std::function<void(void)> call(builder_context *context, int arg_count, ClassType func, RestArgTypes &... rest_args, TO to, OtherArgs... other_args) {
-				return extract_signature<ClassType, RetType, void, FutureArgTypes...>::template from<RestArgTypes..., TO &>::template with<OtherArgs...>::call(
+				return extract_signature<ClassType, RetType, void, FutureArgTypes...>::template from<RestArgTypes..., TO&>::template with<OtherArgs...>::call(
 				    context, arg_count + 1, func, rest_args..., to, other_args...);
 			}
 		};

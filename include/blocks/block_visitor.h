@@ -45,6 +45,7 @@ class initializer_list_expr;
 
 class foreign_expr_base;
 class member_access_expr;
+class addr_of_expr;
 
 class var;
 class type;
@@ -102,6 +103,7 @@ public:
 
 	virtual void visit(std::shared_ptr<foreign_expr_base>);
 	virtual void visit(std::shared_ptr<member_access_expr>);
+	virtual void visit(std::shared_ptr<addr_of_expr>);
 
 	virtual void visit(std::shared_ptr<var>);
 	virtual void visit(std::shared_ptr<type>);

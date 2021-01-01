@@ -2,7 +2,9 @@
 #define BUILDER_FORWARD_DECLARATIONS_H
 
 #include <type_traits>
+#include "blocks/var.h"
 namespace builder {
+
 
 class builder_root;
 
@@ -61,7 +63,14 @@ struct extract_signature_from_lambda;
 struct dyn_var_sentinel_type {
 
 };
+// This class is used for creating exact replicas of a variable
+// One possible use if when initializing args for func_decls
+class dyn_var_consume {
+public:
+	block::var::Ptr block_var = nullptr;
+	dyn_var_consume(const var& a);
+	dyn_var_consume(const dyn_var_consume&);
+};
 }
-
 #endif
 

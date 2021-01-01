@@ -22,8 +22,9 @@ public:
 
 	// This is for enabling dynamic inheritance
 	virtual ~var() = default;
-};
 
+
+};
 
 template<typename T, typename MT, typename BT>
 class dyn_var_base: public var, public MT {
@@ -111,11 +112,30 @@ public:
 		builder_context::current_builder_context->add_stmt_to_current_block(decl_stmt);
 	}
 	// Basic and other constructors
-	dyn_var_base() { 
-		create_dyn_var(false); 
+	dyn_var_base(const char* name=nullptr) { 
+		if (builder_context::current_builder_context == nullptr) {
+			create_dyn_var(true); 
+			if (name != nullptr) {
+				block_var->var_name = name;
+				var_name = name;
+			}
+		} else
+			create_dyn_var(false); 
 	}
-	dyn_var_base(const dyn_var_sentinel_type& a) {
+	dyn_var_base(const dyn_var_sentinel_type& a, std::string name = "") {
 		create_dyn_var(true);
+		if (name != "") {
+			block_var->var_name = name;
+			var_name = name;
+		}
+	
+	}
+	// A very special move constructor that is used to create exact 
+	// replicas of variables
+	dyn_var_base(const dyn_var_consume &a) {
+		block_var = a.block_var;
+		var_name = block_var->var_name;
+		block_decl_stmt = nullptr;	
 	}
 
 	dyn_var_base(const my_type &a) : my_type((BT)a) {}
@@ -163,6 +183,9 @@ public:
 
 	virtual ~dyn_var_base() = default;
 
+	dyn_var_base* addr(void) {
+		return this;
+	}
 
 };
 

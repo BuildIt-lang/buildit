@@ -152,5 +152,6 @@ void block_visitor::visit(func_decl::Ptr a) {
 void block_visitor::visit(return_stmt::Ptr a) { a->return_val->accept(this); }
 
 void block_visitor::visit(member_access_expr::Ptr a) { a->parent_expr->accept(this); }
+void block_visitor::visit(addr_of_expr::Ptr a) { a->expr1->accept(this); }
 
 } // namespace block

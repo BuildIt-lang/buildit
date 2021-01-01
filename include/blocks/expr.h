@@ -421,6 +421,27 @@ public:
 		return true;
 	}	
 };
+
+class addr_of_expr: public expr {
+public:
+	expr::Ptr expr1;
+	
+	typedef std::shared_ptr<addr_of_expr> Ptr;
+	virtual void dump(std::ostream &oss, int) override;
+	virtual void accept(block_visitor * a) override {
+		a->visit(self<addr_of_expr>());
+	}
+	virtual bool is_same(block::Ptr other) override {
+		if (static_offset != other->static_offset) 
+			return false;
+		if (!isa<addr_of_expr>(other))
+			return false;
+		addr_of_expr::Ptr other_expr = to<addr_of_expr>(other);
+		if (!other_expr->expr1-is_same(expr1))
+			return false;
+		return true;
+	}
+};
 } // namespace block
 
 #endif
