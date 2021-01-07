@@ -1,4 +1,4 @@
-# Build&rarr;It [![Build Status](https://travis-ci.com/AjayBrahmakshatriya/buildit.svg?branch=master)](https://travis-ci.com/AjayBrahmakshatriya/buildit)
+# Build&rarr;It [![Build Status](https://travis-ci.com/BuildIt-lang/buildit.svg?branch=master)](https://travis-ci.com/github/BuildIt-lang/buildit)
 
 Build&rarr;It is a type based library framework for multi-stage imperative programming. Build&rarr;It supports programmatically generating ASTs for an embedded language in C++. Build&rarr;It extracts expressions and statements by overloading the basic operators. Build&rarr;It also extracts the control flow by repeated execution and exploration of all branches. Build&rarr;It uses static tags to detect loops and unroll static loops. 
 
