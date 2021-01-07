@@ -11,13 +11,13 @@ using builder::static_var;
 template <typename BT, typename ET>
 dyn_var<int> power_f(BT base, ET exponent) {
 	dyn_var<int> res = 1, x = base;
-	while (exponent > 1) {
+	while (exponent > 0) {
 		if (exponent % 2 == 1)
 			res = res * x;
 		x = x * x;
 		exponent = exponent / 2;
 	}
-	return res * x;
+	return res;
 }
 int main(int argc, char *argv[]) {
 	int power = 15;
