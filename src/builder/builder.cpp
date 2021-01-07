@@ -19,7 +19,6 @@ block::expr::Ptr member_base::get_parent() const {
 	return nullptr;
 }
 dyn_var_consume::dyn_var_consume(const var& a) {
-	std::cout << "Creating consuem from var" << std::endl;
 	block_var = a.block_var;
 }
 dyn_var_consume::dyn_var_consume(const dyn_var_consume& a) {
