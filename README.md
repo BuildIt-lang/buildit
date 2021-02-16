@@ -66,7 +66,7 @@ Build→It is available opensource on GitHub under the MIT license. Many more sa
 
 2. Build→It uses the declared types of variables and expressions to decide the binding time. Build→It adds 2 new generic types - static_var<T> and dyn_var<T> which lets the user program with 2 stages. These types can be nested arbitrarily to produce code for more stages.
 
-3. What exactly is multi-stage programming and why it is important for high-performance DSLs is explained in our paper.
+3. What exactly is multi-stage programming and why it is important for high-performance DSLs is explained in our [paper](https://build-it.intimeand.space/publications/).
 
 ## Build and Run
 
