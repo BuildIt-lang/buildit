@@ -72,15 +72,15 @@ Build→It is available opensource on GitHub under the MIT license. Many more sa
 
 Build→It is a pure library framework and does not require any special compiler support. To build the library, clone the repository, navigate to the top-level directory and run -
 
-   make
+    make
    
 For building the library with Debugging support, run 
 
-   make DEBUG=1 
+    make DEBUG=1 
    
 To run the samples provided with the library (that also serve as simple test cases), run -
 
-   make run
+    make run
  
 The make system will report the first failing test case if any. 
 
