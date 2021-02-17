@@ -44,6 +44,7 @@ public:
 };
 
 void lambda_wrapper(void);
+void lambda_wrapper_close(void);
 void lambda_wrapper_impl(void);
 
 class builder_context {
