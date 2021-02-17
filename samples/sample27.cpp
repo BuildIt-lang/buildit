@@ -20,13 +20,11 @@ dyn_var<int> power_f(BT base, ET exponent) {
 	return res;
 }
 int main(int argc, char *argv[]) {
-	int power = 15;
 	auto ast1 = builder::builder_context().extract_function_ast(
-	    power_f<dyn_var<int>, static_var<int>>, "power_15", power);
+	    power_f<dyn_var<int>, static_var<int>>, "power_15", 15);
 	block::c_code_generator::generate_code(ast1, std::cout, 0);
-	int base = 5;
 	auto ast2 = builder::builder_context().extract_function_ast(
-	    power_f<static_var<int>, dyn_var<int>>, "power_5", base);
+	    power_f<static_var<int>, dyn_var<int>>, "power_5", 5);
 	block::c_code_generator::generate_code(ast2, std::cout, 0);
 
 	return 0;

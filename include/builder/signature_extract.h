@@ -37,11 +37,11 @@ struct extract_signature<ClassType, RetType, typename std::enable_if<filter_var_
 	struct from {
 		template <typename... OtherArgs>
 		struct with {
-			static std::function<void(void)> call(builder_context *context, int arg_count, ClassType func, RestArgTypes &... rest_args, OtherArgs... other_args) {
+			static std::function<void(void)> call(builder_context *context, int arg_count, ClassType func, RestArgTypes &... rest_args, OtherArgs&... other_args) {
 				std::string arg_name = "arg" + std::to_string(arg_count);
 				T *new_arg = context->assume_variable<T>(arg_name);
 				context->current_func_decl->args.push_back(new_arg->block_var);
-				return extract_signature<ClassType, RetType, void, FutureArgTypes...>::template from<RestArgTypes..., T&>::template with<OtherArgs...>::call(
+				return extract_signature<ClassType, RetType, void, FutureArgTypes...>::template from<RestArgTypes..., T&>::template with<OtherArgs&...>::call(
 				    context, arg_count + 1, func, rest_args..., *new_arg, other_args...);
 			}
 		};
@@ -56,8 +56,8 @@ struct extract_signature<ClassType, RetType, typename std::enable_if<!filter_var
 	struct from {
 		template <typename TO, typename... OtherArgs>
 		struct with {
-			static std::function<void(void)> call(builder_context *context, int arg_count, ClassType func, RestArgTypes &... rest_args, TO to, OtherArgs... other_args) {
-				return extract_signature<ClassType, RetType, void, FutureArgTypes...>::template from<RestArgTypes..., TO&>::template with<OtherArgs...>::call(
+			static std::function<void(void)> call(builder_context *context, int arg_count, ClassType func, RestArgTypes &... rest_args, TO& to, OtherArgs&... other_args) {
+				return extract_signature<ClassType, RetType, void, FutureArgTypes...>::template from<RestArgTypes..., TO&>::template with<OtherArgs&...>::call(
 				    context, arg_count + 1, func, rest_args..., to, other_args...);
 			}
 		};
@@ -107,7 +107,7 @@ struct extract_signature_from_lambda : public extract_signature_from_lambda<decl
 
 template <typename ClassType, typename ReturnType, typename... Args, typename... OtherArgs>
 struct extract_signature_from_lambda<ReturnType (ClassType::*)(Args...) const, OtherArgs...> {
-	static std::function<void(void)> from(builder_context *context, ClassType func, std::string func_name, OtherArgs... other_args) {
+	static std::function<void(void)> from(builder_context *context, ClassType func, std::string func_name, OtherArgs&... other_args) {
 		return extract_signature<ClassType, ReturnType, void, Args...>::template from<>::template with<OtherArgs...>::call(context, 0, func, other_args...);
 	}
 };
@@ -115,7 +115,7 @@ struct extract_signature_from_lambda<ReturnType (ClassType::*)(Args...) const, O
 // Match for functions
 template <typename ReturnType, typename... Args, typename... OtherArgs>
 struct extract_signature_from_lambda<ReturnType (*)(Args...), OtherArgs...> {
-	static std::function<void(void)> from(builder_context *context, ReturnType (*func)(Args...), std::string func_name, OtherArgs... other_args) {
+	static std::function<void(void)> from(builder_context *context, ReturnType (*func)(Args...), std::string func_name, OtherArgs&... other_args) {
 		return extract_signature<ReturnType(Args...), ReturnType, void, Args...>::template from<>::template with<OtherArgs...>::call(context, 0, func, other_args...);
 	}
 };

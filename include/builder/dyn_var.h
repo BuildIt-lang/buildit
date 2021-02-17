@@ -78,6 +78,9 @@ public:
 	BT operator=(const static_var<Ts> &a) {
 		return operator=((BT)a);
 	}
+	BT operator=(const member_base &a) {
+		return operator=((BT)a);
+	}
 
 	BT operator!() { return !(BT) * this; }
 	operator bool() { return (bool)(BT) * this; }

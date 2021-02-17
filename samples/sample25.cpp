@@ -46,9 +46,8 @@ int main(int argc, char *argv[]) {
 
 	auto &print_val =
 	    *(context.assume_variable<dyn_var<void(int)>>("print_val"));
-	int iter = 2;
 	auto ast4 =
-	    context.extract_function_ast(foobar, "func4", iter, print_val);
+	    context.extract_function_ast(foobar, "func4", 2, print_val);
 	ast4->dump(std::cout, 0);
 	block::c_code_generator::generate_code(ast4, std::cout, 0);
 	return 0;
