@@ -9,14 +9,18 @@ static unsigned long long call_point = 0;
 
 static void set_call_point(void) {
 	unsigned long long function = (unsigned long long)(void *)builder::lambda_wrapper;
+#ifdef TRACER_USE_FLIMITS
+	unsigned long long function_end = (unsigned long long)(void *)builder::lambda_wrapper_close;
+#endif
 	void *buffer[20];
 	int backtrace_size = backtrace(buffer, 20);
 	char **backtrace_functions = backtrace_symbols(buffer, backtrace_size);
 	int i;
 	bool found = false;
 	for (i = 0; i < backtrace_size; i++) {
-		unsigned int offset;
 		unsigned long long address;
+#ifndef TRACER_USE_FLIMITS
+		unsigned int offset;
 #ifdef __linux
 		if (sscanf(backtrace_functions[i], "%*[^+]+%x) [%llx]", &offset,
 			   &address) != 2) {
@@ -35,10 +39,20 @@ static void set_call_point(void) {
 #else
 #error Backtracer currently only supported for Linux and MacOS
 #endif
+
 		if (function == address - offset) {
 			found = true;
 			break;
 		}
+#else
+		address = (unsigned long long)buffer[i];
+		
+		if (function <= address && address < function_end) {
+			found = true;
+			break;
+		}
+			
+#endif
 	}
 	if (!found)
 		assert(false && "Call point not found\n");

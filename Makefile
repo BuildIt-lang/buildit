@@ -22,13 +22,22 @@ SAMPLES=$(subst $(SAMPLES_DIR),$(BUILD_DIR),$(SAMPLES_SRCS:.cpp=))
 DEBUG ?= 0
 ifeq ($(DEBUG),1)
 CFLAGS=-g -std=c++11
-LINKER_FLAGS=-rdynamic -l$(LIBRARY_NAME) -g
+LINKER_FLAGS=-l$(LIBRARY_NAME) -g
 else
 CFLAGS=-std=c++11 -O3
-LINKER_FLAGS=-rdynamic -l$(LIBRARY_NAME)
+LINKER_FLAGS=-l$(LIBRARY_NAME)
 endif
 
-CFLAGS+=-Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wmissing-declarations -Woverloaded-virtual -pedantic-errors -Wno-deprecated -Wdelete-non-virtual-dtor -Werror
+TRACER_USE_FLIMITS ?= 0
+ifeq ($(TRACER_USE_FLIMITS),1)
+CFLAGS+=-DTRACER_USE_FLIMITS
+else
+LINKER_FLAGS+=-rdynamic
+endif
+
+
+
+CFLAGS+=-Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wmissing-declarations -Woverloaded-virtual -pedantic-errors -Wno-deprecated -Wdelete-non-virtual-dtor -Werror 
 
 LINKER_FLAGS+=-L$(BUILD_DIR)/
 
