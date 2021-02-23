@@ -309,6 +309,7 @@ builder_context::extract_ast_from_function_impl(void) {
 	inserter.offset_to_label = creator.offset_to_label;
 	ast->accept(&inserter);
 
+	return ast;
 	block::loop_finder finder;
 	finder.ast = ast;
 	ast->accept(&finder);
