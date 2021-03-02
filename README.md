@@ -6,7 +6,7 @@ Build→It is a lightweight<sup>1</sup> type-based<sup>2</sup> multi-stage progr
 
 Build→It turns -
 
-```
+```C++
 template <typename BT, typename ET>
 dyn_var<int> power_f(BT base, ET exponent) {
   dyn_var<int> res = 1, x = base;
@@ -29,7 +29,7 @@ context.extract_function_ast(power_f<static_var<int>, dyn_var<int>>, "power_5", 
 
 into -
 
-```
+```C++
 int power_15 (int arg0) {
   int var0 = arg0;
   int var1 = 1;
