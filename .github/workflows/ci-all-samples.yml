@@ -1,5 +1,5 @@
 name: CI to build and run all samples
-on: [push]
+on: [push, pull_request]
 jobs: 
   CI-Actions-Ubuntu:
     runs-on: ubuntu-latest
