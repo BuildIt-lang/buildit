@@ -22,8 +22,11 @@ void label_creator::visit(stmt_block::Ptr a) {
 			      stmt->static_offset) != collected_labels.end()) {
 			label::Ptr new_label = std::make_shared<label>();
 			new_label->static_offset = stmt->static_offset;
-			new_label->label_name =
-			    "label" + stmt->static_offset.stringify();
+			//new_label->label_name =
+			    //"label" + stmt->static_offset.stringify();
+			new_label->label_name = 
+			    "label" + std::to_string(current_label);
+			current_label++;
 			label_stmt::Ptr new_label_stmt =
 			    std::make_shared<label_stmt>();
 			new_label_stmt->static_offset.clear();

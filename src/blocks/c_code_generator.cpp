@@ -322,7 +322,14 @@ void c_code_generator::visit(func_decl::Ptr a) {
 		curr_indent--;
 	}
 }
-void c_code_generator::visit(goto_stmt::Ptr a) { a->dump(oss, 1); }
+void c_code_generator::visit(goto_stmt::Ptr a) { 
+	//a->dump(oss, 1); 
+	oss << "goto ";
+	oss << a->label1->label_name << ";";
+}
+void c_code_generator::visit(label_stmt::Ptr a) { 
+	oss << a->label1->label_name << ":";
+}
 void c_code_generator::visit(return_stmt::Ptr a) {
 	oss << "return ";
 	a->return_val->accept(this);

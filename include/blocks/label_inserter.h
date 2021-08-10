@@ -17,6 +17,7 @@ public:
 	using block_visitor::visit;
 	std::vector<tracer::tag> collected_labels;
 	std::unordered_map<std::string, label::Ptr> offset_to_label;
+	int current_label = 0;
 	virtual void visit(stmt_block::Ptr);
 };
 class label_inserter : public block_visitor {
