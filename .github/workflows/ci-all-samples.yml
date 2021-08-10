@@ -1,0 +1,9 @@
+name: CI to build and run all samples
+on: [push]
+jobs: 
+  CI-Actions:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Starting tests"
+      - run: make run
+      - run: echo "Tests completed"
