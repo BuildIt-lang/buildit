@@ -55,7 +55,12 @@ STMT_BLOCK
   DECL_STMT
     SCALAR_TYPE (INT)
     VAR (var13)
-    INT_CONST (0)
+    NO_INITIALIZATION
+  EXPR_STMT
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (var13)
+      INT_CONST (0)
 {
   short int var0;
   unsigned short int var1;
@@ -70,5 +75,6 @@ STMT_BLOCK
   float var10;
   double var11;
   void* var12;
-  int var13 = 0;
+  int var13;
+  var13 = 0;
 }

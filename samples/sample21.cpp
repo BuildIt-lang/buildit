@@ -1,4 +1,3 @@
-/*NO TEST*/
 #include "blocks/c_code_generator.h"
 #include "builder/builder.h"
 #include "builder/builder_context.h"
