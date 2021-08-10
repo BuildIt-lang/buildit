@@ -28,6 +28,8 @@ std::vector<block::expr::Ptr> extract_call_arguments_helper(const arg_types &...
 
 
 class builder_root {
+public:
+	virtual ~builder_root() = default;
 };
 
 template <typename MT>
