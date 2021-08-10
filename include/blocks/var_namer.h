@@ -8,8 +8,12 @@ class var_namer : public block_visitor {
 public:
 	using block_visitor::visit;
 	int var_counter = 0;
+	std::vector<stmt::Ptr> hoisted_decls;
 	stmt::Ptr ast;
-	virtual void visit(decl_stmt::Ptr);
+	//virtual void visit(decl_stmt::Ptr);
+	virtual void visit(stmt_block::Ptr);	
+
+	void finalize_hoists(block::Ptr);
 };
 class var_replacer : public block_visitor {
 public:

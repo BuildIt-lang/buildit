@@ -62,11 +62,23 @@ void for_loop_finder::visit(stmt_block::Ptr a) {
 				// conversion
 				if (i == 0)
 					continue;
-				if (!isa<decl_stmt>(a->stmts[i - 1]))
+				if (!(isa<decl_stmt>(a->stmts[i - 1]) 
+					|| (isa<expr_stmt>(a->stmts[i-1]) 
+					&& isa<assign_expr>(to<expr_stmt>(a->stmts[i - 1])->expr1))))
 					continue;
-				decl_stmt::Ptr decl =
-				    to<decl_stmt>(a->stmts[i - 1]);
-				var::Ptr decl_var = decl->decl_var;
+
+				var::Ptr init_var;
+				if (isa<decl_stmt>(a->stmts[i - 1])) {
+					decl_stmt::Ptr decl =
+					    to<decl_stmt>(a->stmts[i - 1]);
+					init_var = decl->decl_var;
+				} else {
+					auto assign = to<assign_expr>(to<expr_stmt>(a->stmts[i - 1])->expr1);
+					if (!isa<var_expr>(assign->var1))
+						continue;
+					init_var = to<var_expr>(assign->var1)->var1;
+				}
+
 				if (!isa<lt_expr>(loop->cond))
 					continue;
 				lt_expr::Ptr cond_expr =
@@ -75,7 +87,7 @@ void for_loop_finder::visit(stmt_block::Ptr a) {
 					continue;
 				var_expr::Ptr lhs_expr =
 				    to<var_expr>(cond_expr->expr1);
-				if (decl_var != lhs_expr->var1)
+				if (init_var != lhs_expr->var1)
 					continue;
 				if (!isa<stmt_block>(loop->body))
 					continue;
@@ -83,7 +95,7 @@ void for_loop_finder::visit(stmt_block::Ptr a) {
 				    to<stmt_block>(loop->body);
 				if (loop_body->stmts.size() < 1)
 					continue;
-				if (!is_last_update(decl_var, loop_body,
+				if (!is_last_update(init_var, loop_body,
 						    parents))
 					continue;
 				if (parents.size() == 0)
@@ -92,7 +104,7 @@ void for_loop_finder::visit(stmt_block::Ptr a) {
 					if (loop->continue_blocks.size() < 2)
 						continue;
 					if (!is_update(
-						decl_var,
+						init_var,
 						stmt->stmts[stmt->stmts.size() -
 							    2]))
 						continue;

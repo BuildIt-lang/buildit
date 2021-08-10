@@ -60,6 +60,7 @@ public:
 	virtual void visit(addr_of_expr::Ptr);
 
 	virtual void visit(goto_stmt::Ptr);
+	virtual void visit(label_stmt::Ptr);
 	
 
 	static void generate_code(block::Ptr ast, std::ostream &oss, int indent = 0) {
