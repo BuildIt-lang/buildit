@@ -5,5 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: echo "Starting tests"
-      - run: make run
+      - name: Checking out repository
+        uses: actions/checkout@v2
+      - run: make -C ${{ github.workspace }} run
       - run: echo "Tests completed"
