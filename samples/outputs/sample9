@@ -1,12 +1,14 @@
-DECL_STMT
-  SCALAR_TYPE (INT)
-  VAR (var0)
-  INT_CONST (0)
-FOR_STMT
-  DECL_STMT
-    SCALAR_TYPE (INT)
-    VAR (var1)
+EXPR_STMT
+  ASSIGN_EXPR
+    VAR_EXPR
+      VAR (var0)
     INT_CONST (0)
+FOR_STMT
+  EXPR_STMT
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (var1)
+      INT_CONST (0)
   LT_EXPR
     VAR_EXPR
       VAR (var1)
