@@ -1,0 +1,19 @@
+name: CI to build and run all samples
+on: [push, pull_request]
+jobs: 
+  CI-Actions-Ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Starting tests"
+      - name: Checking out repository
+        uses: actions/checkout@v2
+      - run: make -C ${{ github.workspace }} run
+      - run: echo "Tests completed"
+  CI-Actions-MacOs:
+    runs-on: 	macos-latest
+    steps:
+      - run: echo "Starting tests"
+      - name: Checking out repository
+        uses: actions/checkout@v2
+      - run: make -C ${{ github.workspace }} run
+      - run: echo "Tests completed"
