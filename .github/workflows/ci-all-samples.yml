@@ -1,4 +1,4 @@
-name: CI to build and run all samples
+name: Test Cases
 on: [push, pull_request]
 jobs: 
   CI-Actions-Ubuntu:
