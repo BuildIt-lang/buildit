@@ -3,42 +3,6 @@ STMT_BLOCK
     SCALAR_TYPE (INT)
     VAR (var0)
     NO_INITIALIZATION
-  DECL_STMT
-    SCALAR_TYPE (INT)
-    VAR (var1)
-    NO_INITIALIZATION
-  DECL_STMT
-    SCALAR_TYPE (INT)
-    VAR (var2)
-    NO_INITIALIZATION
-  DECL_STMT
-    SCALAR_TYPE (INT)
-    VAR (var3)
-    NO_INITIALIZATION
-  DECL_STMT
-    SCALAR_TYPE (INT)
-    VAR (var4)
-    NO_INITIALIZATION
-  DECL_STMT
-    SCALAR_TYPE (INT)
-    VAR (var5)
-    NO_INITIALIZATION
-  DECL_STMT
-    SCALAR_TYPE (INT)
-    VAR (var6)
-    NO_INITIALIZATION
-  DECL_STMT
-    SCALAR_TYPE (INT)
-    VAR (var7)
-    NO_INITIALIZATION
-  DECL_STMT
-    SCALAR_TYPE (INT)
-    VAR (var8)
-    NO_INITIALIZATION
-  DECL_STMT
-    SCALAR_TYPE (INT)
-    VAR (var9)
-    NO_INITIALIZATION
   EXPR_STMT
     ASSIGN_EXPR
       VAR_EXPR
@@ -47,6 +11,10 @@ STMT_BLOCK
         VAR_EXPR
           VAR (var0)
         INT_CONST (1)
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (var1)
+    NO_INITIALIZATION
   EXPR_STMT
     ASSIGN_EXPR
       VAR_EXPR
@@ -55,6 +23,10 @@ STMT_BLOCK
         VAR_EXPR
           VAR (var1)
         INT_CONST (1)
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (var2)
+    NO_INITIALIZATION
   EXPR_STMT
     ASSIGN_EXPR
       VAR_EXPR
@@ -63,6 +35,10 @@ STMT_BLOCK
         VAR_EXPR
           VAR (var2)
         INT_CONST (1)
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (var3)
+    NO_INITIALIZATION
   EXPR_STMT
     ASSIGN_EXPR
       VAR_EXPR
@@ -71,6 +47,10 @@ STMT_BLOCK
         VAR_EXPR
           VAR (var3)
         INT_CONST (1)
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (var4)
+    NO_INITIALIZATION
   EXPR_STMT
     ASSIGN_EXPR
       VAR_EXPR
@@ -79,6 +59,10 @@ STMT_BLOCK
         VAR_EXPR
           VAR (var4)
         INT_CONST (1)
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (var5)
+    NO_INITIALIZATION
   EXPR_STMT
     ASSIGN_EXPR
       VAR_EXPR
@@ -87,6 +71,10 @@ STMT_BLOCK
         VAR_EXPR
           VAR (var5)
         INT_CONST (1)
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (var6)
+    NO_INITIALIZATION
   EXPR_STMT
     ASSIGN_EXPR
       VAR_EXPR
@@ -95,6 +83,10 @@ STMT_BLOCK
         VAR_EXPR
           VAR (var6)
         INT_CONST (1)
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (var7)
+    NO_INITIALIZATION
   EXPR_STMT
     ASSIGN_EXPR
       VAR_EXPR
@@ -103,6 +95,10 @@ STMT_BLOCK
         VAR_EXPR
           VAR (var7)
         INT_CONST (1)
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (var8)
+    NO_INITIALIZATION
   EXPR_STMT
     ASSIGN_EXPR
       VAR_EXPR
@@ -111,6 +107,10 @@ STMT_BLOCK
         VAR_EXPR
           VAR (var8)
         INT_CONST (1)
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (var9)
+    NO_INITIALIZATION
   EXPR_STMT
     ASSIGN_EXPR
       VAR_EXPR
@@ -121,23 +121,23 @@ STMT_BLOCK
         INT_CONST (1)
 {
   int var0;
-  int var1;
-  int var2;
-  int var3;
-  int var4;
-  int var5;
-  int var6;
-  int var7;
-  int var8;
-  int var9;
   var0 = var0 + 1;
+  int var1;
   var1 = var1 + 1;
+  int var2;
   var2 = var2 + 1;
+  int var3;
   var3 = var3 + 1;
+  int var4;
   var4 = var4 + 1;
+  int var5;
   var5 = var5 + 1;
+  int var6;
   var6 = var6 + 1;
+  int var7;
   var7 = var7 + 1;
+  int var8;
   var8 = var8 + 1;
+  int var9;
   var9 = var9 + 1;
 }

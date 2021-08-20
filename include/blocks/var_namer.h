@@ -24,5 +24,13 @@ public:
 	// virtual void visit(assign_expr::Ptr);
 	virtual void visit(var_expr::Ptr);
 };
+
+class decl_counter: public block_visitor {
+public:
+	using block_visitor::visit;
+	tracer::tag to_find;
+	int find_count = 0;
+	virtual void visit(decl_stmt::Ptr);	
+};
 } // namespace block
 #endif
