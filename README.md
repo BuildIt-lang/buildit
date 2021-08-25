@@ -1,4 +1,4 @@
-# Build&rarr;It [![Build Status](https://travis-ci.com/BuildIt-lang/buildit.svg?branch=master)](https://travis-ci.com/github/BuildIt-lang/buildit)
+# Build&rarr;It &nbsp;&nbsp; [![Build Status](https://github.com/BuildIt-lang/buildit/actions/workflows/ci-all-samples.yml/badge.svg)](https://github.com/BuildIt-lang/buildit/actions/workflows/ci-all-samples.yml)
 
 <p align="center">"Every problem in Computer Science can be solved with a level of indirection and every problem in Software Engineering can be solved with a step of code-generation"</p>
 
