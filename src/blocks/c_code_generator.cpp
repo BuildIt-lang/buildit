@@ -181,6 +181,12 @@ void c_code_generator::visit(decl_stmt::Ptr a) {
 	a->decl_var->var_type->accept(this);
 	oss << " ";
 	oss << a->decl_var->var_name;
+	if (a->decl_var->hasMetadata<std::vector<std::string>>("attributes")) {
+		const auto &attributes = a->decl_var->getMetadata<std::vector<std::string>>("attributes");
+		for (auto attr: attributes) {
+			oss << " " << attr;
+		}
+	}
 	if (a->init_expr == nullptr) {
 		oss << ";";
 	} else {

@@ -2,39 +2,21 @@ STMT_BLOCK
   DECL_STMT
     SCALAR_TYPE (INT)
     VAR (var0)
-    NO_INITIALIZATION
+    INT_CONST (0)
   DECL_STMT
     SCALAR_TYPE (INT)
     VAR (var1)
-    NO_INITIALIZATION
+    VAR_EXPR
+      VAR (var0)
   DECL_STMT
     SCALAR_TYPE (INT)
     VAR (var2)
-    NO_INITIALIZATION
-  EXPR_STMT
-    ASSIGN_EXPR
-      VAR_EXPR
-        VAR (var0)
-      INT_CONST (0)
-  EXPR_STMT
-    ASSIGN_EXPR
+    PLUS_EXPR
       VAR_EXPR
         VAR (var1)
-      VAR_EXPR
-        VAR (var0)
-  EXPR_STMT
-    ASSIGN_EXPR
-      VAR_EXPR
-        VAR (var2)
-      PLUS_EXPR
-        VAR_EXPR
-          VAR (var1)
-        INT_CONST (1)
+      INT_CONST (1)
 {
-  int var0;
-  int var1;
-  int var2;
-  var0 = 0;
-  var1 = var0;
-  var2 = var1 + 1;
+  int var0 = 0;
+  int var1 = var0;
+  int var2 = var1 + 1;
 }
