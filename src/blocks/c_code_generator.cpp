@@ -115,7 +115,8 @@ void c_code_generator::visit(named_type::Ptr type) {
 }
 void c_code_generator::visit(pointer_type::Ptr type) {
 	if (!isa<scalar_type>(type->pointee_type) &&
-	    !isa<pointer_type>(type->pointee_type))
+	    !isa<pointer_type>(type->pointee_type) &&
+	    !isa<named_type>(type->pointee_type))
 		assert(
 		    false &&
 		    "Printing pointers of complex type is not supported yet");
@@ -302,6 +303,12 @@ void c_code_generator::visit(initializer_list_expr::Ptr a) {
 }
 void c_code_generator::visit(func_decl::Ptr a) {
 	a->return_type->accept(this);
+	if (a->hasMetadata<std::vector<std::string>>("attributes")) {
+		const auto &attributes = a->getMetadata<std::vector<std::string>>("attributes");
+		for (auto attr: attributes) {
+			oss << " " << attr;
+		}
+	}
 	oss << " " << a->func_name;
 	oss << " (";
 	bool printDelim = false;
@@ -351,8 +358,8 @@ void c_code_generator::visit(member_access_expr::Ptr a) {
 	oss << "." << a->member_name;
 }
 void c_code_generator::visit(addr_of_expr::Ptr a) {
-	oss << "&(";
+	oss << "(&(";
 	a->expr1->accept(this);
-	oss << ")";
+	oss << "))";
 }
 } // namespace block

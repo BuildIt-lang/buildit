@@ -2,11 +2,34 @@
 
 namespace block {
 
-void gather_redundant_decls::visit(decl_stmt::Ptr decl) {
+void check_side_effects::visit(assign_expr::Ptr) {
+	has_side_effects = true;
+}
+void check_side_effects::visit(function_call_expr::Ptr) {
+	has_side_effects = true;
+}
+void use_counter::visit(var_expr::Ptr a) {
+	if (a->var1 == to_find)
+		total_uses++;
+}
+void gather_redundant_decls::visit(decl_stmt::Ptr decl) {	
 	if (decl->init_expr == nullptr)
 		return;
-	if (isa<var_expr>(decl->init_expr))
-		gathered_decls.push_back(decl);	
+	// Let us only replace those variables that are either simple variables on the RHS
+	// Or are used exactly once
+	if (isa<var_expr>(decl->init_expr)) {
+		gathered_decls.push_back(decl);
+		return;
+	}
+	use_counter counter;
+	counter.to_find = decl->decl_var;
+	ast->accept(&counter);
+	if (counter.total_uses == 1) {	
+		check_side_effects checker;
+		decl->init_expr->accept(&checker);
+		if (checker.has_side_effects == false)
+			gathered_decls.push_back(decl);
+	}
 }
 
 void gather_redundant_decls::visit(assign_expr::Ptr assign) {
@@ -27,24 +50,27 @@ void gather_redundant_decls::visit(assign_expr::Ptr assign) {
 
 void replace_redundant_vars::visit(var_expr::Ptr e) {
 	if (e->var1 == to_replace->decl_var) {
-		var::Ptr new_var = to<var_expr>(to_replace->init_expr)->var1;
-		e->var1 = new_var;
+		node = to_replace->init_expr;
+	} else {
+		node = e;
 	}
 }
 
 void replace_redundant_vars::visit(stmt_block::Ptr block) {
 	std::vector<stmt::Ptr> new_stmts;
-	for (auto stmt: block->stmts) {
-		if (stmt == to_replace)
+	for (auto s: block->stmts) {
+		if (s == to_replace)
 			continue;
-		stmt->accept(this);
-		new_stmts.push_back(stmt);
+		auto tmp = rewrite<stmt>(s);
+		new_stmts.push_back(tmp);
 	}
-	block->stmts = new_stmts;
+	block->stmts = new_stmts;	
+	node = block;
 }
 
 void eliminate_redundant_vars(block::Ptr ast) {
 	gather_redundant_decls gather;
+	gather.ast = ast;
 	ast->accept(&gather);
 	while (gather.gathered_decls.size()) {
 		decl_stmt::Ptr to_replace = gather.gathered_decls.back();
