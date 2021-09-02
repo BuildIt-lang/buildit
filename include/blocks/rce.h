@@ -14,6 +14,7 @@ public:
 	std::vector<decl_stmt::Ptr> gathered_decls;
 	virtual void visit(decl_stmt::Ptr) override;
 	virtual void visit(assign_expr::Ptr) override;
+	virtual void visit(addr_of_expr::Ptr) override;
 };
 
 

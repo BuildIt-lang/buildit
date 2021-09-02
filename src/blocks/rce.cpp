@@ -33,11 +33,48 @@ void gather_redundant_decls::visit(decl_stmt::Ptr decl) {
 }
 
 void gather_redundant_decls::visit(assign_expr::Ptr assign) {
+	gathered_decls.clear();
+	return;
+
+	assign->expr1->accept(this);
 	if (!isa<var_expr>(assign->var1))
 		return;
+		
+	// If there is an assignment to an array, 
+	// all variables are potentially modified
+	if (isa<sq_bkt_expr>(assign->var1)) {
+		gathered_decls.clear();
+		return;
+	}
 
 	var::Ptr used_var = to<var_expr>(assign->var1)->var1;
 
+	std::vector<decl_stmt::Ptr> new_gathers;
+	for (auto decl: gathered_decls) {
+		if (decl->decl_var == used_var)
+			continue;
+		new_gathers.push_back(decl);
+	}
+	
+	gathered_decls = new_gathers;
+}
+
+void gather_redundant_decls::visit(addr_of_expr::Ptr addr) {
+	gathered_decls.clear();
+	return;
+	// If there is an assignment to an array, 
+	// all variables are potentially modified
+	if (isa<sq_bkt_expr>(addr->expr1)) {
+		gathered_decls.clear();
+		return;
+	}
+
+	addr->expr1->accept(this);
+
+	if (!isa<var_expr>(addr->expr1))
+		return;
+	var::Ptr used_var = to<var_expr>(addr->expr1)->var1;	
+	
 	std::vector<decl_stmt::Ptr> new_gathers;
 	for (auto decl: gathered_decls) {
 		if (decl->decl_var == used_var)
