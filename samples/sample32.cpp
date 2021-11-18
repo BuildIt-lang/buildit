@@ -7,7 +7,7 @@
 using builder::dyn_var;
 using builder::static_var;
 
-const char graph_t_name[] = "GraphT";
+constexpr char graph_t_name[] = "GraphT";
 using graph_t = typename builder::name<graph_t_name>;
 
 static void bar(void) {
