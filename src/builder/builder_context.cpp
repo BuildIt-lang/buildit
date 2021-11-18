@@ -4,11 +4,13 @@
 #include "blocks/loop_finder.h"
 #include "blocks/loop_roll.h"
 #include "blocks/var_namer.h"
+#include "blocks/rce.h"
 #include "builder/builder.h"
 #include "builder/exceptions.h"
 #include "builder/dyn_var.h"
 #include "util/tracer.h"
 #include <algorithm>
+
 
 namespace builder {
 builder_context *builder_context::current_builder_context = nullptr;
@@ -264,6 +266,9 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 	block::label_inserter inserter;
 	inserter.offset_to_label = creator.offset_to_label;
 	ast->accept(&inserter);
+
+	if (run_rce)
+		block::eliminate_redundant_vars(ast);
 
 	block::loop_finder finder;
 	finder.ast = ast;
