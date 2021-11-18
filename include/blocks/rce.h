@@ -12,7 +12,7 @@ public:
 	using block_visitor::visit;
 	block::block::Ptr ast;
         //decl_stmt::Ptr current_decl;
-	std::vector<decl_stmt::Ptr>(gathered_decls);
+	std::vector<decl_stmt::Ptr> gathered_decls;
 	virtual void visit(decl_stmt::Ptr) override;	
 	virtual void visit(assign_expr::Ptr) override;	
 };
