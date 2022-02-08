@@ -5,35 +5,33 @@
 #include "builder/dyn_var.h"
 #include <iostream>
 
-// We will now created our own builder types and dyn_var types using CRTP and Mixin
-
-template <int recur>
-struct member_accessible;
-
-using my_builder = builder::builder_base<member_accessible<3>>;
-
+using builder::dyn_var;
+using builder::as_member_of;
+// We will now create our own dyn_var type with members
 template <typename T>
-using my_dyn_var = builder::dyn_var_base<T, member_accessible<3>, my_builder>;
+struct my_dyn_var: public dyn_var<T> {
+	using dyn_var<T>::dyn_var;
+	using dyn_var<T>::operator=;
 
-template <int recur>
-struct member_accessible: public builder::member_base_impl<my_builder> {
-	using member_base_impl::member_base_impl;	
-	// Define all the members here
-	member_accessible <recur-1> var1 = member_accessible<recur-1>(this, "var1");
-	member_accessible <recur-1> neighbor = member_accessible<recur-1>(this, "neighbor");
+	my_dyn_var(const my_dyn_var &t): dyn_var<T>((builder::builder)t){}
+	template<typename TO>
+	my_dyn_var(const my_dyn_var<TO>& t): dyn_var<T>((builder::builder)t){}
+	template<typename TO>
+	builder::builder operator=(const my_dyn_var<TO> &t) {
+		return (*this) = (builder::builder)t;
+	}
+	builder::builder operator=(const my_dyn_var &t) {
+		return (*this) = (builder::builder)t;
+	}	
+	dyn_var<int> var1 = as_member_of(this, "var1");	
+	dyn_var<int> neighbor = as_member_of(this, "neighbor");	
 };
-
-template <>
-struct member_accessible<0>: public builder::member_base {
-	using member_base::member_base;
-};
-
 
 int main(int argc, char *argv[]) {
 	builder::builder_context context;
 	auto ast = context.extract_function_ast(
 	    [=](my_dyn_var<int> x) -> my_dyn_var<int> {
-		    my_dyn_var<int> z = (3 + x).var1 + (5 * x).var1;
+		    my_dyn_var<int> z = 3 + x.var1 + 5 * x.var1;
 		    return z.neighbor + 2;
 	    },
 	    "func1");
