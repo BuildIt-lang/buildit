@@ -9,12 +9,10 @@ namespace builder {
 class builder_root;
 
 // The builder base class
-template <typename BT>
-class builder_base;
+class builder;
 
 struct sentinel_member;
 
-using builder = builder_base<sentinel_member>;
 
 template<typename T>
 using is_builder_type = typename std::is_base_of<builder_root, T>;
@@ -29,21 +27,15 @@ class static_var;
 // The var classes declaration
 class var;
 
-template <typename T, typename MT, typename BT>
-class dyn_var_base;
-
 template <typename T>
-using dyn_var = dyn_var_base<T, sentinel_member, builder>;
+class dyn_var;
 
 template <typename T>
 using is_dyn_var_type = std::is_base_of<var, T>;
 
 
 
-struct member_base;
 
-template <typename T>
-using is_member_type = std::is_base_of<member_base, T>;
 
 
 template <typename T>

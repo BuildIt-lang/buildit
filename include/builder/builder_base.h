@@ -4,7 +4,6 @@
 #include "builder/forward_declarations.h"
 
 #include "blocks/var.h"
-#include "builder/member_base.h"
 #include "builder/builder_context.h"
 #include "builder/signature_extract.h"
 #include "builder/block_type_extractor.h"
@@ -32,34 +31,29 @@ public:
 	virtual ~builder_root() = default;
 };
 
-template <typename MT>
-class builder_base: builder_root, public MT{
+class builder: builder_root {
 
-	typedef builder_base<MT> BT;
+	typedef builder BT;
 public:
 
 // All members here
 	block::expr::Ptr block_expr;
 	static BT sentinel_builder;
 	
-	typedef builder_base<MT> super;	
+	typedef builder super;	
 
 // All the costructors and copy constructors to the top
 
 	// Simple constrcutor, should only be used inside the operator
 	// and set the block_expr immediately
-	builder_base() = default;
+	builder() = default;
 	// Copy constructor from another builder
-	builder_base(const BT& other): builder_root(), MT() {
+	builder(const BT& other): builder_root(){
 		block_expr = other.block_expr;
 	}
 
-	template <typename T>	
-	builder_base(const T& a, typename std::enable_if<std::is_base_of<member_base, T>::value && !std::is_base_of<var, T>::value, int>::type = 0) {
-		block_expr = a.get_parent();
-	}
 	
-	builder_base(const int &a) {
+	builder(const int &a) {
 		assert(builder_context::current_builder_context != nullptr);
 		block_expr = nullptr;
 		if (builder_context::current_builder_context->bool_vector.size() > 0)
@@ -73,7 +67,7 @@ public:
 		block_expr = int_const;
 	}
 
-	builder_base(const double &a) {
+	builder(const double &a) {
 		assert(builder_context::current_builder_context != nullptr);
 		block_expr = nullptr;
 		if (builder_context::current_builder_context->bool_vector.size() > 0)
@@ -88,7 +82,7 @@ public:
 
 		block_expr = double_const;
 	}
-	builder_base(const float &a) {
+	builder(const float &a) {
 		assert(builder_context::current_builder_context != nullptr);
 		block_expr = nullptr;
 		if (builder_context::current_builder_context->bool_vector.size() > 0)
@@ -103,17 +97,17 @@ public:
 
 		block_expr = float_const;
 	}
-	builder_base(const bool &b) : builder_base<MT>((int)b) {}
-	builder_base(const char &c) : builder_base<MT>((int)c) {}
-	builder_base(unsigned char &c) : builder_base<MT>((int)c) {}
+	builder(const bool &b) : builder((int)b) {}
+	builder(const char &c) : builder((int)c) {}
+	builder(unsigned char &c) : builder((int)c) {}
 
 	// This is a template class declaration but requires access to var
 	// So this is defined after the var class definition
-	builder_base(const var &a);
+	builder(const var &a);
 
 
 	template <typename T>
-	builder_base(const static_var<T> &a) : builder_base<MT>((const T)a) {}
+	builder(const static_var<T> &a) : builder((const T)a) {}
 
 
 	bool builder_precheck(void) const {
@@ -145,7 +139,7 @@ public:
 
 
 	template <typename T>
-	BT builder_binary_op(const builder_base<MT> & a) const {
+	BT builder_binary_op(const builder & a) const {
 		if (builder_precheck())
 			return sentinel_builder;
 
@@ -264,18 +258,14 @@ public:
 
 };
 
-template <typename MT>
-builder_base<MT> builder_base<MT>::sentinel_builder;
 
 
 
 void annotate(std::string);
 
-// Helper function for the implementation of () operator on builder_base
+void create_return_stmt(const builder &a);
 
-
-
-
+// Helper function for the implementation of () operator on builder
 template <typename BT>
 std::vector<block::expr::Ptr> extract_call_arguments_helper(void) {
 	std::vector<block::expr::Ptr> empty_vector;
@@ -307,7 +297,7 @@ std::vector<block::expr::Ptr> extract_call_arguments(const arg_types &... args) 
 
 
 // Helper functions to create foreign expressions of arbitrary types
-// Theses should be only called from the function to cast the type to builder_base classes
+// Theses should be only called from the function to cast the type to builder classes
 template <typename T>
 block::expr::Ptr create_foreign_expr(const T t) {
 	assert(builder_context::current_builder_context != nullptr);

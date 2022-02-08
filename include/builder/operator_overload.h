@@ -7,7 +7,7 @@ namespace builder {
 
 template <typename T>
 struct is_possible_builder {
-	constexpr static bool value = is_builder_type<T>::value || is_dyn_var_type<T>::value || is_member_type<T>::value;
+	constexpr static bool value = is_builder_type<T>::value || is_dyn_var_type<T>::value;
 };
 
 
@@ -22,10 +22,6 @@ struct return_type_helper <T, typename std::enable_if<is_builder_type<T>::value>
 template <typename T>
 struct return_type_helper <T, typename std::enable_if<!is_builder_type<T>::value && is_dyn_var_type<T>::value>::type> {
 	typedef typename T::associated_BT type;
-};
-template <typename T>
-struct return_type_helper <T, typename std::enable_if<!is_builder_type<T>::value && !is_dyn_var_type<T>::value && is_member_type<T>::value>::type> {
-	typedef typename T::member_associated_BT type;
 };
 
 template <typename T1, typename T2, class Enable = void>
@@ -143,24 +139,6 @@ typename return_type_helper<T>::type operator&(const T &a) {
 	return ret_type(a).template builder_unary_op<block::addr_of_expr>();
 }
 
-template <typename MT>
-void create_return_stmt(const builder_base<MT> &a) {
-	assert(builder_context::current_builder_context != nullptr);
-	builder_context::current_builder_context->remove_node_from_sequence(
-	    a.block_expr);
-	assert(builder_context::current_builder_context->current_block_stmt !=
-	       nullptr);
-	builder_context::current_builder_context->commit_uncommitted();
-
-	if (builder_context::current_builder_context->bool_vector.size() > 0)
-		return;
-	block::return_stmt::Ptr ret_stmt =
-	    std::make_shared<block::return_stmt>();
-	ret_stmt->static_offset = a.block_expr->static_offset;
-	ret_stmt->return_val = a.block_expr;
-	builder_context::current_builder_context->add_stmt_to_current_block(
-	    ret_stmt);
-}
 
 
 }

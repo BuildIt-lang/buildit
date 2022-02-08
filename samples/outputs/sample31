@@ -11,14 +11,14 @@ FUNC_DECL
       SCALAR_TYPE (INT)
       VAR (var1)
       PLUS_EXPR
-        MEMBER_ACCESS_EXPR (var1)
-          PLUS_EXPR
-            INT_CONST (3)
+        PLUS_EXPR
+          INT_CONST (3)
+          MEMBER_ACCESS_EXPR (var1)
             VAR_EXPR
               VAR (var0)
-        MEMBER_ACCESS_EXPR (var1)
-          MUL_EXPR
-            INT_CONST (5)
+        MUL_EXPR
+          INT_CONST (5)
+          MEMBER_ACCESS_EXPR (var1)
             VAR_EXPR
               VAR (var0)
     DECL_STMT
@@ -34,7 +34,7 @@ FUNC_DECL
         VAR (var2)
 int func1 (int arg0) {
   int var0 = arg0;
-  int var1 = (3 + var0).var1 + (5 * var0).var1;
+  int var1 = (3 + var0.var1) + (5 * var0.var1);
   int var2 = var1.neighbor + 2;
   return var2;
 }

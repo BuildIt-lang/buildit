@@ -12,8 +12,6 @@
 namespace builder {
 
 
-//template <typename BT, typename... arg_types>
-//std::vector<block::expr::Ptr> extract_call_arguments_helper(const builder_base<BT> &first_arg, const arg_types &... rest_args);
 
 template <typename T>
 block::expr::Ptr create_foreign_expr(const T t);
@@ -125,13 +123,13 @@ private:
 	std::function<void(void)> internal_stored_lambda;
 
 	static builder_context *current_builder_context;
-	template <typename BT>
-	friend class builder_base;
+
+	friend class builder;
 
 	friend var;
 
-	template <typename T, typename DVT, typename BT>
-	friend class dyn_var_base;
+	template <typename T>
+	friend class dyn_var;
 
 	template <typename T>
 	friend class static_var;
@@ -150,11 +148,8 @@ private:
 	template <typename BT, typename T>
 	friend BT create_foreign_expr_builder(const T t);
 
-	template <typename BT>
-	friend void create_return_stmt(const builder_base<BT> &a);
+	friend void create_return_stmt(const builder &a);
 
-	template <typename BT>
-	friend struct member_base_impl;
 };
 bool get_next_bool_from_context(builder_context *context, block::expr::Ptr);
 tracer::tag get_offset_in_function(void);
