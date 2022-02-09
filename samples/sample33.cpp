@@ -31,6 +31,8 @@ static void bar(void) {
 	dyn_var<int> x = g.member;
 	FooT h = g;
 	h = g;
+	dyn_var<foo_t*> ptr = &g;
+	((FooT)(builder::cast)g[0]).member = 0;		
 }
 
 

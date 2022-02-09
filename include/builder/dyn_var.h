@@ -6,15 +6,29 @@ namespace builder {
 
 class var {
 public:
+
+	enum var_state {
+		standalone_var,
+		member_var,
+		compound_expr,			
+	};
+	
+	var_state current_state = standalone_var;
+
 	// Optional var name
 	std::string var_name;
 	block::var::Ptr block_var;
 	block::decl_stmt::Ptr block_decl_stmt;
 
         // Feature to implement members
-        bool is_member = false;
         var *parent_var;
 
+	// Feature to implement vars as complex expressions
+	// This is require when casting a compound_expr to a 
+	// type derived from dyn_var, mainly for using members
+	// Avoid using this unless really required
+	block::expr::Ptr encompassing_expr;
+	
 	static block::type::Ptr create_block_type(void) {
 		// Cannot create block type for abstract class
 		assert(false);
@@ -36,6 +50,12 @@ struct as_member_of {
 	std::string member_name; 
 	as_member_of(var* p, std::string n): parent_var(p), member_name(n) {};	
 };
+// Struct to initialize a dyn_var as a compound expr
+struct as_compound_expr {
+	block::expr::Ptr encompassing_expr;
+	as_compound_expr(const builder &b): encompassing_expr(b.block_expr) {}	
+};
+using cast = as_compound_expr;
 
 template<typename T>
 class dyn_var: public var{
@@ -135,17 +155,25 @@ public:
 		if (name != "") {
 			block_var->var_name = name;
 			var_name = name;
-		}
-	
+		}	
 	}
         // Constructor to initialize a dyn_var as member
         // This declaration does not produce a declaration
         dyn_var(const as_member_of &a) {
-		is_member = true;
+		current_state = member_var;
 		parent_var = a.parent_var;
 		var_name = a.member_name;            
 		block_var = nullptr;
 		block_decl_stmt = nullptr;
+	}
+	// Constructor to initialize a dyn_var as a compound expr
+	// This declaration also does not produce a declaration
+	dyn_var(const as_compound_expr &a) {
+		current_state = compound_expr;
+		parent_var = nullptr;
+		block_var = nullptr;
+		block_decl_stmt = nullptr;	
+		encompassing_expr = a.encompassing_expr;	
 	}
 	// A very special move constructor that is used to create exact 
 	// replicas of variables
@@ -153,6 +181,7 @@ public:
 		block_var = a.block_var;
 		var_name = block_var->var_name;
 		block_decl_stmt = nullptr;	
+		
 	}
 
 	dyn_var(const my_type &a) : my_type((BT)a) {}

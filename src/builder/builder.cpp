@@ -44,7 +44,7 @@ builder::builder(const var &a) {
 	
 	tracer::tag offset = get_offset_in_function();
 
-	if (a.is_member) {
+	if (a.current_state == var::member_var) {
 		assert(a.parent_var != nullptr);
 		builder parent_expr_builder = (builder)(*a.parent_var);		
 		
@@ -52,9 +52,15 @@ builder::builder(const var &a) {
 		member->parent_expr = parent_expr_builder.block_expr;
 		builder_context::current_builder_context->remove_node_from_sequence(member->parent_expr);
 		member->member_name = a.var_name;
-
+		builder_context::current_builder_context->add_node_to_sequence(member);
+		
 		block_expr = member;
-	} else {
+	} else if (a.current_state == var::compound_expr) {
+		assert(a.encompassing_expr != nullptr);
+		block_expr = a.encompassing_expr;
+		// For now don't remove this expr from the uncommitted list
+		// It should be removed when it is used
+	} else if (a.current_state == var::standalone_var) {
 		assert(a.block_var != nullptr);
 		block::var_expr::Ptr var_expr = std::make_shared<block::var_expr>();
 		var_expr->static_offset = offset;
