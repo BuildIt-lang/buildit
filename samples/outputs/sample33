@@ -28,10 +28,27 @@ STMT_BLOCK
         VAR (var2)
       VAR_EXPR
         VAR (var0)
+  DECL_STMT
+    POINTER_TYPE
+      NAMED_TYPE (FooT)
+    VAR (var3)
+    ADDR_OF_EXPR
+      VAR_EXPR
+        VAR (var0)
+  EXPR_STMT
+    ASSIGN_EXPR
+      MEMBER_ACCESS_EXPR (member)
+        SQ_BKT_EXPR
+          VAR_EXPR
+            VAR (var0)
+          INT_CONST (0)
+      INT_CONST (0)
 {
   FooT var0;
   var0 = var0 + 1;
   int var1 = var0.member;
   FooT var2 = var0;
   var2 = var0;
+  FooT* var3 = (&(var0));
+  (var0[0]).member = 0;
 }

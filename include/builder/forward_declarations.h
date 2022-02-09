@@ -55,6 +55,7 @@ struct extract_signature_from_lambda;
 struct dyn_var_sentinel_type {
 
 };
+
 // This class is used for creating exact replicas of a variable
 // One possible use if when initializing args for func_decls
 class dyn_var_consume {
