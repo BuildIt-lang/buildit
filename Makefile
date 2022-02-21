@@ -98,12 +98,12 @@ run: $(SAMPLES)
 			sample_name=$$(basename $$sample); \
 			if [[ $$(head -n1 $(SAMPLES_DIR)/$$sample_name".cpp") != "/*NO_TEST*/" ]]; then \
 				((total=total+1)); \
-				if diff $(SAMPLES_DIR)/outputs/$$sample_name <($$sample); then \
-					echo $$sample_name: OK; \
+				if cmp -s $(SAMPLES_DIR)/outputs/$$sample_name <($$sample); then \
+					echo -e "\e[32m"$$sample_name: "OK\e[39m"; \
 					((success=success+1)); \
 					progress=$$progress"\e[32m#\e[39m"; \
 				else \
-					echo $$sample_name: FAIL; \
+					echo -e "\e[31m"$$sample_name: "FAIL\e[39m"; \
 					fail=$$fail"\e[31mX\e[39m"; \
 				fi; \
 			fi; \
