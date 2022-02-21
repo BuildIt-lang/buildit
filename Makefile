@@ -109,6 +109,11 @@ run: $(SAMPLES)
 			fi; \
 		done; \
 		echo -e "["$$progress$$fail"] "$$success/$$total; \
+		if [[ $$total == $$success ]]; then \
+			exit 0; \
+		else \
+			exit 1; \
+		fi \
 	else \
 		diff $(SAMPLES_DIR)/outputs/$(TEST) <($(BUILD_DIR)/$(TEST)) || exit 1;	\
 		echo $(TEST): OK; \
