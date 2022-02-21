@@ -90,13 +90,25 @@ TEST ?=
 run: SHELL:=/bin/bash
 run: $(SAMPLES)
 	@ if [ "$(TEST)" == "" ]; then \
+		total=0;\
+                success=0;\
+		progress="";\
+		fail="";\
 		for sample in $(SORTED_SAMPLES); do \
 			sample_name=$$(basename $$sample); \
 			if [[ $$(head -n1 $(SAMPLES_DIR)/$$sample_name".cpp") != "/*NO_TEST*/" ]]; then \
-				diff $(SAMPLES_DIR)/outputs/$$sample_name <($$sample) || exit 1; \
-				echo $$sample_name: OK; \
+				((total=total+1)); \
+				if diff $(SAMPLES_DIR)/outputs/$$sample_name <($$sample); then \
+					echo $$sample_name: OK; \
+					((success=success+1)); \
+					progress=$$progress"\e[32m#\e[39m"; \
+				else \
+					echo $$sample_name: FAIL; \
+					fail=$$fail"\e[31mX\e[39m"; \
+				fi; \
 			fi; \
-		done \
+		done; \
+		echo -e "["$$progress$$fail"] "$$success/$$total; \
 	else \
 		diff $(SAMPLES_DIR)/outputs/$(TEST) <($(BUILD_DIR)/$(TEST)) || exit 1;	\
 		echo $(TEST): OK; \
