@@ -87,8 +87,33 @@ void builder_context::commit_uncommitted(void) {
 	}
 	uncommitted_sequence.clear();
 }
-void builder_context::remove_node_from_sequence(block::expr::Ptr e) {
-	uncommitted_sequence.remove(e);
+void builder_context::remove_node_from_sequence(block::expr::Ptr e) {	
+	// At this point, there is a chance a statement _might_ have been committed if 
+	// a variable was declared. This happens when you return a dyn_var from a function
+	// Now this is not particularly bad because it just leaves a stray expression in the 
+	// generated code, but 1. it can mess with some pattern matchers, 2. could have 
+	// unexpected side effects, so we are going to do a clean up just to be sure
+	// So we will check if the expr that we are trying to delete is in the uncommitted 
+	// sequence, if not we will try to find for it in the committed expressions
+	if (std::find(uncommitted_sequence.begin(), uncommitted_sequence.end(), e) != uncommitted_sequence.end()) {
+		uncommitted_sequence.remove(e);
+	} else {
+		// Could be committed already
+		// It is safe to update the parent block here, because the memoization doesn't care about indices
+		std::vector<block::stmt::Ptr> new_stmts;
+		for (auto stmt: current_block_stmt->stmts) {
+			bool found = false;
+			if (block::isa<block::expr_stmt>(stmt)) {
+				auto expr_s = block::to<block::expr_stmt>(stmt);
+				if (expr_s->expr1 == e)
+					found = true;
+			}
+			if (!found)
+				new_stmts.push_back(stmt);	
+		}
+		current_block_stmt->stmts = new_stmts;
+	}
+	
 }
 void builder_context::add_node_to_sequence(block::expr::Ptr e) {
 	uncommitted_sequence.push_back(e);
