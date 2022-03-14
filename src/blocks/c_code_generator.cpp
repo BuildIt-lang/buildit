@@ -148,15 +148,20 @@ void c_code_generator::visit(decl_stmt::Ptr a) {
 		function_type::Ptr type =
 		    to<function_type>(a->decl_var->var_type);
 		type->return_type->accept(this);
-		oss << " ";
+		oss << " (*";
 		oss << a->decl_var->var_name;
-		oss << "(";
+		oss << ")(";
 		for (unsigned int i = 0; i < type->arg_types.size(); i++) {
 			type->arg_types[i]->accept(this);
 			if (i != type->arg_types.size() - 1)
 				oss << ", ";
 		}
-		oss << ");";
+		oss << ")";
+		if (a->init_expr != nullptr) {
+			oss << " = ";
+			a->init_expr->accept(this);
+		}
+		oss << ";";
 		return;
 	} else if (isa<array_type>(a->decl_var->var_type)) {
 		array_type::Ptr type = to<array_type>(a->decl_var->var_type);
@@ -307,6 +312,21 @@ void c_code_generator::visit(initializer_list_expr::Ptr a) {
 	}
 	oss << "}";
 }
+void c_code_generator::handle_func_arg(var::Ptr a) {
+	function_type::Ptr type =
+		to<function_type>(a->var_type);
+	type->return_type->accept(this);
+	oss << " (*";
+	oss << a->var_name;
+	oss << ")(";
+	for (unsigned int i = 0; i < type->arg_types.size(); i++) {
+		type->arg_types[i]->accept(this);
+		if (i != type->arg_types.size() - 1)
+			oss << ", ";
+	}
+	oss << ")";
+	return;
+}
 void c_code_generator::visit(func_decl::Ptr a) {
 	a->return_type->accept(this);
 	if (a->hasMetadata<std::vector<std::string>>("attributes")) {
@@ -322,8 +342,12 @@ void c_code_generator::visit(func_decl::Ptr a) {
 		if (printDelim)
 			oss << ", ";
 		printDelim = true;
-		arg->var_type->accept(this);
-		oss << " " << arg->var_name;
+		if (isa<function_type>(arg->var_type)) {
+			handle_func_arg(arg);
+		} else {
+			arg->var_type->accept(this);
+			oss << " " << arg->var_name;
+		}
 	}
 	if (!printDelim)
 		oss << "void";
@@ -355,6 +379,24 @@ void c_code_generator::visit(return_stmt::Ptr a) {
 	oss << ";";
 }
 void c_code_generator::visit(member_access_expr::Ptr a) {
+	if (isa<sq_bkt_expr>(a->parent_expr)) {
+		sq_bkt_expr::Ptr parent = to<sq_bkt_expr>(a->parent_expr);
+		if (isa<int_const>(parent->index)) {
+			auto index = to<int_const>(parent->index);
+			if (index->value == 0) {
+				if (!isa<var_expr>(parent->var_expr)) {
+					oss << "(";
+				}
+				parent->var_expr->accept(this);
+				if (!isa<var_expr>(parent->var_expr)) {
+					oss << ")";
+				}
+				oss << "->" << a->member_name;	
+				return;
+			}
+		}
+	}
+
 	if (!isa<var_expr>(a->parent_expr))
 		oss << "(";
 	a->parent_expr->accept(this);
