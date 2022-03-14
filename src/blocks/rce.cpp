@@ -114,7 +114,6 @@ void eliminate_redundant_vars(block::Ptr ast) {
 	ast->accept(&gather);
 		
 	while (gather.gathered_decls.size()) {
-
 		decl_stmt::Ptr to_replace = gather.gathered_decls.back();
 		gather.gathered_decls.pop_back();
 
@@ -123,8 +122,9 @@ void eliminate_redundant_vars(block::Ptr ast) {
 			pre_counter.to_find = to_replace->decl_var;
 			ast->accept(&pre_counter);
 			
-			if (pre_counter.total_uses != 1) 
+			if (pre_counter.total_uses != 1) {
 				continue;
+			}
 		}
 		
 		replace_redundant_vars replacer;

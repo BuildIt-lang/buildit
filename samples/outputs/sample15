@@ -30,8 +30,8 @@ STMT_BLOCK
       VAR_EXPR
         VAR (var3)
 {
-  void var0(int, int*);
-  int var1();
+  void (*var0)(int, int*);
+  int (*var1)();
   int var2;
   int* var3;
   var0(var2, var3);
