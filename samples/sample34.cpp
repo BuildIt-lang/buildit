@@ -19,8 +19,10 @@ static void bar(void) {
 }
 
 int main(int argc, char* argv[]) {
-    block::c_code_generator::generate_code(builder::builder_context().extract_function_ast(bar, "bar"), std::cout, 0);
-    return 0;
+	builder::builder_context context;
+	auto ast = context.extract_function_ast(bar, "bar");
+	ast->dump(std::cout, 0);
+	block::c_code_generator::generate_code(ast, std::cout, 0);
 }
 
 
