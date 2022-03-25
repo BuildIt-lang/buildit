@@ -265,6 +265,7 @@ trim_common_from_back(block::stmt::Ptr ast1, block::stmt::Ptr ast2) {
 			}
 		}
 	}
+
 	std::reverse(trimmed_stmts.begin(), trimmed_stmts.end());
 	return {trimmed_stmts, split_decls};
 }
