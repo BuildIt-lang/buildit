@@ -2,6 +2,7 @@
 #include "blocks/for_loop_finder.h"
 #include "blocks/label_inserter.h"
 #include "blocks/loop_finder.h"
+#include "blocks/if_switcher.h"
 #include "blocks/loop_roll.h"
 #include "blocks/var_namer.h"
 #include "blocks/rce.h"
@@ -265,7 +266,7 @@ trim_common_from_back(block::stmt::Ptr ast1, block::stmt::Ptr ast2) {
 			}
 		}
 	}
-
+	
 	std::reverse(trimmed_stmts.begin(), trimmed_stmts.end());
 	return {trimmed_stmts, split_decls};
 }
@@ -303,6 +304,9 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 	block::for_loop_finder for_finder;
 	for_finder.ast = ast;
 	ast->accept(&for_finder);
+
+	block::if_switcher switcher;
+	ast->accept(&switcher);
 
 	block::loop_roll_finder loop_roll_finder;
 	ast->accept(&loop_roll_finder);
@@ -385,6 +389,8 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(std::vector
 
 		std::copy(trimmed_stmts.begin(), trimmed_stmts.end(),
 			  std::back_inserter(current_block_stmt->stmts));
+
+
 		ret_ast = ast;
 	} catch (LoopBackException &e) {
 		current_builder_context = nullptr;
