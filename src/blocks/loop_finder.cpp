@@ -22,7 +22,7 @@ static void ensure_back_has_goto(stmt_block::Ptr a, label::Ptr label_detect,
 		ensure_back_has_goto(then_block, label_detect, if_parents);
 		ensure_back_has_goto(else_block, label_detect, if_parents);
 		if (if_parents.size() == 2 && if_parents[0] == then_block &&
-		    if_parents[1] == else_block) {
+		    if_parents[1] == else_block && false) {
 			parents.push_back(a);
 		} else {
 			for (unsigned int i = 0; i < if_parents.size(); i++) {
@@ -100,6 +100,13 @@ static void insert_breaks(stmt_block::Ptr a, label::Ptr label_detect,
 	}
 }
 
+
+
+void continue_finder::visit(continue_stmt::Ptr) {
+	has_continue = true;
+}
+
+
 static bool check_last_choppable(std::vector<stmt_block::Ptr> &parents) {
 	// Check if everyone has atleast one stmt
 	for (unsigned int i = 0; i < parents.size(); i++) {
@@ -107,6 +114,13 @@ static bool check_last_choppable(std::vector<stmt_block::Ptr> &parents) {
 			return false;
 	}
 
+
+	stmt::Ptr last_stmt = parents[0]->stmts.back();
+	continue_finder finder;
+	last_stmt->accept(&finder);
+	if (finder.has_continue)
+		return false;
+	
 	if (parents.size() == 1)
 		return true;
 
@@ -167,8 +181,7 @@ void loop_finder::visit_label(label_stmt::Ptr a, stmt_block::Ptr parent) {
 			last_stmt = stmt;
 	}
 	std::vector<stmt::Ptr>::iterator stmt;
-	for (stmt = parent->stmts.begin(); stmt != parent->stmts.end();
-	     stmt++) {
+	for (stmt = parent->stmts.begin(); stmt != parent->stmts.end(); stmt++) {
 		if (*stmt == a)
 			break;
 		stmts_before.push_back(*stmt);
@@ -198,8 +211,12 @@ void loop_finder::visit_label(label_stmt::Ptr a, stmt_block::Ptr parent) {
 	finder.ast = new_while->body;
 	new_while->body->accept(&finder);
 
+
+
+
 	ensure_back_has_goto(to<stmt_block>(new_while->body), a->label1,
 			     parents);
+	
 
 	std::vector<stmt_block::Ptr> collects;
 
@@ -226,7 +243,6 @@ void loop_finder::visit_label(label_stmt::Ptr a, stmt_block::Ptr parent) {
 	std::reverse(trimmed.begin(), trimmed.end());
 	parent->stmts = stmts_before;
 	parent->stmts.push_back(new_while);
-
 	for (auto stmt : trimmed) {
 		parent->stmts.push_back(stmt);
 	}

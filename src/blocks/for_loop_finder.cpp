@@ -56,14 +56,12 @@ void for_loop_finder::visit(stmt_block::Ptr a) {
 		for (unsigned int i = 0; i < a->stmts.size(); i++) {
 			parents.clear();
 			if (isa<while_stmt>(a->stmts[i])) {
-				while_stmt::Ptr loop =
-				    to<while_stmt>(a->stmts[i]);
+				while_stmt::Ptr loop = to<while_stmt>(a->stmts[i]);
 				// All checks for while loop -> for loop
 				// conversion
 				if (i == 0)
 					continue;
-				if (!(isa<decl_stmt>(a->stmts[i - 1]) 
-					|| (isa<expr_stmt>(a->stmts[i-1]) 
+				if (!(isa<decl_stmt>(a->stmts[i - 1]) || (isa<expr_stmt>(a->stmts[i-1]) 
 					&& isa<assign_expr>(to<expr_stmt>(a->stmts[i - 1])->expr1))))
 					continue;
 
@@ -81,32 +79,29 @@ void for_loop_finder::visit(stmt_block::Ptr a) {
 
 				if (!isa<lt_expr>(loop->cond))
 					continue;
-				lt_expr::Ptr cond_expr =
-				    to<lt_expr>(loop->cond);
+				lt_expr::Ptr cond_expr = to<lt_expr>(loop->cond);
 				if (!isa<var_expr>(cond_expr->expr1))
 					continue;
-				var_expr::Ptr lhs_expr =
-				    to<var_expr>(cond_expr->expr1);
+				var_expr::Ptr lhs_expr = to<var_expr>(cond_expr->expr1);
+
 				if (init_var != lhs_expr->var1)
 					continue;
 				if (!isa<stmt_block>(loop->body))
 					continue;
-				stmt_block::Ptr loop_body =
-				    to<stmt_block>(loop->body);
+
+				stmt_block::Ptr loop_body = to<stmt_block>(loop->body);
 				if (loop_body->stmts.size() < 1)
 					continue;
-				if (!is_last_update(init_var, loop_body,
-						    parents))
+				if (!is_last_update(init_var, loop_body, parents))
 					continue;
+/*
 				if (parents.size() == 0)
 					continue;
+*/
 				for (auto stmt : loop->continue_blocks) {
 					if (loop->continue_blocks.size() < 2)
 						continue;
-					if (!is_update(
-						init_var,
-						stmt->stmts[stmt->stmts.size() -
-							    2]))
+					if (!is_update(init_var, stmt->stmts[stmt->stmts.size() - 2]))
 						continue;
 				}
 				while_loop_index = i - 1;
@@ -126,16 +121,31 @@ void for_loop_finder::visit(stmt_block::Ptr a) {
 			for_loop->annotation = for_loop->decl_stmt->annotation;
 			for_loop->decl_stmt->annotation = "";
 			for_loop->cond = loop->cond;
-			for_loop->update =
-			    to<expr_stmt>(parents[0]->stmts.back())->expr1;
+			if (parents.size() == 0) {
+				for_loop->update = nullptr;
+			} else {
+				for_loop->update = to<expr_stmt>(parents[0]->stmts.back())->expr1;
+			}
 			for (unsigned int i = 0; i < parents.size(); i++)
 				parents[i]->stmts.pop_back();
 			for (auto stmt : loop->continue_blocks) {
 				auto cont_stmt = stmt->stmts.back();
+				// This is the continue
 				stmt->stmts.pop_back();
+				// It is possible that none of the parents had an update
+				// This could happen becuase of breaks
+				if (for_loop->update == nullptr)
+					for_loop->update = to<expr_stmt>(stmt->stmts.back())->expr1;
 				stmt->stmts.pop_back();
 				stmt->stmts.push_back(cont_stmt);
 			}
+			// Even after this if the update is empty, just put an empty expression there
+			if (for_loop->update == nullptr) {	
+				auto ce = std::make_shared<int_const>();
+				ce->value = 0;
+				for_loop->update = ce;
+			}
+
 			for_loop->body = loop->body;
 			new_stmts.push_back(for_loop);
 			for (unsigned int i = while_loop_index + 2;

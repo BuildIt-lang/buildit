@@ -20,5 +20,11 @@ public:
 	virtual void visit(goto_stmt::Ptr);
 };
 
+class continue_finder: public block_visitor {
+public: 
+	using block_visitor::visit;
+	bool has_continue = false;
+	virtual void visit(continue_stmt::Ptr);
+};
 } // namespace block
 #endif
