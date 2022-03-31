@@ -49,6 +49,23 @@ static bool is_last_update(var::Ptr decl_var, stmt_block::Ptr block,
 	}
 	return false;
 }
+
+void var_use_finder::visit(var_expr::Ptr ve) {
+	if (ve->var1 == to_find) {
+		found = true;
+	}
+}
+
+static bool has_further_uses(decl_stmt::Ptr decl, std::vector<stmt::Ptr> stmts, int start_index) {
+	var_use_finder finder;
+	finder.to_find = decl->decl_var;
+	for (unsigned i =  start_index; i < stmts.size(); i++) {
+		stmts[i]->accept(&finder);
+		if (finder.found)
+			return true;
+	}
+	return false;
+}
 void for_loop_finder::visit(stmt_block::Ptr a) {
 	while (1) {
 		int while_loop_index = -1;
@@ -117,7 +134,19 @@ void for_loop_finder::visit(stmt_block::Ptr a) {
 			for_stmt::Ptr for_loop = std::make_shared<for_stmt>();
 			for_loop->static_offset =
 			    a->stmts[while_loop_index]->static_offset;
-			for_loop->decl_stmt = a->stmts[while_loop_index];
+			// Before we merge the decl with the for loop, make sure 
+			// the variable being declared doesn't have any other uses
+			auto decl = a->stmts[while_loop_index];
+			if (isa<decl_stmt>(decl) && has_further_uses(to<decl_stmt>(decl), a->stmts, while_loop_index+2)) {
+				auto ce = std::make_shared<int_const>();
+				ce->value = 0;
+				auto es = std::make_shared<expr_stmt>();
+				es->expr1 = ce;
+				for_loop->decl_stmt = es;
+				// Keep the decl in the new stmts
+				new_stmts.push_back(decl);
+			} else 
+				for_loop->decl_stmt = a->stmts[while_loop_index];
 			for_loop->annotation = for_loop->decl_stmt->annotation;
 			for_loop->decl_stmt->annotation = "";
 			for_loop->cond = loop->cond;
