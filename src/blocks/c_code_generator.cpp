@@ -2,6 +2,7 @@
 #include <iomanip>
 #include <limits>
 #include <math.h>
+#include <sstream>
 
 namespace block {
 void c_code_generator::visit(not_expr::Ptr a) {
@@ -143,6 +144,32 @@ void c_code_generator::visit(builder_var_type::Ptr type) {
 	oss << ">";
 }
 void c_code_generator::visit(var::Ptr var) { oss << var->var_name; }
+
+static void print_array_decl(std::ostream &oss, array_type::Ptr atype, var::Ptr decl_var, c_code_generator* self, 
+		std::stringstream &append) {
+	append << "[";
+	if (atype->size != -1)
+		append << atype->size;
+	append << "]";
+
+	if (isa<array_type>(atype->element_type))
+		print_array_decl(oss, to<array_type>(atype->element_type), decl_var, self, append);
+	else if (isa<scalar_type>(atype->element_type) || isa<pointer_type>(atype->element_type)) {
+		atype->element_type->accept(self);	
+		if (decl_var->hasMetadata<std::vector<std::string>>("attributes")) {
+			const auto &attributes = decl_var->getMetadata<std::vector<std::string>>("attributes");
+			for (auto attr: attributes) {
+				oss << " " << attr;
+			}
+		}
+		oss << " ";
+		oss << decl_var->var_name;
+		oss << append.str();	
+	} else {
+		assert(false && "Printing arrays of complex type is not supported yet");
+	}
+}
+
 void c_code_generator::visit(decl_stmt::Ptr a) {
 	if (isa<function_type>(a->decl_var->var_type)) {
 		function_type::Ptr type =
@@ -165,23 +192,8 @@ void c_code_generator::visit(decl_stmt::Ptr a) {
 		return;
 	} else if (isa<array_type>(a->decl_var->var_type)) {
 		array_type::Ptr type = to<array_type>(a->decl_var->var_type);
-		if (!isa<scalar_type>(type->element_type) &&
-		    !isa<pointer_type>(type->element_type))
-			assert(false && "Printing arrays of complex type is "
-					"not supported yet");
-		type->element_type->accept(this);
-		if (a->decl_var->hasMetadata<std::vector<std::string>>("attributes")) {
-			const auto &attributes = a->decl_var->getMetadata<std::vector<std::string>>("attributes");
-			for (auto attr: attributes) {
-				oss << " " << attr;
-			}
-		}
-		oss << " ";
-		oss << a->decl_var->var_name;
-		oss << "[";
-		if (type->size != -1)
-			oss << type->size;
-		oss << "]";
+		std::stringstream s;
+		print_array_decl(oss, type, a->decl_var, this, s);
 		if (a->init_expr != nullptr) {
 			oss << " = ";
 			a->init_expr->accept(this);
