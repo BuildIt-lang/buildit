@@ -12,6 +12,9 @@ static void foo(void) {
 
 	dyn_var<int[]> array2;
 	array2[0] = 5;
+
+	dyn_var<int[512][256]> array3;
+	array3[0][0] = 1;
 }
 int main(int argc, char *argv[]) {
 	builder::builder_context context;
