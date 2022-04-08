@@ -5,7 +5,7 @@ BUILD_DIR?=$(BASE_DIR)/build
 INCLUDE_DIR=$(BASE_DIR)/include
 SAMPLES_DIR=$(BASE_DIR)/samples
 
-INCLUDES=$(wildcard $(INCLUDE_DIR)/*.h) $(wildcard $(INCLUDE_DIR)/*/*.h)
+INCLUDES=$(wildcard $(INCLUDE_DIR)/*.h) $(wildcard $(INCLUDE_DIR)/*/*.h) $(BUILD_DIR)/gen_headers/gen/compiler_headers.h
 
 
 $(shell mkdir -p $(BUILD_DIR))
@@ -13,6 +13,10 @@ $(shell mkdir -p $(BUILD_DIR)/blocks)
 $(shell mkdir -p $(BUILD_DIR)/builder)
 $(shell mkdir -p $(BUILD_DIR)/util)
 $(shell mkdir -p $(BUILD_DIR)/samples)
+$(shell mkdir -p $(BUILD_DIR)/gen_headers)
+$(shell mkdir -p $(BUILD_DIR)/gen_headers/gen)
+$(shell mkdir -p $(BASE_DIR)/scratch)
+
 
 SAMPLES_SRCS=$(wildcard $(SAMPLES_DIR)/*.cpp)
 SAMPLES=$(subst $(SAMPLES_DIR),$(BUILD_DIR),$(SAMPLES_SRCS:.cpp=))
@@ -39,7 +43,7 @@ endif
 
 CFLAGS+=-Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wmissing-declarations -Woverloaded-virtual -pedantic-errors -Wno-deprecated -Wdelete-non-virtual-dtor -Werror 
 
-LINKER_FLAGS+=-L$(BUILD_DIR)/
+LINKER_FLAGS+=-L$(BUILD_DIR)/ -ldl
 
 
 BUILDER_SRC=$(wildcard $(SRC_DIR)/builder/*.cpp)
@@ -60,16 +64,22 @@ all: executables
 .PRECIOUS: $(BUILD_DIR)/samples/%.o 
 .PRECIOUS: $(BUILD_DIR)/util/%.o
 
+$(BUILD_DIR)/gen_headers/gen/compiler_headers.h:
+	echo "#pragma once" > $@
+	echo "#define GEN_TEMPLATE_NAME \"$(BASE_DIR)/scratch/code_XXXXXX\"" >> $@
+	echo "#define COMPILER_PATH \"$(CC)\"" >> $@
+
+
 $(BUILD_DIR)/builder/%.o: $(SRC_DIR)/builder/%.cpp $(INCLUDES)
-	$(CXX) $(CFLAGS) $< -o $@ -I$(INCLUDE_DIR) -c
+	$(CXX) $(CFLAGS) $< -o $@ -I$(INCLUDE_DIR) -I $(BUILD_DIR)/gen_headers/ -c
 $(BUILD_DIR)/blocks/%.o: $(SRC_DIR)/blocks/%.cpp $(INCLUDES)
-	$(CXX) $(CFLAGS) $< -o $@ -I$(INCLUDE_DIR) -c
+	$(CXX) $(CFLAGS) $< -o $@ -I$(INCLUDE_DIR) -I $(BUILD_DIR)/gen_headers/ -c
 $(BUILD_DIR)/util/%.o: $(SRC_DIR)/util/%.cpp $(INCLUDES)
-	$(CXX) $(CFLAGS) $< -o $@ -I$(INCLUDE_DIR) -c
+	$(CXX) $(CFLAGS) $< -o $@ -I$(INCLUDE_DIR) -I $(BUILD_DIR)/gen_headers/ -c
 
 
 $(BUILD_DIR)/samples/%.o: $(SAMPLES_DIR)/%.cpp $(INCLUDES)
-	$(CXX) $(CFLAGS) $< -o $@ -I$(INCLUDE_DIR) -c 
+	$(CXX) $(CFLAGS) $< -o $@ -I$(INCLUDE_DIR) -I $(BUILD_DIR)/gen_headers/ -c 
 
 
 $(LIBRARY): $(LIBRARY_OBJS)
