@@ -328,7 +328,7 @@ std::vector<block::Ptr> extract_cuda_from(block::Ptr from) {
 	std::vector<block::Ptr> new_decls;
 	block::Ptr kernel = nullptr;
 	std::vector<decl_stmt::Ptr> new_var_decls;
-	while (kernel = extract_single_cuda(from, new_var_decls)) {
+	while ((kernel = extract_single_cuda(from, new_var_decls))) {
 		for (auto a: new_var_decls)
 			new_decls.push_back(a);	
 		new_var_decls.clear();	
