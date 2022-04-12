@@ -131,3 +131,5 @@ run: $(SAMPLES)
 
 clean:
 	- rm -rf $(BUILD_DIR)
+clean_scratch:
+	- rm -rf $(BASE_DIR)/scratch
