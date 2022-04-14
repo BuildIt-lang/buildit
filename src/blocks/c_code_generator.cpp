@@ -113,6 +113,17 @@ void c_code_generator::visit(scalar_type::Ptr type) {
 }
 void c_code_generator::visit(named_type::Ptr type) {
 	oss << type->type_name;
+	if (type->template_args.size()) {
+		oss << "<";
+		bool needs_comma = false;
+		for (auto a: type->template_args) {
+			if (needs_comma)
+				oss << ", ";
+			needs_comma = true;
+			a->accept(this);	
+		}
+		oss << ">";
+	}
 }
 void c_code_generator::visit(pointer_type::Ptr type) {
 	if (!isa<scalar_type>(type->pointee_type) &&

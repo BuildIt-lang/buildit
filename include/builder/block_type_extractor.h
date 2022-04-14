@@ -230,17 +230,38 @@ public:
 	}
 };
 
-template <const char* N>
+template <const char* N, typename...Args>
 struct name {
 	
 };
 
-template <const char* N>
-class type_extractor<name<N>> {
+template <typename...Args>
+struct extract_type_from_args;
+
+template <typename T1, typename...Args>
+struct extract_type_from_args<T1, Args...> {
+	static std::vector<block::type::Ptr> get_types() {
+		auto a = extract_type_from_args<Args...>::get_types();
+		a.insert(a.begin(), type_extractor<T1>::extract_type());
+		return a;
+	}
+};
+
+template <>
+struct extract_type_from_args<> {
+	static std::vector<block::type::Ptr> get_types() {
+		return std::vector<block::type::Ptr>();
+	}
+};
+
+
+template <const char* N, typename...Args>
+class type_extractor<name<N, Args...>> {
 public:
 	static block::type::Ptr extract_type(void) {
 		block::named_type::Ptr type = std::make_shared<block::named_type>();
 		type->type_name = N;
+		type->template_args = extract_type_from_args<Args...>::get_types();
 		return type;	
 	}
 };

@@ -76,5 +76,7 @@ void named_type::dump(std::ostream &oss, int indent) {
 	printer::indent(oss, indent);
 	oss << "NAMED_TYPE (";
 	oss << type_name << ")" << std::endl;
+	for (unsigned int i = 0; i < template_args.size(); i++) 
+		template_args[i]->dump(oss, indent + 1);
 }
 } // namespace block

@@ -172,7 +172,14 @@ void block_replacer::visit(builder_var_type::Ptr a) {
 	a->closure_type = rewrite<type>(a->closure_type);
 	node = a;
 }
-void block_replacer::visit(named_type::Ptr a) {node=a;}
+void block_replacer::visit(named_type::Ptr a) {
+	std::vector<type::Ptr> new_args;
+	for (auto a: a->template_args) {
+		new_args.push_back(rewrite<type>(a));
+	}
+	a->template_args = new_args;
+	node=a;
+}
 void block_replacer::visit(func_decl::Ptr a) {
 	a->return_type = rewrite<type>(a->return_type);
 	for (unsigned int i = 0; i < a->args.size(); i++) {
