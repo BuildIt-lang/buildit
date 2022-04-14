@@ -62,6 +62,7 @@ class named_type : public type {
 public:
 	typedef std::shared_ptr<named_type> Ptr;
 	std::string type_name;
+	std::vector<type::Ptr> template_args;
 	virtual void accept(block_visitor *a) override { a->visit(self<named_type>()); }
 
 	virtual void dump(std::ostream &, int) override;
