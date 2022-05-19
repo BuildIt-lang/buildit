@@ -58,14 +58,14 @@ struct as_compound_expr {
 using cast = as_compound_expr;
 
 template<typename T>
-class dyn_var: public var{
+class dyn_var_impl: public var{
 public:
 	
 	typedef builder BT;
-	typedef dyn_var<T> my_type;
+	typedef dyn_var_impl<T> my_type;
+	// These are required for overloads
 	typedef BT associated_BT;
 	typedef T stored_type;
-	typedef my_type super;
 		
 	template <typename... types>
 	BT operator()(const types &... args) {
@@ -85,12 +85,12 @@ public:
 		return (BT)*this = a;
 	}
 
-	BT operator=(const dyn_var<T> &a) {
+	BT operator=(const dyn_var_impl<T> &a) {
 		return (BT) * this = a;
 	}
 
 	template <typename TO>
-	BT operator=(const dyn_var<TO> &a) {
+	BT operator=(const dyn_var_impl<TO> &a) {
 		return (BT) * this = a;
 	}
 
@@ -140,7 +140,7 @@ public:
 		builder_context::current_builder_context->add_stmt_to_current_block(decl_stmt);
 	}
 	// Basic and other constructors
-	dyn_var(const char* name=nullptr) { 
+	dyn_var_impl(const char* name=nullptr) { 
 		if (builder_context::current_builder_context == nullptr) {
 			create_dyn_var(true); 
 			if (name != nullptr) {
@@ -150,7 +150,7 @@ public:
 		} else
 			create_dyn_var(false); 
 	}
-	dyn_var(const dyn_var_sentinel_type& a, std::string name = "") {
+	dyn_var_impl(const dyn_var_sentinel_type& a, std::string name = "") {
 		create_dyn_var(true);
 		if (name != "") {
 			block_var->var_name = name;
@@ -159,16 +159,23 @@ public:
 	}
         // Constructor to initialize a dyn_var as member
         // This declaration does not produce a declaration
-        dyn_var(const as_member_of &a) {
+        dyn_var_impl(const as_member_of &a) {
 		current_state = member_var;
 		parent_var = a.parent_var;
 		var_name = a.member_name;            
 		block_var = nullptr;
 		block_decl_stmt = nullptr;
 	}
-	// Constructor to initialize a dyn_var as a compound expr
-	// This declaration also does not produce a declaration
-	dyn_var(const as_compound_expr &a) {
+	// Constructor and operator = to initialize a dyn_var as a compound expr
+	// This declaration also does not produce a declaration or assign stmt
+	dyn_var_impl(const as_compound_expr &a) {
+		current_state = compound_expr;
+		parent_var = nullptr;
+		block_var = nullptr;
+		block_decl_stmt = nullptr;	
+		encompassing_expr = a.encompassing_expr;	
+	}
+	void operator = (const as_compound_expr& a) {
 		current_state = compound_expr;
 		parent_var = nullptr;
 		block_var = nullptr;
@@ -177,23 +184,23 @@ public:
 	}
 	// A very special move constructor that is used to create exact 
 	// replicas of variables
-	dyn_var(const dyn_var_consume &a) {
+	dyn_var_impl(const dyn_var_consume &a) {
 		block_var = a.block_var;
 		var_name = block_var->var_name;
 		block_decl_stmt = nullptr;	
 		
 	}
 
-	dyn_var(const my_type &a) : my_type((BT)a) {}
+	dyn_var_impl(const my_type &a) : my_type((BT)a) {}
 
 	
 	template <typename TO>
-	dyn_var(const dyn_var<TO> &a) : my_type((BT)a) {}
+	dyn_var_impl(const dyn_var_impl<TO> &a) : my_type((BT)a) {}
 	
 	template <typename TO>
-	dyn_var(const static_var<TO> &a) : my_type((TO)a) {}
+	dyn_var_impl(const static_var<TO> &a) : my_type((TO)a) {}
 
-	dyn_var(const BT &a) {
+	dyn_var_impl(const BT &a) {
 		builder_context::current_builder_context->remove_node_from_sequence(a.block_expr);
 		create_dyn_var();
 		if (builder_context::current_builder_context->bool_vector.size() > 0)
@@ -201,12 +208,12 @@ public:
 		block_decl_stmt->init_expr = a.block_expr;
 	}
 
-	dyn_var(const int &a) : my_type((BT)a) {}
-	dyn_var(const bool &a) : my_type((BT)a) {}
-	dyn_var(const double &a) : my_type((BT)a) {}
-	dyn_var(const float &a) : my_type((BT)a) {}
+	dyn_var_impl(const int &a) : my_type((BT)a) {}
+	dyn_var_impl(const bool &a) : my_type((BT)a) {}
+	dyn_var_impl(const double &a) : my_type((BT)a) {}
+	dyn_var_impl(const float &a) : my_type((BT)a) {}
 
-	dyn_var(const std::initializer_list<BT> &_a) {
+	dyn_var_impl(const std::initializer_list<BT> &_a) {
 		std::vector<BT> a(_a);
 
 		assert(builder_context::current_builder_context != nullptr);
@@ -226,14 +233,42 @@ public:
 		block_decl_stmt->init_expr = list_expr;
 	}
 
-	virtual ~dyn_var() = default;
 
-	dyn_var* addr(void) {
-		return this;
+	virtual ~dyn_var_impl() = default;
+
+
+	// Assume that _impl objects will never be created
+	// Thus addr can always cast the address to dyn_var<T>
+	dyn_var<T>* addr(void) {
+		// TODO: Consider using dynamic_cast here
+		return (dyn_var<T>*)this;
 	}
 
 };
 
+// Actual dyn_var implementation
+// Split design to allow for easily extending types with specialization
+
+template<typename T>
+class dyn_var: public dyn_var_impl<T> {
+public:
+	typedef dyn_var_impl<T> super;
+	
+	using super::super;
+	using super::operator=;
+
+	
+	// Some implementations don't like implicitly declared
+	// constructors so define them here
+	dyn_var(const dyn_var<T> &t): dyn_var_impl<T>((builder)t){}
+
+	// Unfortunately because we are changing the return type, 
+	// the implicitly defined copy assignment will always 
+	// shadow the version the parent defines
+	builder operator= (const dyn_var<T> &t) {
+		return *this = (builder)t;
+	}
+};
 
 
 template <typename T>

@@ -129,7 +129,7 @@ private:
 	friend var;
 
 	template <typename T>
-	friend class dyn_var;
+	friend class dyn_var_impl;
 
 	template <typename T>
 	friend class static_var;
