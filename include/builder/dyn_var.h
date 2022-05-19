@@ -233,9 +233,6 @@ public:
 		block_decl_stmt->init_expr = list_expr;
 	}
 
-	// This is defined specifically so the derived classes 
-	// don't have to define them again
-	dyn_var_impl(const dyn_var<T> &t): dyn_var_impl<T>((builder)t){}
 
 	virtual ~dyn_var_impl() = default;
 
@@ -259,6 +256,11 @@ public:
 	
 	using super::super;
 	using super::operator=;
+
+	
+	// Some implementations don't like implicitly declared
+	// constructors so define them here
+	dyn_var(const dyn_var<T> &t): dyn_var_impl<T>((builder)t){}
 
 	// Unfortunately because we are changing the return type, 
 	// the implicitly defined copy assignment will always 
