@@ -28,6 +28,9 @@ class static_var;
 class var;
 
 template <typename T>
+class dyn_var_impl;
+
+template <typename T>
 class dyn_var;
 
 template <typename T>
