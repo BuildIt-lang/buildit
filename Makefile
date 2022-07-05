@@ -31,34 +31,37 @@ DEBUG=1
 endif
 
 
+CFLAGS_INTERNAL=-std=c++11
+CFLAGS=
+
 DEBUG ?= 0
 ifeq ($(DEBUG),1)
-CFLAGS=-g -std=c++11
+CFLAGS=-g
 LINKER_FLAGS=-l$(LIBRARY_NAME) -g
 else
-CFLAGS=-std=c++11 -O3
+CFLAGS_INTERNAL+=-O3
 LINKER_FLAGS=-l$(LIBRARY_NAME)
 endif
 
 TRACER_USE_FLIMITS ?= 0
 ifeq ($(TRACER_USE_FLIMITS),1)
-CFLAGS+=-DTRACER_USE_FLIMITS
+CFLAGS_INTERNAL+=-DTRACER_USE_FLIMITS
 else
 LINKER_FLAGS+=-rdynamic
 endif
 
 
-CFLAGS+=-Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wmissing-declarations -Woverloaded-virtual -Wno-deprecated -Wdelete-non-virtual-dtor -Werror -Wno-vla 
+CFLAGS_INTERNAL+=-Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wmissing-declarations -Woverloaded-virtual -Wno-deprecated -Wdelete-non-virtual-dtor -Werror -Wno-vla 
 
 INCLUDE_FLAGS=-I$(INCLUDE_DIR) -I$(BUILD_DIR)/gen_headers/
 
 ifeq ($(RECOVER_VAR_NAMES),1)
 LINKER_FLAGS+=-L$(DEPS_DIR)/libelfin/dwarf/ -L$(DEPS_DIR)/libelfin/elf -lunwind -l:libelf++.a -l:libdwarf++.a
-CFLAGS+=-DRECOVER_VAR_NAMES
+CFLAGS_INTERNAL+=-DRECOVER_VAR_NAMES
 INCLUDE_FLAGS+=-I$(DEPS_DIR)/libelfin/dwarf -I$(DEPS_DIR)/libelfin/elf/
 else
 # libelfin has some code that doesn't compile with pedantic
-CFLAGS+=-pedantic-errors
+CFLAGS_INTERNAL+=-pedantic-errors
 endif
 
 LINKER_FLAGS+=-L$(BUILD_DIR)/ -ldl
@@ -90,15 +93,15 @@ $(BUILD_DIR)/gen_headers/gen/compiler_headers.h:
 
 
 $(BUILD_DIR)/builder/%.o: $(SRC_DIR)/builder/%.cpp $(INCLUDES)
-	$(CXX) $(CFLAGS) $< -o $@ $(INCLUDE_FLAGS) -c
+	$(CXX) $(CFLAGS_INTERNAL) $(CFLAGS) $< -o $@ $(INCLUDE_FLAGS) -c
 $(BUILD_DIR)/blocks/%.o: $(SRC_DIR)/blocks/%.cpp $(INCLUDES)
-	$(CXX) $(CFLAGS) $< -o $@ $(INCLUDE_FLAGS) -c
+	$(CXX) $(CFLAGS_INTERNAL) $(CFLAGS) $< -o $@ $(INCLUDE_FLAGS) -c
 $(BUILD_DIR)/util/%.o: $(SRC_DIR)/util/%.cpp $(INCLUDES)
-	$(CXX) $(CFLAGS) $< -o $@ $(INCLUDE_FLAGS) -c
+	$(CXX) $(CFLAGS_INTERNAL) $(CFLAGS) $< -o $@ $(INCLUDE_FLAGS) -c
 
 
 $(BUILD_DIR)/samples/%.o: $(SAMPLES_DIR)/%.cpp $(INCLUDES)
-	$(CXX) $(CFLAGS) $< -o $@ $(INCLUDE_FLAGS) -c 
+	$(CXX) $(CFLAGS_INTERNAL) $(CFLAGS) $< -o $@ $(INCLUDE_FLAGS) -c 
 
 
 $(LIBRARY): $(LIBRARY_OBJS)
@@ -158,3 +161,12 @@ clean:
 	- rm -rf $(BUILD_DIR)
 clean_scratch:
 	- rm -rf $(BASE_DIR)/scratch
+
+
+
+.PHONY: compile-flags linker-flags
+compile-flags:
+	@echo $(CFLAGS) $(INCLUDE_FLAGS)
+
+linker-flags:
+	@echo $(LINKER_FLAGS)
