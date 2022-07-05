@@ -7,6 +7,8 @@ jobs:
       - run: echo "Starting tests"
       - name: Checking out repository
         uses: actions/checkout@v2
+        with:
+          submodules: recursive
       - run: make -C ${{ github.workspace }} run
       - run: make -C ${{ github.workspace }} clean
       - run: make -C ${{ github.workspace }}/deps/libelfin
