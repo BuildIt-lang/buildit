@@ -24,6 +24,9 @@ SAMPLES=$(subst $(SAMPLES_DIR),$(BUILD_DIR),$(SAMPLES_SRCS:.cpp=))
 
 RECOVER_VAR_NAMES ?= 0
 ifeq ($(RECOVER_VAR_NAMES),1)
+ifneq ($(shell uname), Linux)
+$(error RECOVER_VAR_NAMES only supported on Linux)
+endif
 DEBUG=1
 endif
 
