@@ -1,0 +1,11 @@
+void __global__ cuda_kernel_0 (int* arg0) {
+  int thread_id_3 = (blockIdx.x * 512) + threadIdx.x;
+  arg0[thread_id_3] = 0;
+}
+
+void bar (int* arg0) {
+  int* var0 = arg0;
+  cuda_kernel_0<<<128, 512>>>(var0);
+  cudaDeviceSynchronize();
+}
+

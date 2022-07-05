@@ -1,0 +1,52 @@
+STMT_BLOCK
+  DECL_STMT
+    ARRAY_TYPE
+      SCALAR_TYPE (INT)
+      10
+    VAR (array1_0)
+    NO_INITIALIZATION
+  EXPR_STMT
+    ASSIGN_EXPR
+      SQ_BKT_EXPR
+        VAR_EXPR
+          VAR (array1_0)
+        INT_CONST (0)
+      INT_CONST (1)
+  DECL_STMT
+    ARRAY_TYPE
+      SCALAR_TYPE (INT)
+      -1
+    VAR (array2_1)
+    NO_INITIALIZATION
+  EXPR_STMT
+    ASSIGN_EXPR
+      SQ_BKT_EXPR
+        VAR_EXPR
+          VAR (array2_1)
+        INT_CONST (0)
+      INT_CONST (5)
+  DECL_STMT
+    ARRAY_TYPE
+      ARRAY_TYPE
+        SCALAR_TYPE (INT)
+        256
+      512
+    VAR (array3_2)
+    NO_INITIALIZATION
+  EXPR_STMT
+    ASSIGN_EXPR
+      SQ_BKT_EXPR
+        SQ_BKT_EXPR
+          VAR_EXPR
+            VAR (array3_2)
+          INT_CONST (0)
+        INT_CONST (0)
+      INT_CONST (1)
+{
+  int array1_0[10];
+  array1_0[0] = 1;
+  int array2_1[];
+  array2_1[0] = 5;
+  int array3_2[512][256];
+  array3_2[0][0] = 1;
+}

@@ -1,0 +1,114 @@
+#include <stdio.h>
+#include <stdlib.h>
+void print_value(int x) {printf("%c", x);}
+int get_value(void) {char x; scanf(" %c", &x); return x;}
+int main(int argc, char* argv[]) {
+  int pointer_0 = 0;
+  int tape_1[256] = {0};
+  tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+  tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+  tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+  tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+  tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+  tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+  tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+  tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+  while (!(tape_1[pointer_0] == 0)) {
+    pointer_0 = pointer_0 + 1;
+    tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+    tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+    tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+    tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+    while (!(tape_1[pointer_0] == 0)) {
+      pointer_0 = pointer_0 + 1;
+      tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+      tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+      pointer_0 = pointer_0 + 1;
+      tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+      tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+      tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+      pointer_0 = pointer_0 + 1;
+      tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+      tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+      tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+      pointer_0 = pointer_0 + 1;
+      tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+      pointer_0 = pointer_0 - 1;
+      pointer_0 = pointer_0 - 1;
+      pointer_0 = pointer_0 - 1;
+      pointer_0 = pointer_0 - 1;
+      tape_1[pointer_0] = (tape_1[pointer_0] - 1) % 256;
+    }
+    pointer_0 = pointer_0 + 1;
+    tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+    pointer_0 = pointer_0 + 1;
+    tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+    pointer_0 = pointer_0 + 1;
+    tape_1[pointer_0] = (tape_1[pointer_0] - 1) % 256;
+    pointer_0 = pointer_0 + 1;
+    pointer_0 = pointer_0 + 1;
+    tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+    while (!(tape_1[pointer_0] == 0)) {
+      pointer_0 = pointer_0 - 1;
+    }
+    pointer_0 = pointer_0 - 1;
+    tape_1[pointer_0] = (tape_1[pointer_0] - 1) % 256;
+  }
+  pointer_0 = pointer_0 + 1;
+  pointer_0 = pointer_0 + 1;
+  print_value(tape_1[pointer_0]);
+  pointer_0 = pointer_0 + 1;
+  tape_1[pointer_0] = (tape_1[pointer_0] - 1) % 256;
+  tape_1[pointer_0] = (tape_1[pointer_0] - 1) % 256;
+  tape_1[pointer_0] = (tape_1[pointer_0] - 1) % 256;
+  print_value(tape_1[pointer_0]);
+  tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+  tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+  tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+  tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+  tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+  tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+  tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+  print_value(tape_1[pointer_0]);
+  print_value(tape_1[pointer_0]);
+  tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+  tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+  tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+  print_value(tape_1[pointer_0]);
+  pointer_0 = pointer_0 + 1;
+  pointer_0 = pointer_0 + 1;
+  print_value(tape_1[pointer_0]);
+  pointer_0 = pointer_0 - 1;
+  tape_1[pointer_0] = (tape_1[pointer_0] - 1) % 256;
+  print_value(tape_1[pointer_0]);
+  pointer_0 = pointer_0 - 1;
+  print_value(tape_1[pointer_0]);
+  tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+  tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+  tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+  print_value(tape_1[pointer_0]);
+  tape_1[pointer_0] = (tape_1[pointer_0] - 1) % 256;
+  tape_1[pointer_0] = (tape_1[pointer_0] - 1) % 256;
+  tape_1[pointer_0] = (tape_1[pointer_0] - 1) % 256;
+  tape_1[pointer_0] = (tape_1[pointer_0] - 1) % 256;
+  tape_1[pointer_0] = (tape_1[pointer_0] - 1) % 256;
+  tape_1[pointer_0] = (tape_1[pointer_0] - 1) % 256;
+  print_value(tape_1[pointer_0]);
+  tape_1[pointer_0] = (tape_1[pointer_0] - 1) % 256;
+  tape_1[pointer_0] = (tape_1[pointer_0] - 1) % 256;
+  tape_1[pointer_0] = (tape_1[pointer_0] - 1) % 256;
+  tape_1[pointer_0] = (tape_1[pointer_0] - 1) % 256;
+  tape_1[pointer_0] = (tape_1[pointer_0] - 1) % 256;
+  tape_1[pointer_0] = (tape_1[pointer_0] - 1) % 256;
+  tape_1[pointer_0] = (tape_1[pointer_0] - 1) % 256;
+  tape_1[pointer_0] = (tape_1[pointer_0] - 1) % 256;
+  print_value(tape_1[pointer_0]);
+  pointer_0 = pointer_0 + 1;
+  pointer_0 = pointer_0 + 1;
+  tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+  print_value(tape_1[pointer_0]);
+  pointer_0 = pointer_0 + 1;
+  tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+  tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
+  print_value(tape_1[pointer_0]);
+}

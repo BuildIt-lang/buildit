@@ -75,6 +75,7 @@ public:
 	virtual void accept(block_visitor *a) override { a->visit(self<var>()); }
 	// Optional var_name
 	std::string var_name;
+	std::string preferred_name;
 	type::Ptr var_type;
 	virtual bool is_same(block::Ptr other) override {
 		if (static_offset != other->static_offset)

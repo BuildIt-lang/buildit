@@ -1,0 +1,3 @@
+[submodule "deps/libelfin"]
+	path = deps/libelfin
+	url = https://github.com/aclements/libelfin.git

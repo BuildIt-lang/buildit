@@ -2,6 +2,7 @@
 #define BUILDER_DYN_VAR_H
 
 #include "builder/builder.h"
+#include "util/var_finder.h"
 namespace builder {
 
 class var {
@@ -119,6 +120,7 @@ public:
 			block::var::Ptr dyn_var = std::make_shared<block::var>();
 			dyn_var->var_type = create_block_type();
 			block_var = dyn_var;
+			dyn_var->preferred_name = util::find_variable_name(this);
 			return;
 		}
 		assert(builder_context::current_builder_context != nullptr);
@@ -126,6 +128,7 @@ public:
 		builder_context::current_builder_context->commit_uncommitted();
 		block::var::Ptr dyn_var = std::make_shared<block::var>();
 		dyn_var->var_type = create_block_type();
+		dyn_var->preferred_name = util::find_variable_name(this);
 		block_var = dyn_var;
 		tracer::tag offset = get_offset_in_function();
 		dyn_var->static_offset = offset;
