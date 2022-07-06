@@ -1,3 +1,5 @@
+-include Makefile.inc
+
 LIBRARY_NAME=buildit
 BASE_DIR=$(shell pwd)
 SRC_DIR=$(BASE_DIR)/src
@@ -5,9 +7,45 @@ BUILD_DIR?=$(BASE_DIR)/build
 INCLUDE_DIR=$(BASE_DIR)/include
 SAMPLES_DIR=$(BASE_DIR)/samples
 DEPS_DIR=$(BASE_DIR)/deps
-
+SAMPLES_SRCS=$(wildcard $(SAMPLES_DIR)/*.cpp)
+SAMPLES=$(subst $(SAMPLES_DIR),$(BUILD_DIR),$(SAMPLES_SRCS:.cpp=))
 INCLUDES=$(wildcard $(INCLUDE_DIR)/*.h) $(wildcard $(INCLUDE_DIR)/*/*.h) $(BUILD_DIR)/gen_headers/gen/compiler_headers.h
 
+
+RECOVER_VAR_NAMES ?= 0
+TRACER_USE_FLIMITS ?= 0
+DEBUG ?= 0
+ifeq ($(RECOVER_VAR_NAMES),1)
+ifneq ($(shell uname), Linux)
+$(error RECOVER_VAR_NAMES only supported on Linux)
+endif
+DEBUG=1
+endif
+
+
+# Config is ready, check if config is consistent
+CHECK_CONFIG=1
+ifeq ($(MAKECMDGOALS), compile-flags)
+CHECK_CONFIG=0
+endif
+ifeq ($(MAKECMDGOALS), linker-flags)
+CHECK_CONFIG=0
+endif
+
+ifeq ($(CHECK_CONFIG), 1)
+CONFIG_STR=DEBUG=$(DEBUG) RECOVER_VAR_NAMES=$(RECOVER_VAR_NAMES) TRACER_USE_FLIMITS=$(TRACER_USE_FLIMITS)
+CONFIG_FILE=$(BUILD_DIR)/build.config
+$(shell mkdir -p $(BUILD_DIR))
+$(shell touch $(CONFIG_FILE))
+
+ifneq ($(shell cat $(CONFIG_FILE)), $(CONFIG_STR))
+$(warning Previous config and current config does not match! Rebuilding)
+$(shell rm -rf $(BUILD_DIR))
+$(shell mkdir -p $(BUILD_DIR))
+$(shell echo $(CONFIG_STR) > $(CONFIG_FILE))
+endif
+
+endif
 
 $(shell mkdir -p $(BUILD_DIR))
 $(shell mkdir -p $(BUILD_DIR)/blocks)
@@ -19,31 +57,20 @@ $(shell mkdir -p $(BUILD_DIR)/gen_headers/gen)
 $(shell mkdir -p $(BASE_DIR)/scratch)
 
 
-SAMPLES_SRCS=$(wildcard $(SAMPLES_DIR)/*.cpp)
-SAMPLES=$(subst $(SAMPLES_DIR),$(BUILD_DIR),$(SAMPLES_SRCS:.cpp=))
-
-RECOVER_VAR_NAMES ?= 0
-ifeq ($(RECOVER_VAR_NAMES),1)
-ifneq ($(shell uname), Linux)
-$(error RECOVER_VAR_NAMES only supported on Linux)
-endif
-DEBUG=1
-endif
-
-
 CFLAGS_INTERNAL=-std=c++11
 CFLAGS=
+LINKER_FLAGS=
+INCLUDE_FLAGS=
 
-DEBUG ?= 0
+
 ifeq ($(DEBUG),1)
-CFLAGS=-g
-LINKER_FLAGS=-l$(LIBRARY_NAME) -g
+CFLAGS+=-g
+LINKER_FLAGS+=-l$(LIBRARY_NAME) -g
 else
 CFLAGS_INTERNAL+=-O3
-LINKER_FLAGS=-l$(LIBRARY_NAME)
+LINKER_FLAGS+=-l$(LIBRARY_NAME)
 endif
 
-TRACER_USE_FLIMITS ?= 0
 ifeq ($(TRACER_USE_FLIMITS),1)
 CFLAGS_INTERNAL+=-DTRACER_USE_FLIMITS
 else
@@ -52,7 +79,6 @@ endif
 
 
 CFLAGS_INTERNAL+=-Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wmissing-declarations -Woverloaded-virtual -Wno-deprecated -Wdelete-non-virtual-dtor -Werror -Wno-vla 
-
 INCLUDE_FLAGS=-I$(INCLUDE_DIR) -I$(BUILD_DIR)/gen_headers/
 
 ifeq ($(RECOVER_VAR_NAMES),1)
@@ -65,8 +91,6 @@ CFLAGS_INTERNAL+=-pedantic-errors
 endif
 
 LINKER_FLAGS+=-L$(BUILD_DIR)/ -ldl
-
-
 
 BUILDER_SRC=$(wildcard $(SRC_DIR)/builder/*.cpp)
 BLOCKS_SRC=$(wildcard $(SRC_DIR)/blocks/*.cpp)
