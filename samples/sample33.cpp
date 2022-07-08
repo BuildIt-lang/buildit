@@ -8,14 +8,16 @@ using builder::dyn_var;
 using builder::static_var;
 using builder::as_member_of;
 
-const char foo_t_name[] = "FooT";
+constexpr char foo_t_name[] = "FooT";
 using foo_t = typename builder::name<foo_t_name>;
 
 class FooT: public dyn_var<foo_t> {
 public:
-	using dyn_var<foo_t>::dyn_var;
+	typedef dyn_var<foo_t> super;
+	using super::super;
 	using dyn_var<foo_t>::operator=;
 	FooT(const FooT &t): dyn_var<foo_t>((builder::builder)t) {}
+	FooT(): dyn_var<foo_t>() {}
 	builder::builder operator= (const FooT &t) {
 		return (*this) = (builder::builder)t;
 	}	

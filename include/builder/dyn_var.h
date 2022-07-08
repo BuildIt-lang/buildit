@@ -259,7 +259,8 @@ public:
 	
 	using super::super;
 	using super::operator=;
-
+	
+	dyn_var(): dyn_var_impl<T>() {}
 	
 	// Some implementations don't like implicitly declared
 	// constructors so define them here

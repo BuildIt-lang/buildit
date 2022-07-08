@@ -174,8 +174,8 @@ void block_replacer::visit(builder_var_type::Ptr a) {
 }
 void block_replacer::visit(named_type::Ptr a) {
 	std::vector<type::Ptr> new_args;
-	for (auto a: a->template_args) {
-		new_args.push_back(rewrite<type>(a));
+	for (auto b: a->template_args) {
+		new_args.push_back(rewrite<type>(b));
 	}
 	a->template_args = new_args;
 	node=a;
