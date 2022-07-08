@@ -1,0 +1,59 @@
+STMT_BLOCK
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (a_0)
+    INT_CONST (0)
+  FOR_STMT
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (b_1)
+      INT_CONST (0)
+    LT_EXPR
+      VAR_EXPR
+        VAR (b_1)
+      INT_CONST (10)
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (b_1)
+      PLUS_EXPR
+        VAR_EXPR
+          VAR (b_1)
+        INT_CONST (1)
+    STMT_BLOCK
+      IF_STMT
+        EQUALS_EXPR
+          VAR_EXPR
+            VAR (b_1)
+          INT_CONST (5)
+        STMT_BLOCK
+          CONTINUE_STMT
+        STMT_BLOCK
+      EXPR_STMT
+        ASSIGN_EXPR
+          VAR_EXPR
+            VAR (a_0)
+          PLUS_EXPR
+            VAR_EXPR
+              VAR (a_0)
+            VAR_EXPR
+              VAR (b_1)
+      IF_STMT
+        GT_EXPR
+          VAR_EXPR
+            VAR (a_0)
+          INT_CONST (25)
+        STMT_BLOCK
+          BREAK_STMT
+        STMT_BLOCK
+{
+  int a_0 = 0;
+  for (int b_1 = 0; b_1 < 10; b_1 = b_1 + 1) {
+    if (b_1 == 5) {
+      continue;
+    } 
+    a_0 = a_0 + b_1;
+    if (a_0 > 25) {
+      break;
+    } 
+  }
+}

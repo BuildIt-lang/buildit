@@ -1,0 +1,29 @@
+int power_15 (int arg0) {
+  int var0 = arg0;
+  int res_1 = 1;
+  int x_2 = var0;
+  res_1 = res_1 * x_2;
+  x_2 = x_2 * x_2;
+  res_1 = res_1 * x_2;
+  x_2 = x_2 * x_2;
+  res_1 = res_1 * x_2;
+  x_2 = x_2 * x_2;
+  res_1 = res_1 * x_2;
+  x_2 = x_2 * x_2;
+  return res_1;
+}
+
+int power_5 (int arg1) {
+  int var0 = arg1;
+  int res_1 = 1;
+  int x_2 = 5;
+  while (var0 > 0) {
+    if ((var0 % 2) == 1) {
+      res_1 = res_1 * x_2;
+    } 
+    x_2 = x_2 * x_2;
+    var0 = var0 / 2;
+  }
+  return res_1;
+}
+

@@ -1,0 +1,52 @@
+FUNC_DECL
+  SCALAR_TYPE (VOID)
+  STMT_BLOCK
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (x_0)
+      INT_CONST (5)
+    FOR_STMT
+      DECL_STMT
+        SCALAR_TYPE (INT)
+        VAR (i_1)
+        INT_CONST (0)
+      LT_EXPR
+        VAR_EXPR
+          VAR (i_1)
+        INT_CONST (100)
+      ASSIGN_EXPR
+        VAR_EXPR
+          VAR (i_1)
+        PLUS_EXPR
+          VAR_EXPR
+            VAR (i_1)
+          INT_CONST (1)
+      STMT_BLOCK
+        IF_STMT
+          NOT_EXPR
+            EQUALS_EXPR
+              VAR_EXPR
+                VAR (i_1)
+              VAR_EXPR
+                VAR (x_0)
+          STMT_BLOCK
+            CONTINUE_STMT
+          STMT_BLOCK
+        EXPR_STMT
+          ASSIGN_EXPR
+            VAR_EXPR
+              VAR (x_0)
+            VAR_EXPR
+              VAR (i_1)
+        BREAK_STMT
+void bar (void) {
+  int x_0 = 5;
+  for (int i_1 = 0; i_1 < 100; i_1 = i_1 + 1) {
+    if (!(i_1 == x_0)) {
+      continue;
+    } 
+    x_0 = i_1;
+    break;
+  }
+}
+

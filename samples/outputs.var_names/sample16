@@ -1,0 +1,23 @@
+STMT_BLOCK
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (a_0)
+    NO_INITIALIZATION
+  EXPR_STMT
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (a_0)
+      INT_CONST (20)
+  EXPR_STMT
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (global_var1)
+      PLUS_EXPR
+        INT_CONST (10)
+        VAR_EXPR
+          VAR (a_0)
+{
+  int a_0;
+  a_0 = 20;
+  global_var1 = 10 + a_0;
+}

@@ -1,0 +1,41 @@
+FUNC_DECL
+  SCALAR_TYPE (INT)
+  VAR (arg0)
+  STMT_BLOCK
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var0)
+      VAR_EXPR
+        VAR (arg0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (z_1)
+      PLUS_EXPR
+        PLUS_EXPR
+          INT_CONST (3)
+          MEMBER_ACCESS_EXPR (var1)
+            VAR_EXPR
+              VAR (var0)
+        MUL_EXPR
+          INT_CONST (5)
+          MEMBER_ACCESS_EXPR (var1)
+            VAR_EXPR
+              VAR (var0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var2)
+      PLUS_EXPR
+        MEMBER_ACCESS_EXPR (neighbor)
+          VAR_EXPR
+            VAR (z_1)
+        INT_CONST (2)
+    RETURN_STMT
+      VAR_EXPR
+        VAR (var2)
+int func1 (int arg0) {
+  int var0 = arg0;
+  int z_1 = (3 + var0.var1) + (5 * var0.var1);
+  int var2 = z_1.neighbor + 2;
+  return var2;
+}
+

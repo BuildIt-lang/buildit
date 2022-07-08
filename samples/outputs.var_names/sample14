@@ -1,0 +1,22 @@
+STMT_BLOCK
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (a_0)
+    INT_CONST (0)
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (var1)
+    VAR_EXPR
+      VAR (a_0)
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (b_2)
+    PLUS_EXPR
+      VAR_EXPR
+        VAR (var1)
+      INT_CONST (1)
+{
+  int a_0 = 0;
+  int var1 = a_0;
+  int b_2 = var1 + 1;
+}

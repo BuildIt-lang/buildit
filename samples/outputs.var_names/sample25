@@ -1,0 +1,154 @@
+FUNC_DECL
+  SCALAR_TYPE (INT)
+  VAR (arg0)
+  VAR (arg1)
+  VAR (arg2)
+  STMT_BLOCK
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var0)
+      VAR_EXPR
+        VAR (arg2)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var1)
+      VAR_EXPR
+        VAR (arg1)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var2)
+      VAR_EXPR
+        VAR (arg0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (z_3)
+      MINUS_EXPR
+        MINUS_EXPR
+          VAR_EXPR
+            VAR (var2)
+          VAR_EXPR
+            VAR (var1)
+        VAR_EXPR
+          VAR (var0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var4)
+      INT_CONST (0)
+    RETURN_STMT
+      VAR_EXPR
+        VAR (var4)
+int func1 (int arg0, int arg1, int arg2) {
+  int var0 = arg2;
+  int var1 = arg1;
+  int var2 = arg0;
+  int z_3 = (var2 - var1) - var0;
+  int var4 = 0;
+  return var4;
+}
+
+FUNC_DECL
+  SCALAR_TYPE (INT)
+  VAR (arg0)
+  STMT_BLOCK
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var0)
+      VAR_EXPR
+        VAR (arg0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var1)
+      PLUS_EXPR
+        VAR_EXPR
+          VAR (var0)
+        INT_CONST (1)
+    RETURN_STMT
+      VAR_EXPR
+        VAR (var1)
+int func2 (int arg0) {
+  int var0 = arg0;
+  int var1 = var0 + 1;
+  return var1;
+}
+
+FUNC_DECL
+  SCALAR_TYPE (VOID)
+  VAR (arg0)
+  STMT_BLOCK
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var0)
+      VAR_EXPR
+        VAR (arg0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (b_1)
+      VAR_EXPR
+        VAR (var0)
+    EXPR_STMT
+      ASSIGN_EXPR
+        VAR_EXPR
+          VAR (var0)
+        PLUS_EXPR
+          VAR_EXPR
+            VAR (b_1)
+          INT_CONST (1)
+void func3 (int arg0) {
+  int var0 = arg0;
+  int b_1 = var0;
+  var0 = b_1 + 1;
+}
+
+FUNC_DECL
+  SCALAR_TYPE (INT)
+  VAR (arg0)
+  STMT_BLOCK
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var0)
+      VAR_EXPR
+        VAR (arg0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (t_1)
+      INT_CONST (0)
+    EXPR_STMT
+      ASSIGN_EXPR
+        VAR_EXPR
+          VAR (t_1)
+        PLUS_EXPR
+          PLUS_EXPR
+            VAR_EXPR
+              VAR (t_1)
+            VAR_EXPR
+              VAR (var0)
+          INT_CONST (1)
+    EXPR_STMT
+      ASSIGN_EXPR
+        VAR_EXPR
+          VAR (t_1)
+        PLUS_EXPR
+          PLUS_EXPR
+            VAR_EXPR
+              VAR (t_1)
+            VAR_EXPR
+              VAR (var0)
+          INT_CONST (1)
+    EXPR_STMT
+      FUNCTION_CALL_EXPR
+        VAR_EXPR
+          VAR (print_val)
+        VAR_EXPR
+          VAR (t_1)
+    RETURN_STMT
+      VAR_EXPR
+        VAR (t_1)
+int func4 (int arg0) {
+  int var0 = arg0;
+  int t_1 = 0;
+  t_1 = (t_1 + var0) + 1;
+  t_1 = (t_1 + var0) + 1;
+  print_val(t_1);
+  return t_1;
+}
+

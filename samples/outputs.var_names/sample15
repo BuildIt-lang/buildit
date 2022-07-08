@@ -1,0 +1,38 @@
+STMT_BLOCK
+  DECL_STMT
+    FUNCITON_TYPE
+      SCALAR_TYPE (VOID)
+      SCALAR_TYPE (INT)
+      POINTER_TYPE
+        SCALAR_TYPE (INT)
+    VAR (bar_0)
+    NO_INITIALIZATION
+  DECL_STMT
+    FUNCITON_TYPE
+      SCALAR_TYPE (INT)
+    VAR (bar2_1)
+    NO_INITIALIZATION
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (a_2)
+    NO_INITIALIZATION
+  DECL_STMT
+    POINTER_TYPE
+      SCALAR_TYPE (INT)
+    VAR (b_3)
+    NO_INITIALIZATION
+  EXPR_STMT
+    FUNCTION_CALL_EXPR
+      VAR_EXPR
+        VAR (bar_0)
+      VAR_EXPR
+        VAR (a_2)
+      VAR_EXPR
+        VAR (b_3)
+{
+  void (*bar_0)(int, int*);
+  int (*bar2_1)();
+  int a_2;
+  int* b_3;
+  bar_0(a_2, b_3);
+}

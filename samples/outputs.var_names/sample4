@@ -1,0 +1,28 @@
+STMT_BLOCK
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (a_0)
+    NO_INITIALIZATION
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (b_1)
+    NO_INITIALIZATION
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (c_2)
+    NO_INITIALIZATION
+  EXPR_STMT
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (c_2)
+      PLUS_EXPR
+        VAR_EXPR
+          VAR (a_0)
+        VAR_EXPR
+          VAR (b_1)
+{
+  int a_0;
+  int b_1;
+  int c_2;
+  c_2 = a_0 + b_1;
+}

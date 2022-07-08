@@ -1,0 +1,112 @@
+STMT_BLOCK
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (k_0)
+    INT_CONST (0)
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (t_1)
+    INT_CONST (0)
+  WHILE_STMT
+    NOT_EXPR
+      EQUALS_EXPR
+        VAR_EXPR
+          VAR (k_0)
+        INT_CONST (0)
+    STMT_BLOCK
+      EXPR_STMT
+        ASSIGN_EXPR
+          VAR_EXPR
+            VAR (t_1)
+          PLUS_EXPR
+            VAR_EXPR
+              VAR (t_1)
+            INT_CONST (1)
+      EXPR_STMT
+        ASSIGN_EXPR
+          VAR_EXPR
+            VAR (t_1)
+          PLUS_EXPR
+            VAR_EXPR
+              VAR (t_1)
+            INT_CONST (1)
+      WHILE_STMT
+        NOT_EXPR
+          EQUALS_EXPR
+            VAR_EXPR
+              VAR (k_0)
+            INT_CONST (0)
+        STMT_BLOCK
+      EXPR_STMT
+        ASSIGN_EXPR
+          VAR_EXPR
+            VAR (t_1)
+          PLUS_EXPR
+            VAR_EXPR
+              VAR (t_1)
+            INT_CONST (1)
+      WHILE_STMT
+        NOT_EXPR
+          EQUALS_EXPR
+            VAR_EXPR
+              VAR (k_0)
+            INT_CONST (0)
+        STMT_BLOCK
+          EXPR_STMT
+            ASSIGN_EXPR
+              VAR_EXPR
+                VAR (t_1)
+              PLUS_EXPR
+                VAR_EXPR
+                  VAR (t_1)
+                INT_CONST (1)
+      EXPR_STMT
+        ASSIGN_EXPR
+          VAR_EXPR
+            VAR (t_1)
+          PLUS_EXPR
+            VAR_EXPR
+              VAR (t_1)
+            INT_CONST (1)
+  EXPR_STMT
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (t_1)
+      PLUS_EXPR
+        VAR_EXPR
+          VAR (t_1)
+        INT_CONST (1)
+  WHILE_STMT
+    NOT_EXPR
+      EQUALS_EXPR
+        VAR_EXPR
+          VAR (k_0)
+        INT_CONST (0)
+    STMT_BLOCK
+      EXPR_STMT
+        ASSIGN_EXPR
+          VAR_EXPR
+            VAR (t_1)
+          PLUS_EXPR
+            VAR_EXPR
+              VAR (t_1)
+            INT_CONST (1)
+{
+  int k_0 = 0;
+  int t_1 = 0;
+  while (!(k_0 == 0)) {
+    t_1 = t_1 + 1;
+    t_1 = t_1 + 1;
+    while (!(k_0 == 0)) {
+    }
+    t_1 = t_1 + 1;
+    while (!(k_0 == 0)) {
+      t_1 = t_1 + 1;
+    }
+    t_1 = t_1 + 1;
+  }
+  t_1 = t_1 + 1;
+  while (!(k_0 == 0)) {
+    t_1 = t_1 + 1;
+  }
+}
