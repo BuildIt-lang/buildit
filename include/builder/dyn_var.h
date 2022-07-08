@@ -120,7 +120,8 @@ public:
 			block::var::Ptr dyn_var = std::make_shared<block::var>();
 			dyn_var->var_type = create_block_type();
 			block_var = dyn_var;
-			dyn_var->preferred_name = util::find_variable_name(this);
+			// Don't try to obtain preferred names for objects created without context
+			//dyn_var->preferred_name = util::find_variable_name(this);
 			return;
 		}
 		assert(builder_context::current_builder_context != nullptr);

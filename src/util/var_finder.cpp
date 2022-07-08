@@ -14,7 +14,7 @@
 #include <map>
 #include <algorithm>
 #include <iostream>
-
+#include <link.h>
 
 namespace util {
 
@@ -164,12 +164,13 @@ static std::string find_variable_with_cursor(void* addr, unw_cursor_t &cursor) {
 	(void) var_offset;
 
 	Dl_info info;
-	if (!dladdr((void*)ip, &info)) {
+	struct link_map *map;
+	if (!dladdr1((void*)ip, &info, (void**)&map, RTLD_DL_LINKMAP)) {
 		return "";
 	}
 
 	
-	unsigned long long find_offset = (unsigned long long)((unsigned long long)ip - (unsigned long long)info.dli_fbase);
+	unsigned long long find_offset = (unsigned long long)((unsigned long long)ip - (unsigned long long)map->l_addr);
 	(void) find_offset;
 	// Now that we have obtained the base address and the offset for the function
 	// we can load the dwarf
