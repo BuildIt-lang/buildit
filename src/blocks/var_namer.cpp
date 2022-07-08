@@ -33,7 +33,11 @@ void var_namer::visit(stmt_block::Ptr a) {
 			decl_stmt::Ptr prev_decl = find_hoisted_decl(hoisted_decls, so);
 			int detach_init = false;
 			if (!prev_decl) {	
-				b->decl_var->var_name = "var" + std::to_string(var_counter);
+				if (b->decl_var->preferred_name != "") {
+					b->decl_var->var_name = b->decl_var->preferred_name + "_" + std::to_string(var_counter);
+				} else {
+					b->decl_var->var_name = "var" + std::to_string(var_counter);
+				}
 				var_counter++;
 				var_replacer replacer;
 				replacer.to_replace = b->decl_var;

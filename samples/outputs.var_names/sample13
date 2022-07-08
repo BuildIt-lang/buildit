@@ -1,0 +1,73 @@
+STMT_BLOCK
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (a_0)
+    INT_CONST (0)
+  FOR_STMT
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (y_1)
+      INT_CONST (0)
+    LT_EXPR
+      VAR_EXPR
+        VAR (y_1)
+      INT_CONST (100)
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (y_1)
+      PLUS_EXPR
+        VAR_EXPR
+          VAR (y_1)
+        INT_CONST (1)
+    STMT_BLOCK
+      EXPR_STMT
+        ASSIGN_EXPR
+          VAR_EXPR
+            VAR (a_0)
+          MUL_EXPR
+            VAR_EXPR
+              VAR (a_0)
+            INT_CONST (1)
+  FOR_STMT
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (y_2)
+      INT_CONST (0)
+    LT_EXPR
+      VAR_EXPR
+        VAR (y_2)
+      INT_CONST (200)
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (y_2)
+      PLUS_EXPR
+        VAR_EXPR
+          VAR (y_2)
+        INT_CONST (1)
+    STMT_BLOCK
+      EXPR_STMT
+        ASSIGN_EXPR
+          VAR_EXPR
+            VAR (a_0)
+          MUL_EXPR
+            VAR_EXPR
+              VAR (a_0)
+            INT_CONST (1)
+  EXPR_STMT
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (a_0)
+      MINUS_EXPR
+        VAR_EXPR
+          VAR (a_0)
+        INT_CONST (1)
+{
+  int a_0 = 0;
+  for (int y_1 = 0; y_1 < 100; y_1 = y_1 + 1) {
+    a_0 = a_0 * 1;
+  }
+  for (int y_2 = 0; y_2 < 200; y_2 = y_2 + 1) {
+    a_0 = a_0 * 1;
+  }
+  a_0 = a_0 - 1;
+}
