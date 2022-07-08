@@ -12,8 +12,8 @@ static void set_call_point(void) {
 #ifdef TRACER_USE_FLIMITS
 	unsigned long long function_end = (unsigned long long)(void *)builder::lambda_wrapper_close;
 #endif
-	void *buffer[20];
-	int backtrace_size = backtrace(buffer, 20);
+	void *buffer[50];
+	int backtrace_size = backtrace(buffer, 50);
 	char **backtrace_functions = backtrace_symbols(buffer, backtrace_size);
 	int i;
 	bool found = false;
@@ -64,10 +64,10 @@ tag get_offset_in_function_impl(
 	if (call_point == 0) {
 		set_call_point();
 	}
-	void *buffer[20];
+	void *buffer[50];
 	tag new_tag;
 	// First add the RIP pointers
-	int backtrace_size = backtrace(buffer, 20);
+	int backtrace_size = backtrace(buffer, 50);
 	for (int i = 0; i < backtrace_size; i++) {
 		if ((unsigned long long)buffer[i] == call_point)
 			break;
