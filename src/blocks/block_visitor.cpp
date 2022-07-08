@@ -142,8 +142,8 @@ void block_visitor::visit(array_type::Ptr a) { a->element_type->accept(this); }
 void block_visitor::visit(builder_var_type::Ptr a) {
 	a->closure_type->accept(this);
 }
-void block_visitor::visit(named_type::Ptr a) {
-	for (auto a: a->template_args) {
+void block_visitor::visit(named_type::Ptr x) {
+	for (auto a: x->template_args) {
 		a->accept(this);
 	}
 }

@@ -9,12 +9,14 @@ using builder::dyn_var;
 using builder::static_var;
 using builder::as_member_of;
 
-const char foo_t_name[] = "FooT";
+constexpr char foo_t_name[] = "FooT";
 using foo_t = typename builder::name<foo_t_name>;
+
+namespace builder {
 
 // Use specialization instead of inheritance
 template <>
-class builder::dyn_var<foo_t>: public dyn_var_impl<foo_t> {
+class dyn_var<foo_t>: public dyn_var_impl<foo_t> {
 public:
 	typedef dyn_var_impl<foo_t> super;
 	using super::super;
@@ -23,6 +25,7 @@ public:
 		return (*this) = (builder)t;
 	}	
 	dyn_var(const dyn_var& t): dyn_var_impl((builder)t){}
+	dyn_var(): dyn_var_impl<foo_t>() {}
 
 	dyn_var<int> member = as_member_of(this, "member");
 };
@@ -30,7 +33,7 @@ public:
 // Create specialization for foo_t* so that we can overload the * operator
 
 template <>
-class builder::dyn_var<foo_t*>: public dyn_var_impl<foo_t*> {
+class dyn_var<foo_t*>: public dyn_var_impl<foo_t*> {
 public:
 	typedef dyn_var_impl<foo_t*> super;
 	using super::super;
@@ -39,7 +42,7 @@ public:
 		return (*this) = (builder)t;
 	}	
 	dyn_var(const dyn_var& t): dyn_var_impl((builder)t){}
-	
+	dyn_var(): dyn_var_impl<foo_t*>() {}	
 	
 	dyn_var<foo_t> operator *() {
 		// Rely on copy elision
@@ -56,6 +59,7 @@ public:
 	}
 };
 
+}
 
 static void bar(void) {
 	dyn_var<foo_t> g;
