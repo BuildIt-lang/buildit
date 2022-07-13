@@ -13,7 +13,7 @@ INCLUDES=$(wildcard $(INCLUDE_DIR)/*.h) $(wildcard $(INCLUDE_DIR)/*/*.h) $(BUILD
 
 
 RECOVER_VAR_NAMES ?= 0
-TRACER_USE_FLIMITS ?= 0
+TRACER_USE_LIBUNWIND ?= 0
 DEBUG ?= 0
 ifeq ($(RECOVER_VAR_NAMES),1)
 ifneq ($(shell uname), Linux)
@@ -33,7 +33,7 @@ CHECK_CONFIG=0
 endif
 
 ifeq ($(CHECK_CONFIG), 1)
-CONFIG_STR=DEBUG=$(DEBUG) RECOVER_VAR_NAMES=$(RECOVER_VAR_NAMES) TRACER_USE_FLIMITS=$(TRACER_USE_FLIMITS)
+CONFIG_STR=DEBUG=$(DEBUG) RECOVER_VAR_NAMES=$(RECOVER_VAR_NAMES) TRACER_USE_LIBUNWIND=$(TRACER_USE_LIBUNWIND)
 CONFIG_FILE=$(BUILD_DIR)/build.config
 $(shell mkdir -p $(BUILD_DIR))
 $(shell touch $(CONFIG_FILE))
@@ -71,10 +71,8 @@ CFLAGS_INTERNAL+=-O3
 LINKER_FLAGS+=-l$(LIBRARY_NAME)
 endif
 
-ifeq ($(TRACER_USE_FLIMITS),1)
-CFLAGS_INTERNAL+=-DTRACER_USE_FLIMITS
-else
-LINKER_FLAGS+=-rdynamic
+ifeq ($(TRACER_USE_LIBUNWIND),1)
+CFLAGS_INTERNAL+=-DTRACER_USE_LIBUNWIND
 endif
 
 
@@ -88,6 +86,9 @@ INCLUDE_FLAGS+=-I$(DEPS_DIR)/libelfin/dwarf -I$(DEPS_DIR)/libelfin/elf/
 else
 # libelfin has some code that doesn't compile with pedantic
 CFLAGS_INTERNAL+=-pedantic-errors
+ifeq ($(TRACER_USE_LIBUNWIND),1)
+LINKER_FLAGS+=-lunwind
+endif
 endif
 
 LINKER_FLAGS+=-L$(BUILD_DIR)/ -ldl
