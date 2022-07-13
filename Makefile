@@ -75,6 +75,8 @@ ifeq ($(TRACER_USE_LIBUNWIND),1)
 CFLAGS_INTERNAL+=-DTRACER_USE_LIBUNWIND
 endif
 
+LIBUNWIND_PATH ?= _UNSET_
+
 
 CFLAGS_INTERNAL+=-Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wmissing-declarations -Woverloaded-virtual -Wno-deprecated -Wdelete-non-virtual-dtor -Werror -Wno-vla 
 INCLUDE_FLAGS=-I$(INCLUDE_DIR) -I$(BUILD_DIR)/gen_headers/
@@ -83,11 +85,19 @@ ifeq ($(RECOVER_VAR_NAMES),1)
 LINKER_FLAGS+=-L$(DEPS_DIR)/libelfin/dwarf/ -L$(DEPS_DIR)/libelfin/elf -lunwind -l:libelf++.a -l:libdwarf++.a
 CFLAGS_INTERNAL+=-DRECOVER_VAR_NAMES
 INCLUDE_FLAGS+=-I$(DEPS_DIR)/libelfin/dwarf -I$(DEPS_DIR)/libelfin/elf/
+ifneq ($(LIBUNWIND_PATH),_UNSET_)
+INCLUDE_FLAGS+=-I $(LIBUNWIND_PATH)/include
+LINKER_FLAGS+=-L $(LIBUNWIND_PATH)/lib
+endif
 else
 # libelfin has some code that doesn't compile with pedantic
 CFLAGS_INTERNAL+=-pedantic-errors
 ifeq ($(TRACER_USE_LIBUNWIND),1)
 LINKER_FLAGS+=-lunwind
+ifneq ($(LIBUNWIND_PATH),_UNSET_)
+INCLUDE_FLAGS+=-I $(LIBUNWIND_PATH)/include
+LINKER_FLAGS+=-L $(LIBUNWIND_PATH)/lib
+endif
 endif
 endif
 
