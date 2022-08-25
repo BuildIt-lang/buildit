@@ -34,6 +34,7 @@ public:
 	virtual void visit(int_const::Ptr);
 	virtual void visit(double_const::Ptr);
 	virtual void visit(float_const::Ptr);
+	virtual void visit(string_const::Ptr);
 	virtual void visit(assign_expr::Ptr);
 	virtual void visit(expr_stmt::Ptr);
 	virtual void visit(stmt_block::Ptr);

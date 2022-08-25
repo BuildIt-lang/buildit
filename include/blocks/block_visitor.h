@@ -26,6 +26,7 @@ class const_expr;
 class int_const;
 class double_const;
 class float_const;
+class string_const;
 class assign_expr;
 class stmt;
 class expr_stmt;
@@ -84,6 +85,7 @@ public:
 	virtual void visit(std::shared_ptr<int_const>);
 	virtual void visit(std::shared_ptr<double_const>);
 	virtual void visit(std::shared_ptr<float_const>);
+	virtual void visit(std::shared_ptr<string_const>);
 	virtual void visit(std::shared_ptr<assign_expr>);
 	virtual void visit(std::shared_ptr<stmt>);
 	virtual void visit(std::shared_ptr<expr_stmt>);
