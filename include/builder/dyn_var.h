@@ -58,7 +58,7 @@ struct as_compound_expr {
 };
 using cast = as_compound_expr;
 
-class with_name {
+struct with_name {
 	std::string name;
 };
 
