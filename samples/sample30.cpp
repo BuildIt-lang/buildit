@@ -23,6 +23,8 @@ static void foo(void) {
 	dyn_var<float> k;
 	dyn_var<double> l;
 	dyn_var<void*> m;
+	dyn_var<char[]> n = "Hello world";
+	n = "new string";
 	
 	// bool test, fixes a bug
 	// that causes false as an init value creates a variable

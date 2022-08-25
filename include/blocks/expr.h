@@ -264,6 +264,26 @@ public:
 	}
 };
 
+class string_const: public const_expr {
+public:
+	typedef std::shared_ptr<string_const> Ptr;
+	virtual void dump(std::ostream &, int) override;
+	virtual void accept(block_visitor *a) override { a->visit(self<string_const>()); }
+
+	std::string value;
+	
+	virtual bool is_same(block::Ptr other) override {
+		if (static_offset != other->static_offset)
+			return false;
+		if (!isa<string_const>(other))
+			return false;
+		string_const::Ptr other_expr = to<string_const>(other);
+		if (value != other_expr->value)
+			return false;
+		return true;
+	}
+};
+
 class assign_expr : public expr {
 public:
 	typedef std::shared_ptr<assign_expr> Ptr;

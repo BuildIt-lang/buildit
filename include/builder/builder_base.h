@@ -100,6 +100,23 @@ public:
 	builder(const bool &b) : builder((int)b) {}
 	builder(const char &c) : builder((int)c) {}
 	builder(unsigned char &c) : builder((int)c) {}
+	builder(const std::string &s) {
+		assert(builder_context::current_builder_context != nullptr);
+		block_expr = nullptr;
+		if (builder_context::current_builder_context->bool_vector.size() > 0)
+			return;
+		block::string_const::Ptr string_const =
+		    std::make_shared<block::string_const>();
+		tracer::tag offset = get_offset_in_function();
+		string_const->static_offset = offset;
+		string_const->value = s;
+		builder_context::current_builder_context->add_node_to_sequence(
+		    string_const);
+
+		block_expr = string_const;
+	}
+	builder(const char* s): builder((std::string)s) {}
+	builder(char* s): builder((std::string)s) {}
 
 	// This is a template class declaration but requires access to var
 	// So this is defined after the var class definition

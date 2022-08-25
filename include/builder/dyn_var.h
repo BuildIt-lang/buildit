@@ -58,6 +58,10 @@ struct as_compound_expr {
 };
 using cast = as_compound_expr;
 
+class with_name {
+	std::string name;
+};
+
 template<typename T>
 class dyn_var_impl: public var{
 public:
@@ -103,6 +107,16 @@ public:
 		return operator=((BT)a); 
 	}
 
+	BT operator=(const std::string &s) {
+		return operator=((BT)s);
+	}
+	BT operator=(char* s) {
+		return operator=((BT)s);
+	}
+	BT operator=(const char* s) {
+		return operator=((BT)s);
+	}
+
 	template <typename Ts>
 	BT operator=(const static_var<Ts> &a) {
 		return operator=((BT)a);
@@ -143,16 +157,21 @@ public:
 		block_decl_stmt = decl_stmt;
 		builder_context::current_builder_context->add_stmt_to_current_block(decl_stmt);
 	}
+
+	dyn_var_impl() {
+		create_dyn_var(false);
+	}
 	// Basic and other constructors
-	dyn_var_impl(const char* name=nullptr) { 
+	dyn_var_impl(const with_name &v) { 
 		if (builder_context::current_builder_context == nullptr) {
 			create_dyn_var(true); 
-			if (name != nullptr) {
-				block_var->var_name = name;
-				var_name = name;
-			}
-		} else
+			block_var->var_name = v.name;
+			var_name = v.name;
+		} else {
 			create_dyn_var(false); 
+			block_var->var_name = v.name;
+			var_name = v.name;
+		}
 	}
 	dyn_var_impl(const dyn_var_sentinel_type& a, std::string name = "") {
 		create_dyn_var(true);
@@ -216,6 +235,9 @@ public:
 	dyn_var_impl(const bool &a) : my_type((BT)a) {}
 	dyn_var_impl(const double &a) : my_type((BT)a) {}
 	dyn_var_impl(const float &a) : my_type((BT)a) {}
+	dyn_var_impl(const std::string &a) : my_type((BT)a) {}
+	dyn_var_impl(const char* s): my_type((BT)(std::string)s) {}
+	dyn_var_impl(char* s): my_type((BT)(std::string)s) {}
 
 	dyn_var_impl(const std::initializer_list<BT> &_a) {
 		std::vector<BT> a(_a);

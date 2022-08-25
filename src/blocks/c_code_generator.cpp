@@ -62,6 +62,9 @@ void c_code_generator::visit(float_const::Ptr a) {
 		oss << ".0";
 	oss << "f";
 }
+void c_code_generator::visit(string_const::Ptr a) {
+	oss << "\"" << a->value << "\"";
+}
 void c_code_generator::visit(assign_expr::Ptr a) {
 	if (expr_needs_bracket(a->var1)) {
 		oss << "(";
