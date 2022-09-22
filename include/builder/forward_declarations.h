@@ -21,6 +21,8 @@ template<typename T>
 using if_builder = typename std::enable_if<is_builder_type<T>::value, T>::type;
 
 
+class static_var_base;
+
 template <typename T>
 class static_var;
 

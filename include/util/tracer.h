@@ -7,6 +7,7 @@
 #define MAX_TRACKING_VAR_SIZE (128)
 namespace builder {
 class builder_context;
+class static_var_base;
 }
 
 namespace tracer {
@@ -15,6 +16,11 @@ class tag {
 public:
 	std::vector<unsigned long long> pointers;
 	std::vector<std::string> static_var_snapshots;
+
+	// This is an optional field that does not participate in extraction 
+	// logic. This only helps with constructing XRAY debugging info. 
+	// This can be guarded under the XRAY_DEBUGGING flag
+	std::vector<std::pair<std::string, std::string>> static_var_key_values;
 
 	bool operator==(const tag &other) {
 		if (other.pointers.size() != pointers.size())

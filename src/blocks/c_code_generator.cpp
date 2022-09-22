@@ -3,8 +3,27 @@
 #include <limits>
 #include <math.h>
 #include <sstream>
+#include "util/source_finder.h"
 
 namespace block {
+
+void c_code_generator::save_static_info(block::Ptr a) {
+	for (auto &keyval: a->static_offset.static_var_key_values) {
+		xctx.set_var_here(keyval.first, keyval.second);	
+	}
+	for (auto &addr: a->static_offset.pointers) {
+		int line_no = -1;
+		const char* filename = NULL;
+		std::string function_name, linkage_name;
+		if (util::find_line_info(addr, &line_no, &filename, function_name, linkage_name) == 0) {
+			if (function_name != "" && linkage_name.rfind("_ZN7builder", 0) != 0) {
+				std::string fname = filename;
+				xctx.push_source_loc({fname, line_no, function_name, -1});
+			}
+		}
+	}
+}
+
 void c_code_generator::visit(not_expr::Ptr a) {
 	oss << "!(";
 	a->expr1->accept(this);
@@ -81,11 +100,14 @@ void c_code_generator::visit(expr_stmt::Ptr a) {
 }
 void c_code_generator::visit(stmt_block::Ptr a) {
 	oss << "{" << std::endl;
+        xctx.nextl();
 	curr_indent += 1;
 	for (auto stmt : a->stmts) {
 		printer::indent(oss, curr_indent);
 		stmt->accept(this);
+		save_static_info(stmt);
 		oss << std::endl;
+        	xctx.nextl();
 	}
 	curr_indent -= 1;
 	printer::indent(oss, curr_indent);
@@ -239,11 +261,15 @@ void c_code_generator::visit(if_stmt::Ptr a) {
 		a->then_stmt->accept(this);
 		oss << " ";
 	} else {
+		save_static_info(a);
 		oss << std::endl;
+        	xctx.nextl();
 		curr_indent++;
 		printer::indent(oss, curr_indent);
 		a->then_stmt->accept(this);
+		save_static_info(a);
 		oss << std::endl;
+        	xctx.nextl();
 		curr_indent--;
 	}
 
@@ -255,7 +281,9 @@ void c_code_generator::visit(if_stmt::Ptr a) {
 		a->else_stmt->accept(this);
 	} else {
 		oss << "else";
+		save_static_info(a);
 		oss << std::endl;
+        	xctx.nextl();
 		curr_indent++;
 		printer::indent(oss, curr_indent);
 		a->else_stmt->accept(this);
@@ -270,7 +298,9 @@ void c_code_generator::visit(while_stmt::Ptr a) {
 		oss << " ";
 		a->body->accept(this);
 	} else {
+		save_static_info(a);
 		oss << std::endl;
+        	xctx.nextl();
 		curr_indent++;
 		printer::indent(oss, curr_indent);
 		a->body->accept(this);
@@ -289,7 +319,9 @@ void c_code_generator::visit(for_stmt::Ptr a) {
 		oss << " ";
 		a->body->accept(this);
 	} else {
+		save_static_info(a);
 		oss << std::endl;
+        	xctx.nextl();
 		curr_indent++;
 		printer::indent(oss, curr_indent);
 		a->body->accept(this);
@@ -351,6 +383,9 @@ void c_code_generator::handle_func_arg(var::Ptr a) {
 	return;
 }
 void c_code_generator::visit(func_decl::Ptr a) {
+
+	oss << xctx.begin_section();
+
 	a->return_type->accept(this);
 	if (a->hasMetadata<std::vector<std::string>>("attributes")) {
 		const auto &attributes = a->getMetadata<std::vector<std::string>>("attributes");
@@ -378,15 +413,24 @@ void c_code_generator::visit(func_decl::Ptr a) {
 	if (isa<stmt_block>(a->body)) {
 		oss << " ";
 		a->body->accept(this);
+		save_static_info(a);
 		oss << std::endl;
+        	xctx.nextl();
 	} else {
+		save_static_info(a);
 		oss << std::endl;
+        	xctx.nextl();
 		curr_indent++;
 		printer::indent(oss, curr_indent);
 		a->body->accept(this);
+		save_static_info(a);
 		oss << std::endl;
+        	xctx.nextl();
 		curr_indent--;
 	}
+
+        xctx.emit_function_info(oss);
+	xctx.end_section();
 }
 void c_code_generator::visit(goto_stmt::Ptr a) { 
 	//a->dump(oss, 1); 

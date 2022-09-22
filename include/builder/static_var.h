@@ -3,6 +3,8 @@
 
 #include "builder/builder.h"
 #include "builder/builder_context.h"
+#include "util/var_finder.h"
+#include <iostream>
 
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
@@ -10,8 +12,16 @@
 
 namespace builder {
 
+// Base class for all static variables
+class static_var_base {
+public:
+	virtual std::string serialize();
+	std::string var_name;
+	virtual ~static_var_base();
+};
+
 template <typename T>
-class static_var {
+class static_var: public static_var_base {
 public:
 	static_assert(
 		std::is_same<T, short int>::value || 
@@ -30,20 +40,45 @@ public:
 	static_assert(sizeof(T) < MAX_TRACKING_VAR_SIZE, "Currently builder::static_var supports variables of max size "
 							 "= " TOSTRING(MAX_TRACKING_VARIABLE_SIZE));
 	T val;
-	operator T &() { return val; }
-	operator const T &() const { return val; }
-	const T &operator=(const T &t) {
+
+	int name_checked = false;
+	
+	void check_at_access() {
+		if (var_name == "" && name_checked == false) {
+			// This is the last attempt at recovering the variable name
+			var_name = util::find_variable_name(this);
+		}
+		name_checked = true;
+	}
+
+	operator T &() { 
+		check_at_access();
+		return val; 
+	}
+	operator const T &() const { 
+		return val; 
+	}
+	const T &operator=(const T &t) {	
+		check_at_access();
 		val = t;
 		return t;
 	}
 	static_var() {
 		assert(builder_context::current_builder_context != nullptr);
-		builder_context::current_builder_context->static_var_tuples.push_back(tracking_tuple((unsigned char *)&val, sizeof(T)));
+		builder_context::current_builder_context->static_var_tuples.push_back(tracking_tuple((unsigned char *)&val, sizeof(T), this));
+		var_name = util::find_variable_name(this);
 	}
 	static_var(const T &v) {
 		assert(builder_context::current_builder_context != nullptr);
-		builder_context::current_builder_context->static_var_tuples.push_back(tracking_tuple((unsigned char *)&val, sizeof(T)));
+		builder_context::current_builder_context->static_var_tuples.push_back(tracking_tuple((unsigned char *)&val, sizeof(T), this));
 		val = v;
+		var_name = util::find_variable_name(this);
+	}
+	static_var(const static_var& other) {
+		assert(builder_context::current_builder_context != nullptr);
+		builder_context::current_builder_context->static_var_tuples.push_back(tracking_tuple((unsigned char *)&val, sizeof(T), this));
+		val = other.val;
+		var_name = util::find_variable_name(this);
 	}
 	~static_var() {
 		assert(builder_context::current_builder_context != nullptr);
@@ -51,7 +86,16 @@ public:
 		assert(builder_context::current_builder_context->static_var_tuples.back().ptr == (unsigned char *)&val);
 		builder_context::current_builder_context->static_var_tuples.pop_back();
 	}
-	operator builder() { return (builder)val; }
+	operator builder() { 	
+		check_at_access();
+		return (builder)val; 
+	}
+
+	virtual std::string serialize() override {
+		// Assuming all static_vars can simply converted to string
+		// This is currently true because of the static assert above
+		return std::to_string(val);
+	}
 };
 
 } // namespace builder

@@ -14,7 +14,13 @@ INCLUDES=$(wildcard $(INCLUDE_DIR)/*.h) $(wildcard $(INCLUDE_DIR)/*/*.h) $(BUILD
 
 RECOVER_VAR_NAMES ?= 0
 TRACER_USE_LIBUNWIND ?= 0
+XRAY_DEBUGGING ?= 0
 DEBUG ?= 0
+ifeq ($(XRAY_DEBUGGING),1)
+DEBUG=1
+RECOVER_VAR_NAMES=1
+endif
+
 ifeq ($(RECOVER_VAR_NAMES),1)
 ifneq ($(shell uname), Linux)
 $(error RECOVER_VAR_NAMES only supported on Linux)
@@ -33,7 +39,7 @@ CHECK_CONFIG=0
 endif
 
 ifeq ($(CHECK_CONFIG), 1)
-CONFIG_STR=DEBUG=$(DEBUG) RECOVER_VAR_NAMES=$(RECOVER_VAR_NAMES) TRACER_USE_LIBUNWIND=$(TRACER_USE_LIBUNWIND)
+CONFIG_STR=DEBUG=$(DEBUG) RECOVER_VAR_NAMES=$(RECOVER_VAR_NAMES) TRACER_USE_LIBUNWIND=$(TRACER_USE_LIBUNWIND) XRAY_DEBUGGING=$(XRAY_DEBUGGING)
 CONFIG_FILE=$(BUILD_DIR)/build.config
 $(shell mkdir -p $(BUILD_DIR))
 $(shell touch $(CONFIG_FILE))
@@ -65,10 +71,10 @@ INCLUDE_FLAGS=
 
 ifeq ($(DEBUG),1)
 CFLAGS+=-g
-LINKER_FLAGS+=-l$(LIBRARY_NAME) -g
+LINKER_FLAGS+=-Wl,--start-group -l$(LIBRARY_NAME) -g
 else
 CFLAGS_INTERNAL+=-O3
-LINKER_FLAGS+=-l$(LIBRARY_NAME)
+LINKER_FLAGS+=-Wl,--start-group -l$(LIBRARY_NAME)
 endif
 
 ifeq ($(TRACER_USE_LIBUNWIND),1)
@@ -101,7 +107,13 @@ endif
 endif
 endif
 
-LINKER_FLAGS+=-L$(BUILD_DIR)/ -ldl
+ifeq ($(XRAY_DEBUGGING),1)
+LINKER_FLAGS+=-L$(XRAY_PATH)/build -lxray -ldwarf
+CFLAGS_INTERNAL+=-DXRAY_DEBUGGING
+INCLUDE_FLAGS+=-I$(XRAY_PATH)/include
+endif
+
+LINKER_FLAGS+=-L$(BUILD_DIR)/ -ldl -Wl,--end-group
 
 BUILDER_SRC=$(wildcard $(SRC_DIR)/builder/*.cpp)
 BLOCKS_SRC=$(wildcard $(SRC_DIR)/blocks/*.cpp)

@@ -5,12 +5,13 @@
 #include "util/printer.h"
 #include <unordered_map>
 #include <unordered_set>
+#include "xray/xray.h"
 
 namespace block {
 class c_code_generator : public block_visitor {
 private:
 	void emit_binary_expr(binary_expr::Ptr, std::string);
-
+	xray::xray_context xctx;
 public:
 	using block_visitor::visit;
 	c_code_generator(std::ostream &_oss) : oss(_oss) {}
@@ -64,6 +65,7 @@ public:
 	virtual void visit(label_stmt::Ptr);
 	
 
+	void save_static_info(block::Ptr);
 	static void generate_code(block::Ptr ast, std::ostream &oss, int indent = 0) {
 		c_code_generator generator(oss);
 		generator.curr_indent = indent;

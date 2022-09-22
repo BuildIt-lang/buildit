@@ -2,7 +2,8 @@
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 
-#ifdef RECOVER_VAR_NAMES
+//#ifdef RECOVER_VAR_NAMES 
+#if defined(RECOVER_VAR_NAMES) || defined(XRAY_DEBUGGING)
 #define UNW_LOCAL_ONLY
 #include <libunwind.h>
 

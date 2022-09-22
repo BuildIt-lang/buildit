@@ -24,7 +24,11 @@ class tracking_tuple {
 public:
 	const unsigned char *ptr;
 	uint32_t size;
-	tracking_tuple(const unsigned char *_ptr, uint32_t _size) : ptr(_ptr), size(_size) {}
+	tracking_tuple(const unsigned char *_ptr, uint32_t _size, static_var_base* sv) : ptr(_ptr), size(_size), var_ref(sv) {}
+	
+	// Fields related to XRAY 
+	static_var_base* var_ref;
+	
 	std::string snapshot(void) {
 		std::string output_string;
 		char temp[4];

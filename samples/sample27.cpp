@@ -8,8 +8,7 @@
 using builder::dyn_var;
 using builder::static_var;
 
-template <typename BT, typename ET>
-dyn_var<int> power_f(BT base, ET exponent) {
+static dyn_var<int> power_f(dyn_var<int> base, static_var<int> exponent) {
 	dyn_var<int> res = 1, x = base;
 	while (exponent > 0) {
 		if (exponent % 2 == 1)
@@ -21,11 +20,7 @@ dyn_var<int> power_f(BT base, ET exponent) {
 }
 int main(int argc, char *argv[]) {
 	auto ast1 = builder::builder_context().extract_function_ast(
-	    power_f<dyn_var<int>, static_var<int>>, "power_15", 15);
+	    power_f, "power_15", 15);
 	block::c_code_generator::generate_code(ast1, std::cout, 0);
-	auto ast2 = builder::builder_context().extract_function_ast(
-	    power_f<static_var<int>, dyn_var<int>>, "power_5", 5);
-	block::c_code_generator::generate_code(ast2, std::cout, 0);
-
 	return 0;
 }
