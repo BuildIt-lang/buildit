@@ -14,10 +14,8 @@
 namespace builder {
 
 template <typename FT, typename...ArgsT>
-auto compile_function(FT f, ArgsT...args) -> void* {
-	builder_context context;	
-	// Currently we will use an unconfigured context
-	// Can take in extra parameters or a context object
+auto compile_function_with_context(builder_context context, FT f, ArgsT...args) -> void* {
+
 	auto ast = context.extract_function_ast(f, "execute", args...);
 	// Proactively run RCE
 	block::eliminate_redundant_vars(ast);		
@@ -59,6 +57,13 @@ auto compile_function(FT f, ArgsT...args) -> void* {
 		assert(false && "Loading compiled module failed\n");
 	}
 	return function;
+}
+
+template <typename FT, typename...ArgsT>
+auto compile_function(FT f, ArgsT...args) -> void* {
+	// Use an unconfigured context object
+	builder_context context;
+	return compile_function_with_context(context, f, args...);
 }
 
 }

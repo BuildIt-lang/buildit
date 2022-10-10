@@ -1,3 +1,4 @@
+/*NO_TEST*/
 // Include the headers
 #include "blocks/c_code_generator.h"
 #include "builder/static_var.h"
