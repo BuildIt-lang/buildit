@@ -34,9 +34,27 @@ static void process_match(stmt_block::Ptr b, int match_start, int match_end) {
 	}
 	std::vector<var::Ptr> new_vars;
 	for (unsigned int i = 0; i < num_constants; i++) {
+		// Check a special case if const[index] == index, skip
+		bool all_match = true;
+		for (unsigned int j = 0; j < vals[i].size(); j++) {
+			if (vals[i][j] != (int)j) {
+				all_match = false;
+				break;
+			}	
+		}
+		if (all_match) {
+			new_vars.push_back(nullptr);
+			continue;
+		}
 		var::Ptr new_var = std::make_shared<var>();
 		new_var->var_name =
 		    "roll_var_" + std::to_string(unique_counter);
+		
+		std::vector<std::string> attrs;
+		attrs.push_back("static");
+				
+		new_var->setMetadata("attributes", attrs);
+
 		unique_counter++;
 		new_var->var_type =
 		    builder::dyn_var<int[]>::create_block_type();
@@ -103,6 +121,13 @@ static void process_match(stmt_block::Ptr b, int match_start, int match_end) {
 	std::vector<expr::Ptr> replace;
 
 	for (unsigned int i = 0; i < num_constants; i++) {
+		if (new_vars[i] == nullptr) {
+			var_expr::Ptr new_var2 = std::make_shared<var_expr>();
+			new_var2->var1 = i_var;
+			replace.push_back(new_var2);
+			continue;
+		}
+
 		sq_bkt_expr::Ptr new_sq_bkt = std::make_shared<sq_bkt_expr>();
 
 		var_expr::Ptr new_var1 = std::make_shared<var_expr>();
@@ -116,6 +141,7 @@ static void process_match(stmt_block::Ptr b, int match_start, int match_end) {
 
 		replace.push_back(new_sq_bkt);
 	}
+
 	constant_replacer replacer;
 	replacer.replace = replace;
 
@@ -160,6 +186,12 @@ void loop_roll_finder::visit(stmt_block::Ptr b) {
 	}
 }
 void constant_expr_finder::visit(int_const::Ptr a) { constants.push_back(a); }
+
+
+void constant_replacer::visit(int_const::Ptr a) {
+	node = replace[curr_index++];		
+}
+/*
 void constant_replacer::visit(plus_expr::Ptr a) {
 	if (isa<const_expr>(a->expr1)) {
 		a->expr1 = replace[curr_index++];
@@ -210,4 +242,5 @@ void constant_replacer::visit(sq_bkt_expr::Ptr a) {
 	} else
 		a->index->accept(this);
 }
+*/
 } // namespace block

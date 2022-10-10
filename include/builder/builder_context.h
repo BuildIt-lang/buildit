@@ -64,6 +64,9 @@ public:
 
 	bool use_memoization = true;
 	bool run_rce = false;
+	bool feature_unstructured = false;
+
+
 	bool is_visited_tag(tracer::tag &new_tag);
 	void erase_tag(tracer::tag &erase_tag);
 

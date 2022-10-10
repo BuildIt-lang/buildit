@@ -60,6 +60,7 @@ using cast = as_compound_expr;
 
 struct with_name {
 	std::string name;
+	with_name(const std::string &n): name(n) {}
 };
 
 template<typename T>

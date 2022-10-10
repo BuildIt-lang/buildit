@@ -297,6 +297,9 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 	if (run_rce)
 		block::eliminate_redundant_vars(ast);
 
+	if (feature_unstructured) 
+		return ast;
+
 	block::loop_finder finder;
 	finder.ast = ast;
 	ast->accept(&finder);
@@ -346,6 +349,8 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(std::vector
 		true_context.use_memoization = use_memoization;
 		true_context.visited_offsets = visited_offsets;
 		true_context.internal_stored_lambda = internal_stored_lambda;
+		true_context.feature_unstructured = feature_unstructured;
+
 		std::vector<bool> true_bv;
 		true_bv.push_back(true);
 		std::copy(b.begin(), b.end(), std::back_inserter(true_bv));
@@ -356,6 +361,8 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(std::vector
 		false_context.use_memoization = use_memoization;
 		false_context.visited_offsets = visited_offsets;
 		false_context.internal_stored_lambda = internal_stored_lambda;
+		false_context.feature_unstructured = feature_unstructured;
+
 		std::vector<bool> false_bv;
 		false_bv.push_back(false);
 		std::copy(b.begin(), b.end(), std::back_inserter(false_bv));
@@ -403,9 +410,17 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(std::vector
 		add_stmt_to_current_block(goto_stmt, false);
 		ret_ast = ast;
 	} catch (MemoizationException &e) {
-		for (unsigned int i = e.child_id; i < e.parent->stmts.size();
-		     i++) {
-			add_stmt_to_current_block(e.parent->stmts[i], false);
+		if (feature_unstructured) {
+			// Instead of copying statements to the current block, we will just insert a goto
+			block::goto_stmt::Ptr goto_stmt = std::make_shared<block::goto_stmt>();
+			goto_stmt->static_offset.clear();
+			goto_stmt->temporary_label_number = e.static_offset;
+			add_stmt_to_current_block(goto_stmt, false);
+		} else {
+			for (unsigned int i = e.child_id; i < e.parent->stmts.size();
+					i++) {
+				add_stmt_to_current_block(e.parent->stmts[i], false);
+			}
 		}
 		ret_ast = ast;
 	}
