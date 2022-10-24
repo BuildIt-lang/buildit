@@ -124,6 +124,7 @@ $(BUILD_DIR)/gen_headers/gen/compiler_headers.h:
 	echo "#pragma once" > $@
 	echo "#define GEN_TEMPLATE_NAME \"$(BASE_DIR)/scratch/code_XXXXXX\"" >> $@
 	echo "#define COMPILER_PATH \"$(CC)\"" >> $@
+	echo "#define CXX_COMPILER_PATH \"$(CXX)\"" >> $@
 
 
 $(BUILD_DIR)/builder/%.o: $(SRC_DIR)/builder/%.cpp $(INCLUDES)

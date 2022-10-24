@@ -62,10 +62,13 @@ public:
 	tag_map *memoized_tags;
 
 
+	// Flags for controlling BuildIt extraction
+	// and code generation behavior
 	bool use_memoization = true;
 	bool run_rce = false;
 	bool feature_unstructured = false;
-
+	bool dynamic_use_cxx = false;
+	std::string dynamic_header_includes = "";
 
 	bool is_visited_tag(tracer::tag &new_tag);
 	void erase_tag(tracer::tag &erase_tag);

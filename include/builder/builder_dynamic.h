@@ -18,7 +18,8 @@ auto compile_function_with_context(builder_context context, FT f, ArgsT...args) 
 
 	auto ast = context.extract_function_ast(f, "execute", args...);
 	// Proactively run RCE
-	block::eliminate_redundant_vars(ast);		
+	if (context.run_rce)
+		block::eliminate_redundant_vars(ast);		
 
 	char base_name_c[] = GEN_TEMPLATE_NAME;
 	int fd = mkstemp(base_name_c);
@@ -29,15 +30,33 @@ auto compile_function_with_context(builder_context context, FT f, ArgsT...args) 
 	close(fd);
 
 	std::string base_name(base_name_c);	
-	std::string source_name = base_name + ".c";
+	std::string source_name = base_name;
+	
+	if (!context.dynamic_use_cxx) 
+		source_name += ".c";
+	else 
+		source_name += ".cpp";
+
 	std::string compiled_name = base_name + ".so";
 	
-	std::string compiler_name = COMPILER_PATH;
+	std::string compiler_name;
+
+	if (!context.dynamic_use_cxx) 	
+		compiler_name = COMPILER_PATH;
+	else
+		compiler_name = CXX_COMPILER_PATH;		
+
 	std::string compile_command = compiler_name + " -shared -O3 " + source_name + " -o " + compiled_name;
 	
 		
 	std::ofstream oss(source_name);	
 
+	oss << context.dynamic_header_includes << std::endl;
+
+	if (context.dynamic_use_cxx) 
+		oss << "extern \"C\" ";
+
+		
 	block::c_code_generator::generate_code(ast, oss, 0);
 
 	oss.close();
