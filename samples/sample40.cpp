@@ -8,7 +8,7 @@ template <typename T>
 using dyn = builder::dyn_var<T>;
 using builder::static_var;
 
-static dyn<int (char*)> d_strlen(builder::with_name("strlen"));
+static dyn<int (char*)> d_strlen(builder::as_global("strlen"));
 
 static bool is_normal(char m) {
 	return (m >= 'a' && m <= 'z') || (m >= 'A'

@@ -1,5 +1,4 @@
 -include Makefile.inc
-
 LIBRARY_NAME=buildit
 BASE_DIR=$(shell pwd)
 SRC_DIR=$(BASE_DIR)/src

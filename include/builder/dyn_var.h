@@ -58,9 +58,9 @@ struct as_compound_expr {
 };
 using cast = as_compound_expr;
 
-struct with_name {
+struct as_global {
 	std::string name;
-	with_name(const std::string &n): name(n) {}
+	as_global(const std::string &n): name(n) {}
 };
 
 template<typename T>
@@ -163,7 +163,7 @@ public:
 		create_dyn_var(false);
 	}
 	// Basic and other constructors
-	dyn_var_impl(const with_name &v) { 
+	dyn_var_impl(const as_global &v) { 
 		if (builder_context::current_builder_context == nullptr) {
 			create_dyn_var(true); 
 			block_var->var_name = v.name;
@@ -173,6 +173,10 @@ public:
 			block_var->var_name = v.name;
 			var_name = v.name;
 		}
+		// Now that we have created the block_var, we need to leak a reference
+		// So that the destructor for the block_var is never called
+		auto ptr_to_leak = new std::shared_ptr<block::block>();
+		*ptr_to_leak = block_var;
 	}
 	dyn_var_impl(const dyn_var_sentinel_type& a, std::string name = "") {
 		create_dyn_var(true);
