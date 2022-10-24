@@ -43,8 +43,10 @@ auto compile_function_with_context(builder_context context, FT f, ArgsT...args) 
 
 	if (!context.dynamic_use_cxx) 	
 		compiler_name = COMPILER_PATH;
-	else
-		compiler_name = CXX_COMPILER_PATH;		
+	else {
+		compiler_name = CXX_COMPILER_PATH;
+		compiler_name += " -std=c++11";
+	}
 
 	std::string compile_command = compiler_name + " -shared -O3 " + source_name + " -o " + compiled_name;
 	
