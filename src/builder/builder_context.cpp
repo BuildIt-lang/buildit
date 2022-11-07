@@ -430,6 +430,14 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(std::vector
 		block::stmt::Ptr s = current_block_stmt->stmts[i];
 		// If any of the statements are if conditions, remove the
 		// internal statements from the table
+		// This is required because of the way we do memoization. 
+		// We just store a pointer to the stmt_block that has the statement. 
+		// In case of if stmt, the then and else branches don't have all the required
+		// statements. There might be statements AFTER the if which will not be 
+		// included in the memoization result. 
+		// But, if we are using feature_unstructured, we don't really care about 
+		// the statements, just the existence of the statement. So we will reset 
+		// the memoization table to point to the new blocks around
 		if (block::isa<block::if_stmt>(s)) {
 			block::if_stmt::Ptr if1 = block::to<block::if_stmt>(s);
 			assert(block::isa<block::stmt_block>(if1->then_stmt));
@@ -441,6 +449,11 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(std::vector
 				    stmt->static_offset.stringify());
 				if (it != memoized_tags->map.end())
 					memoized_tags->map.erase(it);
+
+				if (feature_unstructured) {
+					auto pblock = block::to<block::stmt_block>(if1->then_stmt);
+					memoized_tags->map[stmt->static_offset.stringify()] = pblock;
+				}
 			}
 			for (auto &stmt :
 			     block::to<block::stmt_block>(if1->else_stmt)
@@ -449,6 +462,10 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(std::vector
 				    stmt->static_offset.stringify());
 				if (it != memoized_tags->map.end())
 					memoized_tags->map.erase(it);
+				if (feature_unstructured) {
+					auto pblock = block::to<block::stmt_block>(if1->else_stmt);
+					memoized_tags->map[stmt->static_offset.stringify()] = pblock;
+				}
 			}
 		}
 		memoized_tags->map[s->static_offset.stringify()] =
