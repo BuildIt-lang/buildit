@@ -31,7 +31,11 @@ void create_return_stmt(const builder &a) {
 		return;
 	block::return_stmt::Ptr ret_stmt =
 	    std::make_shared<block::return_stmt>();
-	ret_stmt->static_offset = a.block_expr->static_offset;
+	//ret_stmt->static_offset = a.block_expr->static_offset;
+	// Finding conflicts between return statements is somehow really hard. 
+	// So treat each return statement as different. This is okay, because a 
+	// jump is as bad a return. Also no performance issues
+	ret_stmt->static_offset = tracer::get_unique_tag();
 	ret_stmt->return_val = a.block_expr;
 	builder_context::current_builder_context->add_stmt_to_current_block(
 	    ret_stmt);
