@@ -43,6 +43,7 @@ public:
 	virtual void visit(std::shared_ptr<int_const>) override;
 	virtual void visit(std::shared_ptr<double_const>) override;
 	virtual void visit(std::shared_ptr<float_const>) override;
+	virtual void visit(std::shared_ptr<string_const>) override;
 	virtual void visit(std::shared_ptr<assign_expr>) override;
 	virtual void visit(std::shared_ptr<stmt>) override;
 	virtual void visit(std::shared_ptr<expr_stmt>) override;

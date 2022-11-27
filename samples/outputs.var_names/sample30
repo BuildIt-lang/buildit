@@ -53,8 +53,19 @@ STMT_BLOCK
     VAR (m_12)
     NO_INITIALIZATION
   DECL_STMT
+    ARRAY_TYPE
+      SCALAR_TYPE (CHAR)
+      -1
+    VAR (n_13)
+    STRING_CONST ("Hello world")
+  EXPR_STMT
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (n_13)
+      STRING_CONST ("new string")
+  DECL_STMT
     SCALAR_TYPE (INT)
-    VAR (x_13)
+    VAR (x_14)
     INT_CONST (0)
 {
   short int a_0;
@@ -70,5 +81,7 @@ STMT_BLOCK
   float k_10;
   double l_11;
   void* m_12;
-  int x_13 = 0;
+  char n_13[] = "Hello world";
+  n_13 = "new string";
+  int x_14 = 0;
 }

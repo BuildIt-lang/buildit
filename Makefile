@@ -6,7 +6,6 @@ SRC_DIR=$(BASE_DIR)/src
 BUILD_DIR?=$(BASE_DIR)/build
 INCLUDE_DIR=$(BASE_DIR)/include
 SAMPLES_DIR=$(BASE_DIR)/samples
-DEPS_DIR=$(BASE_DIR)/deps
 SAMPLES_SRCS=$(wildcard $(SAMPLES_DIR)/*.cpp)
 SAMPLES=$(subst $(SAMPLES_DIR),$(BUILD_DIR),$(SAMPLES_SRCS:.cpp=))
 INCLUDES=$(wildcard $(INCLUDE_DIR)/*.h) $(wildcard $(INCLUDE_DIR)/*/*.h) $(BUILD_DIR)/gen_headers/gen/compiler_headers.h
@@ -14,9 +13,9 @@ INCLUDES=$(wildcard $(INCLUDE_DIR)/*.h) $(wildcard $(INCLUDE_DIR)/*/*.h) $(BUILD
 
 RECOVER_VAR_NAMES ?= 0
 TRACER_USE_LIBUNWIND ?= 0
-XRAY_DEBUGGING ?= 0
+D2X_DEBUGGING ?= 0
 DEBUG ?= 0
-ifeq ($(XRAY_DEBUGGING),1)
+ifeq ($(D2X_DEBUGGING),1)
 DEBUG=1
 RECOVER_VAR_NAMES=1
 endif
@@ -39,7 +38,7 @@ CHECK_CONFIG=0
 endif
 
 ifeq ($(CHECK_CONFIG), 1)
-CONFIG_STR=DEBUG=$(DEBUG) RECOVER_VAR_NAMES=$(RECOVER_VAR_NAMES) TRACER_USE_LIBUNWIND=$(TRACER_USE_LIBUNWIND) XRAY_DEBUGGING=$(XRAY_DEBUGGING)
+CONFIG_STR=DEBUG=$(DEBUG) RECOVER_VAR_NAMES=$(RECOVER_VAR_NAMES) TRACER_USE_LIBUNWIND=$(TRACER_USE_LIBUNWIND) D2X_DEBUGGING=$(D2X_DEBUGGING)
 CONFIG_FILE=$(BUILD_DIR)/build.config
 $(shell mkdir -p $(BUILD_DIR))
 $(shell touch $(CONFIG_FILE))
@@ -71,10 +70,14 @@ INCLUDE_FLAGS=
 
 ifeq ($(DEBUG),1)
 CFLAGS+=-g
-LINKER_FLAGS+=-Wl,--start-group -l$(LIBRARY_NAME) -g
+ifneq ($(D2X_DEBUGGING),1)
+LINKER_FLAGS+=-l$(LIBRARY_NAME) -g
+else
+LINKER_FLAGS+=-Wl,--start-group -l$(LIBRARY_NAME) -ld2x -Wl,--end-group -g
+endif
 else
 CFLAGS_INTERNAL+=-O3
-LINKER_FLAGS+=-Wl,--start-group -l$(LIBRARY_NAME)
+LINKER_FLAGS+=-l$(LIBRARY_NAME) -g
 endif
 
 ifeq ($(TRACER_USE_LIBUNWIND),1)
@@ -88,9 +91,8 @@ CFLAGS_INTERNAL+=-Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initiali
 INCLUDE_FLAGS=-I$(INCLUDE_DIR) -I$(BUILD_DIR)/gen_headers/
 
 ifeq ($(RECOVER_VAR_NAMES),1)
-LINKER_FLAGS+=-L$(DEPS_DIR)/libelfin/dwarf/ -L$(DEPS_DIR)/libelfin/elf -lunwind -l:libelf++.a -l:libdwarf++.a
 CFLAGS_INTERNAL+=-DRECOVER_VAR_NAMES
-INCLUDE_FLAGS+=-I$(DEPS_DIR)/libelfin/dwarf -I$(DEPS_DIR)/libelfin/elf/
+LINKER_FLAGS+=-ldwarf -lunwind
 ifneq ($(LIBUNWIND_PATH),_UNSET_)
 INCLUDE_FLAGS+=-I $(LIBUNWIND_PATH)/include
 LINKER_FLAGS+=-L $(LIBUNWIND_PATH)/lib
@@ -107,13 +109,13 @@ endif
 endif
 endif
 
-ifeq ($(XRAY_DEBUGGING),1)
-LINKER_FLAGS+=-L$(XRAY_PATH)/build -lxray -ldwarf
-CFLAGS_INTERNAL+=-DXRAY_DEBUGGING
-INCLUDE_FLAGS+=-I$(XRAY_PATH)/include
+ifeq ($(D2X_DEBUGGING),1)
+LINKER_FLAGS+=-L$(D2X_PATH)/build -ldwarf
+CFLAGS_INTERNAL+=-DD2X_DEBUGGING
+INCLUDE_FLAGS+=-I$(D2X_PATH)/include
 endif
 
-LINKER_FLAGS+=-L$(BUILD_DIR)/ -ldl -Wl,--end-group
+LINKER_FLAGS+=-L$(BUILD_DIR)/ -ldl 
 
 BUILDER_SRC=$(wildcard $(SRC_DIR)/builder/*.cpp)
 BLOCKS_SRC=$(wildcard $(SRC_DIR)/blocks/*.cpp)
@@ -154,6 +156,8 @@ $(BUILD_DIR)/samples/%.o: $(SAMPLES_DIR)/%.cpp $(INCLUDES)
 $(LIBRARY): $(LIBRARY_OBJS)
 	ar rv $(LIBRARY) $(LIBRARY_OBJS)
 
+#$(BUILD_DIR)/lib$(LIBRARY_NAME)-d2x.a: $(LIBRARY) 
+#	libtool --tag=CXX -static -o $@ $< $(D2X_PATH)/build/libd2x.a
 
 $(BUILD_DIR)/sample%: $(BUILD_DIR)/samples/sample%.o $(LIBRARY)
 	$(CXX) -o $@ $< $(LINKER_FLAGS)

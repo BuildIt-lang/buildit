@@ -66,6 +66,7 @@ void block_replacer::visit(const_expr::Ptr a) {node = a;}
 void block_replacer::visit(int_const::Ptr a) {node = a;}
 void block_replacer::visit(double_const::Ptr a) {node = a;}
 void block_replacer::visit(float_const::Ptr a) {node = a;}
+void block_replacer::visit(string_const::Ptr a) {node = a;}
 void block_replacer::visit(assign_expr::Ptr a) {
 	a->var1 = rewrite(a->var1);
 	a->expr1 = rewrite(a->expr1);

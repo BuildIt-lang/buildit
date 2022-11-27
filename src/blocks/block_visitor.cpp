@@ -67,6 +67,7 @@ void block_visitor::visit(const_expr::Ptr a) {}
 void block_visitor::visit(int_const::Ptr a) {}
 void block_visitor::visit(double_const::Ptr a) {}
 void block_visitor::visit(float_const::Ptr a) {}
+void block_visitor::visit(string_const::Ptr a) {}
 void block_visitor::visit(assign_expr::Ptr a) {
 	a->var1->accept(this);
 	a->expr1->accept(this);
