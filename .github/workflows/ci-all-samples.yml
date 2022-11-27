@@ -10,10 +10,8 @@ jobs:
         with:
           submodules: recursive
       - run: make -C ${{ github.workspace }} run
-      - run: make -C ${{ github.workspace }} clean
       - name: Install libunwind-dev
-        run: sudo apt-get install libunwind-dev
-      - run: make -C ${{ github.workspace }}/deps/libelfin
+        run: sudo apt-get install libunwind-dev libdwarf-dev libdwarf1
       - run: make -C ${{ github.workspace }} RECOVER_VAR_NAMES=1 run
       - run: echo "Tests completed"
   CI-Actions-MacOs:
