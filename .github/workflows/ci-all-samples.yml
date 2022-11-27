@@ -2,7 +2,7 @@ name: Test Cases
 on: [push, pull_request]
 jobs: 
   CI-Actions-Ubuntu:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - run: echo "Starting tests"
       - name: Checking out repository
@@ -11,7 +11,7 @@ jobs:
           submodules: recursive
       - run: make -C ${{ github.workspace }} run
       - name: Install libunwind-dev
-        run: sudo apt-get install libunwind-dev libdwarf-dev libdwarf1
+        run: sudo apt-get install libunwind-dev libdwarf-dev=20200114-1 libdwarf1=20200114-1
       - run: make -C ${{ github.workspace }} RECOVER_VAR_NAMES=1 run
       - run: echo "Tests completed"
   CI-Actions-MacOs:
