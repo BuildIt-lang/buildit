@@ -81,9 +81,10 @@ CFLAGS_INTERNAL+=-Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initiali
 INCLUDE_FLAGS=-I$(INCLUDE_DIR) -I$(BUILD_DIR)/gen_headers/
 
 ifeq ($(RECOVER_VAR_NAMES),1)
-LINKER_FLAGS+=-L$(DEPS_DIR)/libelfin/dwarf/ -L$(DEPS_DIR)/libelfin/elf -lunwind -l:libelf++.a -l:libdwarf++.a
+#LINKER_FLAGS+=-L$(DEPS_DIR)/libelfin/dwarf/ -L$(DEPS_DIR)/libelfin/elf -lunwind -l:libelf++.a -l:libdwarf++.a
+LINKER_FLAGS+=-ldwarf -lunwind
 CFLAGS_INTERNAL+=-DRECOVER_VAR_NAMES
-INCLUDE_FLAGS+=-I$(DEPS_DIR)/libelfin/dwarf -I$(DEPS_DIR)/libelfin/elf/
+#INCLUDE_FLAGS+=-I$(DEPS_DIR)/libelfin/dwarf -I$(DEPS_DIR)/libelfin/elf/
 ifneq ($(LIBUNWIND_PATH),_UNSET_)
 INCLUDE_FLAGS+=-I $(LIBUNWIND_PATH)/include
 LINKER_FLAGS+=-L $(LIBUNWIND_PATH)/lib
