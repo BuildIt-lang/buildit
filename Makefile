@@ -156,8 +156,6 @@ $(BUILD_DIR)/samples/%.o: $(SAMPLES_DIR)/%.cpp $(INCLUDES)
 $(LIBRARY): $(LIBRARY_OBJS)
 	ar rv $(LIBRARY) $(LIBRARY_OBJS)
 
-#$(BUILD_DIR)/lib$(LIBRARY_NAME)-d2x.a: $(LIBRARY) 
-#	libtool --tag=CXX -static -o $@ $< $(D2X_PATH)/build/libd2x.a
 
 $(BUILD_DIR)/sample%: $(BUILD_DIR)/samples/sample%.o $(LIBRARY)
 	$(CXX) -o $@ $< $(LINKER_FLAGS)

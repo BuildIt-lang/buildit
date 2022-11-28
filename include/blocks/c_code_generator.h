@@ -17,6 +17,7 @@ public:
 	c_code_generator(std::ostream &_oss) : oss(_oss) {}
 	std::ostream &oss;
 	int curr_indent = 0;
+	bool use_d2x = true;
 	virtual void visit(not_expr::Ptr);
 	virtual void visit(and_expr::Ptr);
 	virtual void visit(or_expr::Ptr);

@@ -387,7 +387,10 @@ void c_code_generator::handle_func_arg(var::Ptr a) {
 }
 void c_code_generator::visit(func_decl::Ptr a) {
 
-	oss << xctx.begin_section();
+	if (use_d2x)
+		oss << xctx.begin_section();
+	else 
+		xctx.begin_section();
 
 	a->return_type->accept(this);
 	if (a->hasMetadata<std::vector<std::string>>("attributes")) {
@@ -431,8 +434,9 @@ void c_code_generator::visit(func_decl::Ptr a) {
         	xctx.nextl();
 		curr_indent--;
 	}
-
-        xctx.emit_function_info(oss);
+	
+	if (use_d2x) 	
+        	xctx.emit_function_info(oss);
 	xctx.end_section();
 }
 void c_code_generator::visit(goto_stmt::Ptr a) { 
