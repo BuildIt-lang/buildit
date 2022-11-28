@@ -298,6 +298,7 @@ void c_code_generator::visit(while_stmt::Ptr a) {
 	a->cond->accept(this);
 	oss << ")";
 	if (isa<stmt_block>(a->body)) {
+		save_static_info(a);
 		oss << " ";
 		a->body->accept(this);
 	} else {
@@ -319,6 +320,7 @@ void c_code_generator::visit(for_stmt::Ptr a) {
 	a->update->accept(this);
 	oss << ")";
 	if (isa<stmt_block>(a->body)) {
+		save_static_info(a);
 		oss << " ";
 		a->body->accept(this);
 	} else {

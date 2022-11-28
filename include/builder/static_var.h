@@ -46,7 +46,10 @@ public:
 	void check_at_access() {
 		if (var_name == "" && name_checked == false) {
 			// This is the last attempt at recovering the variable name
+			std::string sep_save = util::member_separator;
+			util::member_separator = ".";
 			var_name = util::find_variable_name(this);
+			util::member_separator = sep_save;
 		}
 		name_checked = true;
 	}
@@ -66,19 +69,28 @@ public:
 	static_var() {
 		assert(builder_context::current_builder_context != nullptr);
 		builder_context::current_builder_context->static_var_tuples.push_back(tracking_tuple((unsigned char *)&val, sizeof(T), this));
+		std::string sep_save = util::member_separator;
+		util::member_separator = ".";
 		var_name = util::find_variable_name(this);
+		util::member_separator = sep_save;
 	}
 	static_var(const T &v) {
 		assert(builder_context::current_builder_context != nullptr);
 		builder_context::current_builder_context->static_var_tuples.push_back(tracking_tuple((unsigned char *)&val, sizeof(T), this));
 		val = v;
+		std::string sep_save = util::member_separator;
+		util::member_separator = ".";
 		var_name = util::find_variable_name(this);
+		util::member_separator = sep_save;
 	}
 	static_var(const static_var& other) {
 		assert(builder_context::current_builder_context != nullptr);
 		builder_context::current_builder_context->static_var_tuples.push_back(tracking_tuple((unsigned char *)&val, sizeof(T), this));
 		val = other.val;
+		std::string sep_save = util::member_separator;
+		util::member_separator = ".";
 		var_name = util::find_variable_name(this);
+		util::member_separator = sep_save;
 	}
 	~static_var() {
 		assert(builder_context::current_builder_context != nullptr);

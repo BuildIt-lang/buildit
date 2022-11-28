@@ -3,6 +3,7 @@
 #include <string>
 namespace util {
 std::string find_variable_name(void*);
+extern std::string member_separator;
 }
 
 #endif
