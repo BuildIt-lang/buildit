@@ -406,3 +406,17 @@ std::string find_variable_name(void* addr) {
 }
 }
 #endif
+
+namespace util {
+static std::map<std::string, std::string> tag_var_name_map;
+std::string find_variable_name_cached(void* addr, std::string tag_string) {
+	if (tag_var_name_map.find(tag_string) != tag_var_name_map.end()) {
+		return tag_var_name_map[tag_string];
+	}
+	
+	std::string ret = find_variable_name(addr);
+	if (ret != "")
+		tag_var_name_map[tag_string] = ret;
+	return ret;
+}
+}
