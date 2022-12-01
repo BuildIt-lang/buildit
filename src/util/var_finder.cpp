@@ -1,6 +1,7 @@
 #include "util/var_finder.h"
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
+#include <map>
 
 #ifdef RECOVER_VAR_NAMES
 #define UNW_LOCAL_ONLY
