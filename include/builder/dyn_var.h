@@ -87,6 +87,9 @@ public:
 	BT operator[] (const BT &a) {
 		return ((BT) *this)[a];
 	}
+	BT operator* (void) {
+		return ((BT) *this)[0];
+	}
 	BT operator=(const BT &a) {
 		return (BT)*this = a;
 	}

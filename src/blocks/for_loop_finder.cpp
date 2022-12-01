@@ -1,10 +1,15 @@
 #include "blocks/for_loop_finder.h"
 
 namespace block {
-static bool is_update(var::Ptr decl_var, stmt::Ptr last_stmt) {
-	if (!isa<expr_stmt>(last_stmt))
-		return false;
-	expr::Ptr last_stmt_expr = to<expr_stmt>(last_stmt)->expr1;
+
+static bool is_update_expr(var::Ptr decl_var, expr::Ptr last_stmt_expr) {
+
+	if (isa<minus_expr>(last_stmt_expr)) {
+		// This is to allow statements like (a = a + 1) - 1;	
+		minus_expr::Ptr mexpr = to<minus_expr>(last_stmt_expr);
+		return is_update_expr(decl_var, mexpr->expr1);
+	}
+
 	if (!isa<assign_expr>(last_stmt_expr))
 		return false;
 	assign_expr::Ptr update_expr = to<assign_expr>(last_stmt_expr);
@@ -22,6 +27,16 @@ static bool is_update(var::Ptr decl_var, stmt::Ptr last_stmt) {
 	if (decl_var != lhs_expr->var1)
 		return false;
 	return true;
+}
+
+
+static bool is_update(var::Ptr decl_var, stmt::Ptr last_stmt) {
+	if (!isa<expr_stmt>(last_stmt))
+		return false;
+	expr::Ptr last_stmt_expr = to<expr_stmt>(last_stmt)->expr1;
+
+	return is_update_expr(decl_var, last_stmt_expr);
+
 }
 static bool is_last_update(var::Ptr decl_var, stmt_block::Ptr block,
 			   std::vector<stmt_block::Ptr> &parents) {
@@ -109,8 +124,11 @@ void for_loop_finder::visit(stmt_block::Ptr a) {
 				stmt_block::Ptr loop_body = to<stmt_block>(loop->body);
 				if (loop_body->stmts.size() < 1)
 					continue;
+
+				
 				if (!is_last_update(init_var, loop_body, parents))
 					continue;
+				
 /*
 				if (parents.size() == 0)
 					continue;

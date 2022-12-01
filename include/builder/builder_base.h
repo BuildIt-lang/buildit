@@ -204,6 +204,9 @@ public:
 		ret_builder.block_expr = expr;
 		return ret_builder;
 	}
+	BT operator* (void) {
+		return (*this)[0];
+	}
 
 	BT assign(const BT& a) {
 		if (builder_precheck())
