@@ -140,7 +140,8 @@ void c_code_generator::visit(pointer_type::Ptr type) {
 }
 void c_code_generator::visit(array_type::Ptr type) {
 	if (!isa<scalar_type>(type->element_type) &&
-	    !isa<pointer_type>(type->element_type))
+	    !isa<pointer_type>(type->element_type) &&
+	    !isa<named_type>(type->element_type))
 		assert(false &&
 		       "Printing arrays of complex type is not supported yet");
 	type->element_type->accept(this);
@@ -168,7 +169,8 @@ static void print_array_decl(std::ostream &oss, array_type::Ptr atype, var::Ptr 
 
 	if (isa<array_type>(atype->element_type))
 		print_array_decl(oss, to<array_type>(atype->element_type), decl_var, self, append);
-	else if (isa<scalar_type>(atype->element_type) || isa<pointer_type>(atype->element_type)) {
+	else if (isa<scalar_type>(atype->element_type) || isa<pointer_type>(atype->element_type) 
+			|| isa<named_type>(atype->element_type)) {
 		atype->element_type->accept(self);	
 		if (decl_var->hasMetadata<std::vector<std::string>>("attributes")) {
 			const auto &attributes = decl_var->getMetadata<std::vector<std::string>>("attributes");
