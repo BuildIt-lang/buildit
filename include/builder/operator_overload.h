@@ -141,6 +141,47 @@ typename return_type_helper<T>::type operator&(const T &a) {
 
 
 
+// Helper operators only! These do no produce any special block operators. 
+
+// Prefix increment
+template <typename T>
+typename return_type_helper<T>::type operator++(T &a) {
+	return (a = a + 1);
+}
+// Postfix increment
+template <typename T>
+typename return_type_helper<T>::type operator++(T &a, int) {
+	return ((a = a + 1) - 1);
+}
+// Prefix decrement
+template <typename T>
+typename return_type_helper<T>::type operator--(T &a) {
+	return (a = a - 1);
+}
+// Postfix increment
+template <typename T>
+typename return_type_helper<T>::type operator--(T &a, int) {
+	return ((a = a - 1) + 1);
+}
+
+template <typename T1, typename T2>
+typename allowed_builder_return<typename std::remove_reference<T1>::type, T2>::type operator += (T1 &&a, const T2 &b) {
+	return (a = a + b);
+}
+template <typename T1, typename T2>
+typename allowed_builder_return<typename std::remove_reference<T1>::type, T2>::type operator -= (T1 &&a, const T2 &b) {
+	return (a = a - b);
+}
+template <typename T1, typename T2>
+typename allowed_builder_return<typename std::remove_reference<T1>::type, T2>::type operator *= (T1 &&a, const T2 &b) {
+	return (a = a * b);
+}
+template <typename T1, typename T2>
+typename allowed_builder_return<typename std::remove_reference<T1>::type, T2>::type operator /= (T1 &&a, const T2 &b) {
+	return (a = a / b);
+}
+
+
 }
 
 #endif
