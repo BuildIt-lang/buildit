@@ -147,9 +147,9 @@ public:
 		builder_context::current_builder_context->commit_uncommitted();
 		block::var::Ptr dyn_var = std::make_shared<block::var>();
 		dyn_var->var_type = create_block_type();
-		dyn_var->preferred_name = util::find_variable_name(this);
-		block_var = dyn_var;
 		tracer::tag offset = get_offset_in_function();
+		dyn_var->preferred_name = util::find_variable_name_cached(this, offset.stringify());
+		block_var = dyn_var;
 		dyn_var->static_offset = offset;
 		block_decl_stmt = nullptr;
 		if (builder_context::current_builder_context->bool_vector.size() > 0)
