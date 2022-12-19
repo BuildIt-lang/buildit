@@ -92,7 +92,7 @@ INCLUDE_FLAGS=-I$(INCLUDE_DIR) -I$(BUILD_DIR)/gen_headers/
 
 ifeq ($(RECOVER_VAR_NAMES),1)
 CFLAGS_INTERNAL+=-DRECOVER_VAR_NAMES
-LINKER_FLAGS+=-ldwarf -lunwind
+LINKER_FLAGS+=-ldwarf -lelf -lunwind
 ifneq ($(LIBUNWIND_PATH),_UNSET_)
 INCLUDE_FLAGS+=-I $(LIBUNWIND_PATH)/include
 LINKER_FLAGS+=-L $(LIBUNWIND_PATH)/lib
@@ -110,7 +110,7 @@ endif
 endif
 
 ifeq ($(D2X_DEBUGGING),1)
-LINKER_FLAGS+=-L$(D2X_PATH)/build -ldwarf
+LINKER_FLAGS+=-L$(D2X_PATH)/build -ldwarf -lelf
 CFLAGS_INTERNAL+=-DD2X_DEBUGGING
 INCLUDE_FLAGS+=-I$(D2X_PATH)/include
 endif
