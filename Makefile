@@ -69,15 +69,15 @@ INCLUDE_FLAGS=
 
 
 ifeq ($(DEBUG),1)
-CFLAGS+=-g
+CFLAGS+=-g -gdwarf-4
 ifneq ($(D2X_DEBUGGING),1)
-LINKER_FLAGS+=-l$(LIBRARY_NAME) -g
+LINKER_FLAGS+=-l$(LIBRARY_NAME) -g -gdwarf-4
 else
-LINKER_FLAGS+=-Wl,--start-group -l$(LIBRARY_NAME) -ld2x -Wl,--end-group -g
+LINKER_FLAGS+=-Wl,--start-group -l$(LIBRARY_NAME) -ld2x -Wl,--end-group -g -gdwarf-4
 endif
 else
 CFLAGS_INTERNAL+=-O3
-LINKER_FLAGS+=-l$(LIBRARY_NAME) -g
+LINKER_FLAGS+=-l$(LIBRARY_NAME) -g -gdwarf-4
 endif
 
 ifeq ($(TRACER_USE_LIBUNWIND),1)
