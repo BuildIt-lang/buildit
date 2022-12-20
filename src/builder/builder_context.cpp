@@ -277,11 +277,8 @@ block::stmt::Ptr builder_context::extract_ast_from_lambda(std::function<void(voi
 block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 	std::vector<bool> b;
 	block::stmt::Ptr ast = extract_ast_from_function_internal(b);
-
-	block::var_namer namer;
-	namer.ast = ast;
-	ast->accept(&namer);
-	namer.finalize_hoists(ast);
+	
+	block::var_namer::name_vars(ast);
 
 	block::label_collector collector;
 	ast->accept(&collector);

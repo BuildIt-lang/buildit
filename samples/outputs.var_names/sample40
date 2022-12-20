@@ -1,7 +1,7 @@
 #include <string.h>
 int match_re (char* arg1) {
-  int var3;
   int var5;
+  int var3;
   int str_len_1 = strlen(arg1);
   int to_match_2 = 0;
   if (to_match_2 < str_len_1) {
