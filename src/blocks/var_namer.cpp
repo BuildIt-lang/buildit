@@ -1,5 +1,5 @@
 #include "blocks/var_namer.h"
-
+#include <algorithm>
 namespace block {
 
 void var_namer::visit(decl_stmt::Ptr stmt) {
@@ -7,6 +7,8 @@ void var_namer::visit(decl_stmt::Ptr stmt) {
 	if (collected_decls.find(so) != collected_decls.end()) {
 		// This decl has been seen before, and needs to be marked for hoisting
 		decls_to_hoist[so] = stmt;
+		if (std::find(decl_tags_to_hoist.begin(), decl_tags_to_hoist.end(), so) == decl_tags_to_hoist.end()) 
+			decl_tags_to_hoist.push_back(so);
 		// Also make the replacement now
 		stmt->decl_var = collected_decls[so];
 		return;
@@ -72,8 +74,8 @@ void var_namer::name_vars(block::Ptr a) {
 
 	std::vector<stmt::Ptr> new_stmts;
 	// Now insert all the hoisted decls at the top
-	for (auto it = namer.decls_to_hoist.begin(); it != namer.decls_to_hoist.end(); it++) {
-		auto stmt = it->second;
+	for (auto dt: namer.decl_tags_to_hoist) {
+		auto stmt = namer.decls_to_hoist[dt];
 		stmt->init_expr = nullptr;	
 		new_stmts.push_back(stmt);
 	}

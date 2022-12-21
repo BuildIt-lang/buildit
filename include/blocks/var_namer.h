@@ -14,7 +14,7 @@ public:
 	int var_counter = 0;
 	std::map<std::string, var::Ptr> collected_decls;
 	std::map<std::string, decl_stmt::Ptr> decls_to_hoist;
-
+	std::vector<std::string> decl_tags_to_hoist;
 	virtual void visit(decl_stmt::Ptr) override;
 
 	static void name_vars(block::Ptr ast);
