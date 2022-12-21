@@ -274,14 +274,12 @@ block::stmt::Ptr builder_context::extract_ast_from_lambda(std::function<void(voi
 	internal_stored_lambda = lambda;
 	return extract_ast_from_function_impl();
 }
+
 block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 	std::vector<bool> b;
-	block::stmt::Ptr ast = extract_ast_from_function_internal(b);
 
-	block::var_namer namer;
-	namer.ast = ast;
-	ast->accept(&namer);
-	namer.finalize_hoists(ast);
+	block::stmt::Ptr ast = extract_ast_from_function_internal(b);
+	block::var_namer::name_vars(ast);	
 
 	block::label_collector collector;
 	ast->accept(&collector);
@@ -294,8 +292,9 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 	inserter.offset_to_label = creator.offset_to_label;
 	ast->accept(&inserter);
 
-	if (run_rce)
+	if (run_rce) {
 		block::eliminate_redundant_vars(ast);
+	}
 
 	if (feature_unstructured) 
 		return ast;
@@ -313,6 +312,7 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 
 	block::loop_roll_finder loop_roll_finder;
 	ast->accept(&loop_roll_finder);
+
 
 	return ast;
 }
