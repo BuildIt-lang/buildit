@@ -78,9 +78,17 @@ public:
 	std::string preferred_name;
 	type::Ptr var_type;
 	virtual bool is_same(block::Ptr other) override {
-		if (static_offset != other->static_offset)
-			return false;
 		if (!isa<var>(other))
+			return false;
+	
+		// It is important to check static tags for variables instead of 
+		// names because this happens during extraction
+		// Also names are dependent on static tags, so it should be fine
+		
+		// We also don't need to check if the type is the same, if the tags 
+		// are the same, the types should be the same. 
+		// Checking static_offset here should not mess with pattern matchers
+		if (static_offset != other->static_offset)
 			return false;
 		return true;
 	}

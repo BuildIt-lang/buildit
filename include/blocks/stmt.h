@@ -11,8 +11,6 @@ public:
 	virtual void accept(block_visitor *a) override { a->visit(self<stmt>()); }
 
 	virtual bool is_same(block::Ptr other) override {
-		if (static_offset != other->static_offset)
-			return false;
 		if (!isa<stmt>(other))
 			return false;
 		return true;
@@ -28,8 +26,6 @@ public:
 	expr::Ptr expr1;
 
 	virtual bool is_same(block::Ptr other) override {
-		if (static_offset != other->static_offset)
-			return false;
 		if (!isa<expr_stmt>(other))
 			return false;
 		expr_stmt::Ptr other_stmt = to<expr_stmt>(other);
@@ -47,8 +43,6 @@ public:
 
 	std::vector<stmt::Ptr> stmts;
 	virtual bool is_same(block::Ptr other) override {
-		if (static_offset != other->static_offset)
-			return false;
 		if (!isa<stmt_block>(other))
 			return false;
 		stmt_block::Ptr other_stmt = to<stmt_block>(other);
@@ -73,8 +67,6 @@ public:
 	// Optional initialization
 	expr::Ptr init_expr = nullptr;
 	virtual bool is_same(block::Ptr other) override {
-		if (static_offset != other->static_offset)
-			return false;
 		if (!isa<decl_stmt>(other))
 			return false;
 		decl_stmt::Ptr other_stmt = to<decl_stmt>(other);
@@ -102,8 +94,6 @@ public:
 	stmt::Ptr then_stmt;
 	stmt::Ptr else_stmt;
 	virtual bool is_same(block::Ptr other) override {
-		if (static_offset != other->static_offset)
-			return false;
 		if (!isa<if_stmt>(other))
 			return false;
 		if_stmt::Ptr other_stmt = to<if_stmt>(other);
@@ -136,8 +126,6 @@ public:
 	std::string label_name;
 	virtual void accept(block_visitor *a) override { a->visit(self<label>()); }
 	virtual bool is_same(block::Ptr other) override {
-		if (static_offset != other->static_offset)
-			return false;
 		if (!isa<label>(other))
 			return false;
 		label::Ptr other_stmt = to<label>(other);
@@ -154,8 +142,6 @@ public:
 
 	label::Ptr label1;
 	virtual bool is_same(block::Ptr other) override {
-		if (static_offset != other->static_offset)
-			return false;
 		if (!isa<label_stmt>(other))
 			return false;
 		label_stmt::Ptr other_stmt = to<label_stmt>(other);
@@ -174,8 +160,6 @@ public:
 	tracer::tag temporary_label_number;
 
 	virtual bool is_same(block::Ptr other) override {
-		if (static_offset != other->static_offset)
-			return false;
 		if (!isa<goto_stmt>(other))
 			return false;
 		goto_stmt::Ptr other_stmt = to<goto_stmt>(other);
@@ -202,8 +186,6 @@ public:
 	// Extra metadata
 	std::vector<stmt_block::Ptr> continue_blocks;
 	virtual bool is_same(block::Ptr other) override {
-		if (static_offset != other->static_offset)
-			return false;
 		if (!isa<while_stmt>(other))
 			return false;
 		while_stmt::Ptr other_stmt = to<while_stmt>(other);
@@ -225,8 +207,6 @@ public:
 	stmt::Ptr body;
 
 	virtual bool is_same(block::Ptr other) override {
-		if (static_offset != other->static_offset)
-			return false;
 		if (!isa<for_stmt>(other))
 			return false;
 		for_stmt::Ptr other_stmt = to<for_stmt>(other);
@@ -301,8 +281,6 @@ public:
 	expr::Ptr return_val;
 
 	virtual bool is_same(block::Ptr other) override {
-		if (static_offset != other->static_offset)
-			return false;
 		return_stmt::Ptr other_stmt = to<return_stmt>(other);
 		if (!return_val->is_same(other_stmt->return_val))
 			return false;
