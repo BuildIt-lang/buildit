@@ -22,8 +22,6 @@ bool binary_is_same(std::shared_ptr<T> first, block::Ptr other);
 
 template <typename T>
 bool unary_is_same(std::shared_ptr<T> first, block::Ptr other) {
-	if (first->static_offset != other->static_offset)
-		return false;
 	if (!isa<unary_expr>(other))
 		return false;
 	typename T::Ptr other_expr = to<T>(other);
@@ -33,8 +31,6 @@ bool unary_is_same(std::shared_ptr<T> first, block::Ptr other) {
 }
 template <typename T>
 bool binary_is_same(std::shared_ptr<T> first, block::Ptr second) {
-	if (first->static_offset != second->static_offset)
-		return false;
 	if (!isa<T>(second))
 		return false;
 	typename T::Ptr other_expr = to<T>(second);
@@ -180,8 +176,6 @@ public:
 
 	var::Ptr var1;
 	virtual bool is_same(block::Ptr other) override {
-		if (static_offset != other->static_offset)
-			return false;
 		if (!isa<var_expr>(other))
 			return false;
 		var_expr::Ptr other_expr = to<var_expr>(other);
@@ -198,8 +192,6 @@ public:
 	virtual void accept(block_visitor *a) override { a->visit(self<const_expr>()); }
 
 	virtual bool is_same(block::Ptr other) override {
-		if (static_offset != other->static_offset)
-			return false;
 		if (!isa<const_expr>(other))
 			return false;
 		return true;
@@ -215,8 +207,6 @@ public:
 	long long value;
 
 	virtual bool is_same(block::Ptr other) override {
-		if (static_offset != other->static_offset)
-			return false;
 		if (!isa<int_const>(other))
 			return false;
 		int_const::Ptr other_expr = to<int_const>(other);
@@ -234,8 +224,6 @@ public:
 	double value;
 
 	virtual bool is_same(block::Ptr other) override {
-		if (static_offset != other->static_offset)
-			return false;
 		if (!isa<double_const>(other))
 			return false;
 		double_const::Ptr other_expr = to<double_const>(other);
@@ -253,8 +241,6 @@ public:
 	float value;
 
 	virtual bool is_same(block::Ptr other) override {
-		if (static_offset != other->static_offset)
-			return false;
 		if (!isa<float_const>(other))
 			return false;
 		float_const::Ptr other_expr = to<float_const>(other);
@@ -273,8 +259,6 @@ public:
 	std::string value;
 	
 	virtual bool is_same(block::Ptr other) override {
-		if (static_offset != other->static_offset)
-			return false;
 		if (!isa<string_const>(other))
 			return false;
 		string_const::Ptr other_expr = to<string_const>(other);
@@ -294,8 +278,6 @@ public:
 	expr::Ptr expr1;
 
 	virtual bool is_same(block::Ptr other) override {
-		if (static_offset != other->static_offset)
-			return false;
 		if (!isa<assign_expr>(other))
 			return false;
 		assign_expr::Ptr other_expr = to<assign_expr>(other);
@@ -315,8 +297,6 @@ public:
 	expr::Ptr index;
 
 	virtual bool is_same(block::Ptr other) override {
-		if (static_offset != other->static_offset)
-			return false;
 		if (!isa<sq_bkt_expr>(other))
 			return false;
 		sq_bkt_expr::Ptr other_expr = to<sq_bkt_expr>(other);
@@ -337,8 +317,6 @@ public:
 	std::vector<expr::Ptr> args;
 
 	virtual bool is_same(block::Ptr other) override {
-		if (static_offset != other->static_offset)
-			return false;
 		if (!isa<function_call_expr>(other))
 			return false;
 		function_call_expr::Ptr other_expr = to<function_call_expr>(other);
@@ -362,8 +340,6 @@ public:
 
 	std::vector<expr::Ptr> elems;
 	virtual bool is_same(block::Ptr other) override {
-		if (static_offset != other->static_offset)
-			return false;
 		if (!isa<initializer_list_expr>(other))
 			return false;
 		initializer_list_expr::Ptr other_expr = to<initializer_list_expr>(other);
@@ -405,8 +381,6 @@ public:
 
 	T inner_expr;
 	virtual bool is_same(block::Ptr other) override {
-		if (static_offset != other->static_offset)
-			return false;
 		if (!isa<foreign_expr<T>>(other))
 			return false;
 		foreign_expr<T>::Ptr other_expr = to<foreign_expr>(other);
@@ -429,8 +403,6 @@ public:
 		a->visit(self<member_access_expr>());
 	}
 	virtual bool is_same(block::Ptr other) override {
-		if (static_offset != other->static_offset) 
-			return false;
 		if (!isa<member_access_expr>(other))
 			return false;
 		member_access_expr::Ptr other_expr = to<member_access_expr>(other);
@@ -452,8 +424,6 @@ public:
 		a->visit(self<addr_of_expr>());
 	}
 	virtual bool is_same(block::Ptr other) override {
-		if (static_offset != other->static_offset) 
-			return false;
 		if (!isa<addr_of_expr>(other))
 			return false;
 		addr_of_expr::Ptr other_expr = to<addr_of_expr>(other);
