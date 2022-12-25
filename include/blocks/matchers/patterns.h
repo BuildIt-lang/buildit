@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 namespace block {
-namespace pattern {
+namespace matcher {
 
 struct pattern: public std::enable_shared_from_this<pattern> {
 	enum class node_type {
@@ -51,7 +51,6 @@ struct pattern: public std::enable_shared_from_this<pattern> {
 		foreign_expr_base,
 		member_access_expr,
 		addr_of_expr,
-		
 		var,
 		// types will probably be never used in matching, but we will keep them
 		type,

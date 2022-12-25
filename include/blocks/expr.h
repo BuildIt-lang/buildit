@@ -414,10 +414,8 @@ public:
 	}	
 };
 
-class addr_of_expr: public expr {
-public:
-	expr::Ptr expr1;
-	
+class addr_of_expr: public unary_expr {
+public:	
 	typedef std::shared_ptr<addr_of_expr> Ptr;
 	virtual void dump(std::ostream &oss, int) override;
 	virtual void accept(block_visitor * a) override {
