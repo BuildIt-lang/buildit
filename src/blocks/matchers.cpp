@@ -127,14 +127,33 @@ bool check_match(std::shared_ptr<pattern> p, block::Ptr node, std::map<std::stri
 			break;
 		case pattern::node_type::int_const:
 			if (!isa<::block::int_const>(node)) return false;
-			// For now we won't check the value of the constant 
+			if (p->has_const) {
+				long long val = to<::block::int_const>(node)->value;
+				if (p->const_val_int != val) 
+					return false;
+			}
 			break;
 		case pattern::node_type::double_const:
 		case pattern::node_type::float_const:
 			if (!isa<::block::double_const>(node) && !isa<::block::float_const>(node)) return false;
+			if (p->has_const) {
+				double val;
+				if (isa<::block::double_const>(node))
+					val = to<::block::int_const>(node)->value;
+				else 
+					val = to<::block::float_const>(node)->value;
+
+				if (p->const_val_double != val) 
+					return false;
+			}
 			break;
 		case pattern::node_type::string_const:
 			if (!isa<::block::string_const>(node)) return false;
+			if (p->has_const) {
+				std::string val = to<::block::string_const>(node)->value;
+				if (p->const_val_string != val) 
+					return false;
+			}
 			break;
 		case pattern::node_type::sq_bkt_expr:
 			if (!isa<::block::sq_bkt_expr>(node)) return false;

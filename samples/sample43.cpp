@@ -1,4 +1,3 @@
-/*NO_TEST*/
 #include "blocks/matchers/patterns.h"
 #include "blocks/matchers/matchers.h"
 #include "builder/builder_context.h"
@@ -15,13 +14,15 @@ static void foo(void) {
 	// this should not be matched
 	dyn_var<int> y = 0;
 	y = x + 1;
+	dyn_var<int> z = 0;
+	z = z + 2;
 }
 
 int main(int argc, char* argv[]) {
 	builder::builder_context context;
 	auto ast = context.extract_function_ast(foo, "foo");
 
-	auto p = assign_expr(var("a"), plus_expr(var("a"), int_const()));
+	auto p = assign_expr(var("a"), binary_expr(var("a"), int_const(1)));
 	auto matches = find_all_matches(p, ast);
 	std::cout << "Found " << matches.size() << " matches" << std::endl;
 	std::cout << "-----" << std::endl;

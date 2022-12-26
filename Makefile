@@ -8,7 +8,7 @@ SAMPLES_DIR=$(BASE_DIR)/samples
 DEPS_DIR=$(BASE_DIR)/deps
 SAMPLES_SRCS=$(wildcard $(SAMPLES_DIR)/*.cpp)
 SAMPLES=$(subst $(SAMPLES_DIR),$(BUILD_DIR),$(SAMPLES_SRCS:.cpp=))
-INCLUDES=$(wildcard $(INCLUDE_DIR)/*.h) $(wildcard $(INCLUDE_DIR)/*/*.h) $(BUILD_DIR)/gen_headers/gen/compiler_headers.h
+INCLUDES=$(wildcard $(INCLUDE_DIR)/*.h) $(wildcard $(INCLUDE_DIR)/*/*.h) $(wildcard $(INCLUDE_DIR)/*/*/*.h) $(BUILD_DIR)/gen_headers/gen/compiler_headers.h
 
 
 RECOVER_VAR_NAMES ?= 0

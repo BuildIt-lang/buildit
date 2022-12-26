@@ -1,0 +1,10 @@
+Found 1 matches
+-----
+ASSIGN_EXPR
+  VAR_EXPR
+    VAR (x_0)
+  PLUS_EXPR
+    VAR_EXPR
+      VAR (x_0)
+    INT_CONST (1)
+-----

@@ -7,6 +7,7 @@ namespace block {
 namespace matcher {
 
 struct pattern: public std::enable_shared_from_this<pattern> {
+	typedef std::shared_ptr<pattern> Ptr;
 	enum class node_type {
 		block,
 		expr,
@@ -66,241 +67,281 @@ struct pattern: public std::enable_shared_from_this<pattern> {
 	};
 	node_type type;
 	std::string name;
-	std::vector<std::shared_ptr<pattern>> children;
-
+	std::vector<pattern::Ptr> children;
+	// Extra fields that can be supplied to be matched
+	bool has_const = false;
+	double const_val_double = 0;
+	int const_val_int = 0;
+	std::string const_val_string = "";
+	
 	// Constructor that assigns a name
-	template <typename...Args>
-	pattern(node_type t, const char* _name, Args...args): children{args...} {
-		name = _name;
-		type = t;
-	}	
-	template <typename...Args>
-	pattern(node_type t, const std::string& _name, Args...args): children{args...} {
-		name = _name;
-		type = t;
-	}
-	// Constructor that doesn't assign a name
-	template <typename...Args>
-	pattern(node_type t, Args...args): children{args...} {
-		name = "";
-		type = t;
-	}
+
+	pattern(node_type t, std::string _name, std::vector<pattern::Ptr> _children)
+		: type (t), name(_name), children(_children) {}
+	pattern(node_type t, std::string _name): type(t), name(_name), children({}) {}
+
 };
 // The helper functions to create nodes
+static inline pattern::Ptr block(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::block, name);
+}
+static inline pattern::Ptr expr(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::expr, name);
+}
+static inline pattern::Ptr unary_expr(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::unary_expr, name);
+}
+static inline pattern::Ptr unary_expr(pattern::Ptr x, std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::unary_expr, name, std::vector<pattern::Ptr>({x}));
+}
+static inline pattern::Ptr binary_expr(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::binary_expr, name);
+}
+static inline pattern::Ptr binary_expr(pattern::Ptr x, pattern::Ptr y, std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::binary_expr, name, std::vector<pattern::Ptr>({x, y}));
+}
+static inline pattern::Ptr not_expr(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::not_expr, name);
+}
+static inline pattern::Ptr not_expr(pattern::Ptr x, std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::not_expr, name, std::vector<pattern::Ptr>({x}));
+}
+static inline pattern::Ptr and_expr(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::and_expr, name);
+}
+static inline pattern::Ptr or_expr(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::or_expr, name);
+}
+static inline pattern::Ptr plus_expr(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::plus_expr, name);
+}
+static inline pattern::Ptr minus_expr(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::minus_expr, name);
+}
+static inline pattern::Ptr mul_expr(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::mul_expr, name);
+}
+static inline pattern::Ptr div_expr(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::div_expr, name);
+}
+static inline pattern::Ptr lt_expr(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::lt_expr, name);
+}
+static inline pattern::Ptr gt_expr(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::gt_expr, name);
+}
+static inline pattern::Ptr lte_expr(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::lte_expr, name);
+}
+static inline pattern::Ptr gte_expr(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::gte_expr, name);
+}
+static inline pattern::Ptr equals_expr(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::equals_expr, name);
+}
+static inline pattern::Ptr ne_expr(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::ne_expr, name);
+}
+static inline pattern::Ptr mod_expr(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::mod_expr, name);
+}
+static inline pattern::Ptr and_expr(pattern::Ptr x, pattern::Ptr y, std::string name = "") {
 
-template <typename...Args>
-std::shared_ptr<pattern> block(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::block, args...);
+	return std::make_shared<pattern>(pattern::node_type::and_expr, name, std::vector<pattern::Ptr>({x, y}));
 }
-template <typename...Args>
-std::shared_ptr<pattern> expr(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::expr, args...);
+static inline pattern::Ptr or_expr(pattern::Ptr x, pattern::Ptr y, std::string name = "") {
+
+	return std::make_shared<pattern>(pattern::node_type::or_expr, name, std::vector<pattern::Ptr>({x, y}));
 }
-template <typename...Args>
-std::shared_ptr<pattern> unary_expr(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::unary_expr, args...);
+static inline pattern::Ptr plus_expr(pattern::Ptr x, pattern::Ptr y, std::string name = "") {
+
+	return std::make_shared<pattern>(pattern::node_type::plus_expr, name, std::vector<pattern::Ptr>({x, y}));
 }
-template <typename...Args>
-std::shared_ptr<pattern> binary_expr(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::binary_expr, args...);
+static inline pattern::Ptr minus_expr(pattern::Ptr x, pattern::Ptr y, std::string name = "") {
+
+	return std::make_shared<pattern>(pattern::node_type::minus_expr, name, std::vector<pattern::Ptr>({x, y}));
 }
-template <typename...Args>
-std::shared_ptr<pattern> not_expr(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::not_expr, args...);
+static inline pattern::Ptr mul_expr(pattern::Ptr x, pattern::Ptr y, std::string name = "") {
+
+	return std::make_shared<pattern>(pattern::node_type::mul_expr, name, std::vector<pattern::Ptr>({x, y}));
 }
-template <typename...Args>
-std::shared_ptr<pattern> and_expr(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::and_expr, args...);
+static inline pattern::Ptr div_expr(pattern::Ptr x, pattern::Ptr y, std::string name = "") {
+
+	return std::make_shared<pattern>(pattern::node_type::div_expr, name, std::vector<pattern::Ptr>({x, y}));
 }
-template <typename...Args>
-std::shared_ptr<pattern> or_expr(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::or_expr, args...);
+static inline pattern::Ptr lt_expr(pattern::Ptr x, pattern::Ptr y, std::string name = "") {
+
+	return std::make_shared<pattern>(pattern::node_type::lt_expr, name, std::vector<pattern::Ptr>({x, y}));
 }
-template <typename...Args>
-std::shared_ptr<pattern> plus_expr(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::plus_expr, args...);
+static inline pattern::Ptr gt_expr(pattern::Ptr x, pattern::Ptr y, std::string name = "") {
+
+	return std::make_shared<pattern>(pattern::node_type::gt_expr, name, std::vector<pattern::Ptr>({x, y}));
 }
-template <typename...Args>
-std::shared_ptr<pattern> minus_expr(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::minus_expr, args...);
+static inline pattern::Ptr lte_expr(pattern::Ptr x, pattern::Ptr y, std::string name = "") {
+
+	return std::make_shared<pattern>(pattern::node_type::lte_expr, name, std::vector<pattern::Ptr>({x, y}));
 }
-template <typename...Args>
-std::shared_ptr<pattern> mul_expr(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::mul_expr, args...);
+static inline pattern::Ptr gte_expr(pattern::Ptr x, pattern::Ptr y, std::string name = "") {
+
+	return std::make_shared<pattern>(pattern::node_type::gte_expr, name, std::vector<pattern::Ptr>({x, y}));
 }
-template <typename...Args>
-std::shared_ptr<pattern> div_expr(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::div_expr, args...);
+static inline pattern::Ptr equals_expr(pattern::Ptr x, pattern::Ptr y, std::string name = "") {
+
+	return std::make_shared<pattern>(pattern::node_type::equals_expr, name, std::vector<pattern::Ptr>({x, y}));
 }
-template <typename...Args>
-std::shared_ptr<pattern> lt_expr(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::lt_expr, args...);
+static inline pattern::Ptr ne_expr(pattern::Ptr x, pattern::Ptr y, std::string name = "") {
+
+	return std::make_shared<pattern>(pattern::node_type::ne_expr, name, std::vector<pattern::Ptr>({x, y}));
 }
-template <typename...Args>
-std::shared_ptr<pattern> gt_expr(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::gt_expr, args...);
+static inline pattern::Ptr mod_expr(pattern::Ptr x, pattern::Ptr y, std::string name = "") {
+
+	return std::make_shared<pattern>(pattern::node_type::mod_expr, name, std::vector<pattern::Ptr>({x, y}));
 }
-template <typename...Args>
-std::shared_ptr<pattern> lte_expr(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::lte_expr, args...);
+static inline pattern::Ptr assign_expr(pattern::Ptr x, pattern::Ptr y, std::string name = "") {
+
+	return std::make_shared<pattern>(pattern::node_type::assign_expr, name, std::vector<pattern::Ptr>({x, y}));
 }
-template <typename...Args>
-std::shared_ptr<pattern> gte_expr(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::gte_expr, args...);
+static inline pattern::Ptr sq_bkt_expr(pattern::Ptr x, pattern::Ptr y, std::string name = "") {
+
+	return std::make_shared<pattern>(pattern::node_type::sq_bkt_expr, name, std::vector<pattern::Ptr>({x, y}));
 }
-template <typename...Args>
-std::shared_ptr<pattern> equals_expr(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::equals_expr, args...);
+static inline pattern::Ptr var_expr(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::var_expr, name);
 }
-template <typename...Args>
-std::shared_ptr<pattern> ne_expr(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::ne_expr, args...);
+static inline pattern::Ptr const_expr(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::const_expr, name);
 }
-template <typename...Args>
-std::shared_ptr<pattern> mod_expr(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::mod_expr, args...);
+static inline pattern::Ptr int_const(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::int_const, name);
 }
-template <typename...Args>
-std::shared_ptr<pattern> var_expr(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::var_expr, args...);
+static inline pattern::Ptr int_const(const int val, std::string name = "") {
+	auto p = std::make_shared<pattern>(pattern::node_type::int_const, name);
+	p->has_const = true;
+	p->const_val_int = val;
+	return p;
 }
-template <typename...Args>
-std::shared_ptr<pattern> const_expr(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::const_expr, args...);
+static inline pattern::Ptr double_const(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::double_const, name);
 }
-template <typename...Args>
-std::shared_ptr<pattern> int_const(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::int_const, args...);
+static inline pattern::Ptr double_const(const double val, std::string name = "") {
+	auto p = std::make_shared<pattern>(pattern::node_type::double_const, name);
+	p->has_const = true;
+	p->const_val_double = val;
+	return p;
 }
-template <typename...Args>
-std::shared_ptr<pattern> double_const(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::double_const, args...);
+static inline pattern::Ptr float_const(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::float_const, name);
 }
-template <typename...Args>
-std::shared_ptr<pattern> float_const(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::float_const, args...);
+static inline pattern::Ptr float_const(const double val, std::string name = "") {
+	auto p = std::make_shared<pattern>(pattern::node_type::float_const, name);
+	p->has_const = true;
+	p->const_val_double = val;
+	return p;
 }
-template <typename...Args>
-std::shared_ptr<pattern> string_const(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::string_const, args...);
+static inline pattern::Ptr string_const(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::string_const, name);
 }
-template <typename...Args>
-std::shared_ptr<pattern> assign_expr(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::assign_expr, args...);
+// string_const constructor needs a special name so that the value doesn't mix up with names
+static inline pattern::Ptr string_const_with_val(std::string val, std::string name = "") {
+	auto p = std::make_shared<pattern>(pattern::node_type::string_const, name);
+	p->has_const = true;
+	p->const_val_string = val;
+	return p;
 }
-template <typename...Args>
-std::shared_ptr<pattern> stmt(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::stmt, args...);
+static inline pattern::Ptr assign_expr(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::assign_expr, name);
 }
-template <typename...Args>
-std::shared_ptr<pattern> expr_stmt(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::expr_stmt, args...);
+static inline pattern::Ptr stmt(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::stmt, name);
 }
-template <typename...Args>
-std::shared_ptr<pattern> stmt_block(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::stmt_block, args...);
+static inline pattern::Ptr expr_stmt(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::expr_stmt, name);
 }
-template <typename...Args>
-std::shared_ptr<pattern> decl_stmt(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::decl_stmt, args...);
+static inline pattern::Ptr stmt_block(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::stmt_block, name);
 }
-template <typename...Args>
-std::shared_ptr<pattern> if_stmt(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::if_stmt, args...);
+static inline pattern::Ptr decl_stmt(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::decl_stmt, name);
 }
-template <typename...Args>
-std::shared_ptr<pattern> label(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::label, args...);
+static inline pattern::Ptr if_stmt(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::if_stmt, name);
 }
-template <typename...Args>
-std::shared_ptr<pattern> label_stmt(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::label_stmt, args...);
+static inline pattern::Ptr label(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::label, name);
 }
-template <typename...Args>
-std::shared_ptr<pattern> goto_stmt(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::goto_stmt, args...);
+static inline pattern::Ptr label_stmt(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::label_stmt, name);
 }
-template <typename...Args>
-std::shared_ptr<pattern> while_stmt(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::while_stmt, args...);
+static inline pattern::Ptr goto_stmt(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::goto_stmt, name);
 }
-template <typename...Args>
-std::shared_ptr<pattern> for_stmt(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::for_stmt, args...);
+static inline pattern::Ptr while_stmt(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::while_stmt, name);
 }
-template <typename...Args>
-std::shared_ptr<pattern> break_stmt(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::break_stmt, args...);
+static inline pattern::Ptr for_stmt(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::for_stmt, name);
 }
-template <typename...Args>
-std::shared_ptr<pattern> continue_stmt(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::continue_stmt, args...);
+static inline pattern::Ptr break_stmt(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::break_stmt, name);
 }
-template <typename...Args>
-std::shared_ptr<pattern> sq_bkt_expr(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::sq_bkt_expr, args...);
+static inline pattern::Ptr continue_stmt(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::continue_stmt, name);
 }
-template <typename...Args>
-std::shared_ptr<pattern> function_call_expr(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::function_call_expr, args...);
+static inline pattern::Ptr sq_bkt_expr(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::sq_bkt_expr, name);
 }
-template <typename...Args>
-std::shared_ptr<pattern> initializer_list_expr(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::initializer_list_expr, args...);
+static inline pattern::Ptr function_call_expr(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::function_call_expr, name);
 }
-template <typename...Args>
-std::shared_ptr<pattern> foreign_expr_base(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::foreign_expr_base, args...);
+static inline pattern::Ptr initializer_list_expr(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::initializer_list_expr, name);
 }
-template <typename...Args>
-std::shared_ptr<pattern> member_access_expr(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::member_access_expr, args...);
+static inline pattern::Ptr foreign_expr_base(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::foreign_expr_base, name);
 }
-template <typename...Args>
-std::shared_ptr<pattern> addr_of_expr(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::addr_of_expr, args...);
+static inline pattern::Ptr member_access_expr(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::member_access_expr, name);
 }
-template <typename...Args>
-std::shared_ptr<pattern> var(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::var, args...);
+static inline pattern::Ptr addr_of_expr(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::addr_of_expr, name);
 }
-template <typename...Args>
-std::shared_ptr<pattern> type(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::type, args...);
+static inline pattern::Ptr addr_of_expr(pattern::Ptr x, std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::addr_of_expr, name, std::vector<pattern::Ptr>({x}));
 }
-template <typename...Args>
-std::shared_ptr<pattern> scalar_type(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::scalar_type, args...);
+static inline pattern::Ptr var(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::var, name);
 }
-template <typename...Args>
-std::shared_ptr<pattern> pointer_type(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::pointer_type, args...);
+static inline pattern::Ptr type(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::type, name);
 }
-template <typename...Args>
-std::shared_ptr<pattern> function_type(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::function_type, args...);
+static inline pattern::Ptr scalar_type(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::scalar_type, name);
 }
-template <typename...Args>
-std::shared_ptr<pattern> array_type(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::array_type, args...);
+static inline pattern::Ptr pointer_type(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::pointer_type, name);
 }
-template <typename...Args>
-std::shared_ptr<pattern> builder_var_type(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::builder_var_type, args...);
+static inline pattern::Ptr function_type(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::function_type, name);
 }
-template <typename...Args>
-std::shared_ptr<pattern> named_type(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::named_type, args...);
+static inline pattern::Ptr array_type(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::array_type, name);
 }
-template <typename...Args>
-std::shared_ptr<pattern> func_decl(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::func_decl, args...);
+static inline pattern::Ptr builder_var_type(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::builder_var_type, name);
 }
-template <typename...Args>
-std::shared_ptr<pattern> return_stmt(Args...args) {
-	return std::make_shared<pattern>(pattern::node_type::return_stmt, args...);
+static inline pattern::Ptr named_type(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::named_type, name);
 }
+static inline pattern::Ptr func_decl(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::func_decl, name);
 }
+static inline pattern::Ptr return_stmt(std::string name = "") {
+	return std::make_shared<pattern>(pattern::node_type::return_stmt, name);
 }
+
+
+
+} // namespace matchers
+} // namespace block
 
 #endif
