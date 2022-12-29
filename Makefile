@@ -11,6 +11,9 @@ all: executables
 CHECK_CONFIG=1
 CONFIG_STR=DEBUG=$(DEBUG) RECOVER_VAR_NAMES=$(RECOVER_VAR_NAMES) TRACER_USE_LIBUNWIND=$(TRACER_USE_LIBUNWIND)
 
+# Create a scratch directory where the files are stored
+$(shell mkdir -p $(BASE_DIR)/scratch)
+
 include make/pkgconfig.mk
 include make/stable_config.mk
 include make/buildit_rules.mk
