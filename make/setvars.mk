@@ -14,15 +14,14 @@ endif
 CFLAGS_INTERNAL=-std=c++11 -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wmissing-declarations 
 CFLAGS_INTERNAL+=-Woverloaded-virtual -Wno-deprecated -Wdelete-non-virtual-dtor -Werror -Wno-vla -pedantic-errors
 CFLAGS=
-LINKER_FLAGS=-L$(BUILD_DIR)/ -ldl
+LINKER_FLAGS=-L$(BUILD_DIR)/ -l$(LIBRARY_NAME)
 INCLUDE_FLAGS=-I$(INCLUDE_DIR) -I$(BUILD_DIR)/gen_headers/
 
 ifeq ($(DEBUG),1)
 CFLAGS+=-g -gdwarf-4
-LINKER_FLAGS+=-l$(LIBRARY_NAME) -g -gdwarf-4
+LINKER_FLAGS+=-g -gdwarf-4
 else
 CFLAGS_INTERNAL+=-O3
-LINKER_FLAGS+=-l$(LIBRARY_NAME)
 endif
 
 ifeq ($(TRACER_USE_LIBUNWIND),1)
@@ -48,4 +47,6 @@ endif
 endif
 endif
 
+
+LINKER_FLAGS+=-ldl
 # --- flags are all ready
