@@ -162,7 +162,7 @@ trim_common_from_back(block::stmt::Ptr ast1, block::stmt::Ptr ast2) {
 		while (1) {
 			if (ast1_stmts.size() == 0 || ast2_stmts.size() == 0)
 				break;
-			if (!ast1_stmts.back()->is_same(ast2_stmts.back())) {
+			if (ast1_stmts.back()->static_offset != ast2_stmts.back()->static_offset || !ast1_stmts.back()->is_same(ast2_stmts.back())) {
 				// There is a special case where there could be
 				// an if stmt with same body but different
 				// conditions We handle that by splitting the
