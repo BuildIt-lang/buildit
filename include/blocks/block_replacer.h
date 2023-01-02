@@ -26,7 +26,9 @@ public:
 	virtual void visit(std::shared_ptr<binary_expr>) override;
 	virtual void visit(std::shared_ptr<not_expr>) override;
 	virtual void visit(std::shared_ptr<and_expr>) override;
+	virtual void visit(std::shared_ptr<bitwise_and_expr>) override;
 	virtual void visit(std::shared_ptr<or_expr>) override;
+	virtual void visit(std::shared_ptr<bitwise_or_expr>) override;
 	virtual void visit(std::shared_ptr<plus_expr>) override;
 	virtual void visit(std::shared_ptr<minus_expr>) override;
 	virtual void visit(std::shared_ptr<mul_expr>) override;

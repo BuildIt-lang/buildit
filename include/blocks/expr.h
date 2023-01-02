@@ -77,12 +77,29 @@ public:
 	virtual bool is_same(block::Ptr other) override { return binary_is_same(self<and_expr>(), other); }
 };
 
+class bitwise_and_expr: public binary_expr {
+public:
+	typedef std::shared_ptr<bitwise_and_expr> Ptr;
+	virtual void dump(std::ostream &, int) override;
+	virtual void accept(block_visitor *a) override { a->visit(self<bitwise_and_expr>()); }
+	virtual bool is_same(block::Ptr other) override { return binary_is_same(self<bitwise_and_expr>(), other); }
+
+};
+
 class or_expr : public binary_expr {
 public:
 	typedef std::shared_ptr<or_expr> Ptr;
 	virtual void dump(std::ostream &, int) override;
 	virtual void accept(block_visitor *a) override { a->visit(self<or_expr>()); }
 	virtual bool is_same(block::Ptr other) override { return binary_is_same(self<or_expr>(), other); }
+};
+
+class bitwise_or_expr : public binary_expr {
+public:
+	typedef std::shared_ptr<bitwise_or_expr> Ptr;
+	virtual void dump(std::ostream &, int) override;
+	virtual void accept(block_visitor *a) override { a->visit(self<bitwise_or_expr>()); }
+	virtual bool is_same(block::Ptr other) override { return binary_is_same(self<bitwise_or_expr>(), other); }
 };
 
 class plus_expr : public binary_expr {

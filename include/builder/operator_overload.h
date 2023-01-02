@@ -36,10 +36,15 @@ template <typename T1, typename T2>
 struct allowed_builder_return<T1, T2, typename std::enable_if<!is_possible_builder<T1>::value && is_possible_builder<T2>::value && std::is_convertible<T1, typename return_type_helper<T2>::type>::value>::type>: return_type_helper<T2> {
 };
 
-template <typename T1, typename T2>
-typename allowed_builder_return<T1, T2>::type operator && (const T1 &a, const T2 &b) {
-	typedef typename allowed_builder_return<T1, T2>::type ret_type;
+template <typename t1, typename t2>
+typename allowed_builder_return<t1, t2>::type operator && (const t1 &a, const t2 &b) {
+	typedef typename allowed_builder_return<t1, t2>::type ret_type;
 	return ret_type(a).template builder_binary_op<block::and_expr>((ret_type)b);
+}
+template <typename t1, typename t2>
+typename allowed_builder_return<t1, t2>::type operator & (const t1 &a, const t2 &b) {
+	typedef typename allowed_builder_return<t1, t2>::type ret_type;
+	return ret_type(a).template builder_binary_op<block::bitwise_and_expr>((ret_type)b);
 }
 
 
@@ -47,6 +52,11 @@ template <typename T1, typename T2>
 typename allowed_builder_return<T1, T2>::type operator || (const T1 &a, const T2 &b) {
 	typedef typename allowed_builder_return<T1, T2>::type ret_type;
 	return ret_type(a).template builder_binary_op<block::or_expr>((ret_type)b);
+}
+template <typename T1, typename T2>
+typename allowed_builder_return<T1, T2>::type operator | (const T1 &a, const T2 &b) {
+	typedef typename allowed_builder_return<T1, T2>::type ret_type;
+	return ret_type(a).template builder_binary_op<block::bitwise_or_expr>((ret_type)b);
 }
 
 

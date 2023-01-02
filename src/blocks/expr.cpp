@@ -36,9 +36,21 @@ void and_expr::dump(std::ostream &oss, int indent) {
 	expr1->dump(oss, indent + 1);
 	expr2->dump(oss, indent + 1);
 }
+void bitwise_and_expr::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "BITWISE_AND_EXPR" << std::endl;
+	expr1->dump(oss, indent + 1);
+	expr2->dump(oss, indent + 1);
+}
 void or_expr::dump(std::ostream &oss, int indent) {
 	printer::indent(oss, indent);
 	oss << "OR_EXPR" << std::endl;
+	expr1->dump(oss, indent + 1);
+	expr2->dump(oss, indent + 1);
+}
+void bitwise_or_expr::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "BITWISE_OR_EXPR" << std::endl;
 	expr1->dump(oss, indent + 1);
 	expr2->dump(oss, indent + 1);
 }
