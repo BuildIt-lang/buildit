@@ -20,6 +20,9 @@ int builder_context::debug_creation_counter = 0;
 
 void builder_context::add_stmt_to_current_block(block::stmt::Ptr s,
 						bool check_for_conflicts) {
+	if (bool_vector.size() > 0) {
+		return;
+	}
 	if (current_label != "") {
 		s->annotation = current_label;
 		current_label = "";
@@ -346,6 +349,7 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(std::vector
 		block::expr::Ptr cond_expr = last_stmt->expr1;
 
 		builder_context true_context(memoized_tags);
+		true_context.expr_sequence = expr_sequence;
 		true_context.use_memoization = use_memoization;
 		true_context.visited_offsets = visited_offsets;
 		true_context.internal_stored_lambda = internal_stored_lambda;
@@ -358,6 +362,7 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(std::vector
 		    true_context.extract_ast_from_function_internal(true_bv));
 
 		builder_context false_context(memoized_tags);
+		false_context.expr_sequence = std::move(expr_sequence);
 		false_context.use_memoization = use_memoization;
 		false_context.visited_offsets = visited_offsets;
 		false_context.internal_stored_lambda = internal_stored_lambda;

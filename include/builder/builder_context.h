@@ -47,16 +47,21 @@ void lambda_wrapper_impl(void);
 
 class builder_context {
 public:
+	static builder_context *current_builder_context;
 	static int debug_creation_counter;
 
+	std::function<void(void)> internal_stored_lambda;
+	std::function<void(void)> current_function;
 
 	std::list<block::block::Ptr> uncommitted_sequence;
 	block::stmt::Ptr ast;
 	block::stmt_block::Ptr current_block_stmt;
-	std::function<void(void)> current_function;
 
 	std::vector<bool> bool_vector;
 	std::unordered_set<std::string> visited_offsets;
+	
+	std::vector<block::expr::Ptr> expr_sequence;
+	unsigned long long expr_counter = 0;
 
 	tag_map _internal_tags;
 	tag_map *memoized_tags;
@@ -125,36 +130,6 @@ public:
 	}
 	~builder_context();
 
-private:
-	std::function<void(void)> internal_stored_lambda;
-
-	static builder_context *current_builder_context;
-
-	friend class builder;
-
-	friend var;
-
-	template <typename T>
-	friend class dyn_var_impl;
-
-	template <typename T>
-	friend class static_var;
-
-
-	template <typename BT, typename... arg_types>
-	friend std::vector<block::expr::Ptr> extract_call_arguments_helper(const BT &first_arg, const arg_types &... rest_args);
-
-	friend void annotate(std::string);
-	friend tracer::tag get_offset_in_function(void);
-	friend void lambda_wrapper_impl(void);
-
-	template <typename T>
-	friend block::expr::Ptr create_foreign_expr(const T t);
-
-	template <typename BT, typename T>
-	friend BT create_foreign_expr_builder(const T t);
-
-	friend void create_return_stmt(const builder &a);
 
 };
 bool get_next_bool_from_context(builder_context *context, block::expr::Ptr);

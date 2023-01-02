@@ -28,7 +28,7 @@ public:
 			return;
 		var_expr::Ptr ve = to<var_expr>(e->var1);
 		var::Ptr v = ve->var1;
-		if (std::find(assigned_vars.begin(), assigned_vars.end(), v) != assigned_vars.end())
+		if (std::find(assigned_vars.begin(), assigned_vars.end(), v) == assigned_vars.end())
 			assigned_vars.push_back(v);	
 	}
 };
