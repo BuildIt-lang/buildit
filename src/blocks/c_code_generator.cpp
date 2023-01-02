@@ -35,7 +35,9 @@ void c_code_generator::emit_binary_expr(binary_expr::Ptr a,
 		a->expr2->accept(this);
 }
 void c_code_generator::visit(and_expr::Ptr a) { emit_binary_expr(a, "&&"); }
+void c_code_generator::visit(bitwise_and_expr::Ptr a) { emit_binary_expr(a, "&"); }
 void c_code_generator::visit(or_expr::Ptr a) { emit_binary_expr(a, "||"); }
+void c_code_generator::visit(bitwise_or_expr::Ptr a) { emit_binary_expr(a, "|"); }
 void c_code_generator::visit(plus_expr::Ptr a) { emit_binary_expr(a, "+"); }
 void c_code_generator::visit(minus_expr::Ptr a) { emit_binary_expr(a, "-"); }
 void c_code_generator::visit(mul_expr::Ptr a) { emit_binary_expr(a, "*"); }

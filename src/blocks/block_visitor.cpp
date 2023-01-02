@@ -14,7 +14,15 @@ void block_visitor::visit(and_expr::Ptr a) {
 	a->expr1->accept(this);
 	a->expr2->accept(this);
 }
+void block_visitor::visit(bitwise_and_expr::Ptr a) {
+	a->expr1->accept(this);
+	a->expr2->accept(this);
+}
 void block_visitor::visit(or_expr::Ptr a) {
+	a->expr1->accept(this);
+	a->expr2->accept(this);
+}
+void block_visitor::visit(bitwise_or_expr::Ptr a) {
 	a->expr1->accept(this);
 	a->expr2->accept(this);
 }
