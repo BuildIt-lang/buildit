@@ -255,9 +255,12 @@ public:
 			builder_context::current_builder_context->remove_node_from_sequence(a[i].block_expr);
 		}
 		create_dyn_var();
-		if (builder_context::current_builder_context->bool_vector.size() > 0)
+		if (builder::builder_precheck()) {
+			builder bt = builder::create_builder_from_sequence();
+			if (block_decl_stmt) 
+				block_decl_stmt->init_expr = bt.block_expr;
 			return;
-
+		}	
 		tracer::tag offset = get_offset_in_function();
 		block::initializer_list_expr::Ptr list_expr = std::make_shared<block::initializer_list_expr>();
 		list_expr->static_offset = offset;
@@ -265,6 +268,8 @@ public:
 			list_expr->elems.push_back(a[i].block_expr);
 		}
 		block_decl_stmt->init_expr = list_expr;
+		builder::push_to_sequence(list_expr);
+		
 	}
 
 

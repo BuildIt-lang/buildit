@@ -20,11 +20,8 @@ dyn_var_consume::dyn_var_consume(const dyn_var_consume& a) {
 
 builder builder::sentinel_builder;
 void create_return_stmt(const builder &a) {
-	assert(builder_context::current_builder_context != nullptr);
-	builder_context::current_builder_context->remove_node_from_sequence(
-	    a.block_expr);
-	assert(builder_context::current_builder_context->current_block_stmt !=
-	       nullptr);
+
+	builder_context::current_builder_context->remove_node_from_sequence(a.block_expr);
 	builder_context::current_builder_context->commit_uncommitted();
 
 	if (builder_context::current_builder_context->bool_vector.size() > 0)
@@ -37,14 +34,14 @@ void create_return_stmt(const builder &a) {
 	// jump is as bad a return. Also no performance issues
 	ret_stmt->static_offset = tracer::get_unique_tag();
 	ret_stmt->return_val = a.block_expr;
-	builder_context::current_builder_context->add_stmt_to_current_block(
-	    ret_stmt);
+	builder_context::current_builder_context->add_stmt_to_current_block(ret_stmt);
 }
 builder::builder(const var &a) {
-	assert(builder_context::current_builder_context != nullptr);
-	block_expr = nullptr;
-	if (builder_context::current_builder_context->bool_vector.size() > 0)
+	if (builder_precheck()) {
+		builder_from_sequence();
 		return;
+	}
+	block_expr = nullptr;
 	
 	tracer::tag offset = get_offset_in_function();
 
@@ -75,6 +72,7 @@ builder::builder(const var &a) {
 
 		block_expr = var_expr;
 	}
+	push_to_sequence(block_expr);
 }
 
 } // namespace builder
