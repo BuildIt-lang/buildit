@@ -29,7 +29,10 @@ public:
 		}
 		m_arr = (dyn_var<T>*) new char[sizeof(dyn_var<T>) * actual_size];
 		for (static_var<size_t> i = 0; i < actual_size; i++) {
-			new (m_arr + i) dyn_var<T>(*(init.begin() + i));
+			if (i < init.size()) 
+				new (m_arr + i) dyn_var<T>(*(init.begin() + i));
+			else
+				new (m_arr + i) dyn_var<T>();
 		}
 	}
 	void set_size(size_t new_size) {
@@ -42,7 +45,31 @@ public:
 		}
 	}
 
-	dyn_arr(const dyn_arr& other) = delete;
+	template <typename T2, size_t N>
+	void initialize_from_other(const dyn_arr<T2, N>& other) {
+		if (size) {
+			actual_size = size;
+		} else {
+			actual_size = other.actual_size;
+		}
+		m_arr = (dyn_var<T>*) new char[sizeof(dyn_var<T>) * actual_size];
+		for (static_var<size_t> i = 0; i < actual_size; i++) {
+			if (i < other.actual_size) 
+				new (m_arr + i) dyn_var<T>(other[i]);
+			else 
+				new (m_arr + i) dyn_var<T>();
+		}
+
+	}
+
+	dyn_arr (const dyn_arr& other) {
+		initialize_from_other(other);	
+	}	
+	template <typename T2, size_t N>	
+	dyn_arr(const dyn_arr<T2, N>& other) {
+		initialize_from_other(other);
+	}
+
 	dyn_arr& operator= (const dyn_arr& other) = delete;
 
 	dyn_var<T>& operator[](size_t index) {
@@ -63,6 +90,9 @@ public:
 			delete[] (char*)m_arr;
 		}
 	}
+
+	template <typename T2, size_t N> 
+	friend class dyn_arr;
 };
 
 }

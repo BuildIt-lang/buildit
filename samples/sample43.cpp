@@ -18,6 +18,11 @@ static void foo() {
 	
 	dyn_arr<int> a;
 	a.set_size(2);
+
+
+	dyn_arr<int> b = y;
+	dyn_arr<int, 5> c = a;
+	
 }
 int main(int argc, char* argv[]) {
 	auto ast = builder::builder_context().extract_function_ast(foo, "foo");
