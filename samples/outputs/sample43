@@ -13,5 +13,14 @@ void foo (void) {
   int var8 = 2;
   int var9;
   int var10;
+  int var11 = var3;
+  int var12 = var4;
+  int var13 = var5;
+  int var14 = var6;
+  int var15 = var9;
+  int var16 = var10;
+  int var17;
+  int var18;
+  int var19;
 }
 
