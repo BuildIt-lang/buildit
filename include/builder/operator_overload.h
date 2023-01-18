@@ -115,6 +115,18 @@ typename allowed_builder_return<T1, T2>::type operator >= (const T1 &a, const T2
 	return ret_type(a).template builder_binary_op<block::gte_expr>((ret_type)b);
 }
 
+template <typename T1, typename T2>
+typename allowed_builder_return<T1, T2>::type operator << (const T1 &a, const T2 &b) {
+	typedef typename allowed_builder_return<T1, T2>::type ret_type;
+	return ret_type(a).template builder_binary_op<block::lshift_expr>((ret_type)b);
+}
+
+template <typename T1, typename T2>
+typename allowed_builder_return<T1, T2>::type operator >> (const T1 &a, const T2 &b) {
+	typedef typename allowed_builder_return<T1, T2>::type ret_type;
+	return ret_type(a).template builder_binary_op<block::rshift_expr>((ret_type)b);
+}
+
 
 template <typename T1, typename T2>
 typename allowed_builder_return<T1, T2>::type operator == (const T1 &a, const T2 &b) {

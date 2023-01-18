@@ -58,6 +58,14 @@ void block_visitor::visit(gte_expr::Ptr a) {
 	a->expr1->accept(this);
 	a->expr2->accept(this);
 }
+void block_visitor::visit(lshift_expr::Ptr a) {
+	a->expr1->accept(this);
+	a->expr2->accept(this);
+}
+void block_visitor::visit(rshift_expr::Ptr a) {
+	a->expr1->accept(this);
+	a->expr2->accept(this);
+}
 void block_visitor::visit(equals_expr::Ptr a) {
 	a->expr1->accept(this);
 	a->expr2->accept(this);

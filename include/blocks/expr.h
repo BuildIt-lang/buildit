@@ -161,7 +161,20 @@ public:
 	virtual void accept(block_visitor *a) override { a->visit(self<gte_expr>()); }
 	virtual bool is_same(block::Ptr other) override { return binary_is_same(self<gte_expr>(), other); }
 };
-
+class lshift_expr : public binary_expr {
+public:
+	typedef std::shared_ptr<lshift_expr> Ptr;
+	virtual void dump(std::ostream &, int) override;
+	virtual void accept(block_visitor *a) override { a->visit(self<lshift_expr>()); }
+	virtual bool is_same(block::Ptr other) override { return binary_is_same(self<lshift_expr>(), other); }
+};
+class rshift_expr : public binary_expr {
+public:
+	typedef std::shared_ptr<rshift_expr> Ptr;
+	virtual void dump(std::ostream &, int) override;
+	virtual void accept(block_visitor *a) override { a->visit(self<rshift_expr>()); }
+	virtual bool is_same(block::Ptr other) override { return binary_is_same(self<rshift_expr>(), other); }
+};
 class equals_expr : public binary_expr {
 public:
 	typedef std::shared_ptr<equals_expr> Ptr;

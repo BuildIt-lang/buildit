@@ -55,6 +55,12 @@ void block_replacer::visit(lte_expr::Ptr a) {
 void block_replacer::visit(gte_expr::Ptr a) {
 	binary_helper(a);
 }
+void block_replacer::visit(lshift_expr::Ptr a) {
+	binary_helper(a);
+}
+void block_replacer::visit(rshift_expr::Ptr a) {
+	binary_helper(a);
+}
 void block_replacer::visit(equals_expr::Ptr a) {
 	binary_helper(a);
 }
