@@ -20,6 +20,8 @@ class lt_expr;
 class gt_expr;
 class lte_expr;
 class gte_expr;
+class lshift_expr;
+class rshift_expr;
 class equals_expr;
 class ne_expr;
 class mod_expr;
@@ -81,6 +83,8 @@ public:
 	virtual void visit(std::shared_ptr<gt_expr>);
 	virtual void visit(std::shared_ptr<lte_expr>);
 	virtual void visit(std::shared_ptr<gte_expr>);
+	virtual void visit(std::shared_ptr<lshift_expr>);
+	virtual void visit(std::shared_ptr<rshift_expr>);
 	virtual void visit(std::shared_ptr<equals_expr>);
 	virtual void visit(std::shared_ptr<ne_expr>);
 	virtual void visit(std::shared_ptr<mod_expr>);

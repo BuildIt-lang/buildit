@@ -37,6 +37,8 @@ public:
 	virtual void visit(std::shared_ptr<gt_expr>) override;
 	virtual void visit(std::shared_ptr<lte_expr>) override;
 	virtual void visit(std::shared_ptr<gte_expr>) override;
+	virtual void visit(std::shared_ptr<lshift_expr>) override;
+	virtual void visit(std::shared_ptr<rshift_expr>) override;
 	virtual void visit(std::shared_ptr<equals_expr>) override;
 	virtual void visit(std::shared_ptr<ne_expr>) override;
 	virtual void visit(std::shared_ptr<mod_expr>) override;

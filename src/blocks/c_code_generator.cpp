@@ -46,6 +46,8 @@ void c_code_generator::visit(lt_expr::Ptr a) { emit_binary_expr(a, "<"); }
 void c_code_generator::visit(gt_expr::Ptr a) { emit_binary_expr(a, ">"); }
 void c_code_generator::visit(lte_expr::Ptr a) { emit_binary_expr(a, "<="); }
 void c_code_generator::visit(gte_expr::Ptr a) { emit_binary_expr(a, ">="); }
+void c_code_generator::visit(lshift_expr::Ptr a) { emit_binary_expr(a, "<<"); }
+void c_code_generator::visit(rshift_expr::Ptr a) { emit_binary_expr(a, ">>"); }
 void c_code_generator::visit(equals_expr::Ptr a) { emit_binary_expr(a, "=="); }
 void c_code_generator::visit(ne_expr::Ptr a) { emit_binary_expr(a, "!="); }
 void c_code_generator::visit(mod_expr::Ptr a) { emit_binary_expr(a, "%"); }

@@ -29,6 +29,8 @@ public:
 	virtual void visit(gt_expr::Ptr);
 	virtual void visit(lte_expr::Ptr);
 	virtual void visit(gte_expr::Ptr);
+	virtual void visit(lshift_expr::Ptr);
+	virtual void visit(rshift_expr::Ptr);
 	virtual void visit(equals_expr::Ptr);
 	virtual void visit(ne_expr::Ptr);
 	virtual void visit(mod_expr::Ptr);

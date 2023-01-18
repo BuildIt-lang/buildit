@@ -102,6 +102,18 @@ void gte_expr::dump(std::ostream &oss, int indent) {
 	expr1->dump(oss, indent + 1);
 	expr2->dump(oss, indent + 1);
 }
+void lshift_expr::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "LSHIFT_EXPR" << std::endl;
+	expr1->dump(oss, indent + 1);
+	expr2->dump(oss, indent + 1);
+}
+void rshift_expr::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "RSHIFT_EXPR" << std::endl;
+	expr1->dump(oss, indent + 1);
+	expr2->dump(oss, indent + 1);
+}
 void equals_expr::dump(std::ostream &oss, int indent) {
 	printer::indent(oss, indent);
 	oss << "EQUALS_EXPR" << std::endl;

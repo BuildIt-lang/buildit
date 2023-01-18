@@ -40,6 +40,16 @@ STMT_BLOCK
       VAR_EXPR
         VAR (a_0)
       INT_CONST (2)
+  EXPR_STMT
+    RSHIFT_EXPR
+      VAR_EXPR
+        VAR (a_0)
+      INT_CONST (2)
+  EXPR_STMT
+    LSHIFT_EXPR
+      VAR_EXPR
+        VAR (b_1)
+      INT_CONST (3)
 {
   int a_0 = 0;
   int b_1 = a_0;
@@ -49,4 +59,6 @@ STMT_BLOCK
   1 + b_1;
   a_0 % 2;
   a_0 | 2;
+  a_0 >> 2;
+  b_1 << 3;
 }
