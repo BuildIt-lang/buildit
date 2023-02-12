@@ -16,6 +16,7 @@ public:
 	c_code_generator(std::ostream &_oss) : oss(_oss) {}
 	std::ostream &oss;
 	int curr_indent = 0;
+	bool decl_only = false;
 	virtual void visit(not_expr::Ptr);
 	virtual void visit(and_expr::Ptr);
 	virtual void visit(bitwise_and_expr::Ptr);
@@ -69,8 +70,9 @@ public:
 	virtual void visit(label_stmt::Ptr);
 	
 
-	static void generate_code(block::Ptr ast, std::ostream &oss, int indent = 0) {
+	static void generate_code(block::Ptr ast, std::ostream &oss, int indent = 0, bool decl_only = false) {
 		c_code_generator generator(oss);
+		generator.decl_only = decl_only;
 		generator.curr_indent = indent;
 		ast->accept(&generator);
 		oss << std::endl;

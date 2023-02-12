@@ -62,6 +62,11 @@ struct as_global {
 	std::string name;
 	as_global(const std::string &n): name(n) {}
 };
+// With name is just like as_global but can be used locally
+struct with_name {
+	std::string name;
+	with_name(const std::string &n): name(n) {}
+};
 
 template<typename T>
 class dyn_var_impl: public var{
@@ -180,6 +185,12 @@ public:
 		// So that the destructor for the block_var is never called
 		auto ptr_to_leak = new std::shared_ptr<block::block>();
 		*ptr_to_leak = block_var;
+	}
+	dyn_var_impl(const with_name &v) {
+		// with_name constructors don't usually get declarations
+		create_dyn_var(true);
+		block_var->var_name = v.name;
+		var_name = v.name;
 	}
 	dyn_var_impl(const dyn_var_sentinel_type& a, std::string name = "") {
 		create_dyn_var(true);
