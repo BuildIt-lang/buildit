@@ -14,56 +14,11 @@
 namespace builder {
 
 
-static std::string get_temp_filename(builder_context &context) {
-	char base_name_c[] = GEN_TEMPLATE_NAME;
-	int fd = mkstemp(base_name_c);
-	if (fd < 0) {
-		assert(false && "Opening a temporary file failed\n");
-	}
-	
-	close(fd);
+std::string get_temp_filename(builder_context &context);
+void* compile_and_return_ptr(builder_context &context, std::string source_name, std::string fname);
 
-	std::string base_name(base_name_c);	
-	std::string source_name = base_name;
-
-	if (!context.dynamic_use_cxx) 
-		source_name += ".c";
-	else 
-		source_name += ".cpp";
-	
-	return source_name;
-}
-
-static void* compile_and_return_ptr(builder_context &context, std::string source_name, std::string fname) {
-	std::string compiled_name = source_name + ".so";
-	
-	std::string compiler_name;
-
-	if (!context.dynamic_use_cxx) 	
-		compiler_name = COMPILER_PATH;
-	else {
-		compiler_name = CXX_COMPILER_PATH;
-		compiler_name += " -std=c++11 -fPIC ";
-	}
-
-	std::string compile_command = compiler_name + " -shared -O3 " + source_name + " -o " + compiled_name;
-
-	int err = system(compile_command.c_str());
-	if (err != 0) {	
-		assert(false && "Compilation failed\n");
-	}
-	
-	void* handle = dlopen(compiled_name.c_str(), RTLD_NOW | RTLD_LOCAL);
-	if (!handle) {
-		assert(false && "Loading compiled module failed\n");
-	}
-	
-	void* function = dlsym(handle, fname.c_str());
-	if (!function) {
-		assert(false && "Loading compiled module failed\n");
-	}
-	return function;
-}
+// Interface to just compile ASTs(s)
+void* compile_asts(builder_context context, std::vector<block::block::Ptr> asts, std::string lookup_name);
 
 template <typename FT, typename...ArgsT>
 auto compile_function_with_context(builder_context context, FT f, ArgsT...args) -> void* {
@@ -99,7 +54,5 @@ auto compile_function(FT f, ArgsT...args) -> void* {
 	return compile_function_with_context(context, f, args...);
 }
 
-// Interface to just compile ASTs(s)
-void* compile_asts(builder_context context, std::vector<block::block::Ptr> asts, std::string lookup_name);
 }
 #endif
