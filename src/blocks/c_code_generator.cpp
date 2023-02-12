@@ -384,6 +384,10 @@ void c_code_generator::visit(func_decl::Ptr a) {
 	if (!printDelim)
 		oss << "void";
 	oss << ")";
+	if (decl_only) {
+		oss << ";";
+		return;
+	}
 	if (isa<stmt_block>(a->body)) {
 		oss << " ";
 		a->body->accept(this);
