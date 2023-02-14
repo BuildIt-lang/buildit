@@ -45,7 +45,17 @@ public:
 
 };
 
-struct custom_type_base {
+struct custom_type_base {	
+	static std::vector<block::type::Ptr> get_template_arg_types() {
+		return extract_type_from_args<>::get_types();
+	}
+};
+
+template <typename...Args>
+struct custom_type: custom_type_base {
+	static std::vector<block::type::Ptr> get_template_arg_types() {
+		return extract_type_from_args<Args...>::get_types();
+	}
 };
 
 // Struct to initialize a dyn_var as member;
