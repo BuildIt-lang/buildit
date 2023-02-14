@@ -45,11 +45,21 @@ public:
 
 };
 
+struct custom_type_base {
+};
+
 // Struct to initialize a dyn_var as member;
 struct as_member_of {
 	var *parent_var;
 	std::string member_name; 
+	// This constructor is to be used if the user prefers to define a specialization for
+	// dyn_var. In this case they do not inherit from custom_type_base
 	as_member_of(var* p, std::string n): parent_var(p), member_name(n) {};	
+
+	// We could have accepted a custom_type_base*, but we need T to cast it to dyn_var<T>
+	template <typename T>
+	as_member_of(T* p, typename std::enable_if<std::is_base_of<custom_type_base, T>::value, std::string>::type n): 
+		parent_var(static_cast<var*>(static_cast<dyn_var<T>*>(p))), member_name(n) {}
 };
 // Struct to initialize a dyn_var as a compound expr
 struct as_compound_expr {
@@ -296,11 +306,20 @@ public:
 
 };
 
+template <typename T, typename V>
+struct dyn_var_parent_selector {
+	// This base class is just empty	
+};
+
+template <typename T>
+struct dyn_var_parent_selector <T, typename std::enable_if<std::is_base_of<custom_type_base, T>::value>::type>: public T {
+};
+
+
 // Actual dyn_var implementation
 // Split design to allow for easily extending types with specialization
-
 template<typename T>
-class dyn_var: public dyn_var_impl<T> {
+class dyn_var: public dyn_var_impl<T>, public dyn_var_parent_selector<T, void> {
 public:
 	typedef dyn_var_impl<T> super;
 	

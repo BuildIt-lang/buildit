@@ -6,11 +6,21 @@
 
 namespace builder {
 
+struct custom_type_base;
+
 // The main definition of the type extractor classes
 template <typename T>
 class type_extractor {
 public:
-	static block::type::Ptr extract_type(void);
+	// This implementation is currenty only used 
+	// by custom types which are derived from custom_type_base
+	static block::type::Ptr extract_type(void) {
+		static_assert(std::is_base_of<custom_type_base, T>::value, "Custom types should inherit from builder::custom_type_base");
+		block::named_type::Ptr type = std::make_shared<block::named_type>();
+		type->type_name = T::type_name;
+		return type;	
+		
+	}
 };
 
 // Type specialization for basic C++ types
@@ -263,6 +273,22 @@ public:
 		type->type_name = N;
 		type->template_args = extract_type_from_args<Args...>::get_types();
 		return type;	
+	}
+};
+
+template <template <typename...> class T, typename...Args>
+class type_extractor<T<Args...>> {
+public:
+	// This implementation is currenty only used 
+	// by custom types which are derived from custom_type_base
+	// AND have template arguments
+	static block::type::Ptr extract_type(void) {
+		static_assert(std::is_base_of<custom_type_base, T<Args...>>::value, "Custom types should inherit from builder::custom_type_base");
+		block::named_type::Ptr type = std::make_shared<block::named_type>();
+		type->type_name = T<Args...>::type_name;
+		type->template_args = extract_type_from_args<Args...>::get_types();
+		return type;	
+		
 	}
 };
 
