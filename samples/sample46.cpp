@@ -10,20 +10,20 @@ using builder::as_member_of;
 
 
 
-struct FooT: public builder::custom_type_base {
+struct FooT: public builder::custom_type<> {
 	static constexpr const char* type_name = "FooT";
 	dyn_var<int> member = as_member_of(this, "member");
 };
 
 template <typename T>
-struct BarT: public builder::custom_type_base {
+struct BarT: public builder::custom_type<T> {
 	static constexpr const char* type_name = "BarT";
 	dyn_var<int> my_member = as_member_of(this, "my_member");
 	dyn_var<int> second_member = as_member_of(this, "second_member");
 };
 
 template <typename T1, typename T2>
-struct CarT: public builder::custom_type_base {
+struct CarT: public builder::custom_type<T1, T2> {
 	static constexpr const char* type_name = "CarT";
 	dyn_var<int> my_member = as_member_of(this, "my_member");
 };
