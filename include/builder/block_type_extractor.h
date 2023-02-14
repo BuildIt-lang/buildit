@@ -6,7 +6,7 @@
 
 namespace builder {
 
-class custom_type_base;
+struct custom_type_base;
 
 // The main definition of the type extractor classes
 template <typename T>
