@@ -1,0 +1,70 @@
+STMT_BLOCK
+  DECL_STMT
+    NAMED_TYPE (FooT)
+    VAR (g_0)
+    NO_INITIALIZATION
+  EXPR_STMT
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (g_0)
+      PLUS_EXPR
+        VAR_EXPR
+          VAR (g_0)
+        INT_CONST (1)
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (x_1)
+    MEMBER_ACCESS_EXPR (member)
+      VAR_EXPR
+        VAR (g_0)
+  DECL_STMT
+    NAMED_TYPE (FooT)
+    VAR (h_2)
+    VAR_EXPR
+      VAR (g_0)
+  EXPR_STMT
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (h_2)
+      VAR_EXPR
+        VAR (g_0)
+  DECL_STMT
+    NAMED_TYPE (BarT)
+      SCALAR_TYPE (INT)
+    VAR (f_3)
+    NO_INITIALIZATION
+  EXPR_STMT
+    ASSIGN_EXPR
+      MEMBER_ACCESS_EXPR (second_member)
+        VAR_EXPR
+          VAR (f_3)
+      PLUS_EXPR
+        VAR_EXPR
+          VAR (g_0)
+        INT_CONST (1)
+  DECL_STMT
+    NAMED_TYPE (CarT)
+      SCALAR_TYPE (INT)
+      NAMED_TYPE (BarT)
+        SCALAR_TYPE (FLOAT)
+    VAR (l_4)
+    NO_INITIALIZATION
+  EXPR_STMT
+    ASSIGN_EXPR
+      MEMBER_ACCESS_EXPR (my_member)
+        VAR_EXPR
+          VAR (l_4)
+      MEMBER_ACCESS_EXPR (member)
+        VAR_EXPR
+          VAR (g_0)
+{
+  FooT g_0;
+  g_0 = g_0 + 1;
+  int x_1 = g_0.member;
+  FooT h_2 = g_0;
+  h_2 = g_0;
+  BarT<int> f_3;
+  f_3.second_member = g_0 + 1;
+  CarT<int, BarT<float>> l_4;
+  l_4.my_member = g_0.member;
+}
