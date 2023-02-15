@@ -6,7 +6,7 @@
 #include <iostream>
 
 using builder::dyn_var;
-using builder::as_member_of;
+using builder::as_member;
 // We will now create our own dyn_var type with members
 template <typename T>
 struct my_dyn_var: public dyn_var<T> {
@@ -23,8 +23,8 @@ struct my_dyn_var: public dyn_var<T> {
 	builder::builder operator=(const my_dyn_var &t) {
 		return (*this) = (builder::builder)t;
 	}	
-	dyn_var<int> var1 = as_member_of(this, "var1");	
-	dyn_var<int> neighbor = as_member_of(this, "neighbor");	
+	dyn_var<int> var1 = as_member(this, "var1");	
+	dyn_var<int> neighbor = as_member(this, "neighbor");	
 };
 
 int main(int argc, char *argv[]) {

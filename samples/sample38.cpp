@@ -7,7 +7,7 @@
 #include <memory>
 using builder::dyn_var;
 using builder::static_var;
-using builder::as_member_of;
+using builder::as_member;
 
 constexpr char foo_t_name[] = "FooT";
 using foo_t = typename builder::name<foo_t_name>;
@@ -27,7 +27,7 @@ public:
 	dyn_var(const dyn_var& t): dyn_var_impl((builder)t){}
 	dyn_var(): dyn_var_impl<foo_t>() {}
 
-	dyn_var<int> member = as_member_of(this, "member");
+	dyn_var<int> member = as_member(this, "member");
 };
 
 // Create specialization for foo_t* so that we can overload the * operator
@@ -52,7 +52,7 @@ public:
 	// This is POC of how -> operator can
 	// be implemented. Requires the hack of creating a dummy 
 	// member because -> needs to return a pointer. 
-	dyn_var<foo_t> _p = as_member_of(this, "_p");
+	dyn_var<foo_t> _p = as_member(this, "_p");
 	dyn_var<foo_t>* operator->() {
 		_p = (cast)this->operator[](0);
 		return _p.addr();
