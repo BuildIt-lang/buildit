@@ -6,26 +6,26 @@
 #include <iostream>
 using builder::dyn_var;
 using builder::static_var;
-using builder::as_member_of;
+using builder::as_member;
 
 
 
 struct FooT: public builder::custom_type<> {
 	static constexpr const char* type_name = "FooT";
-	dyn_var<int> member = as_member_of(this, "member");
+	dyn_var<int> member = as_member("member");
 };
 
 template <typename T>
 struct BarT: public builder::custom_type<T> {
 	static constexpr const char* type_name = "BarT";
-	dyn_var<int> my_member = as_member_of(this, "my_member");
-	dyn_var<int> second_member = as_member_of(this, "second_member");
+	dyn_var<int> my_member = as_member("my_member");
+	dyn_var<int> second_member = as_member("second_member");
 };
 
 template <typename T1, typename T2>
 struct CarT: public builder::custom_type<T1, T2> {
 	static constexpr const char* type_name = "CarT";
-	dyn_var<int> my_member = as_member_of(this, "my_member");
+	dyn_var<int> my_member = as_member("my_member");
 };
 
 static void bar(void) {

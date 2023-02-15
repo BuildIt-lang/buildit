@@ -58,18 +58,15 @@ struct custom_type: custom_type_base {
 	}
 };
 
+static std::vector<var*> *parents_stack = nullptr;
 // Struct to initialize a dyn_var as member;
-struct as_member_of {
+struct as_member {
 	var *parent_var;
 	std::string member_name; 
 	// This constructor is to be used if the user prefers to define a specialization for
 	// dyn_var. In this case they do not inherit from custom_type_base
-	as_member_of(var* p, std::string n): parent_var(p), member_name(n) {};	
-
-	// We could have accepted a custom_type_base*, but we need T to cast it to dyn_var<T>
-	template <typename T>
-	as_member_of(T* p, typename std::enable_if<std::is_base_of<custom_type_base, T>::value, std::string>::type n): 
-		parent_var(static_cast<var*>(static_cast<dyn_var<T>*>(p))), member_name(n) {}
+	as_member(var* p, std::string n): parent_var(p), member_name(n) {};	
+	as_member(std::string n): parent_var(parents_stack->back()), member_name(n) {}
 };
 // Struct to initialize a dyn_var as a compound expr
 struct as_compound_expr {
@@ -221,7 +218,7 @@ public:
 	}
         // Constructor to initialize a dyn_var as member
         // This declaration does not produce a declaration
-        dyn_var_impl(const as_member_of &a) {
+        dyn_var_impl(const as_member &a) {
 		current_state = member_var;
 		parent_var = a.parent_var;
 		var_name = a.member_name;            
@@ -321,8 +318,26 @@ struct dyn_var_parent_selector {
 	// This base class is just empty	
 };
 
+
+
 template <typename T>
-struct dyn_var_parent_selector <T, typename std::enable_if<std::is_base_of<custom_type_base, T>::value>::type>: public T {
+struct member_initializer_begin {
+	member_initializer_begin() {
+		if (parents_stack == nullptr) {
+			parents_stack = new std::vector<var*>();
+		}
+		parents_stack->push_back(static_cast<var*>(static_cast<dyn_var<T>*>(this)));
+	}
+};
+
+struct member_initializer_end {
+	member_initializer_end() {
+		parents_stack->pop_back();
+	}
+};
+
+template <typename T>
+struct dyn_var_parent_selector <T, typename std::enable_if<std::is_base_of<custom_type_base, T>::value>::type>: public member_initializer_begin<T>, public T, public member_initializer_end {
 };
 
 

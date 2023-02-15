@@ -6,7 +6,7 @@
 #include <iostream>
 using builder::dyn_var;
 using builder::static_var;
-using builder::as_member_of;
+using builder::as_member;
 
 constexpr char foo_t_name[] = "FooT";
 using foo_t = typename builder::name<foo_t_name>;
@@ -22,7 +22,7 @@ public:
 		return (*this) = (builder::builder)t;
 	}	
 
-	dyn_var<int> member = as_member_of(this, "member");
+	dyn_var<int> member = as_member(this, "member");
 };
 
 
