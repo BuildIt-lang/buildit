@@ -14,8 +14,7 @@ static void foo(void) {
 }
 int main(int argc, char *argv[]) {
 	builder::builder_context context;
-	assumed_variable_ref =
-	    context.assume_variable<dyn_var<int>>("global_var1");
+	assumed_variable_ref = context.assume_variable<dyn_var<int>>("global_var1");
 	auto ast = context.extract_ast_from_function(foo);
 	ast->dump(std::cout, 0);
 	block::c_code_generator::generate_code(ast, std::cout, 0);

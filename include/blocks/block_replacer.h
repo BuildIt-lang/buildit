@@ -1,10 +1,10 @@
 #ifndef BLOCK_REPLACER_H
 #define BLOCK_REPLACER_H
 
-#include "blocks/block_visitor.h"
 #include "blocks/block.h"
+#include "blocks/block_visitor.h"
 namespace block {
-class block_replacer: public block_visitor {	
+class block_replacer : public block_visitor {
 public:
 	using block_visitor::visit;
 	std::shared_ptr<block> node;
@@ -19,7 +19,7 @@ public:
 	}
 	void unary_helper(std::shared_ptr<unary_expr> a);
 	void binary_helper(std::shared_ptr<binary_expr> a);
-	
+
 	virtual void visit(std::shared_ptr<block>) override;
 	virtual void visit(std::shared_ptr<expr>) override;
 	virtual void visit(std::shared_ptr<unary_expr>) override;
@@ -81,7 +81,6 @@ public:
 	virtual void visit(std::shared_ptr<func_decl>) override;
 	virtual void visit(std::shared_ptr<return_stmt>) override;
 };
-}
-
+} // namespace block
 
 #endif

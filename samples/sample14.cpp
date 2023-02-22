@@ -7,7 +7,9 @@ using builder::dyn_var;
 
 // An example of dyn_var<int> being passed around and returning expressions back
 // from the functions
-static dyn_var<int> bar(dyn_var<int> x) { return x + 1; }
+static dyn_var<int> bar(dyn_var<int> x) {
+	return x + 1;
+}
 static void foo(void) {
 	dyn_var<int> a = 0;
 	dyn_var<int> b = bar(a);

@@ -3,8 +3,7 @@
 #include "builder/dyn_var.h"
 namespace block {
 static bool is_roll(std::string s) {
-	if (s != "" && s.length() > 5 && s[0] == 'r' && s[1] == 'o' &&
-	    s[2] == 'l' && s[3] == 'l' && s[4] == '.')
+	if (s != "" && s.length() > 5 && s[0] == 'r' && s[1] == 'o' && s[2] == 'l' && s[3] == 'l' && s[4] == '.')
 		return true;
 	return false;
 }
@@ -25,8 +24,7 @@ static void process_match(stmt_block::Ptr b, int match_start, int match_end) {
 		b->stmts[i]->accept(&finder);
 		assert(finder.constants.size() == num_constants);
 		for (unsigned int j = 0; j < num_constants; j++)
-			vals[j].push_back(
-			    to<int_const>(finder.constants[j])->value);
+			vals[j].push_back(to<int_const>(finder.constants[j])->value);
 	}
 	std::vector<stmt::Ptr> new_stmts;
 	for (int i = 0; i < match_start; i++) {
@@ -40,35 +38,30 @@ static void process_match(stmt_block::Ptr b, int match_start, int match_end) {
 			if (vals[i][j] != (int)j) {
 				all_match = false;
 				break;
-			}	
+			}
 		}
 		if (all_match) {
 			new_vars.push_back(nullptr);
 			continue;
 		}
 		var::Ptr new_var = std::make_shared<var>();
-		new_var->var_name =
-		    "roll_var_" + std::to_string(unique_counter);
-		
+		new_var->var_name = "roll_var_" + std::to_string(unique_counter);
+
 		std::vector<std::string> attrs;
 		attrs.push_back("static");
-				
+
 		new_var->setMetadata("attributes", attrs);
 
 		unique_counter++;
-		new_var->var_type =
-		    builder::dyn_var<int[]>::create_block_type();
-		to<array_type>(new_var->var_type)->size =
-		    match_end - match_start;
+		new_var->var_type = builder::dyn_var<int[]>::create_block_type();
+		to<array_type>(new_var->var_type)->size = match_end - match_start;
 		decl_stmt::Ptr new_decl = std::make_shared<decl_stmt>();
 		new_decl->decl_var = new_var;
 		new_vars.push_back(new_var);
 
-		initializer_list_expr::Ptr new_init =
-		    std::make_shared<initializer_list_expr>();
+		initializer_list_expr::Ptr new_init = std::make_shared<initializer_list_expr>();
 		for (unsigned int j = 0; j < vals[i].size(); j++) {
-			int_const::Ptr new_const =
-			    std::make_shared<int_const>();
+			int_const::Ptr new_const = std::make_shared<int_const>();
 			new_const->value = vals[i][j];
 			new_init->elems.push_back(new_const);
 		}
@@ -185,11 +178,12 @@ void loop_roll_finder::visit(stmt_block::Ptr b) {
 			break;
 	}
 }
-void constant_expr_finder::visit(int_const::Ptr a) { constants.push_back(a); }
-
+void constant_expr_finder::visit(int_const::Ptr a) {
+	constants.push_back(a);
+}
 
 void constant_replacer::visit(int_const::Ptr a) {
-	node = replace[curr_index++];		
+	node = replace[curr_index++];
 }
 /*
 void constant_replacer::visit(plus_expr::Ptr a) {

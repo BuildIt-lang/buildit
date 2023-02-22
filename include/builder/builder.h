@@ -5,11 +5,8 @@
 
 namespace builder {
 
-struct sentinel_member {
+struct sentinel_member {};
 
-};
-
-}
-
+} // namespace builder
 
 #endif

@@ -34,8 +34,7 @@ void annotation_finder::visit(for_stmt::Ptr stmt) {
 	stmt->decl_stmt->accept(this);
 	stmt->body->accept(this);
 }
-stmt::Ptr annotation_finder::find_annotation(block::Ptr ast,
-					     std::string label) {
+stmt::Ptr annotation_finder::find_annotation(block::Ptr ast, std::string label) {
 	annotation_finder finder;
 	finder.annotation_to_find = label;
 	ast->accept(&finder);

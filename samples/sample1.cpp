@@ -10,7 +10,7 @@ static void foo(void) {
 	dyn_var<int> a = 0;
 	dyn_var<int> b = a;
 	a &&b;
-	a & b;
+	a &b;
 	b + 1;
 	1 + b;
 	a % 2;

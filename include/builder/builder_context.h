@@ -11,14 +11,10 @@
 
 namespace builder {
 
-
-
 template <typename T>
 block::expr::Ptr create_foreign_expr(const T t);
 template <typename T>
 builder create_foreign_expr_builder(const T t);
-
-
 
 class tracking_tuple {
 public:
@@ -59,13 +55,12 @@ public:
 
 	std::vector<bool> bool_vector;
 	std::unordered_set<std::string> visited_offsets;
-	
+
 	std::vector<block::expr::Ptr> expr_sequence;
 	unsigned long long expr_counter = 0;
 
 	tag_map _internal_tags;
 	tag_map *memoized_tags;
-
 
 	// Flags for controlling BuildIt extraction
 	// and code generation behavior
@@ -106,11 +101,12 @@ public:
 
 	block::func_decl::Ptr current_func_decl;
 	template <typename F, typename... OtherArgs>
-	block::stmt::Ptr extract_function_ast(F func_input, std::string func_name, OtherArgs&&... other_args) {
+	block::stmt::Ptr extract_function_ast(F func_input, std::string func_name, OtherArgs &&...other_args) {
 		current_func_decl = std::make_shared<block::func_decl>();
 		current_func_decl->func_name = func_name;
 		// The extract_signature_from_lambda will update the return type
-		current_func_decl->body = extract_ast_from_lambda(extract_signature_from_lambda<F, OtherArgs&...>::from(this, func_input, func_name, other_args...));
+		current_func_decl->body = extract_ast_from_lambda(
+		    extract_signature_from_lambda<F, OtherArgs &...>::from(this, func_input, func_name, other_args...));
 		return current_func_decl;
 	}
 
@@ -129,8 +125,6 @@ public:
 		return new_asm_variable;
 	}
 	~builder_context();
-
-
 };
 bool get_next_bool_from_context(builder_context *context, block::expr::Ptr);
 tracer::tag get_offset_in_function(void);

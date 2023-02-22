@@ -1,30 +1,28 @@
 #include "blocks/c_code_generator.h"
 #include "builder/builder.h"
 #include "builder/builder_context.h"
-#include "builder/static_var.h"
 #include "builder/dyn_var.h"
+#include "builder/static_var.h"
 #include <iostream>
+using builder::as_member;
 using builder::dyn_var;
 using builder::static_var;
-using builder::as_member;
 
-
-
-struct FooT: public builder::custom_type<> {
-	static constexpr const char* type_name = "FooT";
+struct FooT : public builder::custom_type<> {
+	static constexpr const char *type_name = "FooT";
 	dyn_var<int> member = as_member("member");
 };
 
 template <typename T>
-struct BarT: public builder::custom_type<T> {
-	static constexpr const char* type_name = "BarT";
+struct BarT : public builder::custom_type<T> {
+	static constexpr const char *type_name = "BarT";
 	dyn_var<int> my_member = as_member("my_member");
 	dyn_var<int> second_member = as_member("second_member");
 };
 
 template <typename T1, typename T2>
-struct CarT: public builder::custom_type<T1, T2> {
-	static constexpr const char* type_name = "CarT";
+struct CarT : public builder::custom_type<T1, T2> {
+	static constexpr const char *type_name = "CarT";
 	dyn_var<int> my_member = as_member("my_member");
 };
 
@@ -41,8 +39,6 @@ static void bar(void) {
 	dyn_var<CarT<int, BarT<float>>> l;
 	l.my_member = g.member;
 }
-
-
 
 int main(int argc, char *argv[]) {
 	builder::builder_context context;

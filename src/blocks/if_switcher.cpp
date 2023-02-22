@@ -16,5 +16,4 @@ void if_switcher::visit(if_stmt::Ptr ifs) {
 	block_visitor::visit(ifs);
 }
 
-
-}
+} // namespace block

@@ -12,15 +12,15 @@ struct custom_type_base;
 template <typename T>
 class type_extractor {
 public:
-	// This implementation is currenty only used 
+	// This implementation is currenty only used
 	// by custom types which are derived from custom_type_base
 	static block::type::Ptr extract_type(void) {
-		static_assert(std::is_base_of<custom_type_base, T>::value, "Custom types should inherit from builder::custom_type_base");
+		static_assert(std::is_base_of<custom_type_base, T>::value,
+			      "Custom types should inherit from builder::custom_type_base");
 		block::named_type::Ptr type = std::make_shared<block::named_type>();
 		type->type_name = T::type_name;
 		type->template_args = T::get_template_arg_types();
-		return type;	
-		
+		return type;
 	}
 };
 
@@ -44,7 +44,6 @@ public:
 		return type;
 	}
 };
-
 
 template <>
 class type_extractor<int> {
@@ -187,7 +186,6 @@ public:
 	}
 };
 
-
 // Type extractor for complete closure
 template <typename T>
 class type_extractor<dyn_var<T>> {
@@ -241,15 +239,13 @@ public:
 	}
 };
 
-template <const char* N, typename...Args>
-struct name {
-	
-};
+template <const char *N, typename... Args>
+struct name {};
 
-template <typename...Args>
+template <typename... Args>
 struct extract_type_from_args;
 
-template <typename T1, typename...Args>
+template <typename T1, typename... Args>
 struct extract_type_from_args<T1, Args...> {
 	static std::vector<block::type::Ptr> get_types() {
 		auto a = extract_type_from_args<Args...>::get_types();
@@ -265,19 +261,17 @@ struct extract_type_from_args<> {
 	}
 };
 
-
-template <const char* N, typename...Args>
+template <const char *N, typename... Args>
 class type_extractor<name<N, Args...>> {
 public:
 	static block::type::Ptr extract_type(void) {
 		block::named_type::Ptr type = std::make_shared<block::named_type>();
 		type->type_name = N;
 		type->template_args = extract_type_from_args<Args...>::get_types();
-		return type;	
+		return type;
 	}
 };
 
-
-}
+} // namespace builder
 
 #endif
