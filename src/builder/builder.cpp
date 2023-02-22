@@ -5,7 +5,7 @@
 
 namespace builder {
 namespace options {
-	bool track_members = false;
+bool track_members = false;
 }
 
 template <>

@@ -6,7 +6,7 @@
 namespace builder {
 
 namespace options {
-	extern bool track_members;
+extern bool track_members;
 }
 
 class var {
@@ -34,8 +34,7 @@ public:
 	block::expr::Ptr encompassing_expr;
 
 	// Feature to gather members of this type
-	std::vector<var*> members;
-
+	std::vector<var *> members;
 
 	static block::type::Ptr create_block_type(void) {
 		// Cannot create block type for abstract class

@@ -2,8 +2,8 @@
 #define C_CODE_GENERATOR_H
 #include "blocks/block_visitor.h"
 #include "blocks/stmt.h"
-#include "util/printer.h"
 #include "builder/dyn_var.h"
+#include "util/printer.h"
 #include <unordered_map>
 #include <unordered_set>
 
@@ -89,16 +89,17 @@ public:
 		printer::indent(oss, indent);
 		auto var_type = T::create_block_type();
 		assert(isa<named_type>(var_type) && "Cannot create struct declarations for un-named types");
-		assert(to<named_type>(var_type)->template_args.size() == 0 && "Cannot yet, generate decls for types with template args");
-		oss << "struct " << to<named_type>(var_type)->type_name << " {\n";	
+		assert(to<named_type>(var_type)->template_args.size() == 0 &&
+		       "Cannot yet, generate decls for types with template args");
+		oss << "struct " << to<named_type>(var_type)->type_name << " {\n";
 		indent++;
-		
-		for (auto member: v.members) {
+
+		for (auto member : v.members) {
 			printer::indent(oss, indent);
 			auto decl = std::make_shared<decl_stmt>();
 			decl->decl_var = member->block_var;
-			decl->accept(&generator);	
-			oss << std::endl;	
+			decl->accept(&generator);
+			oss << std::endl;
 		}
 		indent--;
 		printer::indent(oss, indent);
