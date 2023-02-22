@@ -19,6 +19,7 @@ include make/stable_config.mk
 include make/buildit_rules.mk
 include make/tests.mk
 
+include make/format.mk
 clean:
 	- rm -rf $(BUILD_DIR)
 clean_scratch:
