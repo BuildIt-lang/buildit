@@ -5,6 +5,10 @@
 #include "util/var_finder.h"
 namespace builder {
 
+namespace options {
+extern bool track_members;
+}
+
 class var {
 public:
 	enum var_state {
@@ -28,6 +32,9 @@ public:
 	// type derived from dyn_var, mainly for using members
 	// Avoid using this unless really required
 	block::expr::Ptr encompassing_expr;
+
+	// Feature to gather members of this type
+	std::vector<var *> members;
 
 	static block::type::Ptr create_block_type(void) {
 		// Cannot create block type for abstract class
@@ -223,6 +230,13 @@ public:
 		var_name = a.member_name;
 		block_var = nullptr;
 		block_decl_stmt = nullptr;
+
+		if (options::track_members) {
+			parent_var->members.push_back(this);
+			block_var = std::make_shared<block::var>();
+			block_var->var_type = create_block_type();
+			block_var->var_name = var_name;
+		}
 	}
 	// Constructor and operator = to initialize a dyn_var as a compound expr
 	// This declaration also does not produce a declaration or assign stmt

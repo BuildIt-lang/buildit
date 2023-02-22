@@ -14,16 +14,16 @@ struct FooT : public builder::custom_type<> {
 };
 
 template <typename T>
-struct BarT : public builder::custom_type<T> {
+struct BarT : public builder::custom_type<> {
 	static constexpr const char *type_name = "BarT";
-	dyn_var<int> my_member = as_member("my_member");
-	dyn_var<int> second_member = as_member("second_member");
+	dyn_var<T> my_member = as_member("my_member");
+	dyn_var<T> second_member = as_member("second_member");
 };
 
 template <typename T1, typename T2>
 struct CarT : public builder::custom_type<T1, T2> {
 	static constexpr const char *type_name = "CarT";
-	dyn_var<int> my_member = as_member("my_member");
+	dyn_var<T2> my_member = as_member("my_member");
 };
 
 static void bar(void) {
@@ -42,8 +42,15 @@ static void bar(void) {
 
 int main(int argc, char *argv[]) {
 	builder::builder_context context;
-	auto ast = context.extract_ast_from_function(bar);
+	auto ast = context.extract_function_ast(bar, "my_bar");
 	ast->dump(std::cout, 0);
+
+	block::c_code_generator::generate_struct_decl<dyn_var<FooT>>(std::cout);
+	block::c_code_generator::generate_struct_decl<dyn_var<BarT<int>>>(std::cout);
+
+	// Don't do this because this has a template in the generated type
+	// block::c_code_generator::generate_struct_decl<dyn_var<CarT<int, BarT<float>>>>(std::cout);
+
 	block::c_code_generator::generate_code(ast, std::cout, 0);
 	return 0;
 }
