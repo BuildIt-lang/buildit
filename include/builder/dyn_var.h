@@ -7,13 +7,12 @@ namespace builder {
 
 class var {
 public:
-
 	enum var_state {
 		standalone_var,
 		member_var,
-		compound_expr,			
+		compound_expr,
 	};
-	
+
 	var_state current_state = standalone_var;
 
 	// Optional var name
@@ -21,15 +20,15 @@ public:
 	block::var::Ptr block_var;
 	block::decl_stmt::Ptr block_decl_stmt;
 
-        // Feature to implement members
-        var *parent_var;
+	// Feature to implement members
+	var *parent_var;
 
 	// Feature to implement vars as complex expressions
-	// This is require when casting a compound_expr to a 
+	// This is require when casting a compound_expr to a
 	// type derived from dyn_var, mainly for using members
 	// Avoid using this unless really required
 	block::expr::Ptr encompassing_expr;
-	
+
 	static block::type::Ptr create_block_type(void) {
 		// Cannot create block type for abstract class
 		assert(false);
@@ -41,79 +40,75 @@ public:
 
 	// This is for enabling dynamic inheritance
 	virtual ~var() = default;
-
-
 };
 
-struct custom_type_base {	
+struct custom_type_base {
 	static std::vector<block::type::Ptr> get_template_arg_types() {
 		return extract_type_from_args<>::get_types();
 	}
 };
 
-template <typename...Args>
-struct custom_type: custom_type_base {
+template <typename... Args>
+struct custom_type : custom_type_base {
 	static std::vector<block::type::Ptr> get_template_arg_types() {
 		return extract_type_from_args<Args...>::get_types();
 	}
 };
 
-static std::vector<var*> *parents_stack = nullptr;
+static std::vector<var *> *parents_stack = nullptr;
 // Struct to initialize a dyn_var as member;
 struct as_member {
 	var *parent_var;
-	std::string member_name; 
+	std::string member_name;
 	// This constructor is to be used if the user prefers to define a specialization for
 	// dyn_var. In this case they do not inherit from custom_type_base
-	as_member(var* p, std::string n): parent_var(p), member_name(n) {};	
-	as_member(std::string n): parent_var(parents_stack->back()), member_name(n) {}
+	as_member(var *p, std::string n) : parent_var(p), member_name(n){};
+	as_member(std::string n) : parent_var(parents_stack->back()), member_name(n) {}
 };
 // Struct to initialize a dyn_var as a compound expr
 struct as_compound_expr {
 	block::expr::Ptr encompassing_expr;
-	as_compound_expr(const builder &b): encompassing_expr(b.block_expr) {}	
+	as_compound_expr(const builder &b) : encompassing_expr(b.block_expr) {}
 };
 using cast = as_compound_expr;
 
 struct as_global {
 	std::string name;
-	as_global(const std::string &n): name(n) {}
+	as_global(const std::string &n) : name(n) {}
 };
 // With name is just like as_global but can be used locally
 struct with_name {
 	std::string name;
-	with_name(const std::string &n): name(n) {}
+	with_name(const std::string &n) : name(n) {}
 };
 
-template<typename T>
-class dyn_var_impl: public var{
+template <typename T>
+class dyn_var_impl : public var {
 public:
-	
 	typedef builder BT;
 	typedef dyn_var_impl<T> my_type;
 	// These are required for overloads
 	typedef BT associated_BT;
 	typedef T stored_type;
-		
+
 	template <typename... types>
-	BT operator()(const types &... args) {
+	BT operator()(const types &...args) {
 		return ((BT) * this)(args...);
 	}
 
-	
 	// These three need to be defined inside the class, cannot be defined globally
-	BT operator=(const var &a) { 
-		return (BT) * this = a; 
+	BT operator=(const var &a) {
+		return (BT) * this = a;
 	}
 
-	BT operator[] (const BT &a) {
-		return ((BT) *this)[a];
+	BT operator[](const BT &a) {
+		return ((BT) * this)[a];
 	}
-	BT operator* (void) {
-		return ((BT) *this)[0];
+	BT operator*(void) {
+		return ((BT) * this)[0];
 	}
 	BT operator=(const BT &a) {
-		return (BT)*this = a;
+		return (BT) * this = a;
 	}
 
 	BT operator=(const dyn_var_impl<T> &a) {
@@ -125,21 +120,21 @@ public:
 		return (BT) * this = a;
 	}
 
-	BT operator=(const int &a) { 
-		return operator=((BT)a); 
+	BT operator=(const int &a) {
+		return operator=((BT)a);
 	}
 
-	BT operator=(const double &a) { 
-		return operator=((BT)a); 
+	BT operator=(const double &a) {
+		return operator=((BT)a);
 	}
 
 	BT operator=(const std::string &s) {
 		return operator=((BT)s);
 	}
-	BT operator=(char* s) {
+	BT operator=(char *s) {
 		return operator=((BT)s);
 	}
-	BT operator=(const char* s) {
+	BT operator=(const char *s) {
 		return operator=((BT)s);
 	}
 
@@ -148,11 +143,15 @@ public:
 		return operator=((BT)a);
 	}
 
-	BT operator!() { return !(BT) * this; }
-	operator bool() { return (bool)(BT) * this; }
+	BT operator!() {
+		return !(BT) * this;
+	}
+	operator bool() {
+		return (bool)(BT) * this;
+	}
 
-	static block::type::Ptr create_block_type(void) { 
-		return type_extractor<T>::extract_type(); 
+	static block::type::Ptr create_block_type(void) {
+		return type_extractor<T>::extract_type();
 	}
 
 	void create_dyn_var(bool create_without_context = false) {
@@ -161,7 +160,7 @@ public:
 			dyn_var->var_type = create_block_type();
 			block_var = dyn_var;
 			// Don't try to obtain preferred names for objects created without context
-			//dyn_var->preferred_name = util::find_variable_name(this);
+			// dyn_var->preferred_name = util::find_variable_name(this);
 			return;
 		}
 		assert(builder_context::current_builder_context != nullptr);
@@ -188,13 +187,13 @@ public:
 		create_dyn_var(false);
 	}
 	// Basic and other constructors
-	dyn_var_impl(const as_global &v) { 
+	dyn_var_impl(const as_global &v) {
 		if (builder_context::current_builder_context == nullptr) {
-			create_dyn_var(true); 
+			create_dyn_var(true);
 			block_var->var_name = v.name;
 			var_name = v.name;
 		} else {
-			create_dyn_var(false); 
+			create_dyn_var(false);
 			block_var->var_name = v.name;
 			var_name = v.name;
 		}
@@ -209,19 +208,19 @@ public:
 		block_var->var_name = v.name;
 		var_name = v.name;
 	}
-	dyn_var_impl(const dyn_var_sentinel_type& a, std::string name = "") {
+	dyn_var_impl(const dyn_var_sentinel_type &a, std::string name = "") {
 		create_dyn_var(true);
 		if (name != "") {
 			block_var->var_name = name;
 			var_name = name;
-		}	
+		}
 	}
-        // Constructor to initialize a dyn_var as member
-        // This declaration does not produce a declaration
-        dyn_var_impl(const as_member &a) {
+	// Constructor to initialize a dyn_var as member
+	// This declaration does not produce a declaration
+	dyn_var_impl(const as_member &a) {
 		current_state = member_var;
 		parent_var = a.parent_var;
-		var_name = a.member_name;            
+		var_name = a.member_name;
 		block_var = nullptr;
 		block_decl_stmt = nullptr;
 	}
@@ -231,31 +230,29 @@ public:
 		current_state = compound_expr;
 		parent_var = nullptr;
 		block_var = nullptr;
-		block_decl_stmt = nullptr;	
-		encompassing_expr = a.encompassing_expr;	
+		block_decl_stmt = nullptr;
+		encompassing_expr = a.encompassing_expr;
 	}
-	void operator = (const as_compound_expr& a) {
+	void operator=(const as_compound_expr &a) {
 		current_state = compound_expr;
 		parent_var = nullptr;
 		block_var = nullptr;
-		block_decl_stmt = nullptr;	
-		encompassing_expr = a.encompassing_expr;	
+		block_decl_stmt = nullptr;
+		encompassing_expr = a.encompassing_expr;
 	}
-	// A very special move constructor that is used to create exact 
+	// A very special move constructor that is used to create exact
 	// replicas of variables
 	dyn_var_impl(const dyn_var_consume &a) {
 		block_var = a.block_var;
 		var_name = block_var->var_name;
-		block_decl_stmt = nullptr;	
-		
+		block_decl_stmt = nullptr;
 	}
 
 	dyn_var_impl(const my_type &a) : my_type((BT)a) {}
 
-	
 	template <typename TO>
 	dyn_var_impl(const dyn_var_impl<TO> &a) : my_type((BT)a) {}
-	
+
 	template <typename TO>
 	dyn_var_impl(const static_var<TO> &a) : my_type((TO)a) {}
 
@@ -272,8 +269,8 @@ public:
 	dyn_var_impl(const double &a) : my_type((BT)a) {}
 	dyn_var_impl(const float &a) : my_type((BT)a) {}
 	dyn_var_impl(const std::string &a) : my_type((BT)a) {}
-	dyn_var_impl(const char* s): my_type((BT)(std::string)s) {}
-	dyn_var_impl(char* s): my_type((BT)(std::string)s) {}
+	dyn_var_impl(const char *s) : my_type((BT)(std::string)s) {}
+	dyn_var_impl(char *s) : my_type((BT)(std::string)s) {}
 
 	dyn_var_impl(const std::initializer_list<BT> &_a) {
 		std::vector<BT> a(_a);
@@ -285,10 +282,10 @@ public:
 		create_dyn_var();
 		if (builder::builder_precheck()) {
 			builder bt = builder::create_builder_from_sequence();
-			if (block_decl_stmt) 
+			if (block_decl_stmt)
 				block_decl_stmt->init_expr = bt.block_expr;
 			return;
-		}	
+		}
 		tracer::tag offset = get_offset_in_function();
 		block::initializer_list_expr::Ptr list_expr = std::make_shared<block::initializer_list_expr>();
 		list_expr->static_offset = offset;
@@ -297,36 +294,30 @@ public:
 		}
 		block_decl_stmt->init_expr = list_expr;
 		builder::push_to_sequence(list_expr);
-		
 	}
-
 
 	virtual ~dyn_var_impl() = default;
 
-
 	// Assume that _impl objects will never be created
 	// Thus addr can always cast the address to dyn_var<T>
-	dyn_var<T>* addr(void) {
+	dyn_var<T> *addr(void) {
 		// TODO: Consider using dynamic_cast here
-		return (dyn_var<T>*)this;
+		return (dyn_var<T> *)this;
 	}
-
 };
 
 template <typename T, typename V>
 struct dyn_var_parent_selector {
-	// This base class is just empty	
+	// This base class is just empty
 };
-
-
 
 template <typename T>
 struct member_initializer_begin {
 	member_initializer_begin() {
 		if (parents_stack == nullptr) {
-			parents_stack = new std::vector<var*>();
+			parents_stack = new std::vector<var *>();
 		}
-		parents_stack->push_back(static_cast<var*>(static_cast<dyn_var<T>*>(this)));
+		parents_stack->push_back(static_cast<var *>(static_cast<dyn_var<T> *>(this)));
 	}
 };
 
@@ -337,41 +328,38 @@ struct member_initializer_end {
 };
 
 template <typename T>
-struct dyn_var_parent_selector <T, typename std::enable_if<std::is_base_of<custom_type_base, T>::value>::type>: public member_initializer_begin<T>, public T, public member_initializer_end {
-};
-
+struct dyn_var_parent_selector<T, typename std::enable_if<std::is_base_of<custom_type_base, T>::value>::type>
+    : public member_initializer_begin<T>, public T, public member_initializer_end {};
 
 // Actual dyn_var implementation
 // Split design to allow for easily extending types with specialization
-template<typename T>
-class dyn_var: public dyn_var_impl<T>, public dyn_var_parent_selector<T, void> {
+template <typename T>
+class dyn_var : public dyn_var_impl<T>, public dyn_var_parent_selector<T, void> {
 public:
 	typedef dyn_var_impl<T> super;
-	
+
 	using super::super;
 	using super::operator=;
-	
-	dyn_var(): dyn_var_impl<T>() {}
-	
+
+	dyn_var() : dyn_var_impl<T>() {}
+
 	// Some implementations don't like implicitly declared
 	// constructors so define them here
-	dyn_var(const dyn_var<T> &t): dyn_var_impl<T>((builder)t){}
+	dyn_var(const dyn_var<T> &t) : dyn_var_impl<T>((builder)t) {}
 
-	// Unfortunately because we are changing the return type, 
-	// the implicitly defined copy assignment will always 
+	// Unfortunately because we are changing the return type,
+	// the implicitly defined copy assignment will always
 	// shadow the version the parent defines
-	builder operator= (const dyn_var<T> &t) {
+	builder operator=(const dyn_var<T> &t) {
 		return *this = (builder)t;
 	}
 };
 
-
 template <typename T>
 typename std::enable_if<std::is_base_of<var, T>::value>::type create_return_stmt(const T &a) {
-	create_return_stmt((typename T::associated_BT)a);	
+	create_return_stmt((typename T::associated_BT)a);
 }
 
-
-}
+} // namespace builder
 
 #endif

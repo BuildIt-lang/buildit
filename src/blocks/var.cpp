@@ -22,15 +22,15 @@ void scalar_type::dump(std::ostream &oss, int indent) {
 	else if (scalar_type_id == INT_TYPE)
 		oss << "INT";
 	else if (scalar_type_id == UNSIGNED_INT_TYPE)
-		oss << "UNSIGNED_INT";	
+		oss << "UNSIGNED_INT";
 	else if (scalar_type_id == LONG_INT_TYPE)
-		oss << "LONG_INT";	
+		oss << "LONG_INT";
 	else if (scalar_type_id == UNSIGNED_LONG_INT_TYPE)
-		oss << "UNSIGNED_LONG_INT";	
+		oss << "UNSIGNED_LONG_INT";
 	else if (scalar_type_id == LONG_LONG_INT_TYPE)
-		oss << "LONG_LONG_INT";	
+		oss << "LONG_LONG_INT";
 	else if (scalar_type_id == UNSIGNED_LONG_LONG_INT_TYPE)
-		oss << "UNSIGNED_LONG_LONG_INT";	
+		oss << "UNSIGNED_LONG_LONG_INT";
 	else if (scalar_type_id == CHAR_TYPE)
 		oss << "CHAR";
 	else if (scalar_type_id == UNSIGNED_CHAR_TYPE)
@@ -76,7 +76,7 @@ void named_type::dump(std::ostream &oss, int indent) {
 	printer::indent(oss, indent);
 	oss << "NAMED_TYPE (";
 	oss << type_name << ")" << std::endl;
-	for (unsigned int i = 0; i < template_args.size(); i++) 
+	for (unsigned int i = 0; i < template_args.size(); i++)
 		template_args[i]->dump(oss, indent + 1);
 }
 } // namespace block

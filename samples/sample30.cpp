@@ -2,8 +2,8 @@
 #include "builder/builder.h"
 #include "builder/builder_context.h"
 #include "builder/builder_union.h"
-#include "builder/static_var.h"
 #include "builder/dyn_var.h"
+#include "builder/static_var.h"
 #include <iostream>
 using builder::builder_union;
 using builder::dyn_var;
@@ -22,10 +22,10 @@ static void foo(void) {
 	dyn_var<unsigned char> j;
 	dyn_var<float> k;
 	dyn_var<double> l;
-	dyn_var<void*> m;
+	dyn_var<void *> m;
 	dyn_var<char[]> n = "Hello world";
 	n = "new string";
-	
+
 	// bool test, fixes a bug
 	// that causes false as an init value creates a variable
 	// without context

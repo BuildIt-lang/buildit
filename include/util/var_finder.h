@@ -2,8 +2,8 @@
 #define UTIL_VAR_FINDER_H
 #include <string>
 namespace util {
-std::string find_variable_name(void*);
-std::string find_variable_name_cached(void*, std::string tag_string);
-}
+std::string find_variable_name(void *);
+std::string find_variable_name_cached(void *, std::string tag_string);
+} // namespace util
 
 #endif

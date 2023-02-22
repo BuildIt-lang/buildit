@@ -1,8 +1,8 @@
 #include "blocks/c_code_generator.h"
 #include "builder/builder.h"
 #include "builder/builder_context.h"
-#include "builder/static_var.h"
 #include "builder/dyn_var.h"
+#include "builder/static_var.h"
 #include <iostream>
 
 using builder::dyn_var;
@@ -23,8 +23,7 @@ public:
 		builder::builder b;
 		b.construct_builder_from_foreign_expr(*this);
 		return b;
-	}	
-
+	}
 };
 
 // A simple straight line code with 2 variable declarations and one operator

@@ -3,8 +3,8 @@
 #include "builder/builder.h"
 #include "builder/builder_context.h"
 #include "builder/builder_union.h"
-#include "builder/static_var.h"
 #include "builder/dyn_var.h"
+#include "builder/static_var.h"
 #include <iostream>
 using builder::builder_union;
 using builder::dyn_var;
@@ -14,19 +14,14 @@ static void foo(void) {
 	dyn_var<int> sum = 0;
 	const int arr[] = {1, 3, 4, 0, 2, 6, 0, 8, 0, 0, 1, -2, 0, 0, 3};
 
-	for (static_var<unsigned int> x = 0; x < sizeof(arr) / sizeof(*arr);
-	     x++) {
+	for (static_var<unsigned int> x = 0; x < sizeof(arr) / sizeof(*arr); x++) {
 		if (arr[x] != 0) {
 			builder::annotate("roll.0");
 			sum = sum + arr[x];
 		}
 	}
 
-	const int adj[5][5] = {{4, 0, 1, 0, 0},
-			       {5, 0, 0, 0, 1},
-			       {0, 0, 1, 0, 0},
-			       {1, 2, 1, 0, 0},
-			       {0, 0, 0, 0, 0}};
+	const int adj[5][5] = {{4, 0, 1, 0, 0}, {5, 0, 0, 0, 1}, {0, 0, 1, 0, 0}, {1, 2, 1, 0, 0}, {0, 0, 0, 0, 0}};
 
 	dyn_var<int[5]> old_ranks;
 	dyn_var<int[5]> new_ranks;
@@ -38,8 +33,7 @@ static void foo(void) {
 				builder::annotate("roll.1");
 				// builder::annotate("roll.1." +
 				// std::to_string(src));
-				new_ranks[src] = new_ranks[src] +
-						 adj[src][dst] * old_ranks[dst];
+				new_ranks[src] = new_ranks[src] + adj[src][dst] * old_ranks[dst];
 			}
 		}
 	}

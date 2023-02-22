@@ -29,38 +29,37 @@ std::shared_ptr<T> to(std::shared_ptr<block> p) {
 	return ret;
 }
 
-
 template <typename T>
 class block_metadata_impl;
 
-class block_metadata: public std::enable_shared_from_this<block_metadata> {
+class block_metadata : public std::enable_shared_from_this<block_metadata> {
 public:
 	typedef std::shared_ptr<block_metadata> Ptr;
 	virtual ~block_metadata() = default;
-	
+
 	template <typename T>
-	bool isa (void) {
+	bool isa(void) {
 		if (std::dynamic_pointer_cast<block_metadata_impl<T>>(shared_from_this())) {
 			return true;
 		}
 		return false;
 	}
-	
+
 	template <typename T>
-	std::shared_ptr<block_metadata_impl<T>> to (void) {
-		std::shared_ptr<block_metadata_impl<T>> ret = std::dynamic_pointer_cast<block_metadata_impl<T>>(shared_from_this());
+	std::shared_ptr<block_metadata_impl<T>> to(void) {
+		std::shared_ptr<block_metadata_impl<T>> ret =
+		    std::dynamic_pointer_cast<block_metadata_impl<T>>(shared_from_this());
 		assert(ret != nullptr);
 		return ret;
 	}
 };
 
 template <typename T>
-class block_metadata_impl: public block_metadata {
+class block_metadata_impl : public block_metadata {
 public:
 	typedef std::shared_ptr<block_metadata_impl<T>> Ptr;
 	T val;
-	block_metadata_impl(T _val): val(_val) {
-	}
+	block_metadata_impl(T _val) : val(_val) {}
 };
 
 class block : public std::enable_shared_from_this<block> {
@@ -72,13 +71,13 @@ public:
 	tracer::tag static_offset;
 
 	std::unordered_map<std::string, std::shared_ptr<block_metadata>> metadata_map;
-	
+
 	template <typename T>
 	void setMetadata(std::string mdname, const T &val) {
 		typename block_metadata_impl<T>::Ptr mdnode = std::make_shared<block_metadata_impl<T>>(val);
 		metadata_map[mdname] = mdnode;
 	}
-	
+
 	template <typename T>
 	bool hasMetadata(std::string mdname) {
 		if (metadata_map.find(mdname) == metadata_map.end())
@@ -88,18 +87,19 @@ public:
 			return false;
 		return true;
 	}
-	
 
 	template <typename T>
 	T getMetadata(std::string mdname) {
 		if (!hasMetadata<T>(mdname))
-			assert(false && "No metadata with name specified");	
+			assert(false && "No metadata with name specified");
 		typename block_metadata::Ptr mdnode = metadata_map[mdname];
 		return mdnode->to<T>()->val;
 	}
 
 	virtual void dump(std::ostream &, int);
-	virtual void accept(block_visitor *visitor) { visitor->visit(self<block>()); }
+	virtual void accept(block_visitor *visitor) {
+		visitor->visit(self<block>());
+	}
 	template <typename T>
 	std::shared_ptr<T> self() {
 		return to<T>(shared_from_this());

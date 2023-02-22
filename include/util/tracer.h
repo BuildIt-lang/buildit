@@ -29,8 +29,12 @@ public:
 				return false;
 		return true;
 	}
-	bool operator!=(const tag &other) { return !operator==(other); }
-	bool is_empty(void) { return pointers.size() == 0; }
+	bool operator!=(const tag &other) {
+		return !operator==(other);
+	}
+	bool is_empty(void) {
+		return pointers.size() == 0;
+	}
 	void clear(void) {
 		pointers.clear();
 		static_var_snapshots.clear();

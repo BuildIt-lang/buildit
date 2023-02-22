@@ -8,5 +8,5 @@ public:
 	using block_visitor::visit;
 	virtual void visit(if_stmt::Ptr);
 };
-}
+} // namespace block
 #endif

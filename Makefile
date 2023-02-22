@@ -15,11 +15,11 @@ CONFIG_STR=DEBUG=$(DEBUG) RECOVER_VAR_NAMES=$(RECOVER_VAR_NAMES) TRACER_USE_LIBU
 $(shell mkdir -p $(BASE_DIR)/scratch)
 
 include make/pkgconfig.mk
+include make/format.mk
 include make/stable_config.mk
 include make/buildit_rules.mk
 include make/tests.mk
 
-include make/format.mk
 clean:
 	- rm -rf $(BUILD_DIR)
 clean_scratch:

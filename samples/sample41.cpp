@@ -1,8 +1,8 @@
 // Include the headers
 #include "blocks/c_code_generator.h"
 #include "builder/builder_dynamic.h"
-#include "builder/static_var.h"
 #include "builder/dyn_var.h"
+#include "builder/static_var.h"
 #include <iostream>
 
 // Include the BuildIt types
@@ -22,7 +22,7 @@ static dyn_var<int> power_f(void) {
 	return y[0];
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
 	builder::builder_context context;
 	context.dynamic_use_cxx = true;
 	context.dynamic_header_includes = "#include <vector>";
@@ -31,5 +31,3 @@ int main(int argc, char* argv[]) {
 	std::cout << fptr() << std::endl;
 	return 0;
 }
-
-

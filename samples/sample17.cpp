@@ -1,8 +1,8 @@
 #include "blocks/c_code_generator.h"
 #include "builder/builder.h"
 #include "builder/builder_context.h"
-#include "builder/static_var.h"
 #include "builder/dyn_var.h"
+#include "builder/static_var.h"
 #include <iostream>
 
 using builder::dyn_var;
@@ -78,14 +78,11 @@ int main(int argc, char *argv[]) {
 	builder::builder_context context;
 
 	// BF program that prints hello world
-	bf_program =
-	    "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.++++++"
-	    "+..+++.>>.<-.<.+++.------.--------.>>+.>++.";
+	bf_program = "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.++++++"
+		     "+..+++.>>.<-.<.+++.------.--------.>>+.>++.";
 
-	print_value_ptr =
-	    context.assume_variable<dyn_var<void(int)>>("print_value");
-	get_value_ptr =
-	    context.assume_variable<dyn_var<int(void)>>("get_value");
+	print_value_ptr = context.assume_variable<dyn_var<void(int)>>("print_value");
+	get_value_ptr = context.assume_variable<dyn_var<int(void)>>("get_value");
 
 	auto ast = context.extract_ast_from_function(interpret_bf);
 

@@ -10,7 +10,7 @@
 namespace builder {
 extern void lambda_wrapper(void);
 extern void lambda_wrapper_close(void);
-}
+} // namespace builder
 namespace tracer {
 #ifdef TRACER_USE_LIBUNWIND
 tag get_offset_in_function_impl(builder::builder_context *current_builder_context) {
@@ -26,22 +26,20 @@ tag get_offset_in_function_impl(builder::builder_context *current_builder_contex
 	while (unw_step(&cursor)) {
 		unw_word_t ip;
 		unw_get_reg(&cursor, UNW_REG_IP, &ip);
-		if ((unsigned long long)ip >= function && (unsigned long long) ip < function_end)
+		if ((unsigned long long)ip >= function && (unsigned long long)ip < function_end)
 			break;
 		new_tag.pointers.push_back((unsigned long long)ip);
 	}
 	// Now add snapshots of static vars
 	assert(current_builder_context != nullptr);
-	for (builder::tracking_tuple tuple :
-	     current_builder_context->static_var_tuples) {
+	for (builder::tracking_tuple tuple : current_builder_context->static_var_tuples) {
 		new_tag.static_var_snapshots.push_back(tuple.snapshot());
 	}
 	return new_tag;
 }
 
 #else
-tag get_offset_in_function_impl(
-    builder::builder_context *current_builder_context) {
+tag get_offset_in_function_impl(builder::builder_context *current_builder_context) {
 	unsigned long long function = (unsigned long long)(void *)builder::lambda_wrapper;
 	unsigned long long function_end = (unsigned long long)(void *)builder::lambda_wrapper_close;
 
@@ -50,15 +48,14 @@ tag get_offset_in_function_impl(
 	// First add the RIP pointers
 	int backtrace_size = backtrace(buffer, 50);
 	for (int i = 0; i < backtrace_size; i++) {
-		if ((unsigned long long)buffer[i] >= function && (unsigned long long) buffer[i] < function_end)
+		if ((unsigned long long)buffer[i] >= function && (unsigned long long)buffer[i] < function_end)
 			break;
 		new_tag.pointers.push_back((unsigned long long)buffer[i]);
 	}
 
 	// Now add snapshots of static vars
 	assert(current_builder_context != nullptr);
-	for (builder::tracking_tuple tuple :
-	     current_builder_context->static_var_tuples) {
+	for (builder::tracking_tuple tuple : current_builder_context->static_var_tuples) {
 		new_tag.static_var_snapshots.push_back(tuple.snapshot());
 	}
 	return new_tag;

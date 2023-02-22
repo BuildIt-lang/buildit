@@ -18,8 +18,7 @@ static bool expr_needs_bracket(expr::Ptr a) {
 		return true;
 	return false;
 }
-void c_code_generator::emit_binary_expr(binary_expr::Ptr a,
-					std::string character) {
+void c_code_generator::emit_binary_expr(binary_expr::Ptr a, std::string character) {
 	if (expr_needs_bracket(a->expr1)) {
 		oss << "(";
 		a->expr1->accept(this);
@@ -34,25 +33,63 @@ void c_code_generator::emit_binary_expr(binary_expr::Ptr a,
 	} else
 		a->expr2->accept(this);
 }
-void c_code_generator::visit(and_expr::Ptr a) { emit_binary_expr(a, "&&"); }
-void c_code_generator::visit(bitwise_and_expr::Ptr a) { emit_binary_expr(a, "&"); }
-void c_code_generator::visit(or_expr::Ptr a) { emit_binary_expr(a, "||"); }
-void c_code_generator::visit(bitwise_or_expr::Ptr a) { emit_binary_expr(a, "|"); }
-void c_code_generator::visit(plus_expr::Ptr a) { emit_binary_expr(a, "+"); }
-void c_code_generator::visit(minus_expr::Ptr a) { emit_binary_expr(a, "-"); }
-void c_code_generator::visit(mul_expr::Ptr a) { emit_binary_expr(a, "*"); }
-void c_code_generator::visit(div_expr::Ptr a) { emit_binary_expr(a, "/"); }
-void c_code_generator::visit(lt_expr::Ptr a) { emit_binary_expr(a, "<"); }
-void c_code_generator::visit(gt_expr::Ptr a) { emit_binary_expr(a, ">"); }
-void c_code_generator::visit(lte_expr::Ptr a) { emit_binary_expr(a, "<="); }
-void c_code_generator::visit(gte_expr::Ptr a) { emit_binary_expr(a, ">="); }
-void c_code_generator::visit(lshift_expr::Ptr a) { emit_binary_expr(a, "<<"); }
-void c_code_generator::visit(rshift_expr::Ptr a) { emit_binary_expr(a, ">>"); }
-void c_code_generator::visit(equals_expr::Ptr a) { emit_binary_expr(a, "=="); }
-void c_code_generator::visit(ne_expr::Ptr a) { emit_binary_expr(a, "!="); }
-void c_code_generator::visit(mod_expr::Ptr a) { emit_binary_expr(a, "%"); }
-void c_code_generator::visit(var_expr::Ptr a) { oss << a->var1->var_name; }
-void c_code_generator::visit(int_const::Ptr a) { oss << a->value; }
+void c_code_generator::visit(and_expr::Ptr a) {
+	emit_binary_expr(a, "&&");
+}
+void c_code_generator::visit(bitwise_and_expr::Ptr a) {
+	emit_binary_expr(a, "&");
+}
+void c_code_generator::visit(or_expr::Ptr a) {
+	emit_binary_expr(a, "||");
+}
+void c_code_generator::visit(bitwise_or_expr::Ptr a) {
+	emit_binary_expr(a, "|");
+}
+void c_code_generator::visit(plus_expr::Ptr a) {
+	emit_binary_expr(a, "+");
+}
+void c_code_generator::visit(minus_expr::Ptr a) {
+	emit_binary_expr(a, "-");
+}
+void c_code_generator::visit(mul_expr::Ptr a) {
+	emit_binary_expr(a, "*");
+}
+void c_code_generator::visit(div_expr::Ptr a) {
+	emit_binary_expr(a, "/");
+}
+void c_code_generator::visit(lt_expr::Ptr a) {
+	emit_binary_expr(a, "<");
+}
+void c_code_generator::visit(gt_expr::Ptr a) {
+	emit_binary_expr(a, ">");
+}
+void c_code_generator::visit(lte_expr::Ptr a) {
+	emit_binary_expr(a, "<=");
+}
+void c_code_generator::visit(gte_expr::Ptr a) {
+	emit_binary_expr(a, ">=");
+}
+void c_code_generator::visit(lshift_expr::Ptr a) {
+	emit_binary_expr(a, "<<");
+}
+void c_code_generator::visit(rshift_expr::Ptr a) {
+	emit_binary_expr(a, ">>");
+}
+void c_code_generator::visit(equals_expr::Ptr a) {
+	emit_binary_expr(a, "==");
+}
+void c_code_generator::visit(ne_expr::Ptr a) {
+	emit_binary_expr(a, "!=");
+}
+void c_code_generator::visit(mod_expr::Ptr a) {
+	emit_binary_expr(a, "%");
+}
+void c_code_generator::visit(var_expr::Ptr a) {
+	oss << a->var1->var_name;
+}
+void c_code_generator::visit(int_const::Ptr a) {
+	oss << a->value;
+}
 void c_code_generator::visit(double_const::Ptr a) {
 	oss << std::setprecision(15);
 	oss << a->value;
@@ -100,22 +137,48 @@ void c_code_generator::visit(stmt_block::Ptr a) {
 	oss << "}";
 }
 void c_code_generator::visit(scalar_type::Ptr type) {
-	switch(type->scalar_type_id) {
-		case scalar_type::SHORT_INT_TYPE: oss << "short int"; break;
-		case scalar_type::UNSIGNED_SHORT_INT_TYPE: oss << "unsigned short int"; break;
-		case scalar_type::INT_TYPE: oss << "int"; break;
-		case scalar_type::UNSIGNED_INT_TYPE: oss << "unsigned int"; break;
-		case scalar_type::LONG_INT_TYPE: oss << "long int"; break;
-		case scalar_type::UNSIGNED_LONG_INT_TYPE: oss << "unsigned long int"; break;
-		case scalar_type::LONG_LONG_INT_TYPE: oss << "long long int"; break;
-		case scalar_type::UNSIGNED_LONG_LONG_INT_TYPE: oss << "unsigned long long int"; break;
-		case scalar_type::CHAR_TYPE: oss << "char"; break;
-		case scalar_type::UNSIGNED_CHAR_TYPE: oss << "unsigned char"; break;
-		case scalar_type::VOID_TYPE: oss << "void"; break;
-		case scalar_type::FLOAT_TYPE: oss << "float"; break;
-		case scalar_type::DOUBLE_TYPE: oss << "double"; break;
-		default:
-			assert(false && "Invalid scalar type");
+	switch (type->scalar_type_id) {
+	case scalar_type::SHORT_INT_TYPE:
+		oss << "short int";
+		break;
+	case scalar_type::UNSIGNED_SHORT_INT_TYPE:
+		oss << "unsigned short int";
+		break;
+	case scalar_type::INT_TYPE:
+		oss << "int";
+		break;
+	case scalar_type::UNSIGNED_INT_TYPE:
+		oss << "unsigned int";
+		break;
+	case scalar_type::LONG_INT_TYPE:
+		oss << "long int";
+		break;
+	case scalar_type::UNSIGNED_LONG_INT_TYPE:
+		oss << "unsigned long int";
+		break;
+	case scalar_type::LONG_LONG_INT_TYPE:
+		oss << "long long int";
+		break;
+	case scalar_type::UNSIGNED_LONG_LONG_INT_TYPE:
+		oss << "unsigned long long int";
+		break;
+	case scalar_type::CHAR_TYPE:
+		oss << "char";
+		break;
+	case scalar_type::UNSIGNED_CHAR_TYPE:
+		oss << "unsigned char";
+		break;
+	case scalar_type::VOID_TYPE:
+		oss << "void";
+		break;
+	case scalar_type::FLOAT_TYPE:
+		oss << "float";
+		break;
+	case scalar_type::DOUBLE_TYPE:
+		oss << "double";
+		break;
+	default:
+		assert(false && "Invalid scalar type");
 	}
 }
 void c_code_generator::visit(named_type::Ptr type) {
@@ -123,31 +186,26 @@ void c_code_generator::visit(named_type::Ptr type) {
 	if (type->template_args.size()) {
 		oss << "<";
 		bool needs_comma = false;
-		for (auto a: type->template_args) {
+		for (auto a : type->template_args) {
 			if (needs_comma)
 				oss << ", ";
 			needs_comma = true;
-			a->accept(this);	
+			a->accept(this);
 		}
 		oss << ">";
 	}
 }
 void c_code_generator::visit(pointer_type::Ptr type) {
-	if (!isa<scalar_type>(type->pointee_type) &&
-	    !isa<pointer_type>(type->pointee_type) &&
+	if (!isa<scalar_type>(type->pointee_type) && !isa<pointer_type>(type->pointee_type) &&
 	    !isa<named_type>(type->pointee_type))
-		assert(
-		    false &&
-		    "Printing pointers of complex type is not supported yet");
+		assert(false && "Printing pointers of complex type is not supported yet");
 	type->pointee_type->accept(this);
 	oss << "*";
 }
 void c_code_generator::visit(array_type::Ptr type) {
-	if (!isa<scalar_type>(type->element_type) &&
-	    !isa<pointer_type>(type->element_type) &&
+	if (!isa<scalar_type>(type->element_type) && !isa<pointer_type>(type->element_type) &&
 	    !isa<named_type>(type->element_type))
-		assert(false &&
-		       "Printing arrays of complex type is not supported yet");
+		assert(false && "Printing arrays of complex type is not supported yet");
 	type->element_type->accept(this);
 	if (type->size != -1)
 		oss << "[" << type->size << "]";
@@ -162,10 +220,12 @@ void c_code_generator::visit(builder_var_type::Ptr type) {
 	type->closure_type->accept(this);
 	oss << ">";
 }
-void c_code_generator::visit(var::Ptr var) { oss << var->var_name; }
+void c_code_generator::visit(var::Ptr var) {
+	oss << var->var_name;
+}
 
-static void print_array_decl(std::ostream &oss, array_type::Ptr atype, var::Ptr decl_var, c_code_generator* self, 
-		std::stringstream &append) {
+static void print_array_decl(std::ostream &oss, array_type::Ptr atype, var::Ptr decl_var, c_code_generator *self,
+			     std::stringstream &append) {
 	append << "[";
 	if (atype->size != -1)
 		append << atype->size;
@@ -173,18 +233,18 @@ static void print_array_decl(std::ostream &oss, array_type::Ptr atype, var::Ptr 
 
 	if (isa<array_type>(atype->element_type))
 		print_array_decl(oss, to<array_type>(atype->element_type), decl_var, self, append);
-	else if (isa<scalar_type>(atype->element_type) || isa<pointer_type>(atype->element_type) 
-			|| isa<named_type>(atype->element_type)) {
-		atype->element_type->accept(self);	
+	else if (isa<scalar_type>(atype->element_type) || isa<pointer_type>(atype->element_type) ||
+		 isa<named_type>(atype->element_type)) {
+		atype->element_type->accept(self);
 		if (decl_var->hasMetadata<std::vector<std::string>>("attributes")) {
 			const auto &attributes = decl_var->getMetadata<std::vector<std::string>>("attributes");
-			for (auto attr: attributes) {
+			for (auto attr : attributes) {
 				oss << " " << attr;
 			}
 		}
 		oss << " ";
 		oss << decl_var->var_name;
-		oss << append.str();	
+		oss << append.str();
 	} else {
 		assert(false && "Printing arrays of complex type is not supported yet");
 	}
@@ -192,8 +252,7 @@ static void print_array_decl(std::ostream &oss, array_type::Ptr atype, var::Ptr 
 
 void c_code_generator::visit(decl_stmt::Ptr a) {
 	if (isa<function_type>(a->decl_var->var_type)) {
-		function_type::Ptr type =
-		    to<function_type>(a->decl_var->var_type);
+		function_type::Ptr type = to<function_type>(a->decl_var->var_type);
 		type->return_type->accept(this);
 		oss << " (*";
 		oss << a->decl_var->var_name;
@@ -225,7 +284,7 @@ void c_code_generator::visit(decl_stmt::Ptr a) {
 	a->decl_var->var_type->accept(this);
 	if (a->decl_var->hasMetadata<std::vector<std::string>>("attributes")) {
 		const auto &attributes = a->decl_var->getMetadata<std::vector<std::string>>("attributes");
-		for (auto attr: attributes) {
+		for (auto attr : attributes) {
 			oss << " " << attr;
 		}
 	}
@@ -305,8 +364,12 @@ void c_code_generator::visit(for_stmt::Ptr a) {
 		curr_indent--;
 	}
 }
-void c_code_generator::visit(break_stmt::Ptr a) { oss << "break;"; }
-void c_code_generator::visit(continue_stmt::Ptr a) { oss << "continue;"; }
+void c_code_generator::visit(break_stmt::Ptr a) {
+	oss << "break;";
+}
+void c_code_generator::visit(continue_stmt::Ptr a) {
+	oss << "continue;";
+}
 void c_code_generator::visit(sq_bkt_expr::Ptr a) {
 	if (expr_needs_bracket(a->var_expr)) {
 		oss << "(";
@@ -345,8 +408,7 @@ void c_code_generator::visit(initializer_list_expr::Ptr a) {
 	oss << "}";
 }
 void c_code_generator::handle_func_arg(var::Ptr a) {
-	function_type::Ptr type =
-		to<function_type>(a->var_type);
+	function_type::Ptr type = to<function_type>(a->var_type);
 	type->return_type->accept(this);
 	oss << " (*";
 	oss << a->var_name;
@@ -363,7 +425,7 @@ void c_code_generator::visit(func_decl::Ptr a) {
 	a->return_type->accept(this);
 	if (a->hasMetadata<std::vector<std::string>>("attributes")) {
 		const auto &attributes = a->getMetadata<std::vector<std::string>>("attributes");
-		for (auto attr: attributes) {
+		for (auto attr : attributes) {
 			oss << " " << attr;
 		}
 	}
@@ -401,12 +463,12 @@ void c_code_generator::visit(func_decl::Ptr a) {
 		curr_indent--;
 	}
 }
-void c_code_generator::visit(goto_stmt::Ptr a) { 
-	//a->dump(oss, 1); 
+void c_code_generator::visit(goto_stmt::Ptr a) {
+	// a->dump(oss, 1);
 	oss << "goto ";
 	oss << a->label1->label_name << ";";
 }
-void c_code_generator::visit(label_stmt::Ptr a) { 
+void c_code_generator::visit(label_stmt::Ptr a) {
 	oss << a->label1->label_name << ":";
 }
 void c_code_generator::visit(return_stmt::Ptr a) {
@@ -427,7 +489,7 @@ void c_code_generator::visit(member_access_expr::Ptr a) {
 				if (!isa<var_expr>(parent->var_expr)) {
 					oss << ")";
 				}
-				oss << "->" << a->member_name;	
+				oss << "->" << a->member_name;
 				return;
 			}
 		}

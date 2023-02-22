@@ -2,8 +2,7 @@
 #include <algorithm>
 namespace block {
 
-static void ensure_back_has_goto(stmt_block::Ptr a, label::Ptr label_detect,
-				 std::vector<stmt_block::Ptr> &parents) {
+static void ensure_back_has_goto(stmt_block::Ptr a, label::Ptr label_detect, std::vector<stmt_block::Ptr> &parents) {
 
 	if (a->stmts.size() == 0) {
 		parents.push_back(a);
@@ -14,26 +13,21 @@ static void ensure_back_has_goto(stmt_block::Ptr a, label::Ptr label_detect,
 		// For ifs don't add unnecessary common ends
 		if_stmt::Ptr if_stmt_ptr = to<if_stmt>(last_stmt);
 
-		stmt_block::Ptr then_block =
-		    to<stmt_block>(if_stmt_ptr->then_stmt);
-		stmt_block::Ptr else_block =
-		    to<stmt_block>(if_stmt_ptr->else_stmt);
+		stmt_block::Ptr then_block = to<stmt_block>(if_stmt_ptr->then_stmt);
+		stmt_block::Ptr else_block = to<stmt_block>(if_stmt_ptr->else_stmt);
 		std::vector<stmt_block::Ptr> if_parents;
 		ensure_back_has_goto(then_block, label_detect, if_parents);
 		ensure_back_has_goto(else_block, label_detect, if_parents);
-		if (if_parents.size() == 2 && if_parents[0] == then_block &&
-		    if_parents[1] == else_block && false) {
+		if (if_parents.size() == 2 && if_parents[0] == then_block && if_parents[1] == else_block && false) {
 			parents.push_back(a);
 		} else {
 			for (unsigned int i = 0; i < if_parents.size(); i++) {
 				parents.push_back(if_parents[i]);
 			}
 		}
-	} else if (isa<goto_stmt>(last_stmt) &&
-		   to<goto_stmt>(last_stmt)->label1 == label_detect) {
+	} else if (isa<goto_stmt>(last_stmt) && to<goto_stmt>(last_stmt)->label1 == label_detect) {
 		a->stmts.pop_back();
-	} else if (isa<goto_stmt>(last_stmt) &&
-		   to<goto_stmt>(last_stmt)->label1 != label_detect) {
+	} else if (isa<goto_stmt>(last_stmt) && to<goto_stmt>(last_stmt)->label1 != label_detect) {
 		parents.push_back(a);
 	} else if (isa<break_stmt>(last_stmt)) {
 		assert(false);
@@ -43,15 +37,12 @@ static void ensure_back_has_goto(stmt_block::Ptr a, label::Ptr label_detect,
 	return;
 }
 
-static void insert_continues(stmt_block::Ptr a, label::Ptr label_detect,
-			     std::vector<stmt_block::Ptr> &collect) {
+static void insert_continues(stmt_block::Ptr a, label::Ptr label_detect, std::vector<stmt_block::Ptr> &collect) {
 	for (auto stmt : a->stmts) {
 		if (isa<if_stmt>(stmt)) {
 			if_stmt::Ptr if_stmt_ptr = to<if_stmt>(stmt);
-			stmt_block::Ptr then_block =
-			    to<stmt_block>(if_stmt_ptr->then_stmt);
-			stmt_block::Ptr else_block =
-			    to<stmt_block>(if_stmt_ptr->else_stmt);
+			stmt_block::Ptr then_block = to<stmt_block>(if_stmt_ptr->then_stmt);
+			stmt_block::Ptr else_block = to<stmt_block>(if_stmt_ptr->else_stmt);
 			insert_continues(then_block, label_detect, collect);
 			insert_continues(else_block, label_detect, collect);
 		}
@@ -59,22 +50,18 @@ static void insert_continues(stmt_block::Ptr a, label::Ptr label_detect,
 	if (a->stmts.size() > 0 && isa<goto_stmt>(a->stmts.back())) {
 		if (to<goto_stmt>(a->stmts.back())->label1 == label_detect) {
 			a->stmts.pop_back();
-			continue_stmt::Ptr cont =
-			    std::make_shared<continue_stmt>();
+			continue_stmt::Ptr cont = std::make_shared<continue_stmt>();
 			a->stmts.push_back(cont);
 			collect.push_back(a);
 		}
 	}
 }
-static void insert_breaks(stmt_block::Ptr a, label::Ptr label_detect,
-			  std::vector<stmt_block::Ptr> &parents) {
+static void insert_breaks(stmt_block::Ptr a, label::Ptr label_detect, std::vector<stmt_block::Ptr> &parents) {
 	for (auto stmt : a->stmts) {
 		if (isa<if_stmt>(stmt)) {
 			if_stmt::Ptr if_stmt_ptr = to<if_stmt>(stmt);
-			stmt_block::Ptr then_block =
-			    to<stmt_block>(if_stmt_ptr->then_stmt);
-			stmt_block::Ptr else_block =
-			    to<stmt_block>(if_stmt_ptr->else_stmt);
+			stmt_block::Ptr then_block = to<stmt_block>(if_stmt_ptr->then_stmt);
+			stmt_block::Ptr else_block = to<stmt_block>(if_stmt_ptr->else_stmt);
 			insert_breaks(then_block, label_detect, parents);
 			insert_breaks(else_block, label_detect, parents);
 		}
@@ -100,12 +87,9 @@ static void insert_breaks(stmt_block::Ptr a, label::Ptr label_detect,
 	}
 }
 
-
-
 void continue_finder::visit(continue_stmt::Ptr) {
 	has_continue = true;
 }
-
 
 static bool check_last_choppable(std::vector<stmt_block::Ptr> &parents) {
 	// Check if everyone has atleast one stmt
@@ -114,13 +98,12 @@ static bool check_last_choppable(std::vector<stmt_block::Ptr> &parents) {
 			return false;
 	}
 
-
 	stmt::Ptr last_stmt = parents[0]->stmts.back();
 	continue_finder finder;
 	last_stmt->accept(&finder);
 	if (finder.has_continue)
 		return false;
-	
+
 	if (parents.size() == 1)
 		return true;
 
@@ -131,8 +114,7 @@ static bool check_last_choppable(std::vector<stmt_block::Ptr> &parents) {
 	}
 	return true;
 }
-static void trim_from_parents(std::vector<stmt_block::Ptr> &parents,
-			      std::vector<stmt::Ptr> &trimmed) {
+static void trim_from_parents(std::vector<stmt_block::Ptr> &parents, std::vector<stmt::Ptr> &trimmed) {
 
 	// First check if the ends are all same
 	if (check_last_choppable(parents)) {
@@ -211,12 +193,7 @@ void loop_finder::visit_label(label_stmt::Ptr a, stmt_block::Ptr parent) {
 	finder.ast = new_while->body;
 	new_while->body->accept(&finder);
 
-
-
-
-	ensure_back_has_goto(to<stmt_block>(new_while->body), a->label1,
-			     parents);
-	
+	ensure_back_has_goto(to<stmt_block>(new_while->body), a->label1, parents);
 
 	std::vector<stmt_block::Ptr> collects;
 
@@ -256,16 +233,13 @@ void loop_finder::visit_label(label_stmt::Ptr a, stmt_block::Ptr parent) {
 
 	if (to<stmt_block>(new_while->body)->stmts.size() == 1 &&
 	    isa<if_stmt>(to<stmt_block>(new_while->body)->stmts[0])) {
-		if_stmt::Ptr if_body =
-		    to<if_stmt>(to<stmt_block>(new_while->body)->stmts[0]);
+		if_stmt::Ptr if_body = to<if_stmt>(to<stmt_block>(new_while->body)->stmts[0]);
 
 		stmt::Ptr then_stmt = if_body->then_stmt;
 		stmt::Ptr else_stmt = if_body->else_stmt;
 
-		if (isa<stmt_block>(else_stmt) &&
-		    to<stmt_block>(else_stmt)->stmts.size() == 1) {
-			if (isa<break_stmt>(
-				to<stmt_block>(else_stmt)->stmts[0])) {
+		if (isa<stmt_block>(else_stmt) && to<stmt_block>(else_stmt)->stmts.size() == 1) {
+			if (isa<break_stmt>(to<stmt_block>(else_stmt)->stmts[0])) {
 				new_while->cond = if_body->cond;
 				// new_while->body =
 				// std::make_shared<stmt_block>();
@@ -273,14 +247,10 @@ void loop_finder::visit_label(label_stmt::Ptr a, stmt_block::Ptr parent) {
 				return;
 			}
 		}
-		if (isa<stmt_block>(then_stmt) &&
-		    to<stmt_block>(then_stmt)->stmts.size() == 1) {
-			if (isa<break_stmt>(
-				to<stmt_block>(then_stmt)->stmts[0])) {
-				not_expr::Ptr new_cond =
-				    std::make_shared<not_expr>();
-				new_cond->static_offset =
-				    if_body->cond->static_offset;
+		if (isa<stmt_block>(then_stmt) && to<stmt_block>(then_stmt)->stmts.size() == 1) {
+			if (isa<break_stmt>(to<stmt_block>(then_stmt)->stmts[0])) {
+				not_expr::Ptr new_cond = std::make_shared<not_expr>();
+				new_cond->static_offset = if_body->cond->static_offset;
 				new_cond->expr1 = if_body->cond;
 				new_while->cond = new_cond;
 				new_while->body = else_stmt;
@@ -291,28 +261,18 @@ void loop_finder::visit_label(label_stmt::Ptr a, stmt_block::Ptr parent) {
 	// Other patter is if the loops first statement is a if condition that
 	// breaks
 	if (isa<if_stmt>(to<stmt_block>(new_while->body)->stmts[0])) {
-		if_stmt::Ptr if_body =
-		    to<if_stmt>(to<stmt_block>(new_while->body)->stmts[0]);
+		if_stmt::Ptr if_body = to<if_stmt>(to<stmt_block>(new_while->body)->stmts[0]);
 		stmt::Ptr then_stmt = if_body->then_stmt;
 
-		if (isa<stmt_block>(then_stmt) &&
-		    to<stmt_block>(then_stmt)->stmts.size() == 1) {
-			if (isa<break_stmt>(
-				to<stmt_block>(then_stmt)->stmts[0])) {
-				not_expr::Ptr new_cond =
-				    std::make_shared<not_expr>();
-				new_cond->static_offset =
-				    if_body->cond->static_offset;
+		if (isa<stmt_block>(then_stmt) && to<stmt_block>(then_stmt)->stmts.size() == 1) {
+			if (isa<break_stmt>(to<stmt_block>(then_stmt)->stmts[0])) {
+				not_expr::Ptr new_cond = std::make_shared<not_expr>();
+				new_cond->static_offset = if_body->cond->static_offset;
 				new_cond->expr1 = if_body->cond;
 				new_while->cond = new_cond;
 				auto new_body = std::make_shared<stmt_block>();
-				for (unsigned int i = 1;
-				     i < to<stmt_block>(new_while->body)
-					     ->stmts.size();
-				     i++) {
-					new_body->stmts.push_back(
-					    to<stmt_block>(new_while->body)
-						->stmts[i]);
+				for (unsigned int i = 1; i < to<stmt_block>(new_while->body)->stmts.size(); i++) {
+					new_body->stmts.push_back(to<stmt_block>(new_while->body)->stmts[i]);
 				}
 				new_while->body = new_body;
 				return;
