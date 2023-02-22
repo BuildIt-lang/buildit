@@ -3,6 +3,7 @@
 #include "blocks/block_visitor.h"
 #include "blocks/stmt.h"
 #include "util/printer.h"
+#include "builder/dyn_var.h"
 #include <unordered_map>
 #include <unordered_set>
 
@@ -75,6 +76,33 @@ public:
 		generator.curr_indent = indent;
 		ast->accept(&generator);
 		oss << std::endl;
+	}
+	template <typename T>
+	static void generate_struct_decl(std::ostream &oss, int indent = 0) {
+		static_assert(std::is_base_of<builder::var, T>::value, "Template argument should be a dyn_var");
+		auto save = builder::options::track_members;
+		builder::options::track_members = true;
+		T v = builder::with_name("_");
+		builder::options::track_members = save;
+		/* Dump the type */
+		c_code_generator generator(oss);
+		printer::indent(oss, indent);
+		auto var_type = T::create_block_type();
+		assert(isa<named_type>(var_type) && "Cannot create struct declarations for un-named types");
+		assert(to<named_type>(var_type)->template_args.size() == 0 && "Cannot yet, generate decls for types with template args");
+		oss << "struct " << to<named_type>(var_type)->type_name << " {\n";	
+		indent++;
+		
+		for (auto member: v.members) {
+			printer::indent(oss, indent);
+			auto decl = std::make_shared<decl_stmt>();
+			decl->decl_var = member->block_var;
+			decl->accept(&generator);	
+			oss << std::endl;	
+		}
+		indent--;
+		printer::indent(oss, indent);
+		oss << "};" << std::endl;
 	}
 };
 } // namespace block

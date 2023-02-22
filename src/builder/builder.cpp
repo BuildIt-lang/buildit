@@ -4,6 +4,9 @@
 #include "util/tracer.h"
 
 namespace builder {
+namespace options {
+	bool track_members = false;
+}
 
 template <>
 std::vector<block::type::Ptr> extract_type_vector_dyn<>(void) {
