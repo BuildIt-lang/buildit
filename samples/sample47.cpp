@@ -1,6 +1,6 @@
-#include "builder/static_var.h"
-#include "builder/dyn_var.h"
 #include "blocks/c_code_generator.h"
+#include "builder/dyn_var.h"
+#include "builder/static_var.h"
 
 using builder::dyn_var;
 using builder::static_var;
@@ -12,7 +12,7 @@ static void foo(void) {
 		for (states[1] = 0; states[1] < 2; states[1]++) {
 			for (states[2] = 0; states[2] < 2; states[2]++) {
 				for (states[3] = 0; states[3] < 2; states[3]++) {
-					dyn_var<int> c = 0;	
+					dyn_var<int> c = 0;
 				}
 			}
 		}
