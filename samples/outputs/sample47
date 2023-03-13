@@ -1,0 +1,86 @@
+FUNC_DECL
+  SCALAR_TYPE (VOID)
+  STMT_BLOCK
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var0)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var1)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var2)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var3)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var4)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var5)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var6)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var7)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var8)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var9)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var10)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var11)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var12)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var13)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var14)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var15)
+      INT_CONST (0)
+void my_bar (void) {
+  int var0 = 0;
+  int var1 = 0;
+  int var2 = 0;
+  int var3 = 0;
+  int var4 = 0;
+  int var5 = 0;
+  int var6 = 0;
+  int var7 = 0;
+  int var8 = 0;
+  int var9 = 0;
+  int var10 = 0;
+  int var11 = 0;
+  int var12 = 0;
+  int var13 = 0;
+  int var14 = 0;
+  int var15 = 0;
+}
+
