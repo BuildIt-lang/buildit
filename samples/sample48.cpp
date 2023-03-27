@@ -1,10 +1,10 @@
 #include "blocks/c_code_generator.h"
-#include "builder/dyn_var.h"
 #include "builder/array.h"
+#include "builder/dyn_var.h"
 #include "builder/static_var.h"
 
-using builder::dyn_var;
 using builder::dyn_arr;
+using builder::dyn_var;
 using builder::static_var;
 
 static void foo(void) {

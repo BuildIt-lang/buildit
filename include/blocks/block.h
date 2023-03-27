@@ -110,7 +110,6 @@ public:
 			return false;
 		return true;
 	}
-
 };
 } // namespace block
 #endif

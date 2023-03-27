@@ -1,11 +1,11 @@
 #include "builder/builder_context.h"
 #include "blocks/for_loop_finder.h"
 #include "blocks/if_switcher.h"
-#include "blocks/sub_expr_cleanup.h"
 #include "blocks/label_inserter.h"
 #include "blocks/loop_finder.h"
 #include "blocks/loop_roll.h"
 #include "blocks/rce.h"
+#include "blocks/sub_expr_cleanup.h"
 #include "blocks/var_namer.h"
 #include "builder/builder.h"
 #include "builder/dyn_var.h"
@@ -282,8 +282,8 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 	block::label_inserter inserter;
 	inserter.offset_to_label = creator.offset_to_label;
 	ast->accept(&inserter);
-	
-	// At this point it is safe to remove statements that are 
+
+	// At this point it is safe to remove statements that are
 	// marked for deletion
 	block::sub_expr_cleanup cleaner;
 	ast->accept(&cleaner);
