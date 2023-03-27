@@ -1,0 +1,26 @@
+FUNC_DECL
+  SCALAR_TYPE (VOID)
+  STMT_BLOCK
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (x_0)
+      NO_INITIALIZATION
+    WHILE_STMT
+      INT_CONST (1)
+      STMT_BLOCK
+        DECL_STMT
+          SCALAR_TYPE (INT)
+          VAR (var1)
+          INT_CONST (1)
+        DECL_STMT
+          SCALAR_TYPE (INT)
+          VAR (var2)
+          INT_CONST (2)
+void my_bar (void) {
+  int x_0;
+  while (1) {
+    int var1 = 1;
+    int var2 = 2;
+  }
+}
+

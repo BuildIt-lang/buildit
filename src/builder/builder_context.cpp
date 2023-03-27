@@ -5,6 +5,7 @@
 #include "blocks/loop_finder.h"
 #include "blocks/loop_roll.h"
 #include "blocks/rce.h"
+#include "blocks/sub_expr_cleanup.h"
 #include "blocks/var_namer.h"
 #include "builder/builder.h"
 #include "builder/dyn_var.h"
@@ -97,18 +98,16 @@ void builder_context::remove_node_from_sequence(block::expr::Ptr e) {
 	} else {
 		// Could be committed already
 		// It is safe to update the parent block here, because the memoization doesn't care about indices
-		std::vector<block::stmt::Ptr> new_stmts;
+		// But don't actually delete the statement, because there could be gotos that are jumping here
+		// instead just mark it for deletion later
 		for (auto stmt : current_block_stmt->stmts) {
-			bool found = false;
 			if (block::isa<block::expr_stmt>(stmt)) {
 				auto expr_s = block::to<block::expr_stmt>(stmt);
-				if (expr_s->expr1 == e)
-					found = true;
+				if (expr_s->expr1 == e) {
+					expr_s->mark_for_deletion = true;
+				}
 			}
-			if (!found)
-				new_stmts.push_back(stmt);
 		}
-		current_block_stmt->stmts = new_stmts;
 	}
 }
 void builder_context::add_node_to_sequence(block::expr::Ptr e) {
@@ -283,6 +282,11 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 	block::label_inserter inserter;
 	inserter.offset_to_label = creator.offset_to_label;
 	ast->accept(&inserter);
+
+	// At this point it is safe to remove statements that are
+	// marked for deletion
+	block::sub_expr_cleanup cleaner;
+	ast->accept(&cleaner);
 
 	if (run_rce) {
 		block::eliminate_redundant_vars(ast);
