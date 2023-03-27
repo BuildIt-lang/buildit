@@ -29,6 +29,10 @@ public:
 
 	expr::Ptr expr1;
 
+	// member to keep track if this expr stmt 
+	// has been spuriously created and needs to be deleted
+	bool mark_for_deletion = false;
+
 	virtual bool is_same(block::Ptr other) override {
 		if (!isa<expr_stmt>(other))
 			return false;
