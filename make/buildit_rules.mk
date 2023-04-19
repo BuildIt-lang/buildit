@@ -19,7 +19,7 @@ $(LIBRARY): $(LIBRARY_OBJS)
 	$(ARV) cr $(LIBRARY) $(LIBRARY_OBJS)
 $(BUILD_DIR)/sample%: $(BUILD_DIR)/samples/sample%.o $(LIBRARY)
 	@mkdir -p $(@D)
-	$(CXXV) -o $@ $< $(LINKER_FLAGS)
+	$(CXXLDV) -o $@ $< $(LINKER_FLAGS)
 
 .PHONY: executables
 executables: $(SAMPLES)
