@@ -204,6 +204,23 @@ static void merge_condition_with_loop(while_stmt::Ptr new_while) {
 			}
 		}
 	}
+	std::cout << "++++++ basic blocks ++++++ \n";
+
+	// while (1) {
+	// 	label_stmt::Ptr found_label = nullptr;
+	// 	for (auto stmt : a->stmts) {
+	// 		if (isa<label_stmt>(stmt)) {
+	// 			found_label = to<label_stmt>(stmt);
+	// 		}
+	// 	}
+	// 	if (found_label == nullptr)
+	// 		break;
+	// 	visit_label(found_label, a);
+	// }
+	// // Once all labels are done, visit the instructions normally
+	// for (auto stmt : a->stmts) {
+	// 	stmt->accept(this);
+	// }
 }
 
 void loop_finder::visit_label(label_stmt::Ptr a, stmt_block::Ptr parent) {
