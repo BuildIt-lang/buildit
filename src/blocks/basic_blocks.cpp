@@ -153,5 +153,12 @@ std::vector<std::shared_ptr<basic_block>> generate_basic_blocks(block::stmt_bloc
         }
     }
 
+    // step 5: populate the predecessors
+    for (auto bb: return_list) {
+        for (auto succ: bb->successor) {
+            succ->predecessor.push_back(bb);
+        }
+    }
+
     return return_list;
 }
