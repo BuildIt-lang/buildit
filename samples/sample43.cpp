@@ -1,8 +1,10 @@
 #include "blocks/matchers/patterns.h"
 #include "blocks/matchers/matchers.h"
+#include "blocks/matchers/replacers.h"
 #include "builder/builder_context.h"
 #include "builder/dyn_var.h"
 #include "builder/static_var.h"
+#include "blocks/c_code_generator.h"
 
 using namespace block::matcher;
 using builder::dyn_var;
@@ -16,6 +18,9 @@ static void foo(void) {
 	y = x + 1;
 	dyn_var<int> z = 0;
 	z = z + 2;
+
+
+	z = x + 0;
 }
 
 int main(int argc, char* argv[]) {
@@ -30,5 +35,25 @@ int main(int argc, char* argv[]) {
 		x.node->dump(std::cout, 0);
 		std::cout << "-----" << std::endl;
 	}
+
+
+	auto p2 = plus_expr(expr("a"), int_const(0));
+	auto matches2 = find_all_matches(p2, ast);
+	std::cout << "Found " << matches2.size() << " matches" << std::endl;
+	std::cout << "-----" << std::endl;
+	for (auto x: matches2) {
+		x.node->dump(std::cout, 0);
+		std::cout << "-----" << std::endl;
+	}
+	
+	auto p3 = expr("a");
+
+	for (auto x: matches2) {
+		replace_match(ast, x, p3);
+	}	
+	std::cout << "After all replacements" << std::endl;
+	ast->dump(std::cout, 0);
+	block::c_code_generator::generate_code(ast, std::cout, 0);
+	
 	return 0;
 }
