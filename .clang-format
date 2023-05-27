@@ -2,4 +2,5 @@ UseTab: Always
 IndentWidth: 8
 AlwaysBreakTemplateDeclarations: true
 AccessModifierOffset: -8
-ColumnLimit: 200
+ColumnLimit: 120
+AllowShortFunctionsOnASingleLine: Empty

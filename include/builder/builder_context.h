@@ -11,14 +11,10 @@
 
 namespace builder {
 
-
-
 template <typename T>
 block::expr::Ptr create_foreign_expr(const T t);
 template <typename T>
 builder create_foreign_expr_builder(const T t);
-
-
 
 class tracking_tuple {
 public:
@@ -47,20 +43,24 @@ void lambda_wrapper_impl(void);
 
 class builder_context {
 public:
+	static builder_context *current_builder_context;
 	static int debug_creation_counter;
 
+	std::function<void(void)> internal_stored_lambda;
+	std::function<void(void)> current_function;
 
 	std::list<block::block::Ptr> uncommitted_sequence;
 	block::stmt::Ptr ast;
 	block::stmt_block::Ptr current_block_stmt;
-	std::function<void(void)> current_function;
 
 	std::vector<bool> bool_vector;
 	std::unordered_set<std::string> visited_offsets;
 
+	std::vector<block::expr::Ptr> expr_sequence;
+	unsigned long long expr_counter = 0;
+
 	tag_map _internal_tags;
 	tag_map *memoized_tags;
-
 
 	// Flags for controlling BuildIt extraction
 	// and code generation behavior
@@ -101,11 +101,12 @@ public:
 
 	block::func_decl::Ptr current_func_decl;
 	template <typename F, typename... OtherArgs>
-	block::stmt::Ptr extract_function_ast(F func_input, std::string func_name, OtherArgs&&... other_args) {
+	block::stmt::Ptr extract_function_ast(F func_input, std::string func_name, OtherArgs &&...other_args) {
 		current_func_decl = std::make_shared<block::func_decl>();
 		current_func_decl->func_name = func_name;
 		// The extract_signature_from_lambda will update the return type
-		current_func_decl->body = extract_ast_from_lambda(extract_signature_from_lambda<F, OtherArgs&...>::from(this, func_input, func_name, other_args...));
+		current_func_decl->body = extract_ast_from_lambda(
+		    extract_signature_from_lambda<F, OtherArgs &...>::from(this, func_input, func_name, other_args...));
 		return current_func_decl;
 	}
 
@@ -124,38 +125,6 @@ public:
 		return new_asm_variable;
 	}
 	~builder_context();
-
-private:
-	std::function<void(void)> internal_stored_lambda;
-
-	static builder_context *current_builder_context;
-
-	friend class builder;
-
-	friend var;
-
-	template <typename T>
-	friend class dyn_var_impl;
-
-	template <typename T>
-	friend class static_var;
-
-
-	template <typename BT, typename... arg_types>
-	friend std::vector<block::expr::Ptr> extract_call_arguments_helper(const BT &first_arg, const arg_types &... rest_args);
-
-	friend void annotate(std::string);
-	friend tracer::tag get_offset_in_function(void);
-	friend void lambda_wrapper_impl(void);
-
-	template <typename T>
-	friend block::expr::Ptr create_foreign_expr(const T t);
-
-	template <typename BT, typename T>
-	friend BT create_foreign_expr_builder(const T t);
-
-	friend void create_return_stmt(const builder &a);
-
 };
 bool get_next_bool_from_context(builder_context *context, block::expr::Ptr);
 tracer::tag get_offset_in_function(void);

@@ -14,7 +14,8 @@ struct LoopBackException : public std::exception {
 	tracer::tag static_offset;
 };
 struct MemoizationException : public std::exception {
-	MemoizationException(tracer::tag offset, block::stmt_block::Ptr _parent, int32_t _child_id) : static_offset(offset), parent(_parent), child_id(_child_id) {}
+	MemoizationException(tracer::tag offset, block::stmt_block::Ptr _parent, int32_t _child_id)
+	    : static_offset(offset), parent(_parent), child_id(_child_id) {}
 	tracer::tag static_offset;
 
 	block::stmt_block::Ptr parent;

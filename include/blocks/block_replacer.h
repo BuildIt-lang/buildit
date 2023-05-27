@@ -1,10 +1,10 @@
 #ifndef BLOCK_REPLACER_H
 #define BLOCK_REPLACER_H
 
-#include "blocks/block_visitor.h"
 #include "blocks/block.h"
+#include "blocks/block_visitor.h"
 namespace block {
-class block_replacer: public block_visitor {	
+class block_replacer : public block_visitor {
 public:
 	using block_visitor::visit;
 	std::shared_ptr<block> node;
@@ -26,14 +26,16 @@ public:
 	}
 	void unary_helper(std::shared_ptr<unary_expr> a);
 	void binary_helper(std::shared_ptr<binary_expr> a);
-	
+
 	virtual void visit(std::shared_ptr<block>) override;
 	virtual void visit(std::shared_ptr<expr>) override;
 	virtual void visit(std::shared_ptr<unary_expr>) override;
 	virtual void visit(std::shared_ptr<binary_expr>) override;
 	virtual void visit(std::shared_ptr<not_expr>) override;
 	virtual void visit(std::shared_ptr<and_expr>) override;
+	virtual void visit(std::shared_ptr<bitwise_and_expr>) override;
 	virtual void visit(std::shared_ptr<or_expr>) override;
+	virtual void visit(std::shared_ptr<bitwise_or_expr>) override;
 	virtual void visit(std::shared_ptr<plus_expr>) override;
 	virtual void visit(std::shared_ptr<minus_expr>) override;
 	virtual void visit(std::shared_ptr<mul_expr>) override;
@@ -42,6 +44,8 @@ public:
 	virtual void visit(std::shared_ptr<gt_expr>) override;
 	virtual void visit(std::shared_ptr<lte_expr>) override;
 	virtual void visit(std::shared_ptr<gte_expr>) override;
+	virtual void visit(std::shared_ptr<lshift_expr>) override;
+	virtual void visit(std::shared_ptr<rshift_expr>) override;
 	virtual void visit(std::shared_ptr<equals_expr>) override;
 	virtual void visit(std::shared_ptr<ne_expr>) override;
 	virtual void visit(std::shared_ptr<mod_expr>) override;
@@ -84,7 +88,6 @@ public:
 	virtual void visit(std::shared_ptr<func_decl>) override;
 	virtual void visit(std::shared_ptr<return_stmt>) override;
 };
-}
-
+} // namespace block
 
 #endif

@@ -1,91 +1,54 @@
 #ifndef BUILDER_DYNAMIC_H
 #define BUILDER_DYNAMIC_H
 
-#include "builder/builder_context.h"
 #include "blocks/c_code_generator.h"
 #include "blocks/rce.h"
+#include "builder/builder_context.h"
 #include <cstdio>
+#include <dlfcn.h>
 #include <fstream>
 #include <unistd.h>
-#include <dlfcn.h>
 
 #include "gen/compiler_headers.h"
 
 namespace builder {
 
-template <typename FT, typename...ArgsT>
-auto compile_function_with_context(builder_context context, FT f, ArgsT...args) -> void* {
+std::string get_temp_filename(builder_context &context);
+void *compile_and_return_ptr(builder_context &context, std::string source_name, std::string fname);
+
+// Interface to just compile ASTs(s)
+void *compile_asts(builder_context context, std::vector<block::block::Ptr> asts, std::string lookup_name);
+
+template <typename FT, typename... ArgsT>
+auto compile_function_with_context(builder_context context, FT f, ArgsT... args) -> void * {
 
 	auto ast = context.extract_function_ast(f, "execute", args...);
 	// Proactively run RCE
 	if (context.run_rce)
-		block::eliminate_redundant_vars(ast);		
+		block::eliminate_redundant_vars(ast);
 
-	char base_name_c[] = GEN_TEMPLATE_NAME;
-	int fd = mkstemp(base_name_c);
-	if (fd < 0) {
-		assert(false && "Opening a temporary file failed\n");
-	}
-	
-	close(fd);
+	std::string source_name = get_temp_filename(context);
 
-	std::string base_name(base_name_c);	
-	std::string source_name = base_name;
-	
-	if (!context.dynamic_use_cxx) 
-		source_name += ".c";
-	else 
-		source_name += ".cpp";
-
-	std::string compiled_name = base_name + ".so";
-	
-	std::string compiler_name;
-
-	if (!context.dynamic_use_cxx) 	
-		compiler_name = COMPILER_PATH;
-	else {
-		compiler_name = CXX_COMPILER_PATH;
-		compiler_name += " -std=c++11 -fPIC ";
-	}
-
-	std::string compile_command = compiler_name + " -shared -O3 " + source_name + " -o " + compiled_name;
-	
-		
-	std::ofstream oss(source_name);	
+	std::ofstream oss(source_name);
 
 	oss << context.dynamic_header_includes << std::endl;
 
-	if (context.dynamic_use_cxx) 
+	if (context.dynamic_use_cxx)
 		oss << "extern \"C\" ";
 
-		
 	block::c_code_generator::generate_code(ast, oss, 0);
 
 	oss.close();
 
-	int err = system(compile_command.c_str());
-	if (err != 0) {	
-		assert(false && "Compilation failed\n");
-	}
-	
-	void* handle = dlopen(compiled_name.c_str(), RTLD_NOW | RTLD_LOCAL);
-	if (!handle) {
-		assert(false && "Loading compiled module failed\n");
-	}
-	
-	void* function = dlsym(handle, "execute");
-	if (!function) {
-		assert(false && "Loading compiled module failed\n");
-	}
-	return function;
+	return compile_and_return_ptr(context, source_name, "execute");
 }
 
-template <typename FT, typename...ArgsT>
-auto compile_function(FT f, ArgsT...args) -> void* {
+template <typename FT, typename... ArgsT>
+auto compile_function(FT f, ArgsT... args) -> void * {
 	// Use an unconfigured context object
 	builder_context context;
 	return compile_function_with_context(context, f, args...);
 }
 
-}
+} // namespace builder
 #endif

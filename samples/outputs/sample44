@@ -1,0 +1,35 @@
+void staged (void) {
+  int var0 = 24;
+  if (!(var0)) {
+  } 
+  int var1 = 0;
+  var1 != 1;
+  int var2 = 32;
+  if (!(var2)) {
+  } 
+  int var3 = 0;
+  (var1 != 1) && (var3 != 1);
+}
+
+void staged2 (void) {
+  int var0 = 0;
+  for (int var1 = 0; var1 < 5; var1 = var1 + 1) {
+    var0 = var0 + 1;
+  }
+  int var2 = var0;
+  for (int var3 = 0; var3 < var0; var3 = var3 + 1) {
+    var2 = var2 + 1;
+  }
+}
+
+void staged2 (void) {
+  int var0 = 0;
+  for (int var1 = 0; var1 < 5; var1 = var1 + 1) {
+    var0 = var0 + 1;
+  }
+  int var2 = var0;
+  for (int var3 = 0; var3 < var0; var3 = var3 + 1) {
+    var2 = var2 + 1;
+  }
+}
+

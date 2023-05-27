@@ -3,8 +3,8 @@
 #include "builder/builder.h"
 #include "builder/builder_context.h"
 #include "builder/builder_union.h"
-#include "builder/static_var.h"
 #include "builder/dyn_var.h"
+#include "builder/static_var.h"
 #include <iostream>
 using builder::builder_union;
 using builder::dyn_var;

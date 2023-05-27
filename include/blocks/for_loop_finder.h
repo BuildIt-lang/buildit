@@ -11,14 +11,12 @@ public:
 	virtual void visit(stmt_block::Ptr) override;
 };
 
-
-class var_use_finder: public block_visitor {
+class var_use_finder : public block_visitor {
 public:
 	using block_visitor::visit;
 	var::Ptr to_find;
 	bool found = false;
 	virtual void visit(var_expr::Ptr) override;
-
 };
 } // namespace block
 #endif

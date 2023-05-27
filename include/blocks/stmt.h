@@ -8,7 +8,9 @@ public:
 	typedef std::shared_ptr<stmt> Ptr;
 	std::string annotation;
 	virtual void dump(std::ostream &, int) override;
-	virtual void accept(block_visitor *a) override { a->visit(self<stmt>()); }
+	virtual void accept(block_visitor *a) override {
+		a->visit(self<stmt>());
+	}
 
 	virtual bool is_same(block::Ptr other) override {
 		if (!isa<stmt>(other))
@@ -21,9 +23,15 @@ class expr_stmt : public stmt {
 public:
 	typedef std::shared_ptr<expr_stmt> Ptr;
 	virtual void dump(std::ostream &, int) override;
-	virtual void accept(block_visitor *a) override { a->visit(self<expr_stmt>()); }
+	virtual void accept(block_visitor *a) override {
+		a->visit(self<expr_stmt>());
+	}
 
 	expr::Ptr expr1;
+
+	// member to keep track if this expr stmt
+	// has been spuriously created and needs to be deleted
+	bool mark_for_deletion = false;
 
 	virtual bool is_same(block::Ptr other) override {
 		if (!isa<expr_stmt>(other))
@@ -39,7 +47,9 @@ class stmt_block : public stmt {
 public:
 	typedef std::shared_ptr<stmt_block> Ptr;
 	virtual void dump(std::ostream &, int) override;
-	virtual void accept(block_visitor *a) override { a->visit(self<stmt_block>()); }
+	virtual void accept(block_visitor *a) override {
+		a->visit(self<stmt_block>());
+	}
 
 	std::vector<stmt::Ptr> stmts;
 	virtual bool is_same(block::Ptr other) override {
@@ -61,7 +71,9 @@ class decl_stmt : public stmt {
 public:
 	typedef std::shared_ptr<decl_stmt> Ptr;
 	virtual void dump(std::ostream &, int) override;
-	virtual void accept(block_visitor *a) override { a->visit(self<decl_stmt>()); }
+	virtual void accept(block_visitor *a) override {
+		a->visit(self<decl_stmt>());
+	}
 
 	var::Ptr decl_var;
 	// Optional initialization
@@ -88,7 +100,9 @@ class if_stmt : public stmt {
 public:
 	typedef std::shared_ptr<if_stmt> Ptr;
 	virtual void dump(std::ostream &, int) override;
-	virtual void accept(block_visitor *a) override { a->visit(self<if_stmt>()); }
+	virtual void accept(block_visitor *a) override {
+		a->visit(self<if_stmt>());
+	}
 
 	expr::Ptr cond;
 	stmt::Ptr then_stmt;
@@ -124,7 +138,9 @@ public:
 	typedef std::shared_ptr<label> Ptr;
 	virtual void dump(std::ostream &, int) override;
 	std::string label_name;
-	virtual void accept(block_visitor *a) override { a->visit(self<label>()); }
+	virtual void accept(block_visitor *a) override {
+		a->visit(self<label>());
+	}
 	virtual bool is_same(block::Ptr other) override {
 		if (!isa<label>(other))
 			return false;
@@ -138,7 +154,9 @@ class label_stmt : public stmt {
 public:
 	typedef std::shared_ptr<label_stmt> Ptr;
 	virtual void dump(std::ostream &, int) override;
-	virtual void accept(block_visitor *a) override { a->visit(self<label_stmt>()); }
+	virtual void accept(block_visitor *a) override {
+		a->visit(self<label_stmt>());
+	}
 
 	label::Ptr label1;
 	virtual bool is_same(block::Ptr other) override {
@@ -154,7 +172,9 @@ class goto_stmt : public stmt {
 public:
 	typedef std::shared_ptr<goto_stmt> Ptr;
 	virtual void dump(std::ostream &, int) override;
-	virtual void accept(block_visitor *a) override { a->visit(self<goto_stmt>()); }
+	virtual void accept(block_visitor *a) override {
+		a->visit(self<goto_stmt>());
+	}
 
 	label::Ptr label1;
 	tracer::tag temporary_label_number;
@@ -179,7 +199,9 @@ class while_stmt : public stmt {
 public:
 	typedef std::shared_ptr<while_stmt> Ptr;
 	virtual void dump(std::ostream &, int) override;
-	virtual void accept(block_visitor *a) override { a->visit(self<while_stmt>()); }
+	virtual void accept(block_visitor *a) override {
+		a->visit(self<while_stmt>());
+	}
 	stmt::Ptr body;
 	expr::Ptr cond;
 
@@ -200,7 +222,9 @@ class for_stmt : public stmt {
 public:
 	typedef std::shared_ptr<for_stmt> Ptr;
 	virtual void dump(std::ostream &, int) override;
-	virtual void accept(block_visitor *a) override { a->visit(self<for_stmt>()); }
+	virtual void accept(block_visitor *a) override {
+		a->visit(self<for_stmt>());
+	}
 	stmt::Ptr decl_stmt;
 	expr::Ptr cond;
 	expr::Ptr update;
@@ -226,7 +250,9 @@ public:
 	std::string type;
 	typedef std::shared_ptr<break_stmt> Ptr;
 	virtual void dump(std::ostream &, int) override;
-	virtual void accept(block_visitor *a) override { a->visit(self<break_stmt>()); }
+	virtual void accept(block_visitor *a) override {
+		a->visit(self<break_stmt>());
+	}
 	virtual bool is_same(block::Ptr other) override {
 		if (!isa<break_stmt>(other))
 			return false;
@@ -237,7 +263,9 @@ class continue_stmt : public stmt {
 public:
 	typedef std::shared_ptr<continue_stmt> Ptr;
 	virtual void dump(std::ostream &, int) override;
-	virtual void accept(block_visitor *a) override { a->visit(self<continue_stmt>()); }
+	virtual void accept(block_visitor *a) override {
+		a->visit(self<continue_stmt>());
+	}
 	virtual bool is_same(block::Ptr other) override {
 		if (!isa<continue_stmt>(other))
 			return false;
@@ -249,7 +277,9 @@ class func_decl : public stmt {
 public:
 	typedef std::shared_ptr<func_decl> Ptr;
 	virtual void dump(std::ostream &, int) override;
-	virtual void accept(block_visitor *a) override { a->visit(self<func_decl>()); }
+	virtual void accept(block_visitor *a) override {
+		a->visit(self<func_decl>());
+	}
 	std::string func_name;
 	type::Ptr return_type;
 	std::vector<var::Ptr> args;
@@ -277,7 +307,9 @@ class return_stmt : public stmt {
 public:
 	typedef std::shared_ptr<return_stmt> Ptr;
 	virtual void dump(std::ostream &, int) override;
-	virtual void accept(block_visitor *a) override { a->visit(self<return_stmt>()); }
+	virtual void accept(block_visitor *a) override {
+		a->visit(self<return_stmt>());
+	}
 	expr::Ptr return_val;
 
 	virtual bool is_same(block::Ptr other) override {

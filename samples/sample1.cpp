@@ -10,9 +10,13 @@ static void foo(void) {
 	dyn_var<int> a = 0;
 	dyn_var<int> b = a;
 	a &&b;
+	a &b;
 	b + 1;
 	1 + b;
 	a % 2;
+	a | 2;
+	a >> 2;
+	b << 3;
 }
 int main(int argc, char *argv[]) {
 	builder::builder_context context;

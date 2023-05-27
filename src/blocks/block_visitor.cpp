@@ -4,17 +4,29 @@
 namespace block {
 void block_visitor::visit(block::Ptr a) {}
 void block_visitor::visit(expr::Ptr a) {}
-void block_visitor::visit(unary_expr::Ptr a) { a->expr1->accept(this); }
+void block_visitor::visit(unary_expr::Ptr a) {
+	a->expr1->accept(this);
+}
 void block_visitor::visit(binary_expr::Ptr a) {
 	a->expr1->accept(this);
 	a->expr2->accept(this);
 }
-void block_visitor::visit(not_expr::Ptr a) { a->expr1->accept(this); }
+void block_visitor::visit(not_expr::Ptr a) {
+	a->expr1->accept(this);
+}
 void block_visitor::visit(and_expr::Ptr a) {
 	a->expr1->accept(this);
 	a->expr2->accept(this);
 }
+void block_visitor::visit(bitwise_and_expr::Ptr a) {
+	a->expr1->accept(this);
+	a->expr2->accept(this);
+}
 void block_visitor::visit(or_expr::Ptr a) {
+	a->expr1->accept(this);
+	a->expr2->accept(this);
+}
+void block_visitor::visit(bitwise_or_expr::Ptr a) {
 	a->expr1->accept(this);
 	a->expr2->accept(this);
 }
@@ -50,6 +62,14 @@ void block_visitor::visit(gte_expr::Ptr a) {
 	a->expr1->accept(this);
 	a->expr2->accept(this);
 }
+void block_visitor::visit(lshift_expr::Ptr a) {
+	a->expr1->accept(this);
+	a->expr2->accept(this);
+}
+void block_visitor::visit(rshift_expr::Ptr a) {
+	a->expr1->accept(this);
+	a->expr2->accept(this);
+}
 void block_visitor::visit(equals_expr::Ptr a) {
 	a->expr1->accept(this);
 	a->expr2->accept(this);
@@ -62,7 +82,9 @@ void block_visitor::visit(mod_expr::Ptr a) {
 	a->expr1->accept(this);
 	a->expr2->accept(this);
 }
-void block_visitor::visit(var_expr::Ptr a) { a->var1->accept(this); }
+void block_visitor::visit(var_expr::Ptr a) {
+	a->var1->accept(this);
+}
 void block_visitor::visit(const_expr::Ptr a) {}
 void block_visitor::visit(int_const::Ptr a) {}
 void block_visitor::visit(double_const::Ptr a) {}
@@ -73,7 +95,9 @@ void block_visitor::visit(assign_expr::Ptr a) {
 	a->expr1->accept(this);
 }
 void block_visitor::visit(stmt::Ptr a) {}
-void block_visitor::visit(expr_stmt::Ptr a) { a->expr1->accept(this); }
+void block_visitor::visit(expr_stmt::Ptr a) {
+	a->expr1->accept(this);
+}
 void block_visitor::visit(stmt_block::Ptr a) {
 	for (auto stmt : a->stmts) {
 		stmt->accept(this);
@@ -128,7 +152,9 @@ void block_visitor::visit(initializer_list_expr::Ptr a) {
 void block_visitor::visit(foreign_expr_base::Ptr a) {
 	// Since this is an abstract class, we do nothing
 }
-void block_visitor::visit(var::Ptr a) { a->var_type->accept(this); }
+void block_visitor::visit(var::Ptr a) {
+	a->var_type->accept(this);
+}
 void block_visitor::visit(type::Ptr a) {}
 void block_visitor::visit(scalar_type::Ptr a) {}
 void block_visitor::visit(pointer_type::Ptr a) {
@@ -139,12 +165,14 @@ void block_visitor::visit(function_type::Ptr a) {
 	for (unsigned int i = 0; i < a->arg_types.size(); i++)
 		a->arg_types[i]->accept(this);
 }
-void block_visitor::visit(array_type::Ptr a) { a->element_type->accept(this); }
+void block_visitor::visit(array_type::Ptr a) {
+	a->element_type->accept(this);
+}
 void block_visitor::visit(builder_var_type::Ptr a) {
 	a->closure_type->accept(this);
 }
 void block_visitor::visit(named_type::Ptr x) {
-	for (auto a: x->template_args) {
+	for (auto a : x->template_args) {
 		a->accept(this);
 	}
 }
@@ -154,9 +182,15 @@ void block_visitor::visit(func_decl::Ptr a) {
 		arg->accept(this);
 	a->body->accept(this);
 }
-void block_visitor::visit(return_stmt::Ptr a) { a->return_val->accept(this); }
+void block_visitor::visit(return_stmt::Ptr a) {
+	a->return_val->accept(this);
+}
 
-void block_visitor::visit(member_access_expr::Ptr a) { a->parent_expr->accept(this); }
-void block_visitor::visit(addr_of_expr::Ptr a) { a->expr1->accept(this); }
+void block_visitor::visit(member_access_expr::Ptr a) {
+	a->parent_expr->accept(this);
+}
+void block_visitor::visit(addr_of_expr::Ptr a) {
+	a->expr1->accept(this);
+}
 
 } // namespace block

@@ -5,7 +5,7 @@ namespace block {
 static bool is_update_expr(var::Ptr decl_var, expr::Ptr last_stmt_expr) {
 
 	if (isa<minus_expr>(last_stmt_expr)) {
-		// This is to allow statements like (a = a + 1) - 1;	
+		// This is to allow statements like (a = a + 1) - 1;
 		minus_expr::Ptr mexpr = to<minus_expr>(last_stmt_expr);
 		return is_update_expr(decl_var, mexpr->expr1);
 	}
@@ -29,17 +29,14 @@ static bool is_update_expr(var::Ptr decl_var, expr::Ptr last_stmt_expr) {
 	return true;
 }
 
-
 static bool is_update(var::Ptr decl_var, stmt::Ptr last_stmt) {
 	if (!isa<expr_stmt>(last_stmt))
 		return false;
 	expr::Ptr last_stmt_expr = to<expr_stmt>(last_stmt)->expr1;
 
 	return is_update_expr(decl_var, last_stmt_expr);
-
 }
-static bool is_last_update(var::Ptr decl_var, stmt_block::Ptr block,
-			   std::vector<stmt_block::Ptr> &parents) {
+static bool is_last_update(var::Ptr decl_var, stmt_block::Ptr block, std::vector<stmt_block::Ptr> &parents) {
 	if (block->stmts.size() == 0)
 		return false;
 	if (isa<break_stmt>(block->stmts.back()))
@@ -54,10 +51,8 @@ static bool is_last_update(var::Ptr decl_var, stmt_block::Ptr block,
 			return false;
 		if (!isa<stmt_block>(last_stmt->else_stmt))
 			return false;
-		bool then_res = is_last_update(
-		    decl_var, to<stmt_block>(last_stmt->then_stmt), parents);
-		bool else_res = is_last_update(
-		    decl_var, to<stmt_block>(last_stmt->else_stmt), parents);
+		bool then_res = is_last_update(decl_var, to<stmt_block>(last_stmt->then_stmt), parents);
+		bool else_res = is_last_update(decl_var, to<stmt_block>(last_stmt->else_stmt), parents);
 		if (then_res && else_res)
 			return true;
 		return false;
@@ -74,7 +69,7 @@ void var_use_finder::visit(var_expr::Ptr ve) {
 static bool has_further_uses(decl_stmt::Ptr decl, std::vector<stmt::Ptr> stmts, int start_index) {
 	var_use_finder finder;
 	finder.to_find = decl->decl_var;
-	for (unsigned i =  start_index; i < stmts.size(); i++) {
+	for (unsigned i = start_index; i < stmts.size(); i++) {
 		stmts[i]->accept(&finder);
 		if (finder.found)
 			return true;
@@ -93,14 +88,14 @@ void for_loop_finder::visit(stmt_block::Ptr a) {
 				// conversion
 				if (i == 0)
 					continue;
-				if (!(isa<decl_stmt>(a->stmts[i - 1]) || (isa<expr_stmt>(a->stmts[i-1]) 
-					&& isa<assign_expr>(to<expr_stmt>(a->stmts[i - 1])->expr1))))
+				if (!(isa<decl_stmt>(a->stmts[i - 1]) ||
+				      (isa<expr_stmt>(a->stmts[i - 1]) &&
+				       isa<assign_expr>(to<expr_stmt>(a->stmts[i - 1])->expr1))))
 					continue;
 
 				var::Ptr init_var;
 				if (isa<decl_stmt>(a->stmts[i - 1])) {
-					decl_stmt::Ptr decl =
-					    to<decl_stmt>(a->stmts[i - 1]);
+					decl_stmt::Ptr decl = to<decl_stmt>(a->stmts[i - 1]);
 					init_var = decl->decl_var;
 				} else {
 					auto assign = to<assign_expr>(to<expr_stmt>(a->stmts[i - 1])->expr1);
@@ -125,14 +120,13 @@ void for_loop_finder::visit(stmt_block::Ptr a) {
 				if (loop_body->stmts.size() < 1)
 					continue;
 
-				
 				if (!is_last_update(init_var, loop_body, parents))
 					continue;
-				
-/*
-				if (parents.size() == 0)
-					continue;
-*/
+
+				/*
+								if (parents.size() == 0)
+									continue;
+				*/
 				for (auto stmt : loop->continue_blocks) {
 					if (loop->continue_blocks.size() < 2)
 						continue;
@@ -144,18 +138,17 @@ void for_loop_finder::visit(stmt_block::Ptr a) {
 			}
 		}
 		if (while_loop_index != -1) {
-			while_stmt::Ptr loop =
-			    to<while_stmt>(a->stmts[while_loop_index + 1]);
+			while_stmt::Ptr loop = to<while_stmt>(a->stmts[while_loop_index + 1]);
 			std::vector<stmt::Ptr> new_stmts;
 			for (int i = 0; i < while_loop_index; i++)
 				new_stmts.push_back(a->stmts[i]);
 			for_stmt::Ptr for_loop = std::make_shared<for_stmt>();
-			for_loop->static_offset =
-			    a->stmts[while_loop_index]->static_offset;
-			// Before we merge the decl with the for loop, make sure 
+			for_loop->static_offset = a->stmts[while_loop_index]->static_offset;
+			// Before we merge the decl with the for loop, make sure
 			// the variable being declared doesn't have any other uses
 			auto decl = a->stmts[while_loop_index];
-			if (isa<decl_stmt>(decl) && has_further_uses(to<decl_stmt>(decl), a->stmts, while_loop_index+2)) {
+			if (isa<decl_stmt>(decl) &&
+			    has_further_uses(to<decl_stmt>(decl), a->stmts, while_loop_index + 2)) {
 				auto ce = std::make_shared<int_const>();
 				ce->value = 0;
 				auto es = std::make_shared<expr_stmt>();
@@ -163,7 +156,7 @@ void for_loop_finder::visit(stmt_block::Ptr a) {
 				for_loop->decl_stmt = es;
 				// Keep the decl in the new stmts
 				new_stmts.push_back(decl);
-			} else 
+			} else
 				for_loop->decl_stmt = a->stmts[while_loop_index];
 			for_loop->annotation = for_loop->decl_stmt->annotation;
 			for_loop->decl_stmt->annotation = "";
@@ -187,7 +180,7 @@ void for_loop_finder::visit(stmt_block::Ptr a) {
 				stmt->stmts.push_back(cont_stmt);
 			}
 			// Even after this if the update is empty, just put an empty expression there
-			if (for_loop->update == nullptr) {	
+			if (for_loop->update == nullptr) {
 				auto ce = std::make_shared<int_const>();
 				ce->value = 0;
 				for_loop->update = ce;
@@ -195,8 +188,7 @@ void for_loop_finder::visit(stmt_block::Ptr a) {
 
 			for_loop->body = loop->body;
 			new_stmts.push_back(for_loop);
-			for (unsigned int i = while_loop_index + 2;
-			     i < a->stmts.size(); i++)
+			for (unsigned int i = while_loop_index + 2; i < a->stmts.size(); i++)
 				new_stmts.push_back(a->stmts[i]);
 			a->stmts = new_stmts;
 		} else

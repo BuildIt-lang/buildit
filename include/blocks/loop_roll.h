@@ -1,7 +1,7 @@
 #ifndef BLOCK_LOOP_ROLL_H
 #define BLOCK_LOOP_ROLL_H
-#include "blocks/block_visitor.h"
 #include "blocks/block_replacer.h"
+#include "blocks/block_visitor.h"
 #include "blocks/stmt.h"
 
 namespace block {
@@ -25,7 +25,6 @@ public:
 	using block_visitor::visit;
 	std::vector<expr::Ptr> replace;
 	int curr_index = 0;
-
 
 	virtual void visit(int_const::Ptr);
 

@@ -1,22 +1,22 @@
 #include "blocks/extract_cuda.h"
+#include "blocks/c_code_generator.h"
 #include "builder/dyn_var.h"
 #include <sstream>
-#include "blocks/c_code_generator.h"
 
 namespace block {
 // Unique counter to name generated kernels
 int total_created_kernels = 0;
 
-// Local utility visitor to find the statement block 
+// Local utility visitor to find the statement block
 // a particular statement is from
-struct parent_finder: public block_visitor {
+struct parent_finder : public block_visitor {
 public:
 	using block_visitor::visit;
 	stmt::Ptr to_find;
 	stmt_block::Ptr parent_found = nullptr;
 	virtual void visit(stmt_block::Ptr block) {
 		block_visitor::visit(block);
-		for (auto stmt: block->stmts) {
+		for (auto stmt : block->stmts) {
 			if (to_find == stmt) {
 				parent_found = block;
 			}
@@ -41,12 +41,11 @@ static std::vector<var::Ptr> extract_extern_vars(block::Ptr function, stmt::Ptr 
 	exts.declared = dec.declared;
 	exts.declared.push_back(outer);
 	exts.declared.push_back(inner);
-	//exts.func_declared = func_dec.declared;
-	
+	// exts.func_declared = func_dec.declared;
+
 	from->accept(&exts);
 
 	return exts.gathered;
-	
 }
 
 static void var_replace_all(stmt::Ptr body, var::Ptr from, var::Ptr to);
@@ -70,9 +69,10 @@ block::Ptr extract_single_cuda(block::Ptr from, std::vector<decl_stmt::Ptr> &new
 	assert(isa<for_stmt>(found_loop) && "The " CUDA_KERNEL " annotation should be only applied to a for loop");
 	// We will also assert that this for loop has a single other for loop
 	for_stmt::Ptr outer_loop = to<for_stmt>(found_loop);
-	assert(isa<stmt_block>(outer_loop->body) && to<stmt_block>(outer_loop->body)->stmts.size() == 1 && isa<for_stmt>(to<stmt_block>(outer_loop->body)->stmts[0]) &&  "Loops for device should be doubly nested");
+	assert(isa<stmt_block>(outer_loop->body) && to<stmt_block>(outer_loop->body)->stmts.size() == 1 &&
+	       isa<for_stmt>(to<stmt_block>(outer_loop->body)->stmts[0]) && "Loops for device should be doubly nested");
 	for_stmt::Ptr inner_loop = to<for_stmt>(to<stmt_block>(outer_loop->body)->stmts[0]);
-	
+
 	var::Ptr outer_var;
 	if (isa<decl_stmt>(outer_loop->decl_stmt)) {
 		outer_var = to<decl_stmt>(outer_loop->decl_stmt)->decl_var;
@@ -95,17 +95,18 @@ block::Ptr extract_single_cuda(block::Ptr from, std::vector<decl_stmt::Ptr> &new
 	if (is_coop) {
 		// If this is coop, we will create some extra decls to return the copied values
 		int i = 0;
-		for (auto v: vars) {
+		for (auto v : vars) {
 			std::ostringstream type_str;
 			c_code_generator::generate_code(v->var_type, type_str, 0);
 			std::string type_string = type_str.str();
-			type_string.pop_back();	
+			type_string.pop_back();
 			auto v_new = std::make_shared<var>();
-			v_new->var_type = builder::dyn_var<char>::create_block_type();	
-			//v_new->var_type = v->var_type;
-			v_new->var_name = "ret_" + std::to_string(this_kern_index) + "_" + std::to_string(i) + "[sizeof(" + type_string +")]";
+			v_new->var_type = builder::dyn_var<char>::create_block_type();
+			// v_new->var_type = v->var_type;
+			v_new->var_name = "ret_" + std::to_string(this_kern_index) + "_" + std::to_string(i) +
+					  "[sizeof(" + type_string + ")]";
 			auto v_new_ret = std::make_shared<var>();
-			v_new_ret->var_type = builder::dyn_var<char>::create_block_type();	
+			v_new_ret->var_type = builder::dyn_var<char>::create_block_type();
 			v_new_ret->var_name = "ret_" + std::to_string(this_kern_index) + "_" + std::to_string(i);
 			ret_vars.push_back(v_new_ret);
 			i++;
@@ -114,25 +115,24 @@ block::Ptr extract_single_cuda(block::Ptr from, std::vector<decl_stmt::Ptr> &new
 			auto decl_new = std::make_shared<decl_stmt>();
 			decl_new->decl_var = v_new;
 			decl_new->init_expr = nullptr;
-			new_decls.push_back(decl_new);	
+			new_decls.push_back(decl_new);
 		}
 	}
 
 	assert(isa<lt_expr>(outer_loop->cond) && "CUDA loops should have condition of the form < ...");
 	assert(isa<lt_expr>(inner_loop->cond) && "CUDA loops should have condition of the form < ...");
-	
+
 	expr::Ptr cta_count = to<lt_expr>(outer_loop->cond)->expr2;
 	expr::Ptr thread_count = to<lt_expr>(inner_loop->cond)->expr2;
-	
-	
+
 	var::Ptr cta_id = std::make_shared<var>();
 	cta_id->var_name = "blockIdx.x";
 	cta_id->var_type = builder::dyn_var<int>::create_block_type();
-	
+
 	var::Ptr thread_id = std::make_shared<var>();
 	thread_id->var_name = "threadIdx.x";
 	thread_id->var_type = builder::dyn_var<int>::create_block_type();
-	
+
 	var_replace_all(inner_loop->body, outer_var, cta_id);
 	var_replace_all(inner_loop->body, inner_var, thread_id);
 
@@ -140,7 +140,6 @@ block::Ptr extract_single_cuda(block::Ptr from, std::vector<decl_stmt::Ptr> &new
 	kernel->func_name = "cuda_kernel_" + std::to_string(this_kern_index);
 
 	kernel->return_type = builder::dyn_var<void>::create_block_type();
-	
 
 	function_call_expr::Ptr call = std::make_shared<function_call_expr>();
 	var::Ptr call_name = std::make_shared<var>();
@@ -159,7 +158,7 @@ block::Ptr extract_single_cuda(block::Ptr from, std::vector<decl_stmt::Ptr> &new
 		call_name->var_name += ", " + thread_count_str.str();
 		call_name->var_name.pop_back();
 		call_name->var_name += ">>>";
-		
+
 	} else {
 		call_name->var_type = builder::dyn_var<int>::create_block_type();
 		call_name->var_name = "runtime::LaunchCooperativeKernel";
@@ -189,24 +188,24 @@ block::Ptr extract_single_cuda(block::Ptr from, std::vector<decl_stmt::Ptr> &new
 	call_stmt_sync->expr1 = call_sync;
 
 	for (unsigned int i = 0; i < vars.size(); i++) {
-		std::string arg_name = "arg" + std::to_string(i);	
+		std::string arg_name = "arg" + std::to_string(i);
 		var::Ptr arg = std::make_shared<var>();
 		arg->var_name = arg_name;
 		arg->var_type = vars[i]->var_type;
-		var_replace_all(inner_loop->body, vars[i], arg);		
+		var_replace_all(inner_loop->body, vars[i], arg);
 		kernel->args.push_back(arg);
 		var_expr::Ptr arg_expr = std::make_shared<var_expr>();
 		arg_expr->var1 = vars[i];
 		call->args.push_back(arg_expr);
 	}
 	stmt_block::Ptr new_stmts = std::make_shared<stmt_block>();
-	
-	//block::stmt_block::Ptr old_stmts = to<block::stmt_block>(from);	
+
+	// block::stmt_block::Ptr old_stmts = to<block::stmt_block>(from);
 	parent_finder finder;
 	finder.to_find = found_loop;
 	from->accept(&finder);
 	stmt_block::Ptr old_stmts = finder.parent_found;
-	
+
 	kernel->body = inner_loop->body;
 
 	// If this is a coop kernel, return the values
@@ -228,15 +227,14 @@ block::Ptr extract_single_cuda(block::Ptr from, std::vector<decl_stmt::Ptr> &new
 		v_copy->var_name = "runtime::cudaMemcpyFromSymbolMagic";
 		auto v_copy_expr = std::make_shared<var_expr>();
 		v_copy_expr->var1 = v_copy;
-	
+
 		auto m_copy = std::make_shared<var>();
 		m_copy->var_type = builder::dyn_var<void(void)>::create_block_type();
 		m_copy->var_name = "runtime::cudaMemcpyToSymbolMagic";
 		auto m_copy_expr = std::make_shared<var_expr>();
 		m_copy_expr->var1 = m_copy;
-		
 
-		for (auto v: kernel->args) {
+		for (auto v : kernel->args) {
 			auto rhs = std::make_shared<var_expr>();
 			rhs->var1 = v;
 			auto lhs = std::make_shared<var_expr>();
@@ -254,10 +252,10 @@ block::Ptr extract_single_cuda(block::Ptr from, std::vector<decl_stmt::Ptr> &new
 			auto f = std::make_shared<function_call_expr>();
 			f->expr1 = v_copy_expr;
 			auto addr = std::make_shared<addr_of_expr>();
-			addr->expr1 = call->args[i+3];
+			addr->expr1 = call->args[i + 3];
 			f->args.push_back(addr);
 			f->args.push_back(lhs);
-			
+
 			auto stmt = std::make_shared<expr_stmt>();
 			stmt->expr1 = f;
 			copy_backs.push_back(stmt);
@@ -266,27 +264,26 @@ block::Ptr extract_single_cuda(block::Ptr from, std::vector<decl_stmt::Ptr> &new
 		}
 		to<stmt_block>(kernel->body)->stmts.push_back(if_s);
 	}
-	
-	for (auto stmt: old_stmts->stmts) {
+
+	for (auto stmt : old_stmts->stmts) {
 		if (stmt != found_loop)
 			new_stmts->stmts.push_back(stmt);
 		else {
 			new_stmts->stmts.push_back(call_stmt);
 			new_stmts->stmts.push_back(call_stmt_sync);
-			for (auto a: copy_backs)
+			for (auto a : copy_backs)
 				new_stmts->stmts.push_back(a);
 		}
 	}
 
-	old_stmts->stmts = new_stmts->stmts;	
-	
+	old_stmts->stmts = new_stmts->stmts;
+
 	std::vector<std::string> attrs;
 	attrs.push_back("__global__");
-			
+
 	kernel->setMetadata("attributes", attrs);
-	
+
 	return kernel;
-		
 }
 
 void cuda_var_replacer::visit(var_expr::Ptr expr) {
@@ -297,7 +294,7 @@ static void var_replace_all(stmt::Ptr body, var::Ptr from, var::Ptr to) {
 	cuda_var_replacer replacer;
 	replacer.to_replace = from;
 	replacer.replace_with = to;
-	body->accept(&replacer);	
+	body->accept(&replacer);
 }
 
 void gather_declared_vars::visit(decl_stmt::Ptr stmt) {
@@ -320,7 +317,8 @@ void gather_extern_vars::visit(var_expr::Ptr expr) {
 	// We want to ignore all the variables with function types
 	if (isa<function_type>(var1->var_type))
 		return;
-	if (std::find(gathered.begin(), gathered.end(), var1) == gathered.end() && std::find(declared.begin(), declared.end(), var1) == declared.end())
+	if (std::find(gathered.begin(), gathered.end(), var1) == gathered.end() &&
+	    std::find(declared.begin(), declared.end(), var1) == declared.end())
 		gathered.push_back(var1);
 }
 
@@ -329,12 +327,12 @@ std::vector<block::Ptr> extract_cuda_from(block::Ptr from) {
 	block::Ptr kernel = nullptr;
 	std::vector<decl_stmt::Ptr> new_var_decls;
 	while ((kernel = extract_single_cuda(from, new_var_decls))) {
-		for (auto a: new_var_decls)
-			new_decls.push_back(a);	
-		new_var_decls.clear();	
-		new_decls.push_back(kernel);		
+		for (auto a : new_var_decls)
+			new_decls.push_back(a);
+		new_var_decls.clear();
+		new_decls.push_back(kernel);
 	}
-	return new_decls;	
+	return new_decls;
 }
 
-}
+} // namespace block

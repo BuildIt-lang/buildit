@@ -1,30 +1,28 @@
-#include <iostream>
-#include <cstring>
+#include "blocks/c_code_generator.h"
 #include "builder/dyn_var.h"
 #include "builder/static_var.h"
-#include "blocks/c_code_generator.h"
+#include <cstring>
+#include <iostream>
 
 template <typename T>
 using dyn = builder::dyn_var<T>;
 using builder::static_var;
 
-static dyn<int (char*)> d_strlen(builder::as_global("strlen"));
+static dyn<int(char *)> d_strlen(builder::as_global("strlen"));
 
 static bool is_normal(char m) {
-	return (m >= 'a' && m <= 'z') || (m >= 'A'
-		&& m <= 'Z') || (m >= '0' && m <= '9');
+	return (m >= 'a' && m <= 'z') || (m >= 'A' && m <= 'Z') || (m >= '0' && m <= '9');
 }
 static void progress(const char *re, static_var<char> *next, int p) {
 	int ns = p + 1;
 	if ((int)strlen(re) == ns) {
 		next[ns] = true;
-	} else if (is_normal(re[ns])
-			|| '.' == re[ns]) {
+	} else if (is_normal(re[ns]) || '.' == re[ns]) {
 		next[ns] = true;
-		if ('*' == re[ns+1]) {
+		if ('*' == re[ns + 1]) {
 			// We are allowed to skip this
 			// so just progress again
-			progress(re, next, ns+1);
+			progress(re, next, ns + 1);
 		}
 	} else if ('*' == re[ns]) {
 		next[p] = true;
@@ -32,8 +30,7 @@ static void progress(const char *re, static_var<char> *next, int p) {
 	}
 }
 
-
-static dyn<int> match_regex(const char* re, dyn<char*> str) {
+static dyn<int> match_regex(const char *re, dyn<char *> str) {
 	// allocate two state vectors
 	const int re_len = strlen(re);
 	static_var<char> *current = new static_var<char>[re_len + 1];
@@ -96,14 +93,11 @@ static dyn<int> match_regex(const char* re, dyn<char*> str) {
 	return is_match;
 }
 
-
-
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
 	builder::builder_context context;
 	context.feature_unstructured = true;
 	context.run_rce = true;
-	auto ast = context.extract_function_ast(match_regex,
-			"match_re", "ab*c*d");
+	auto ast = context.extract_function_ast(match_regex, "match_re", "ab*c*d");
 	std::cout << "#include <string.h>" << std::endl;
 	block::c_code_generator::generate_code(ast, std::cout);
 	return 0;
