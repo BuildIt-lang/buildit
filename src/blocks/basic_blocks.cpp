@@ -12,6 +12,7 @@ std::vector<std::shared_ptr<basic_block>> generate_basic_blocks(block::stmt_bloc
     for (auto st: ast->stmts) {
         auto bb = std::make_shared<basic_block>(std::to_string(basic_block_count));
         bb->parent = st;
+        // bb->index = ;
         work_list.push_back(bb);
         basic_block_count++;
     }
@@ -21,7 +22,7 @@ std::vector<std::shared_ptr<basic_block>> generate_basic_blocks(block::stmt_bloc
         work_list[i]->successor.push_back(work_list[i+1]);
     }
 
-    // step 3: process blocks
+    // step 3: process blocks: every xx_stmt type statement is made out into a basic block
     while (work_list.size()) {
         auto bb = work_list.front();
 
@@ -31,22 +32,30 @@ std::vector<std::shared_ptr<basic_block>> generate_basic_blocks(block::stmt_bloc
 
             if (stmt_block_->stmts.size() > 0) {
                 std::vector<std::shared_ptr<basic_block>> stmt_block_list;
-
+                
+                // convert all statements of this stmt_block into a basic block
                 for (auto st: stmt_block_->stmts) {
                     stmt_block_list.push_back(std::make_shared<basic_block>(std::to_string(basic_block_count++)));
                     stmt_block_list.back()->parent = st;
                 }
-
+                
+                // set the basic block successors
                 for (unsigned i = 0; stmt_block_list.size() != 0 && i < stmt_block_list.size() - 1; i++) {
                     stmt_block_list[i]->successor.push_back(stmt_block_list[i+1]);
                 }
 
+                // since we insert these stmts between bb1 ---> bb2 ==> bb1 ---> (bb-a1...bb-an) ---> bb2
+                // point the successor of the stmt_block_list to the basic block that bb1's successor 
+                // pointed to. After this, clear the bb1's successor and push the front of stmt_block_list
+                // to bb1's successor list.
                 stmt_block_list.back()->successor.push_back(bb->successor.front());
                 bb->successor.clear();
                 bb->successor.push_back(stmt_block_list.front());
                 
+                // push a rather empty-ish basic block, which will branch to the next basic block, or the next statement.
                 return_list.push_back(bb);
                 work_list.pop_front();
+                // now insert the pending blocks to be processed at the front of the work_list
                 work_list.insert(work_list.begin(), stmt_block_list.begin(), stmt_block_list.end());
             }
             else {
@@ -67,7 +76,7 @@ std::vector<std::shared_ptr<basic_block>> generate_basic_blocks(block::stmt_bloc
             exit_bb->parent = std::make_shared<stmt_block>();
             // check if this is the last block, if yes the successor will be empty
             if (bb->successor.size()) {
-                // set the successor to the block that if_stmt pointer to earlier
+                // set the successor to the block that if_stmt successor pointer to earlier
                 exit_bb->successor.push_back(bb->successor.front());
                 // clear the successor block from the if_stmt
                 bb->successor.clear();

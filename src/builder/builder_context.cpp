@@ -303,6 +303,28 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 		block::eliminate_redundant_vars(ast);
 	}
 
+	std::vector<std::shared_ptr<basic_block>> BBs = generate_basic_blocks(block::to<block::stmt_block>(ast));
+
+	std::cerr << "++++++ basic blocks ++++++ \n";
+	for (auto bb: BBs) {
+		std::cerr << bb->name << ":" << "  ; ";
+		for (auto pred: bb->predecessor) {
+			std::cerr << pred->name << ", ";
+		}
+		std::cerr << "\n";
+		if (bb->branch_expr) {
+			std::cerr << "  ";
+			bb->branch_expr->dump(std::cerr, 0);
+		}
+		std::cerr << "  ";
+		std::cerr << "br ";
+		for (auto branches: bb->successor) {
+			std::cerr << branches->name << ", ";
+		}
+		std::cerr << "\n";
+	}
+	std::cerr << "++++++ basic blocks ++++++ \n";
+
 	if (feature_unstructured)
 		return ast;
 

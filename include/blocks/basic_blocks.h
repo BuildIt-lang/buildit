@@ -14,6 +14,7 @@ class basic_block {
         std::vector<std::shared_ptr<basic_block>> successor;
         block::expr::Ptr branch_expr;
         block::stmt::Ptr parent;
+        unsigned int index;
         std::string name;
 };
 

@@ -2,7 +2,6 @@
 #define LOOP_FINDER_H
 #include "blocks/block_visitor.h"
 #include "blocks/stmt.h"
-#include "blocks/basic_blocks.h"
 
 namespace block {
 class loop_finder : public block_visitor {
