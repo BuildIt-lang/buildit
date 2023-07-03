@@ -307,7 +307,7 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 
 	std::cerr << "++++++ basic blocks ++++++ \n";
 	for (auto bb: BBs) {
-		std::cerr << bb->name << ":" << "  ; ";
+		std::cerr << bb->id << ":" << bb->name << ":" << "  ; ";
 		for (auto pred: bb->predecessor) {
 			std::cerr << pred->name << ", ";
 		}
@@ -324,6 +324,28 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 		std::cerr << "\n";
 	}
 	std::cerr << "++++++ basic blocks ++++++ \n";
+
+	std::cerr << "++++++ dominance ++++++ \n";
+	dominator_tree dom(BBs);
+
+	std::cerr << "== postorder map ==\n";
+	for (int i: dom.get_postorder_bb_map()) {
+		std::cerr << i << "\n";
+	}
+	std::cerr << "== postorder map ==\n";
+
+	std::cerr << "== postorder ==\n";
+	for (int i: dom.get_postorder()) {
+		std::cerr << i << "\n";
+	}
+	std::cerr << "== postorder ==\n";
+
+	std::cerr << "== idom ==\n";
+	for (int i: dom.get_idom()) {
+		std::cerr << i << "\n";
+	}
+	std::cerr << "== idom ==\n";
+	std::cerr << "++++++ dominance ++++++ \n";
 
 	if (feature_unstructured)
 		return ast;

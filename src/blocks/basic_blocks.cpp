@@ -169,5 +169,10 @@ std::vector<std::shared_ptr<basic_block>> generate_basic_blocks(block::stmt_bloc
         }
     }
 
+    // step 6: assign each basic_block an id
+    for (unsigned int i = 0; i < return_list.size(); i++) {
+        return_list[i]->id = i;
+    }
+
     return return_list;
 }
