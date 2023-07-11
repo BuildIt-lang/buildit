@@ -3,9 +3,9 @@
 
 using namespace block;
 
-std::vector<std::shared_ptr<basic_block>> generate_basic_blocks(block::stmt_block::Ptr ast) {
+basic_block::cfg_block generate_basic_blocks(block::stmt_block::Ptr ast) {
     std::deque<std::shared_ptr<basic_block>> work_list;
-    std::vector<std::shared_ptr<basic_block>> return_list;
+    basic_block::cfg_block return_list;
     int basic_block_count = 0;
 
     // step 1: fill the work_list
@@ -31,7 +31,7 @@ std::vector<std::shared_ptr<basic_block>> generate_basic_blocks(block::stmt_bloc
             bb->name = "stmt" + bb->name;
 
             if (stmt_block_->stmts.size() > 0) {
-                std::vector<std::shared_ptr<basic_block>> stmt_block_list;
+                basic_block::cfg_block stmt_block_list;
                 
                 // convert all statements of this stmt_block into a basic block
                 for (auto st: stmt_block_->stmts) {

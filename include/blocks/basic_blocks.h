@@ -1,6 +1,5 @@
 #ifndef BASIC_BLOCKS_H
 #define BASIC_BLOCKS_H
-#include "blocks/block_visitor.h"
 #include "blocks/stmt.h"
 #include <vector>
 #include <deque>
@@ -8,10 +7,11 @@
 
 class basic_block {
     public:
+        typedef std::vector<std::shared_ptr<basic_block>> cfg_block;
         basic_block(std::string label): name(label) {};
 
-        std::vector<std::shared_ptr<basic_block>> predecessor;
-        std::vector<std::shared_ptr<basic_block>> successor;
+        cfg_block predecessor;
+        cfg_block successor;
         block::expr::Ptr branch_expr;
         block::stmt::Ptr parent;
         unsigned int index;
@@ -19,6 +19,6 @@ class basic_block {
         std::string name;
 };
 
-std::vector<std::shared_ptr<basic_block>> generate_basic_blocks(block::stmt_block::Ptr ast);
+basic_block::cfg_block generate_basic_blocks(block::stmt_block::Ptr ast);
 
 #endif

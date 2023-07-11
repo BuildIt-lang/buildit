@@ -303,7 +303,7 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 		block::eliminate_redundant_vars(ast);
 	}
 
-	std::vector<std::shared_ptr<basic_block>> BBs = generate_basic_blocks(block::to<block::stmt_block>(ast));
+	basic_block::cfg_block BBs = generate_basic_blocks(block::to<block::stmt_block>(ast));
 
 	std::cerr << "++++++ basic blocks ++++++ \n";
 	for (auto bb: BBs) {
@@ -326,7 +326,7 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 	std::cerr << "++++++ basic blocks ++++++ \n";
 
 	std::cerr << "++++++ dominance ++++++ \n";
-	dominator_tree dom(BBs);
+	dominator_analysis dom(BBs);
 
 	std::cerr << "== postorder map ==\n";
 	for (int i: dom.get_postorder_bb_map()) {
@@ -341,12 +341,35 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 	std::cerr << "== postorder ==\n";
 
 	std::cerr << "== idom ==\n";
+	std::cerr << "get_idom(int) test: get_idom(0): " << dom.get_idom(0) << "\n";
+	std::cerr << "get_idom(int) test: get_idom(-1): " << dom.get_idom(-1) << "\n";
+
 	for (int i: dom.get_idom()) {
 		std::cerr << i << "\n";
 	}
 	std::cerr << "== idom ==\n";
+
+	std::cerr << "== idom map ==\n";
+	std::cerr << "get_idom_map(int) test: get_idom_map(0): ";
+	for (int i : dom.get_idom_map(0)) std::cerr << i << " ";
+	std::cerr << "\n";
+
+	std::cerr << "get_idom_map(int) test: get_idom_map(-1): ";
+	for (int i : dom.get_idom_map(-1)) std::cerr << i << " ";
+	std::cerr << "\n";
+
+	for (auto children: dom.get_idom_map()) {
+		std::cerr << children.first << ": ";
+		for (int child: children.second) {
+			std::cerr << child << " ";
+		}
+		std::cerr << "\n";
+	}
+	std::cerr << "== idom map ==\n";
+
 	std::cerr << "++++++ dominance ++++++ \n";
 
+	loop_info LI(BBs, dom);
 	if (feature_unstructured)
 		return ast;
 

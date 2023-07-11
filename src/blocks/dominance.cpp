@@ -2,7 +2,7 @@
 
 using namespace block;
 
-dominator_tree::dominator_tree(std::vector<std::shared_ptr<basic_block>> &cfg) : cfg_(cfg) {
+dominator_analysis::dominator_analysis(basic_block::cfg_block &cfg) : cfg_(cfg) {
     // TODO: Add a check for size, it should be greater than 2.
     idom.reserve(cfg_.size());
     idom.assign(cfg_.size(), -1);
@@ -14,7 +14,7 @@ dominator_tree::dominator_tree(std::vector<std::shared_ptr<basic_block>> &cfg) :
     analyze();
 }
 
-void dominator_tree::postorder_dfs_helper(std::vector<bool> &visited_bbs, int id) {
+void dominator_analysis::postorder_dfs_helper(std::vector<bool> &visited_bbs, int id) {
     for (auto child: cfg_[id]->successor) {
         if (!visited_bbs[child->id]) {
             visited_bbs[child->id] = true;
@@ -23,7 +23,7 @@ void dominator_tree::postorder_dfs_helper(std::vector<bool> &visited_bbs, int id
         }
     }    
 }
-void dominator_tree::postorder_dfs() {
+void dominator_analysis::postorder_dfs() {
     std::vector<bool> visited_bbs(cfg_.size());
     visited_bbs.assign(visited_bbs.size(), false);
     visited_bbs[0] = true;
@@ -32,26 +32,39 @@ void dominator_tree::postorder_dfs() {
     postorder.push_back(0);
 }
 
-std::vector<int> &dominator_tree::get_postorder_bb_map() {
+std::vector<int> &dominator_analysis::get_postorder_bb_map() {
     return postorder_bb_map;
 }
 
-std::vector<int> &dominator_tree::get_postorder() {
+std::vector<int> &dominator_analysis::get_postorder() {
     return postorder;
 }
 
-std::vector<int> &dominator_tree::get_idom() {
+std::vector<int> &dominator_analysis::get_idom() {
     return idom;
 }
 
-int dominator_tree::get_idom(int bb_id) {
-    if (bb_id >= 0 && bb_id < idom.size()) {
+std::map<int, std::vector<int>> &dominator_analysis::get_idom_map() {
+    return idom_map;
+}
+
+int dominator_analysis::get_idom(int bb_id) {
+    if (bb_id < 0 || bb_id >= (int)idom.size()) {
         return -1;
     }
 
     return idom[bb_id];
 }
-bool dominator_tree::dominates(int bb1_id, int bb2_id) {
+
+std::vector<int> dominator_analysis::get_idom_map(int bb_id) {
+    if (bb_id < 0 || bb_id >= (int)idom_map.size()) {
+        return {};
+    }
+
+    return idom_map[bb_id];
+}
+
+bool dominator_analysis::dominates(int bb1_id, int bb2_id) {
     if (bb1_id == 0) {
         return true;
     }
@@ -67,11 +80,11 @@ bool dominator_tree::dominates(int bb1_id, int bb2_id) {
     return false;
 }
 
-bool dominator_tree::is_reachable_from_entry(int bb_id) {
+bool dominator_analysis::is_reachable_from_entry(int bb_id) {
     return dominates(0, bb_id);
 }
 
-int dominator_tree::intersect(int bb1_id, int bb2_id) {
+int dominator_analysis::intersect(int bb1_id, int bb2_id) {
     while (bb1_id != bb2_id) {
         if (postorder_bb_map[bb1_id] < postorder_bb_map[bb2_id]) {
             bb1_id = idom[bb1_id];
@@ -84,7 +97,7 @@ int dominator_tree::intersect(int bb1_id, int bb2_id) {
     return bb1_id;
 }
 
-void dominator_tree::analyze() {
+void dominator_analysis::analyze() {
     postorder_dfs();
     for (unsigned int i = 0; i < postorder.size(); i++) {
         postorder_bb_map[postorder[i]] = i;
@@ -113,4 +126,23 @@ void dominator_tree::analyze() {
             }
         }
     } while(change);
+
+
+    // build a map of dominators for easy traversal.
+    for (unsigned int i = 0; i < idom.size(); i++) {
+        idom_map[idom[i]].push_back(i);
+    }
+
+    for (unsigned int i = 0; i < idom.size(); i++) {
+        if (idom_map[i].empty())
+            idom_map[i].push_back(-1);
+    }
+
+    // for (auto key: idom_map) {
+    //     std::cout << key.first << ": ";
+    //     for (int id: key.second) {
+    //         std::cout << id << " ";
+    //     }
+    //     std::cout << "\n";
+    // }
 }
