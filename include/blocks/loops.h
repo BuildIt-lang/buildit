@@ -8,9 +8,9 @@
 using namespace block;
 class loop {
 public:
-    loop() = default;
+    loop(std::shared_ptr<basic_block> header): header_block(header) {}
 
-private:
+// private:
     struct loop_bounds_ {
         stmt::Ptr ind_var;
         // MISS: intial value of ind var
@@ -22,17 +22,26 @@ private:
         stmt::Ptr entry_stmt;
     } loop_bounds;
 
-    basic_block::cfg_block exit_bbs;
+    basic_block::cfg_block blocks;
+    std::shared_ptr<loop> parent_loop;
+    std::shared_ptr<basic_block> header_block;
+    std::shared_ptr<basic_block> backedge_block;
+    std::vector<std::shared_ptr<loop>> subloops;
 };
 
 class loop_info {
 public:
-    loop_info(basic_block::cfg_block ast, dominator_analysis dt): parent_ast(ast), dta(dt) {
+    loop_info(basic_block::cfg_block ast, dominator_analysis &dt): parent_ast(ast), dta(dt) {
         analyze();
     }
+    std::shared_ptr<loop> allocate_loop(std::shared_ptr<basic_block> header);
+    std::vector<std::shared_ptr<loop>> loops;
+    std::vector<std::shared_ptr<loop>> top_level_loops;
+
 private:
     basic_block::cfg_block parent_ast;
     dominator_analysis dta;
+    std::map<int, std::shared_ptr<loop>> bb_loop_map;
     // discover loops during traversal of the abstract syntax tree
     void analyze();
 };

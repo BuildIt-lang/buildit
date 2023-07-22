@@ -14,6 +14,17 @@ dominator_analysis::dominator_analysis(basic_block::cfg_block &cfg) : cfg_(cfg) 
     analyze();
 }
 
+void dominator_analysis::postorder_idom_helper(std::vector<bool> &visited, int id) {
+    for (int idom_id: idom_map[id]) {
+        std::cerr << idom_id << "\n";
+        if (idom_id != -1 && !visited[idom_id]) {
+            visited[idom_id] = true;
+            postorder_idom_helper(visited, idom_id);
+            postorder_idom.push_back(idom_id);
+        }
+    }
+}
+
 void dominator_analysis::postorder_dfs_helper(std::vector<bool> &visited_bbs, int id) {
     for (auto child: cfg_[id]->successor) {
         if (!visited_bbs[child->id]) {
@@ -48,6 +59,10 @@ std::map<int, std::vector<int>> &dominator_analysis::get_idom_map() {
     return idom_map;
 }
 
+std::vector<int> &dominator_analysis::get_postorder_idom_map() {
+    return postorder_idom;
+}
+
 int dominator_analysis::get_idom(int bb_id) {
     if (bb_id < 0 || bb_id >= (int)idom.size()) {
         return -1;
@@ -62,6 +77,14 @@ std::vector<int> dominator_analysis::get_idom_map(int bb_id) {
     }
 
     return idom_map[bb_id];
+}
+
+int dominator_analysis::get_postorder_idom_map(int idom_id) {
+    if (idom_id < 0 || idom_id >= (int)postorder_idom.size()) {
+        return -1;
+    }
+
+    return postorder_idom[idom_id];
 }
 
 bool dominator_analysis::dominates(int bb1_id, int bb2_id) {
@@ -138,11 +161,11 @@ void dominator_analysis::analyze() {
             idom_map[i].push_back(-1);
     }
 
-    // for (auto key: idom_map) {
-    //     std::cout << key.first << ": ";
-    //     for (int id: key.second) {
-    //         std::cout << id << " ";
-    //     }
-    //     std::cout << "\n";
-    // }
+    // build a postorder visit list of idom_tree
+    std::vector<bool> visited_idom_nodes(idom_map.size());
+    visited_idom_nodes.assign(visited_idom_nodes.size(), false);
+    visited_idom_nodes[0] = true;
+
+    postorder_idom_helper(visited_idom_nodes, 0);
+    postorder_idom.push_back(0);
 }

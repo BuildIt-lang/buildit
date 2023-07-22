@@ -367,9 +367,32 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 	}
 	std::cerr << "== idom map ==\n";
 
+	std::cerr << "== postorder idom ==\n";
+	for (auto idom: dom.get_postorder_idom_map()) {
+		std::cerr << idom << "\n";
+	}
+	std::cerr << "== postorder idom ==\n";
+
 	std::cerr << "++++++ dominance ++++++ \n";
 
+	std::cerr << "++++++ loop info ++++++ \n";
 	loop_info LI(BBs, dom);
+	int loop_num = 0;
+	for (auto loop: LI.loops) {
+		std::cerr << "++++++ loop " << loop_num++ << " ++++++ \n";
+
+		std::cerr << "loop headers: " << loop->header_block->id << "\n";
+		std::cerr << "blocks: ";
+		for (auto bb: loop->blocks) std::cerr << bb->id << " ";
+		std::cerr << "\n";
+		// std::cerr << "backedge: " << loop->backedge_block->id << "\n";
+		std::cerr << "parent loop: (loop header: " << (loop->parent_loop ? (int)loop->parent_loop->header_block->id : -1) << ")\n";
+		std::cerr << "subloops: ";
+		for (auto subl: loop->subloops) std::cerr << "(loop header: " << subl->header_block->id << ") ";
+		std::cerr << "\n";
+	}
+	std::cerr << "++++++ loop info ++++++ \n";
+
 	if (feature_unstructured)
 		return ast;
 
