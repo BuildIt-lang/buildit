@@ -382,11 +382,17 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 		std::cerr << "++++++ loop " << loop_num++ << " ++++++ \n";
 
 		std::cerr << "loop headers: " << loop->header_block->id << "\n";
+		
 		std::cerr << "blocks: ";
 		for (auto bb: loop->blocks) std::cerr << bb->id << " ";
 		std::cerr << "\n";
-		// std::cerr << "backedge: " << loop->backedge_block->id << "\n";
+
+		std::cerr << "loop latches: ";
+		for (auto bb: loop->loop_latch_blocks) std::cerr << bb->id << " ";
+		std::cerr << "\n";
+		
 		std::cerr << "parent loop: (loop header: " << (loop->parent_loop ? (int)loop->parent_loop->header_block->id : -1) << ")\n";
+		
 		std::cerr << "subloops: ";
 		for (auto subl: loop->subloops) std::cerr << "(loop header: " << subl->header_block->id << ") ";
 		std::cerr << "\n";

@@ -4,6 +4,7 @@
 #include "blocks/basic_blocks.h"
 #include "blocks/dominance.h"
 #include "blocks/stmt.h"
+#include <unordered_set>
 
 using namespace block;
 class loop {
@@ -23,9 +24,10 @@ public:
     } loop_bounds;
 
     basic_block::cfg_block blocks;
+    std::unordered_set<int> blocks_id_map;
     std::shared_ptr<loop> parent_loop;
     std::shared_ptr<basic_block> header_block;
-    std::shared_ptr<basic_block> backedge_block;
+    basic_block::cfg_block loop_latch_blocks;
     std::vector<std::shared_ptr<loop>> subloops;
 };
 

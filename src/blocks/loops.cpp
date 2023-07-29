@@ -84,6 +84,7 @@ void loop_info::analyze() {
             }
             new_loop->subloops.reserve(num_subloops);
             new_loop->blocks.reserve(num_blocks);
+            new_loop->blocks_id_map.reserve(num_blocks);
         }
     }
 
@@ -108,7 +109,21 @@ void loop_info::analyze() {
 
         while (subloop) {
             subloop->blocks.push_back(dta.cfg_[bb_id]);
+            subloop->blocks_id_map.insert(dta.cfg_[bb_id]->id);
             subloop = subloop->parent_loop;
+        }
+    }
+
+    // Populate the loop latches
+    for (auto loop: loops) {
+        if (!loop->header_block)
+            continue;
+
+        std::shared_ptr<basic_block> header = loop->header_block;
+        for (auto children: header->predecessor) {
+            if (loop->blocks_id_map.count(children->id)) {
+                loop->loop_latch_blocks.push_back(children);
+            }
         }
     }
 }
