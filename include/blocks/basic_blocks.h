@@ -14,7 +14,7 @@ class basic_block {
         cfg_block successor;
         block::expr::Ptr branch_expr;
         block::stmt::Ptr parent;
-        unsigned int index;
+        unsigned int ast_index;
         unsigned int id;
         std::string name;
 };

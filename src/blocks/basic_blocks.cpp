@@ -9,10 +9,11 @@ basic_block::cfg_block generate_basic_blocks(block::stmt_block::Ptr ast) {
     int basic_block_count = 0;
 
     // step 1: fill the work_list
+    unsigned int ast_index_counter = 0;
     for (auto st: ast->stmts) {
         auto bb = std::make_shared<basic_block>(std::to_string(basic_block_count));
         bb->parent = st;
-        // bb->index = ;
+        bb->ast_index = ast_index_counter++;
         work_list.push_back(bb);
         basic_block_count++;
     }
@@ -27,6 +28,7 @@ basic_block::cfg_block generate_basic_blocks(block::stmt_block::Ptr ast) {
         auto bb = work_list.front();
 
         if (isa<block::stmt_block>(bb->parent)) {
+            ast_index_counter = 0;
             stmt_block::Ptr stmt_block_ = to<stmt_block>(bb->parent);
             bb->name = "stmt" + bb->name;
 
@@ -37,6 +39,7 @@ basic_block::cfg_block generate_basic_blocks(block::stmt_block::Ptr ast) {
                 for (auto st: stmt_block_->stmts) {
                     stmt_block_list.push_back(std::make_shared<basic_block>(std::to_string(basic_block_count++)));
                     stmt_block_list.back()->parent = st;
+                    stmt_block_list.back()->ast_index = ast_index_counter++;
                 }
                 
                 // set the basic block successors
