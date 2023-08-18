@@ -89,7 +89,8 @@ void c_code_generator::visit(var_expr::Ptr a) {
 }
 void c_code_generator::visit(int_const::Ptr a) {
 	oss << a->value;
-	if (a->is_64bit) oss << "ll";
+	if (a->is_64bit)
+		oss << "ll";
 }
 void c_code_generator::visit(double_const::Ptr a) {
 	oss << std::setprecision(15);
