@@ -127,7 +127,16 @@ public:
 		return (BT) * this = a;
 	}
 
+	BT operator=(const unsigned int &a) {
+		return operator=((BT)a);
+	}
 	BT operator=(const int &a) {
+		return operator=((BT)a);
+	}
+	BT operator=(const long long &a) {
+		return operator=((BT)a);
+	}
+	BT operator=(const unsigned long long &a) {
 		return operator=((BT)a);
 	}
 
@@ -279,6 +288,9 @@ public:
 	}
 
 	dyn_var_impl(const int &a) : my_type((BT)a) {}
+	dyn_var_impl(const unsigned int &a) : my_type((BT)a) {}
+	dyn_var_impl(const long long &a) : my_type((BT)a) {}
+	dyn_var_impl(const unsigned long long &a) : my_type((BT)a) {}
 	dyn_var_impl(const bool &a) : my_type((BT)a) {}
 	dyn_var_impl(const double &a) : my_type((BT)a) {}
 	dyn_var_impl(const float &a) : my_type((BT)a) {}
