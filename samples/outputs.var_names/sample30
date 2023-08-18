@@ -30,7 +30,7 @@ STMT_BLOCK
   DECL_STMT
     SCALAR_TYPE (UNSIGNED_LONG_LONG_INT)
     VAR (h_7)
-    NO_INITIALIZATION
+    INT_CONST (4)
   DECL_STMT
     SCALAR_TYPE (CHAR)
     VAR (i_8)
@@ -75,7 +75,7 @@ STMT_BLOCK
   long int e_4;
   unsigned long int f_5;
   long long int g_6;
-  unsigned long long int h_7;
+  unsigned long long int h_7 = 4ll;
   char i_8;
   unsigned char j_9;
   float k_10;

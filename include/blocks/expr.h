@@ -322,6 +322,7 @@ public:
 	}
 
 	long long value;
+	bool is_64bit;
 
 	virtual bool is_same(block::Ptr other) override {
 		if (!isa<int_const>(other))

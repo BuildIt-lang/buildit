@@ -17,7 +17,7 @@ static void foo(void) {
 	dyn_var<long> e;
 	dyn_var<unsigned long> f;
 	dyn_var<long long> g;
-	dyn_var<unsigned long long> h;
+	dyn_var<unsigned long long> h = (unsigned long long)4;
 	dyn_var<char> i;
 	dyn_var<unsigned char> j;
 	dyn_var<float> k;

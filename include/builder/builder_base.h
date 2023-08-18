@@ -72,6 +72,8 @@ public:
 		builder_context *ctx = builder_context::current_builder_context;
 		ctx->expr_sequence.push_back(a);
 	}
+	builder(const unsigned int &a) : builder((int)a) {}
+
 	builder(const int &a) {
 		if (builder_precheck()) {
 			builder_from_sequence();
@@ -82,6 +84,24 @@ public:
 		tracer::tag offset = get_offset_in_function();
 		int_const->static_offset = offset;
 		int_const->value = a;
+		int_const->is_64bit = false;
+		builder_context::current_builder_context->add_node_to_sequence(int_const);
+		block_expr = int_const;
+
+		push_to_sequence(block_expr);
+	}
+	builder(const unsigned long long &a) : builder((long long)a) {}
+	builder(const long long &a) {
+		if (builder_precheck()) {
+			builder_from_sequence();
+			return;
+		}
+
+		block::int_const::Ptr int_const = std::make_shared<block::int_const>();
+		tracer::tag offset = get_offset_in_function();
+		int_const->static_offset = offset;
+		int_const->value = a;
+		int_const->is_64bit = true;
 		builder_context::current_builder_context->add_node_to_sequence(int_const);
 		block_expr = int_const;
 
