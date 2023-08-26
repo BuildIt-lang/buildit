@@ -311,6 +311,7 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 		for (auto pred: bb->predecessor) {
 			std::cerr << pred->name << ", ";
 		}
+		std::cerr << bb->ast_depth;
 		std::cerr << "\n";
 		if (bb->branch_expr) {
 			std::cerr << "  ";
@@ -397,14 +398,30 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 		for (auto subl: loop->subloops) std::cerr << "(loop header: " << subl->header_block->id << ") ";
 		std::cerr << "\n";
 	}
+
+	std::cerr << "++++++ top level loops ++++++ \n";
+	for (auto top_level_loop: LI.top_level_loops) std::cerr << "(loop header: " << top_level_loop->header_block->id << ") ";
+	std::cerr << "\n";
+
+	std::cerr << "++++++ preorder loops tree ++++++ \n";
+	for (auto loop_tree: LI.postorder_loops_map) {
+		std::cerr << "loop tree root: (loop header: " << LI.loops[loop_tree.first]->header_block->id << ")\n";
+		std::cerr << "postorder: ";
+		for (auto node: loop_tree.second) std::cerr << node << " ";
+		std::cerr << "\n";
+	}
 	std::cerr << "++++++ loop info ++++++ \n";
+
+	std::cerr << "++++++ convert to ast ++++++ \n";
+	LI.convert_to_ast(block::to<block::stmt_block>(ast));
+	std::cerr << "++++++ convert to ast ++++++ \n";
 
 	if (feature_unstructured)
 		return ast;
 
-	block::loop_finder finder;
-	finder.ast = ast;
-	ast->accept(&finder);
+	// block::loop_finder finder;
+	// finder.ast = ast;
+	// ast->accept(&finder);
 
 	block::for_loop_finder for_finder;
 	for_finder.ast = ast;

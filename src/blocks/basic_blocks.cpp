@@ -14,6 +14,7 @@ basic_block::cfg_block generate_basic_blocks(block::stmt_block::Ptr ast) {
         auto bb = std::make_shared<basic_block>(std::to_string(basic_block_count));
         bb->parent = st;
         bb->ast_index = ast_index_counter++;
+        bb->ast_depth = 0;
         work_list.push_back(bb);
         basic_block_count++;
     }
@@ -40,6 +41,7 @@ basic_block::cfg_block generate_basic_blocks(block::stmt_block::Ptr ast) {
                     stmt_block_list.push_back(std::make_shared<basic_block>(std::to_string(basic_block_count++)));
                     stmt_block_list.back()->parent = st;
                     stmt_block_list.back()->ast_index = ast_index_counter++;
+                    stmt_block_list.back()->ast_depth = bb->ast_depth + 1;
                 }
                 
                 // set the basic block successors
@@ -77,6 +79,8 @@ basic_block::cfg_block generate_basic_blocks(block::stmt_block::Ptr ast) {
             auto exit_bb = std::make_shared<basic_block>("exit" + std::to_string(basic_block_count));
             // assign it a empty stmt_block as parent
             exit_bb->parent = std::make_shared<stmt_block>();
+            // set the ast depth of the basic block
+            exit_bb->ast_depth = bb->ast_depth;
             // check if this is the last block, if yes the successor will be empty
             if (bb->successor.size()) {
                 // set the successor to the block that if_stmt successor pointer to earlier
@@ -94,6 +98,8 @@ basic_block::cfg_block generate_basic_blocks(block::stmt_block::Ptr ast) {
                 auto then_bb = std::make_shared<basic_block>(std::to_string(++basic_block_count));
                 // set the parent of this block as the then stmts
                 then_bb->parent = if_stmt_->then_stmt;
+                // set the ast depth of the basic block
+                then_bb->ast_depth = bb->ast_depth;
                 // set the successor of this block to be the exit block
                 then_bb->successor.push_back(exit_bb);
                 // set the successor of the original if_stmt block to be this then block
@@ -106,6 +112,8 @@ basic_block::cfg_block generate_basic_blocks(block::stmt_block::Ptr ast) {
                 auto else_bb = std::make_shared<basic_block>(std::to_string(++basic_block_count));
                 // set the parent of this block as the else stmts
                 else_bb->parent = if_stmt_->else_stmt;
+                // set the ast depth of the basic block
+                else_bb->ast_depth = bb->ast_depth;
                 // set the successor of this block to be the exit block
                 else_bb->successor.push_back(exit_bb);
                 // set the successor of the orignal if_stmt block to be this else block

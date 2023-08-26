@@ -15,6 +15,7 @@ class basic_block {
         block::expr::Ptr branch_expr;
         block::stmt::Ptr parent;
         unsigned int ast_index;
+        unsigned int ast_depth;
         unsigned int id;
         std::string name;
 };

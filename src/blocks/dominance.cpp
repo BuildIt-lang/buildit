@@ -16,7 +16,7 @@ dominator_analysis::dominator_analysis(basic_block::cfg_block &cfg) : cfg_(cfg) 
 
 void dominator_analysis::postorder_idom_helper(std::vector<bool> &visited, int id) {
     for (int idom_id: idom_map[id]) {
-        std::cerr << idom_id << "\n";
+        // std::cerr << idom_id << "\n";
         if (idom_id != -1 && !visited[idom_id]) {
             visited[idom_id] = true;
             postorder_idom_helper(visited, idom_id);
