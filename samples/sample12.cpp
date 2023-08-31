@@ -11,7 +11,8 @@ using builder::static_var;
 // A simple straight line code enclosed in a static loop. This should be
 // unrolled 10 times. There shouldn't be a loop in the AST
 static void foo(void) {
-	for (static_var<int> x = 0; x < 10; x++) {
+	static_var<long> y = 0;
+	for (static_var<int> x = y; x < 10; x++) {
 		dyn_var<int> a;
 		a = a + 1;
 	}
