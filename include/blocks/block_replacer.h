@@ -73,6 +73,7 @@ public:
 	virtual void visit(std::shared_ptr<type>) override;
 	virtual void visit(std::shared_ptr<scalar_type>) override;
 	virtual void visit(std::shared_ptr<pointer_type>) override;
+	virtual void visit(std::shared_ptr<reference_type>) override;
 	virtual void visit(std::shared_ptr<function_type>) override;
 	virtual void visit(std::shared_ptr<array_type>) override;
 	virtual void visit(std::shared_ptr<builder_var_type>) override;

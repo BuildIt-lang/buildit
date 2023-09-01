@@ -47,6 +47,17 @@ public:
 	}
 	virtual void dump(std::ostream &, int) override;
 };
+
+class reference_type : public type {
+public:
+	typedef std::shared_ptr<reference_type> Ptr;
+	type::Ptr referenced_type;
+	virtual void accept(block_visitor *a) override {
+		a->visit(self<reference_type>());
+	}
+	virtual void dump(std::ostream &, int) override;
+};
+
 class function_type : public type {
 public:
 	typedef std::shared_ptr<function_type> Ptr;

@@ -57,6 +57,7 @@ public:
 	virtual void visit(var::Ptr);
 	virtual void visit(scalar_type::Ptr);
 	virtual void visit(pointer_type::Ptr);
+	virtual void visit(reference_type::Ptr);
 	virtual void visit(array_type::Ptr);
 	virtual void visit(builder_var_type::Ptr);
 	virtual void visit(named_type::Ptr);

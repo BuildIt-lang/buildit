@@ -56,6 +56,7 @@ class var;
 class type;
 class scalar_type;
 class pointer_type;
+class reference_type;
 class function_type;
 class array_type;
 class builder_var_type;
@@ -119,6 +120,7 @@ public:
 	virtual void visit(std::shared_ptr<type>);
 	virtual void visit(std::shared_ptr<scalar_type>);
 	virtual void visit(std::shared_ptr<pointer_type>);
+	virtual void visit(std::shared_ptr<reference_type>);
 	virtual void visit(std::shared_ptr<function_type>);
 	virtual void visit(std::shared_ptr<array_type>);
 	virtual void visit(std::shared_ptr<builder_var_type>);

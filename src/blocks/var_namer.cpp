@@ -13,6 +13,11 @@ void var_namer::visit(decl_stmt::Ptr stmt) {
 		stmt->decl_var = collected_decls[so];
 		return;
 	}
+
+	// If a variable already has a name, created with with_name(_, true), skip naming it
+	if (stmt->decl_var->var_name != "")
+		return;
+
 	// We have found a new variable decl, first assign it a name
 	if (stmt->decl_var->preferred_name != "") {
 		stmt->decl_var->var_name = stmt->decl_var->preferred_name + "_" + std::to_string(var_counter);

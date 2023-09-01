@@ -160,6 +160,9 @@ void block_visitor::visit(scalar_type::Ptr a) {}
 void block_visitor::visit(pointer_type::Ptr a) {
 	a->pointee_type->accept(this);
 }
+void block_visitor::visit(reference_type::Ptr a) {
+	a->referenced_type->accept(this);
+}
 void block_visitor::visit(function_type::Ptr a) {
 	a->return_type->accept(this);
 	for (unsigned int i = 0; i < a->arg_types.size(); i++)
