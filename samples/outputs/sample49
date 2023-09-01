@@ -1,0 +1,23 @@
+FUNC_DECL
+  SCALAR_TYPE (VOID)
+  STMT_BLOCK
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (my_var)
+      NO_INITIALIZATION
+    EXPR_STMT
+      ASSIGN_EXPR
+        VAR_EXPR
+          VAR (my_var)
+        INT_CONST (1)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var0)
+      VAR_EXPR
+        VAR (my_var)
+void foo (void) {
+  int my_var;
+  my_var = 1;
+  int var0 = my_var;
+}
+

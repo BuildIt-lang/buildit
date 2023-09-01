@@ -24,17 +24,17 @@ public:
 							 "= " TOSTRING(MAX_TRACKING_VARIABLE_SIZE));
 	T val;
 
-	static_var(const static_var& other): static_var((T) other) {}
-	static_var& operator=(const static_var& other) {
-		*this = (T) other;
+	static_var(const static_var &other) : static_var((T)other) {}
+	static_var &operator=(const static_var &other) {
+		*this = (T)other;
 		return *this;
 	}
 
 	template <typename OT>
-	static_var(const static_var<OT> &other): static_var((T)(OT) other) {}
+	static_var(const static_var<OT> &other) : static_var((T)(OT)other) {}
 	template <typename OT>
-	static_var& operator=(const static_var<OT> &other) {
-		*this = (T) (OT) other;
+	static_var &operator=(const static_var<OT> &other) {
+		*this = (T)(OT)other;
 		return *this;
 	}
 

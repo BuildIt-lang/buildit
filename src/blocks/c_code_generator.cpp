@@ -204,6 +204,13 @@ void c_code_generator::visit(pointer_type::Ptr type) {
 	type->pointee_type->accept(this);
 	oss << "*";
 }
+void c_code_generator::visit(reference_type::Ptr type) {
+	if (!isa<scalar_type>(type->referenced_type) && !isa<pointer_type>(type->referenced_type) &&
+	    !isa<named_type>(type->referenced_type))
+		assert(false && "Printing pointers of complex type is not supported yet");
+	type->referenced_type->accept(this);
+	oss << "&";
+}
 void c_code_generator::visit(array_type::Ptr type) {
 	if (!isa<scalar_type>(type->element_type) && !isa<pointer_type>(type->element_type) &&
 	    !isa<named_type>(type->element_type))

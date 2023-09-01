@@ -153,6 +153,16 @@ public:
 		return type;
 	}
 };
+// Type specialization for reference type
+template <typename T>
+class type_extractor<T &> {
+public:
+	static block::type::Ptr extract_type(void) {
+		block::reference_type::Ptr type = std::make_shared<block::reference_type>();
+		type->referenced_type = type_extractor<T>::extract_type();
+		return type;
+	}
+};
 
 template <>
 class type_extractor<void> {

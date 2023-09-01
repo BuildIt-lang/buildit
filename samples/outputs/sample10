@@ -14,7 +14,25 @@ STMT_BLOCK
         VAR_EXPR
           VAR (var0)
         INT_CONST (6)
+  DECL_STMT
+    REFERENCE_TYPE
+      SCALAR_TYPE (INT)
+    VAR (var1)
+    SQ_BKT_EXPR
+      VAR_EXPR
+        VAR (var0)
+      INT_CONST (0)
+  EXPR_STMT
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (var1)
+      PLUS_EXPR
+        VAR_EXPR
+          VAR (var1)
+        INT_CONST (1)
 {
   int* var0;
   var0[5] = var0[6];
+  int& var1 = var0[0];
+  var1 = var1 + 1;
 }

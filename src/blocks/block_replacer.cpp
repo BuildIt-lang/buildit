@@ -199,6 +199,10 @@ void block_replacer::visit(pointer_type::Ptr a) {
 	a->pointee_type = rewrite<type>(a->pointee_type);
 	node = a;
 }
+void block_replacer::visit(reference_type::Ptr a) {
+	a->referenced_type = rewrite<type>(a->referenced_type);
+	node = a;
+}
 void block_replacer::visit(function_type::Ptr a) {
 	a->return_type = rewrite<type>(a->return_type);
 	for (unsigned int i = 0; i < a->arg_types.size(); i++) {

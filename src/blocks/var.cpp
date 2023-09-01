@@ -48,6 +48,11 @@ void pointer_type::dump(std::ostream &oss, int indent) {
 	oss << "POINTER_TYPE" << std::endl;
 	pointee_type->dump(oss, indent + 1);
 }
+void reference_type::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "REFERENCE_TYPE" << std::endl;
+	referenced_type->dump(oss, indent + 1);
+}
 void function_type::dump(std::ostream &oss, int indent) {
 	printer::indent(oss, indent);
 	oss << "FUNCITON_TYPE" << std::endl;

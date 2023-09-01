@@ -1,21 +1,20 @@
 #include "blocks/c_code_generator.h"
-#include "builder/builder.h"
-#include "builder/builder_context.h"
 #include "builder/dyn_var.h"
-#include <iostream>
+
 using builder::dyn_var;
 
-// Pointer variables
 static void foo(void) {
-	dyn_var<int *> a;
-	a[5] = a[6];
-	dyn_var<int &> b = a[0];
-	b = b + 1;
+	std::string name = "my_var";
+	dyn_var<int> v = builder::with_name(name, true);
+	v = 1;
+	dyn_var<int> v1 = builder::with_name(name);
+	dyn_var<int> y = v1;
 }
 int main(int argc, char *argv[]) {
 	builder::builder_context context;
-	auto ast = context.extract_ast_from_function(foo);
+	auto ast = context.extract_function_ast(foo, "foo");
 	ast->dump(std::cout, 0);
+
 	block::c_code_generator::generate_code(ast, std::cout, 0);
 	return 0;
 }
