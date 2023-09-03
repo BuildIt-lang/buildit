@@ -404,12 +404,21 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 	std::cerr << "\n";
 
 	std::cerr << "++++++ preorder loops tree ++++++ \n";
+	for (auto loop_tree: LI.preorder_loops_map) {
+		std::cerr << "loop tree root: (loop header: " << LI.loops[loop_tree.first]->header_block->id << ")\n";
+		std::cerr << "preorder: ";
+		for (auto node: loop_tree.second) std::cerr << node << " ";
+		std::cerr << "\n";
+	}
+
+	std::cerr << "++++++ postorder loops tree ++++++ \n";
 	for (auto loop_tree: LI.postorder_loops_map) {
 		std::cerr << "loop tree root: (loop header: " << LI.loops[loop_tree.first]->header_block->id << ")\n";
 		std::cerr << "postorder: ";
 		for (auto node: loop_tree.second) std::cerr << node << " ";
 		std::cerr << "\n";
 	}
+
 	std::cerr << "++++++ loop info ++++++ \n";
 
 	std::cerr << "++++++ convert to ast ++++++ \n";
@@ -518,7 +527,7 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(std::vector
 		ret_ast = ast;
 	} catch (LoopBackException &e) {
 		current_builder_context = nullptr;
-
+		std::cerr << "goto in\n";
 		block::goto_stmt::Ptr goto_stmt = std::make_shared<block::goto_stmt>();
 		goto_stmt->static_offset.clear();
 		goto_stmt->temporary_label_number = e.static_offset;
@@ -528,13 +537,23 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(std::vector
 	} catch (MemoizationException &e) {
 		if (feature_unstructured) {
 			// Instead of copying statements to the current block, we will just insert a goto
+			std::cerr << "goto memo\n";
 			block::goto_stmt::Ptr goto_stmt = std::make_shared<block::goto_stmt>();
 			goto_stmt->static_offset.clear();
 			goto_stmt->temporary_label_number = e.static_offset;
 			add_stmt_to_current_block(goto_stmt, false);
 		} else {
+			std::cerr << "goto memo\n";
 			for (unsigned int i = e.child_id; i < e.parent->stmts.size(); i++) {
-				add_stmt_to_current_block(e.parent->stmts[i], false);
+				if (isa<block::goto_stmt>(e.parent->stmts[i])) {
+					block::goto_stmt::Ptr goto_stmt = std::make_shared<block::goto_stmt>();
+					goto_stmt->static_offset.clear();
+					goto_stmt->temporary_label_number = to<block::goto_stmt>(e.parent->stmts[i])->temporary_label_number;
+					add_stmt_to_current_block(goto_stmt, false);
+				}
+				else {
+					add_stmt_to_current_block(e.parent->stmts[i], false);
+				}
 			}
 		}
 		ret_ast = ast;
