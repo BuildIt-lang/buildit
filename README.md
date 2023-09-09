@@ -1,76 +1,73 @@
-# Build&rarr;It &nbsp;&nbsp; [![Build Status](https://github.com/BuildIt-lang/buildit/actions/workflows/ci-all-samples.yml/badge.svg)](https://github.com/BuildIt-lang/buildit/actions/workflows/ci-all-samples.yml)
+# BuildIt &nbsp;&nbsp; [![Build Status](https://github.com/BuildIt-lang/buildit/actions/workflows/ci-all-samples.yml/badge.svg)](https://github.com/BuildIt-lang/buildit/actions/workflows/ci-all-samples.yml) 
 
+
+<p align="center"><img src="https://intimeand.space/images/logo-buildit.png" width="400"></p>
 <p align="center">"Every problem in Computer Science can be solved with a level of indirection and every problem in Software Engineering can be solved with a step of code-generation"</p>
 
-Build→It is a lightweight<sup>1</sup> type-based<sup>2</sup> multi-stage programming<sup>3</sup> framework in C++. Build→It makes it easy to implement Domain Specific Languages (DSLs) with very little to no knowledge about compilers. Besides extracting expressions and statements using operator overloading, Build→It supports extracting rich data-dependent control flow like if-then-else conditions and for and while loops using its novel re-execution strategy to explore all control-flow paths in the program.
+[BuildIt](https://buildit.so) is a a framework for rapidly developing high-performance Domain Specific Languages (DSLs) with little to no compiler knowledge. A lightweight type-based multi-stage programming framework in C++ that supports generating expresisons and rich data-dependent control flow like if-then-else conditions and for and while loops using its novel re-execution strategy for a variety of targets.
 
-Build→It turns -
+## Some completed and WIP projects with BuildIt
+1. [NetBlocks](https://github.com/BuildIt-lang/net-blocks): A Performant, customizable and modular network stack to specialize protocols and implementations
+2. [Easy-GraphIt](https://github.com/BuildIt-lang/easy_graphit): A 2021 LoC GraphIt compiler that generates high-performance GPU code!
+3. [Mini-Einsum DSL](https://buildit.so/tryit?sample=einsum): Compiler for Einsum-expressions on N-dimensional dense tensors in 300 LoC (CPU and GPU parallel)
 
-```C++
-template <typename BT, typename ET>
-dyn_var<int> power_f(BT base, ET exponent) {
-  dyn_var<int> res = 1, x = base;
-  while (exponent > 1) {
-    if (exponent % 2 == 1)
-      res = res * x;
-    x = x * x;
-    exponent = exponent / 2;
-  }
-  return res * x;
-}
+BuildIt is available opensource on GitHub under the MIT license. Many more samples are available in the samples/ directory and the [website](https://buildit.so/tryit)
+
+## Key Features
+**1. A portable light-weight multi-stage library that can be used with any standard C++ compiler.**
+```
+#include <builder/dyn_var.h>
+#include <builder/static_var.h>
 ...
-int power = 15;
-context.extract_function_ast(power_f<dyn_var<int>, static_var<int>>, "power_15", power);
-...
-int base = 5;
-context.extract_function_ast(power_f<static_var<int>, dyn_var<int>>, "power_5", base);
-...
+> g++ foo.cpp -lbuildit -I buildit/include/
 ```
 
-into -
-
-```C++
-int power_15 (int arg0) {
-  int var0 = arg0;
-  int var1 = 1;
-  int var2 = var0;
-  var1 = var1 * var2;
-  var2 = var2 * var2;
-  var1 = var1 * var2;
-  var2 = var2 * var2;
-  var1 = var1 * var2;
-  var2 = var2 * var2;
-  int var3 = var1 * var2;
-  return var3;
+**2. Write expressions and statements with dyn_var<T> variables to generate the same code. Easily port a high-performance library into a compiler by changing types of variables.**
+```
+// Code written with dyn_var<T>
+for (dyn_var<int> i = 0; i < 512; i = i + 1) {
+  A[i] = 0;
 }
-
-int power_5 (int arg1) {
-  int var0 = arg1;
-  int var1 = 1;
-  int var2 = 5;
-  while (var0 > 1) {
-    if ((var0 % 2) == 1) {
-      var1 = var1 * var2;
-    }
-    var2 = var2 * var2;
-    var0 = var0 / 2;
-  }
-  int var3 = var1 * var2;
-  return var3;
+```
+// Generates the same code
+```
+for (int var1 = 0; var1 < 512; var1 = var1 + 1) {
+  var0[var1] = 0;
 }
 ```
 
-Build→It is available opensource on GitHub under the MIT license. Many more samples are available in the samples/ directory including turning an interpreter for BrainFuck into a compiler using Futamura projections.
+**3. Use conditions and expressions on static_var<T> to specialize generated code for high-performance.**
+```
+static_var<int> bound, block_size;
+...
+// Splitting of loop with known bounds
+for (dyn_var<int> i0 = 0; i0 < bound / block_size; i0 = i0 + 1) {
+  for (dyn_var<int> i1 = i0 * block_size; i1 < (i0 + 1) * block_size; i1 = i1 + 1) {
+    ...
+  }
+}
+// conditionally generate padding loops
+if (bound % block_size != 0) {
+  for (dyn_var<int> i1 = (bound / block_size) * block_size; i1 < bound; i1 = i1 + 1) {
+    ...
+  }
+}
+```
 
-1. Build→It uses a purely library based approach and does not require any special compiler modifications making it extremely portable and easy to integrate into existing code bases. Using Build→It is as easy as including a few header files and linking against the Build→It library.
+**4. Supports generation of parallel code for CPUs and GPUs with simple annotations**
+```
+builder::annotate("pragma: omp parallel for");
+for (dyn_var<int> i = 0; i < 512; i = i + 1) {
+  A[i] = 0;
+}
+```
 
-2. Build→It uses the declared types of variables and expressions to decide the binding time. Build→It adds 2 new generic types - static_var<T> and dyn_var<T> which lets the user program with 2 stages. These types can be nested arbitrarily to produce code for more stages.
-
-3. What exactly is multi-stage programming and why it is important for high-performance DSLs is explained in our [paper](https://build-it.intimeand.space/publications/).
+## Debugging support
+Checkout [D2X](https://buildit.so/d2x) a debugging library that works in tandem with BuildIt and provides debugging support for DSLs. 
 
 ## Build and Run
 
-Build→It is a pure library framework and does not require any special compiler support. To build the library, clone the repository, navigate to the top-level directory and run -
+BuildIt is a pure library framework and does not require any special compiler support. To build the library, clone the repository, navigate to the top-level directory and run -
 
     make
    
@@ -84,7 +81,7 @@ To run the samples provided with the library (that also serve as simple test cas
  
 The make system will report the first failing test case if any. 
 
-Build→It is currently under active development. More features are being added to the framework to make building DSLs easy. If you notice Build→It not functioning correctly on certain inputs, please create an issue with the code snippet and expected behavior.
+BuildIt is currently under active development. More features are being added to the framework to make building DSLs easy. If you notice BuildIt not functioning correctly on certain inputs, please create an issue with the code snippet and expected behavior.
 
  
 
