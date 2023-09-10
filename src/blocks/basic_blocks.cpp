@@ -110,6 +110,8 @@ basic_block::cfg_block generate_basic_blocks(block::stmt_block::Ptr ast) {
                 then_bb->successor.push_back(exit_bb);
                 // set the successor of the original if_stmt block to be this then block
                 bb->successor.push_back(then_bb);
+                // set the then branch ptr
+                bb->then_branch = then_bb;
                 // push the block to the work_list, to expand it further
                 work_list.push_front(then_bb);
             }
@@ -126,12 +128,18 @@ basic_block::cfg_block generate_basic_blocks(block::stmt_block::Ptr ast) {
                 else_bb->successor.push_back(exit_bb);
                 // set the successor of the orignal if_stmt block to be this else block
                 bb->successor.push_back(else_bb);
+                // set the else branch ptr
+                bb->else_branch = else_bb;
                 // push the block to the work_list, to expand it further
                 work_list.insert(work_list.begin() + 1, else_bb);
             }
 
-            // if there is no else block, then have the exit block as successor as well.
+            // if there is no then/else block, then have the exit block as successor as well.
             if (bb->successor.size() <= 1) bb->successor.push_back(exit_bb);
+
+            // set the missing block as the exit block
+            if (!bb->then_branch) bb->then_branch = exit_bb;
+            else if (!bb->else_branch) bb->else_branch = exit_bb;
 
             return_list.push_back(bb);
         }

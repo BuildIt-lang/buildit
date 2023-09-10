@@ -303,7 +303,11 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 		block::eliminate_redundant_vars(ast);
 	}
 
+	if (feature_unstructured)
+		return ast;
+
 	basic_block::cfg_block BBs = generate_basic_blocks(block::to<block::stmt_block>(ast));
+	basic_block::cfg_block post_BBs = generate_basic_blocks(block::to<block::stmt_block>(ast));
 
 	std::cerr << "++++++ basic blocks ++++++ \n";
 	for (auto bb: BBs) {
@@ -328,6 +332,7 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 
 	std::cerr << "++++++ dominance ++++++ \n";
 	dominator_analysis dom(BBs);
+	dominator_analysis post_dom(post_BBs, true);
 
 	std::cerr << "== postorder map ==\n";
 	for (int i: dom.get_postorder_bb_map()) {
@@ -374,10 +379,54 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 	}
 	std::cerr << "== postorder idom ==\n";
 
+	std::cerr << "== (postdom) postorder map ==\n";
+	for (int i: post_dom.get_postorder_bb_map()) {
+		std::cerr << i << "\n";
+	}
+	std::cerr << "== (postdom) postorder map ==\n";
+
+	std::cerr << "== (postdom) postorder ==\n";
+	for (int i: post_dom.get_postorder()) {
+		std::cerr << i << "\n";
+	}
+	std::cerr << "== (postdom) postorder ==\n";
+
+	std::cerr << "== (postdom) idom ==\n";
+	std::cerr << "get_idom(int) test: get_idom(0): " << post_dom.get_idom(0) << "\n";
+	std::cerr << "get_idom(int) test: get_idom(-1): " << post_dom.get_idom(-1) << "\n";
+
+	for (int i: post_dom.get_idom()) {
+		std::cerr << i << "\n";
+	}
+	std::cerr << "== (postdom) idom ==\n";
+
+	std::cerr << "== (postdom) idom map ==\n";
+	std::cerr << "get_idom_map(int) test: get_idom_map(0): ";
+	for (int i : post_dom.get_idom_map(0)) std::cerr << i << " ";
+	std::cerr << "\n";
+
+	std::cerr << "get_idom_map(int) test: get_idom_map(-1): ";
+	for (int i : post_dom.get_idom_map(-1)) std::cerr << i << " ";
+	std::cerr << "\n";
+
+	for (auto children: post_dom.get_idom_map()) {
+		std::cerr << children.first << ": ";
+		for (int child: children.second) {
+			std::cerr << child << " ";
+		}
+		std::cerr << "\n";
+	}
+	std::cerr << "== (postdom) idom map ==\n";
+
+	std::cerr << "== (postdom) postorder idom ==\n";
+	for (auto idom: post_dom.get_postorder_idom_map()) {
+		std::cerr << idom << "\n";
+	}
+	std::cerr << "== (postdom) postorder idom ==\n";
 	std::cerr << "++++++ dominance ++++++ \n";
 
 	std::cerr << "++++++ loop info ++++++ \n";
-	loop_info LI(BBs, dom);
+	loop_info LI(BBs, dom, post_dom);
 	int loop_num = 0;
 	for (auto loop: LI.loops) {
 		std::cerr << "++++++ loop " << loop_num++ << " ++++++ \n";
@@ -392,6 +441,10 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 		for (auto bb: loop->loop_latch_blocks) std::cerr << bb->id << " ";
 		std::cerr << "\n";
 		
+		std::cerr << "loop exits: ";
+		for (auto bb: loop->loop_exit_blocks) std::cerr << bb->id << " ";
+		std::cerr << "\n";
+
 		std::cerr << "parent loop: (loop header: " << (loop->parent_loop ? (int)loop->parent_loop->header_block->id : -1) << ")\n";
 		
 		std::cerr << "subloops: ";
@@ -424,9 +477,6 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 	std::cerr << "++++++ convert to ast ++++++ \n";
 	LI.convert_to_ast(block::to<block::stmt_block>(ast));
 	std::cerr << "++++++ convert to ast ++++++ \n";
-
-	if (feature_unstructured)
-		return ast;
 
 	// block::loop_finder finder;
 	// finder.ast = ast;

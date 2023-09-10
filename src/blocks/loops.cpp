@@ -150,6 +150,38 @@ void loop_info::analyze() {
         }
     }
 
+    // Populate the loop exits
+    for (auto loop: loops) {
+        if (!loop->header_block)
+            continue;
+        
+        for (auto bb: loop->blocks) {
+            for (auto children: bb->successor) {
+                if (!loop->blocks_id_map.count(children->id) && children->id != loop->header_block->id) {
+                    loop->loop_exit_blocks.push_back(bb);
+                    break;
+                }
+            }
+        }
+    }
+
+    // Update unique loop exit using post dominators
+    for (auto loop: loops) {
+        if (loop->loop_exit_blocks.size() == 0)
+            continue;
+
+        int unique_postdom = post_dta.get_idom(loop->loop_exit_blocks[0]->id);
+        bool unique_postdom_flag = true;
+        for (auto exit_bb: loop->loop_exit_blocks) {
+            if (post_dta.get_idom(exit_bb->id) != unique_postdom) {
+                unique_postdom_flag = false;
+            }
+        }
+
+        if (unique_postdom_flag)
+            loop->unique_exit_block = dta.cfg_[unique_postdom];
+    }
+
     // Assign id to the loops
     for (unsigned int i = 0; i < loops.size(); i++) {
         loops[i]->loop_id = i;
@@ -180,12 +212,12 @@ void loop_info::analyze() {
     }
 }
 
-static stmt::Ptr get_loop_block(std::shared_ptr<basic_block> loop_header, block::stmt_block::Ptr ast) {
+static stmt::Ptr get_loop_block(std::shared_ptr<basic_block> bb, block::stmt_block::Ptr ast) {
     block::stmt::Ptr current_ast = to<block::stmt>(ast);
     std::vector<stmt::Ptr> current_block = to<block::stmt_block>(current_ast)->stmts;
     std::deque<stmt::Ptr> worklist;
     std::map<stmt::Ptr, stmt::Ptr> ast_parent_map;
-    std::cerr << loop_header->name << "\n";
+    // std::cerr << bb->name << "\n";
 
     for (auto stmt: current_block) {
         ast_parent_map[stmt] = current_ast;
@@ -198,30 +230,36 @@ static stmt::Ptr get_loop_block(std::shared_ptr<basic_block> loop_header, block:
 
         if (isa<block::stmt_block>(worklist_top)) {
             stmt_block::Ptr wl_stmt_block = to<stmt_block>(worklist_top);
-            for (auto stmt: wl_stmt_block->stmts) {
-                ast_parent_map[stmt] = worklist_top;
+            for (auto stmt_: wl_stmt_block->stmts) {
+                ast_parent_map[stmt_] = worklist_top;
             }
             worklist.insert(worklist.end(), wl_stmt_block->stmts.begin(), wl_stmt_block->stmts.end());
+
+            if (worklist_top == bb->parent)
+                return ast_parent_map[worklist_top];
         }
         else if (isa<block::if_stmt>(worklist_top)) {
             if_stmt::Ptr wl_if_stmt = to<if_stmt>(worklist_top);
-            std::cerr << "found if: ";
+            // std::cerr << "found if: ";
             if (to<stmt_block>(wl_if_stmt->then_stmt)->stmts.size() != 0) {
-                std::cerr << "then\n";
+                // std::cerr << "then\n";
                 stmt_block::Ptr wl_if_then_stmt = to<stmt_block>(wl_if_stmt->then_stmt);
-                for (auto stmt: wl_if_then_stmt->stmts) {
-                    ast_parent_map[stmt] = worklist_top;
+                for (auto stmt_: wl_if_then_stmt->stmts) {
+                    ast_parent_map[stmt_] = worklist_top;
                 }
                 worklist.insert(worklist.end(), wl_if_then_stmt->stmts.begin(), wl_if_then_stmt->stmts.end());
             }
             if (to<stmt_block>(wl_if_stmt->else_stmt)->stmts.size() != 0) {
-                std::cerr << "else\n";
+                // std::cerr << "else\n";
                 stmt_block::Ptr wl_if_else_stmt = to<stmt_block>(wl_if_stmt->else_stmt);
-                for (auto stmt: wl_if_else_stmt->stmts) {
-                    ast_parent_map[stmt] = worklist_top;
+                for (auto stmt_: wl_if_else_stmt->stmts) {
+                    ast_parent_map[stmt_] = worklist_top;
                 }
                 worklist.insert(worklist.end(), wl_if_else_stmt->stmts.begin(), wl_if_else_stmt->stmts.end());
             }
+
+            if (worklist_top == bb->parent)
+                return ast_parent_map[worklist_top];
         }
         else if (isa<block::while_stmt>(worklist_top)) {
             stmt_block::Ptr wl_while_body_block = to<stmt_block>(to<block::while_stmt>(worklist_top)->body);
@@ -229,18 +267,18 @@ static stmt::Ptr get_loop_block(std::shared_ptr<basic_block> loop_header, block:
                 ast_parent_map[stmt] = worklist_top;
             }
             worklist.insert(worklist.end(), wl_while_body_block->stmts.begin(), wl_while_body_block->stmts.end());
+
+            if (worklist_top == bb->parent)
+                return ast_parent_map[worklist_top];
         }
         else if (isa<block::label_stmt>(worklist_top)) {
-            std::cerr << "found label\n";
-            worklist_top->dump(std::cerr, 0);
-            label_stmt::Ptr wl_label_stmt = to<label_stmt>(worklist_top);
-            if (worklist_top == loop_header->parent)
+            // std::cerr << "found label\n";
+            if (worklist_top == bb->parent)
                 return ast_parent_map[worklist_top];
         }
         else if (isa<block::goto_stmt>(worklist_top)) {
-            std::cerr << "found goto\n";
-            goto_stmt::Ptr wl_goto_stmt = to<goto_stmt>(worklist_top);
-            if (worklist_top == loop_header->parent)
+            // std::cerr << "found goto\n";
+            if (worklist_top == bb->parent)
                 return ast_parent_map[worklist_top];
         }
     }
@@ -249,13 +287,39 @@ static stmt::Ptr get_loop_block(std::shared_ptr<basic_block> loop_header, block:
     return nullptr;
 }
 
-// remove continue if last basic block
+static void replace_loop_exits(std::shared_ptr<loop> loop, block::stmt_block::Ptr ast) {
+    for (auto exit_bb: loop->loop_exit_blocks) {
+        if (!loop->unique_exit_block)
+            return;
+
+        // exit_bb->parent->dump(std::cerr, 0);
+        int target_branch = -1;
+
+        if (!isa<if_stmt>(exit_bb->parent))
+            assert(0);
+        
+        if (exit_bb->then_branch && !loop->blocks_id_map.count(exit_bb->then_branch->id))
+            target_branch = 0;
+        else if (exit_bb->else_branch && !loop->blocks_id_map.count(exit_bb->else_branch->id))
+            target_branch = 1;
+
+        if (target_branch == -1)
+            assert(0);
+
+        if (target_branch == 0) {
+            std::vector<stmt::Ptr> &temp_ast = to<block::stmt_block>(to<if_stmt>(exit_bb->parent)->then_stmt)->stmts;
+            temp_ast.push_back(std::make_shared<block::break_stmt>());
+        }
+        else if (target_branch == 1) {
+            std::vector<stmt::Ptr> &temp_ast = to<block::stmt_block>(to<if_stmt>(exit_bb->parent)->else_stmt)->stmts;
+            temp_ast.push_back(std::make_shared<block::break_stmt>());
+        }                   
+    }
+}
+
 static void replace_loop_latches(std::shared_ptr<loop> loop, block::stmt_block::Ptr ast) {
     for (auto latch_iter = loop->loop_latch_blocks.begin(); latch_iter != loop->loop_latch_blocks.end(); latch_iter++) {
-        std::cerr << (*latch_iter)->ast_index << "\n";
-        std::cerr << (*latch_iter)->parent.get() << "\n";
         stmt::Ptr loop_latch_ast = get_loop_block(*latch_iter, ast);
-        // loop_latch_ast->dump(std::cerr, 0);
 
         if (isa<stmt_block>(loop_latch_ast)) {
             std::cerr << "stmt parent\n";
@@ -289,31 +353,30 @@ static void replace_loop_latches(std::shared_ptr<loop> loop, block::stmt_block::
                     std::replace(temp_ast.begin(), temp_ast.end(), temp_ast[(*latch_iter)->ast_index], to<stmt>(std::make_shared<continue_stmt>()));
             }
         }
-
-        // loop_latch_ast->dump(std::cerr, 0);
     }
 }
 
 block::stmt_block::Ptr loop_info::convert_to_ast(block::stmt_block::Ptr ast) {
-    // std::cerr << "before ast\n";
-    // ast->dump(std::cerr, 0);
-    // std::cerr << "before ast\n";
+    std::cerr << "before ast\n";
+    ast->dump(std::cerr, 0);
+    std::cerr << "before ast\n";
 
     for (auto loop_map: preorder_loops_map) {
         for (auto preorder: loop_map.second) {
+            replace_loop_exits(loops[preorder], ast);
             replace_loop_latches(loops[preorder], ast);
         }
     }
-
-    // std::cerr << "after ast\n";
-    // ast->dump(std::cerr, 0);
-    // std::cerr << "after ast\n";
+    
+    std::cerr << "after ast\n";
+    ast->dump(std::cerr, 0);
+    std::cerr << "after ast\n";
 
     for (auto loop_map: postorder_loops_map) {
         for (auto postorder: loop_map.second) {
-            std::cerr << "before ast\n";
-            ast->dump(std::cerr, 0);
-            std::cerr << "before ast\n";
+            // std::cerr << "before ast\n";
+            // ast->dump(std::cerr, 0);
+            // std::cerr << "before ast\n";
             block::stmt::Ptr loop_header_ast = get_loop_block(loops[postorder]->header_block, ast);
             std::cerr << loops[postorder]->header_block->ast_index << "\n";
             loop_header_ast->dump(std::cerr, 0);
@@ -363,9 +426,9 @@ block::stmt_block::Ptr loop_info::convert_to_ast(block::stmt_block::Ptr ast) {
                     for (auto body_stmt: then_block->stmts) {
                         to<stmt_block>(while_block->body)->stmts.push_back(body_stmt);
                     }
-                    for (auto body_stmt: else_block->stmts) {
-                        to<stmt_block>(while_block->body)->stmts.push_back(body_stmt);
-                    }
+                    // for (auto body_stmt: else_block->stmts) {
+                    //     to<stmt_block>(while_block->body)->stmts.push_back(body_stmt);
+                    // }
                     // if block to be replaced with while block
                     worklist.push_back(std::make_tuple(ast_index, std::ref(to<block::stmt_block>(loop_header_ast)->stmts), to<stmt>(while_block)));
                 }
@@ -412,13 +475,12 @@ block::stmt_block::Ptr loop_info::convert_to_ast(block::stmt_block::Ptr ast) {
 				            while_block->cond = new_cond;
                         }
 
-
                         for (auto body_stmt: then_block->stmts) {
                             to<stmt_block>(while_block->body)->stmts.push_back(body_stmt);
                         }
-                        for (auto body_stmt: else_block->stmts) {
-                            to<stmt_block>(while_block->body)->stmts.push_back(body_stmt);
-                        }
+                        // for (auto body_stmt: else_block->stmts) {
+                        //     to<stmt_block>(while_block->body)->stmts.push_back(body_stmt);
+                        // }
                         // if block to be replaced with while block
                         worklist.push_back(std::make_tuple(ast_index, std::ref(if_then_block->stmts), to<stmt>(while_block)));
                     }
@@ -463,9 +525,9 @@ block::stmt_block::Ptr loop_info::convert_to_ast(block::stmt_block::Ptr ast) {
                         for (auto body_stmt: then_block->stmts) {
                             to<stmt_block>(while_block->body)->stmts.push_back(body_stmt);
                         }
-                        for (auto body_stmt: else_block->stmts) {
-                            to<stmt_block>(while_block->body)->stmts.push_back(body_stmt);
-                        }
+                        // for (auto body_stmt: else_block->stmts) {
+                        //     to<stmt_block>(while_block->body)->stmts.push_back(body_stmt);
+                        // }
                         // if block to be replaced with while block
                         worklist.push_back(std::make_tuple(ast_index, std::ref(if_else_block->stmts), to<stmt>(while_block)));
                     }
@@ -498,9 +560,9 @@ block::stmt_block::Ptr loop_info::convert_to_ast(block::stmt_block::Ptr ast) {
             }
             worklist.clear();
 
-            std::cerr << "after ast\n";
-            ast->dump(std::cerr, 0);
-            std::cerr << "after ast\n";
+            // std::cerr << "after ast\n";
+            // ast->dump(std::cerr, 0);
+            // std::cerr << "after ast\n";
         }
     }
 

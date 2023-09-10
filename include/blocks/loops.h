@@ -28,13 +28,15 @@ public:
     std::unordered_set<int> blocks_id_map;
     std::shared_ptr<loop> parent_loop;
     std::shared_ptr<basic_block> header_block;
+    std::shared_ptr<basic_block> unique_exit_block;
     basic_block::cfg_block loop_latch_blocks;
+    basic_block::cfg_block loop_exit_blocks;
     std::vector<std::shared_ptr<loop>> subloops;
 };
 
 class loop_info {
 public:
-    loop_info(basic_block::cfg_block ast, dominator_analysis &dt): parent_ast(ast), dta(dt) {
+    loop_info(basic_block::cfg_block ast, dominator_analysis &dt, dominator_analysis &post_dt): parent_ast(ast), dta(dt), post_dta(post_dt) {
         analyze();
     }
     std::shared_ptr<loop> allocate_loop(std::shared_ptr<basic_block> header);
@@ -47,6 +49,7 @@ public:
 private:
     basic_block::cfg_block parent_ast;
     dominator_analysis dta;
+    dominator_analysis post_dta;
     std::map<int, std::shared_ptr<loop>> bb_loop_map;
     void postorder_dfs_helper(std::vector<int> &postorder_loops_map, std::vector<bool> &visited_loops, int id);
     void preorder_dfs_helper(std::vector<int> &preorder_loops_map, std::vector<bool> &visited_loops, int id);

@@ -2,7 +2,38 @@
 
 using namespace block;
 
-dominator_analysis::dominator_analysis(basic_block::cfg_block &cfg) : cfg_(cfg) {
+void dominator_analysis::reverse_cfg() {
+    // TODO: Add a check for size, it should be greater than 2.
+    if (cfg_.size() == 0)
+        assert(0);
+
+    std::shared_ptr<basic_block> virtual_exit_bb = std::make_shared<basic_block>("virtualexit0");
+    virtual_exit_bb->id = cfg_.size();
+    cfg_.push_back(virtual_exit_bb);
+    
+    for (auto bb: cfg_) {
+        if (bb->successor.size() == 0) {
+            bb->successor.push_back(virtual_exit_bb);
+            virtual_exit_bb->predecessor.push_back(bb);
+        }
+    }
+
+    for (auto bb: cfg_) {
+        basic_block::cfg_block temp_pred = bb->predecessor;
+        bb->predecessor.clear();
+        bb->predecessor.insert(bb->predecessor.begin(), bb->successor.begin(), bb->successor.end());
+        std::reverse(bb->predecessor.begin(), bb->predecessor.end());
+        bb->successor.clear();
+        bb->successor.insert(bb->successor.begin(), temp_pred.begin(), temp_pred.end());
+        std::reverse(bb->successor.begin(), bb->successor.end());
+    }
+}
+
+dominator_analysis::dominator_analysis(basic_block::cfg_block cfg, bool is_postdom) : cfg_(cfg), is_postdom_(is_postdom) {
+    if (is_postdom) {
+        reverse_cfg();
+    }
+
     // TODO: Add a check for size, it should be greater than 2.
     idom.reserve(cfg_.size());
     idom.assign(cfg_.size(), -1);
@@ -16,7 +47,6 @@ dominator_analysis::dominator_analysis(basic_block::cfg_block &cfg) : cfg_(cfg) 
 
 void dominator_analysis::postorder_idom_helper(std::vector<bool> &visited, int id) {
     for (int idom_id: idom_map[id]) {
-        // std::cerr << idom_id << "\n";
         if (idom_id != -1 && !visited[idom_id]) {
             visited[idom_id] = true;
             postorder_idom_helper(visited, idom_id);
@@ -26,21 +56,31 @@ void dominator_analysis::postorder_idom_helper(std::vector<bool> &visited, int i
 }
 
 void dominator_analysis::postorder_dfs_helper(std::vector<bool> &visited_bbs, int id) {
-    for (auto child: cfg_[id]->successor) {
-        if (!visited_bbs[child->id]) {
-            visited_bbs[child->id] = true;
-            postorder_dfs_helper(visited_bbs, child->id);
-            postorder.push_back(child->id);
+        for (auto child: cfg_[id]->successor) {
+            if (!visited_bbs[child->id]) {
+                visited_bbs[child->id] = true;
+                postorder_dfs_helper(visited_bbs, child->id);
+                postorder.push_back(child->id);
+            }
         }
-    }    
 }
+
 void dominator_analysis::postorder_dfs() {
     std::vector<bool> visited_bbs(cfg_.size());
     visited_bbs.assign(visited_bbs.size(), false);
-    visited_bbs[0] = true;
+    if (is_postdom_)
+        visited_bbs[cfg_.size() - 1] = true;
+    else
+        visited_bbs[0] = true;
 
-    postorder_dfs_helper(visited_bbs, 0);
-    postorder.push_back(0);
+    if (is_postdom_) {
+        postorder_dfs_helper(visited_bbs, cfg_.size() - 1);
+        postorder.push_back(cfg_.size() - 1);
+    }
+    else {
+        postorder_dfs_helper(visited_bbs, 0);
+        postorder.push_back(0);
+    }
 }
 
 std::vector<int> &dominator_analysis::get_postorder_bb_map() {
@@ -121,12 +161,16 @@ int dominator_analysis::intersect(int bb1_id, int bb2_id) {
 }
 
 void dominator_analysis::analyze() {
-    postorder_dfs();
+    postorder_dfs();    
     for (unsigned int i = 0; i < postorder.size(); i++) {
         postorder_bb_map[postorder[i]] = i;
     }
 
-    idom[0] = 0;
+    if (is_postdom_)
+        idom[cfg_.size() - 1] = cfg_.size() - 1;
+    else
+        idom[0] = 0;
+
     bool change = false;
 
     do {
@@ -135,7 +179,7 @@ void dominator_analysis::analyze() {
             int postorder_bb_num = postorder[i];
             std::shared_ptr<basic_block> bb = cfg_[postorder_bb_num];
             int bb_id_idom = bb->predecessor[0]->id;
-             
+
             for (unsigned int j = 1; j < bb->predecessor.size(); j++) {
                 int bb_id_idom_next = bb->predecessor[j]->id;
                 if (idom[bb_id_idom_next] != -1) {
@@ -149,7 +193,6 @@ void dominator_analysis::analyze() {
             }
         }
     } while(change);
-
 
     // build a map of dominators for easy traversal.
     for (unsigned int i = 0; i < idom.size(); i++) {

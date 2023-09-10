@@ -17,8 +17,9 @@ class dominator_analysis {
         //     int bb_id;
         //     std::vector<std::shared_ptr<dominator_tree_>> child_nodes;
         // } dominator_tree;
-        dominator_analysis(basic_block::cfg_block &cfg);
-        basic_block::cfg_block &cfg_;
+        dominator_analysis(basic_block::cfg_block cfg, bool is_postdom = false);
+        basic_block::cfg_block cfg_;
+        bool is_postdom_;
         std::vector<int> &get_postorder_bb_map();
         std::vector<int> &get_postorder();
         std::vector<int> &get_idom();
@@ -37,6 +38,7 @@ class dominator_analysis {
         std::vector<int> postorder_idom;
         std::vector<int> postorder;
         std::vector<int> postorder_bb_map;
+        void reverse_cfg();
         void postorder_idom_helper(std::vector<bool> &visited, int id);
         void postorder_dfs_helper(std::vector<bool> &visited_bbs, int id);
         void postorder_dfs();
