@@ -346,6 +346,18 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 	}
 	std::cerr << "== postorder ==\n";
 
+	std::cerr << "== preorder map ==\n";
+	for (int i: dom.get_preorder_bb_map()) {
+		std::cerr << i << "\n";
+	}
+	std::cerr << "== preorder map ==\n";
+
+	std::cerr << "== preorder ==\n";
+	for (int i: dom.get_preorder()) {
+		std::cerr << i << "\n";
+	}
+	std::cerr << "== preorder ==\n";
+
 	std::cerr << "== idom ==\n";
 	std::cerr << "get_idom(int) test: get_idom(0): " << dom.get_idom(0) << "\n";
 	std::cerr << "get_idom(int) test: get_idom(-1): " << dom.get_idom(-1) << "\n";
@@ -390,6 +402,18 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 		std::cerr << i << "\n";
 	}
 	std::cerr << "== (postdom) postorder ==\n";
+
+	std::cerr << "== (postdom) preorder map ==\n";
+	for (int i: dom.get_preorder_bb_map()) {
+		std::cerr << i << "\n";
+	}
+	std::cerr << "== (postdom) preorder map ==\n";
+
+	std::cerr << "== (postdom) preorder ==\n";
+	for (int i: dom.get_preorder()) {
+		std::cerr << i << "\n";
+	}
+	std::cerr << "== (postdom) preorder ==\n";
 
 	std::cerr << "== (postdom) idom ==\n";
 	std::cerr << "get_idom(int) test: get_idom(0): " << post_dom.get_idom(0) << "\n";
@@ -444,6 +468,7 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 		std::cerr << "loop exits: ";
 		for (auto bb: loop->loop_exit_blocks) std::cerr << bb->id << " ";
 		std::cerr << "\n";
+		if (loop->unique_exit_block) std::cerr << "loop unique exit block: " << loop->unique_exit_block->id << "\n";
 
 		std::cerr << "parent loop: (loop header: " << (loop->parent_loop ? (int)loop->parent_loop->header_block->id : -1) << ")\n";
 		

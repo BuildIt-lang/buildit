@@ -81,6 +81,8 @@ basic_block::cfg_block generate_basic_blocks(block::stmt_block::Ptr ast) {
             auto exit_bb = std::make_shared<basic_block>("exit" + std::to_string(basic_block_count));
             // assign it a empty stmt_block as parent
             exit_bb->parent = std::make_shared<stmt_block>();
+            // mark the basic block as exit block
+            exit_bb->is_exit_block = true;
             // add mapping in ast to bb map
             // exit_bb->ast_to_basic_block_map[exit_bb->parent] = exit_bb;
             // set the ast depth of the basic block

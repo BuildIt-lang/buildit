@@ -212,7 +212,7 @@ void loop_info::analyze() {
     }
 }
 
-static stmt::Ptr get_loop_block(std::shared_ptr<basic_block> bb, block::stmt_block::Ptr ast) {
+static stmt::Ptr get_loop_block(std::shared_ptr<basic_block> bb, block::stmt_block::Ptr ast, bool one_level_up = false) {
     block::stmt::Ptr current_ast = to<block::stmt>(ast);
     std::vector<stmt::Ptr> current_block = to<block::stmt_block>(current_ast)->stmts;
     std::deque<stmt::Ptr> worklist;
@@ -259,7 +259,7 @@ static stmt::Ptr get_loop_block(std::shared_ptr<basic_block> bb, block::stmt_blo
             }
 
             if (worklist_top == bb->parent)
-                return ast_parent_map[worklist_top];
+                return one_level_up ? ast_parent_map[ast_parent_map[worklist_top]] : ast_parent_map[worklist_top];
         }
         else if (isa<block::while_stmt>(worklist_top)) {
             stmt_block::Ptr wl_while_body_block = to<stmt_block>(to<block::while_stmt>(worklist_top)->body);
@@ -269,17 +269,21 @@ static stmt::Ptr get_loop_block(std::shared_ptr<basic_block> bb, block::stmt_blo
             worklist.insert(worklist.end(), wl_while_body_block->stmts.begin(), wl_while_body_block->stmts.end());
 
             if (worklist_top == bb->parent)
-                return ast_parent_map[worklist_top];
+                return one_level_up ? ast_parent_map[ast_parent_map[worklist_top]] : ast_parent_map[worklist_top];
         }
         else if (isa<block::label_stmt>(worklist_top)) {
             // std::cerr << "found label\n";
             if (worklist_top == bb->parent)
-                return ast_parent_map[worklist_top];
+                return one_level_up ? ast_parent_map[ast_parent_map[worklist_top]] : ast_parent_map[worklist_top];
         }
         else if (isa<block::goto_stmt>(worklist_top)) {
             // std::cerr << "found goto\n";
             if (worklist_top == bb->parent)
-                return ast_parent_map[worklist_top];
+                return one_level_up ? ast_parent_map[ast_parent_map[worklist_top]] : ast_parent_map[worklist_top];
+        }
+        else if (isa<block::expr_stmt>(worklist_top)) {
+            if (worklist_top == bb->parent)
+                return one_level_up ? ast_parent_map[ast_parent_map[worklist_top]] : ast_parent_map[worklist_top];
         }
     }
 
@@ -287,12 +291,11 @@ static stmt::Ptr get_loop_block(std::shared_ptr<basic_block> bb, block::stmt_blo
     return nullptr;
 }
 
-static void replace_loop_exits(std::shared_ptr<loop> loop, block::stmt_block::Ptr ast) {
+static void replace_loop_exits(std::shared_ptr<loop> loop, block::stmt_block::Ptr ast, dominator_analysis &dta_) {
     for (auto exit_bb: loop->loop_exit_blocks) {
         if (!loop->unique_exit_block)
             return;
 
-        // exit_bb->parent->dump(std::cerr, 0);
         int target_branch = -1;
 
         if (!isa<if_stmt>(exit_bb->parent))
@@ -308,26 +311,125 @@ static void replace_loop_exits(std::shared_ptr<loop> loop, block::stmt_block::Pt
 
         if (target_branch == 0) {
             std::vector<stmt::Ptr> &temp_ast = to<block::stmt_block>(to<if_stmt>(exit_bb->parent)->then_stmt)->stmts;
-            temp_ast.push_back(std::make_shared<block::break_stmt>());
+
+            if (exit_bb->then_branch == loop->unique_exit_block) {
+                temp_ast.push_back(std::make_shared<block::break_stmt>());
+            }
+            else {
+                std::shared_ptr<basic_block> exiting_bb = exit_bb->then_branch;
+                std::cerr << exiting_bb->id << "\n";
+                // if (!isa<stmt_block>(exiting_bb->parent) || to<stmt_block>(exiting_bb->parent)->stmts.size() == 0)
+                //     exiting_bb = exit_bb->then_branch->successor[0];
+                unsigned int preorder_index = dta_.get_preorder_bb_map()[exiting_bb->id];
+                while(exiting_bb->is_exit_block) {
+                    std::shared_ptr<basic_block> temp_exiting_bb = dta_.cfg_[dta_.get_preorder()[++preorder_index]];
+                    if (temp_exiting_bb->id == loop->unique_exit_block->id)
+                        break;
+                    exiting_bb = temp_exiting_bb;
+                }
+                std::cerr << exiting_bb->id << "\n";
+                
+                stmt::Ptr loop_exit_ast;
+                if (exiting_bb->is_exit_block)
+                    loop_exit_ast = exit_bb->parent;
+                else
+                    loop_exit_ast = get_loop_block(exiting_bb, ast);
+
+                if (isa<block::stmt_block>(loop_exit_ast)) {
+                    to<block::stmt_block>(loop_exit_ast)->stmts.push_back(std::make_shared<block::break_stmt>());
+                }
+                else if (isa<block::if_stmt>(loop_exit_ast)) {
+                    stmt_block::Ptr if_then_block = to<block::stmt_block>(to<block::if_stmt>(loop_exit_ast)->then_stmt);
+                    // stmt_block::Ptr if_else_block = to<block::stmt_block>(to<block::if_stmt>(loop_exit_ast)->else_stmt);
+
+                    // if (exiting_bb->ast_index < if_then_block->stmts.size() && if_then_block->stmts[exiting_bb->ast_index] == exiting_bb->parent)
+                        if_then_block->stmts.push_back(std::make_shared<block::break_stmt>());
+                    // else if (exiting_bb->ast_index < if_else_block->stmts.size() && if_else_block->stmts[exiting_bb->ast_index] == exiting_bb->parent)
+                    //     if_else_block->stmts.push_back(std::make_shared<block::break_stmt>());
+                }
+            }
         }
         else if (target_branch == 1) {
             std::vector<stmt::Ptr> &temp_ast = to<block::stmt_block>(to<if_stmt>(exit_bb->parent)->else_stmt)->stmts;
-            temp_ast.push_back(std::make_shared<block::break_stmt>());
+
+            if (exit_bb->else_branch == loop->unique_exit_block) {
+                temp_ast.push_back(std::make_shared<block::break_stmt>());
+            }
+            else {
+                std::shared_ptr<basic_block> exiting_bb = exit_bb->else_branch;
+                std::cerr << exiting_bb->id << "\n";
+                // if (!isa<stmt_block>(exiting_bb->parent) || to<stmt_block>(exiting_bb->parent)->stmts.size() == 0)
+                //     exiting_bb = exit_bb->else_branch->successor[0];
+                unsigned int preorder_index = dta_.get_preorder_bb_map()[exiting_bb->id];
+                while(exiting_bb->is_exit_block) {
+                    std::shared_ptr<basic_block> temp_exiting_bb = dta_.cfg_[dta_.get_preorder()[++preorder_index]];
+                    if (temp_exiting_bb->id == loop->unique_exit_block->id)
+                        break;
+                    exiting_bb = temp_exiting_bb;
+                }
+                std::cerr << exiting_bb->id << "\n";
+
+                stmt::Ptr loop_exit_ast;
+                if (exiting_bb->is_exit_block)
+                    loop_exit_ast = exit_bb->parent;
+                else
+                    loop_exit_ast = get_loop_block(exiting_bb, ast);
+
+                if (isa<block::stmt_block>(loop_exit_ast)) {
+                    to<block::stmt_block>(loop_exit_ast)->stmts.push_back(std::make_shared<block::break_stmt>());
+                }
+                else if (isa<block::if_stmt>(loop_exit_ast)) {
+                    // stmt_block::Ptr if_then_block = to<block::stmt_block>(to<block::if_stmt>(loop_exit_ast)->then_stmt);
+                    stmt_block::Ptr if_else_block = to<block::stmt_block>(to<block::if_stmt>(loop_exit_ast)->else_stmt);
+
+                    // if (exiting_bb->ast_index < if_then_block->stmts.size() && if_then_block->stmts[exiting_bb->ast_index] == exiting_bb->parent)
+                    //     if_then_block->stmts.push_back(std::make_shared<block::break_stmt>());
+                    // else if (exiting_bb->ast_index < if_else_block->stmts.size() && if_else_block->stmts[exiting_bb->ast_index] == exiting_bb->parent)
+                        if_else_block->stmts.push_back(std::make_shared<block::break_stmt>());
+                }
+            }
         }                   
     }
 }
 
-static void replace_loop_latches(std::shared_ptr<loop> loop, block::stmt_block::Ptr ast) {
+static std::vector<stmt_block::Ptr> backedge_blocks;
+
+static void replace_loop_latches(std::shared_ptr<loop> loop, block::stmt_block::Ptr ast, dominator_analysis &dta_) {
     for (auto latch_iter = loop->loop_latch_blocks.begin(); latch_iter != loop->loop_latch_blocks.end(); latch_iter++) {
         stmt::Ptr loop_latch_ast = get_loop_block(*latch_iter, ast);
+        // stmt::Ptr loop_latch_ast_level_up = get_loop_block(*latch_iter, ast, true);
+        bool is_last_block = false;
 
+        if (dta_.get_preorder_bb_map()[(*latch_iter)->id] == (int)dta_.get_preorder().size() - 1) {
+            is_last_block = true;
+        }
+        else {
+            unsigned int next_preorder = dta_.get_preorder()[dta_.get_preorder_bb_map()[(*latch_iter)->id] + 1];
+            unsigned int next_next_preorder = dta_.get_preorder()[dta_.get_preorder_bb_map()[next_preorder] + 1];
+
+            std::cerr << next_preorder << " : " << next_next_preorder << "\n";
+            if (loop->blocks_id_map.count(next_preorder))
+                is_last_block = false;
+            else {
+                if (loop->unique_exit_block && (next_preorder == loop->unique_exit_block->id))
+                    is_last_block = true;
+                else if (loop->unique_exit_block && (next_next_preorder == loop->unique_exit_block->id))
+                    is_last_block = true;
+                else
+                    is_last_block = false;
+            }
+        }
+
+        std::cerr << "LL: " << (*latch_iter)->id << ": " << is_last_block << "\n";
         if (isa<stmt_block>(loop_latch_ast)) {
             std::cerr << "stmt parent\n";
             std::vector<stmt::Ptr> &temp_ast = to<block::stmt_block>(loop_latch_ast)->stmts;
-            if (latch_iter == loop->loop_latch_blocks.end() - 1)
+            if (is_last_block)
                 temp_ast.erase(temp_ast.begin() + (*latch_iter)->ast_index);
-            else
+            else {
+                backedge_blocks.push_back(to<stmt_block>(loop_latch_ast));
                 std::replace(temp_ast.begin(), temp_ast.end(), temp_ast[(*latch_iter)->ast_index + 1], to<stmt>(std::make_shared<continue_stmt>()));
+            }
         }
         else if (isa<if_stmt>(loop_latch_ast)) {
             stmt_block::Ptr if_then_block = to<block::stmt_block>(to<block::if_stmt>(loop_latch_ast)->then_stmt);
@@ -338,19 +440,23 @@ static void replace_loop_latches(std::shared_ptr<loop> loop, block::stmt_block::
             if (if_then_block->stmts.size() && if_then_block->stmts[(*latch_iter)->ast_index] == (*latch_iter)->parent) {
                 std::cerr << "then\n";
                 std::vector<stmt::Ptr> &temp_ast = if_then_block->stmts;
-                if (latch_iter == loop->loop_latch_blocks.end() - 1)
+                if (is_last_block)
                     temp_ast.erase(temp_ast.begin() + (*latch_iter)->ast_index);
-                else
+                else {
+                    backedge_blocks.push_back(if_then_block);
                     std::replace(temp_ast.begin(), temp_ast.end(), temp_ast[(*latch_iter)->ast_index], to<stmt>(std::make_shared<continue_stmt>()));
+                }
             }
             
             if (if_else_block->stmts.size() && if_else_block->stmts[(*latch_iter)->ast_index] == (*latch_iter)->parent) {
                 std::cerr << "else\n";
                 std::vector<stmt::Ptr> &temp_ast = if_else_block->stmts;
-                if (latch_iter == loop->loop_latch_blocks.end() - 1)
+                if (is_last_block)
                     temp_ast.erase(temp_ast.begin() + (*latch_iter)->ast_index);
-                else
+                else {
+                    backedge_blocks.push_back(if_else_block);
                     std::replace(temp_ast.begin(), temp_ast.end(), temp_ast[(*latch_iter)->ast_index], to<stmt>(std::make_shared<continue_stmt>()));
+                }
             }
         }
     }
@@ -363,25 +469,26 @@ block::stmt_block::Ptr loop_info::convert_to_ast(block::stmt_block::Ptr ast) {
 
     for (auto loop_map: preorder_loops_map) {
         for (auto preorder: loop_map.second) {
-            replace_loop_exits(loops[preorder], ast);
-            replace_loop_latches(loops[preorder], ast);
+            replace_loop_exits(loops[preorder], ast, dta);
+            replace_loop_latches(loops[preorder], ast, dta);
         }
     }
-    
+
     std::cerr << "after ast\n";
     ast->dump(std::cerr, 0);
     std::cerr << "after ast\n";
 
     for (auto loop_map: postorder_loops_map) {
         for (auto postorder: loop_map.second) {
-            // std::cerr << "before ast\n";
-            // ast->dump(std::cerr, 0);
-            // std::cerr << "before ast\n";
+            std::cerr << "before ast\n";
+            ast->dump(std::cerr, 0);
+            std::cerr << "before ast\n";
             block::stmt::Ptr loop_header_ast = get_loop_block(loops[postorder]->header_block, ast);
             std::cerr << loops[postorder]->header_block->ast_index << "\n";
             loop_header_ast->dump(std::cerr, 0);
             while_stmt::Ptr while_block = std::make_shared<while_stmt>();
             while_block->body = std::make_shared<stmt_block>();
+            // while_block->continue_blocks.insert(while_block->continue_blocks.begin(), backedge_blocks.begin(), backedge_blocks.end());
 
             if (isa<block::while_stmt>(loop_header_ast)) {
                 loop_header_ast = to<block::while_stmt>(loop_header_ast)->body;
@@ -421,10 +528,46 @@ block::stmt_block::Ptr loop_info::convert_to_ast(block::stmt_block::Ptr ast) {
                         new_cond->static_offset = while_block->cond->static_offset;
                         new_cond->expr1 = while_block->cond;
                         while_block->cond = new_cond;
-                    }
 
-                    for (auto body_stmt: then_block->stmts) {
-                        to<stmt_block>(while_block->body)->stmts.push_back(body_stmt);
+                        for (auto body_stmt: else_block->stmts) {
+                            to<stmt_block>(while_block->body)->stmts.push_back(body_stmt);
+                        }
+
+                        auto backedge_iter = std::find(backedge_blocks.begin(), backedge_blocks.end(), else_block);
+                        if (backedge_iter != backedge_blocks.end()) {
+                            std::cerr << "replaced BE\n";
+                            std::replace(backedge_blocks.begin(), backedge_blocks.end(), *backedge_iter, to<stmt_block>(while_block->body));
+                        }
+                        while_block->continue_blocks.insert(while_block->continue_blocks.begin(), backedge_blocks.begin(), backedge_blocks.end());
+                    }
+                    else if (then_block->stmts.size() == 1 && else_block->stmts.size() != 0 && isa<block::break_stmt>(then_block->stmts[0])) {
+                        not_expr::Ptr new_cond = std::make_shared<not_expr>();
+                        new_cond->static_offset = while_block->cond->static_offset;
+                        new_cond->expr1 = while_block->cond;
+                        while_block->cond = new_cond;
+
+                        for (auto body_stmt: else_block->stmts) {
+                            to<stmt_block>(while_block->body)->stmts.push_back(body_stmt);
+                        }
+
+                        auto backedge_iter = std::find(backedge_blocks.begin(), backedge_blocks.end(), else_block);
+                        if (backedge_iter != backedge_blocks.end()) {
+                            std::cerr << "replaced BE\n";
+                            std::replace(backedge_blocks.begin(), backedge_blocks.end(), *backedge_iter, to<stmt_block>(while_block->body));
+                        }
+                        while_block->continue_blocks.insert(while_block->continue_blocks.begin(), backedge_blocks.begin(), backedge_blocks.end());
+                    }
+                    else {
+                        for (auto body_stmt: then_block->stmts) {
+                            to<stmt_block>(while_block->body)->stmts.push_back(body_stmt);
+                        }
+
+                        auto backedge_iter = std::find(backedge_blocks.begin(), backedge_blocks.end(), then_block);
+                        if (backedge_iter != backedge_blocks.end()) {
+                            std::cerr << "replaced BE\n";
+                            std::replace(backedge_blocks.begin(), backedge_blocks.end(), *backedge_iter, to<stmt_block>(while_block->body));
+                        }
+                        while_block->continue_blocks.insert(while_block->continue_blocks.begin(), backedge_blocks.begin(), backedge_blocks.end());
                     }
                     // for (auto body_stmt: else_block->stmts) {
                     //     to<stmt_block>(while_block->body)->stmts.push_back(body_stmt);
@@ -473,10 +616,46 @@ block::stmt_block::Ptr loop_info::convert_to_ast(block::stmt_block::Ptr ast) {
 				            new_cond->static_offset = while_block->cond->static_offset;
 				            new_cond->expr1 = while_block->cond;
 				            while_block->cond = new_cond;
-                        }
 
-                        for (auto body_stmt: then_block->stmts) {
-                            to<stmt_block>(while_block->body)->stmts.push_back(body_stmt);
+                            for (auto body_stmt: else_block->stmts) {
+                                to<stmt_block>(while_block->body)->stmts.push_back(body_stmt);
+                            }
+
+                            auto backedge_iter = std::find(backedge_blocks.begin(), backedge_blocks.end(), else_block);
+                            if (backedge_iter != backedge_blocks.end()) {
+                                std::cerr << "replaced BE\n";
+                                std::replace(backedge_blocks.begin(), backedge_blocks.end(), *backedge_iter, to<stmt_block>(while_block->body));
+                            }
+                            while_block->continue_blocks.insert(while_block->continue_blocks.begin(), backedge_blocks.begin(), backedge_blocks.end());
+                        }
+                        else if (then_block->stmts.size() == 1 && else_block->stmts.size() != 0 && isa<block::break_stmt>(then_block->stmts[0])) {
+                            not_expr::Ptr new_cond = std::make_shared<not_expr>();
+                            new_cond->static_offset = while_block->cond->static_offset;
+                            new_cond->expr1 = while_block->cond;
+                            while_block->cond = new_cond;
+
+                            for (auto body_stmt: else_block->stmts) {
+                                to<stmt_block>(while_block->body)->stmts.push_back(body_stmt);
+                            }
+
+                            auto backedge_iter = std::find(backedge_blocks.begin(), backedge_blocks.end(), else_block);
+                            if (backedge_iter != backedge_blocks.end()) {
+                                std::cerr << "replaced BE\n";
+                                std::replace(backedge_blocks.begin(), backedge_blocks.end(), *backedge_iter, to<stmt_block>(while_block->body));
+                            }
+                            while_block->continue_blocks.insert(while_block->continue_blocks.begin(), backedge_blocks.begin(), backedge_blocks.end());
+                        }
+                        else {
+                            for (auto body_stmt: then_block->stmts) {
+                                to<stmt_block>(while_block->body)->stmts.push_back(body_stmt);
+                            }
+
+                            auto backedge_iter = std::find(backedge_blocks.begin(), backedge_blocks.end(), then_block);
+                            if (backedge_iter != backedge_blocks.end()) {
+                                std::cerr << "replaced BE\n";
+                                std::replace(backedge_blocks.begin(), backedge_blocks.end(), *backedge_iter, to<stmt_block>(while_block->body));
+                            }
+                            while_block->continue_blocks.insert(while_block->continue_blocks.begin(), backedge_blocks.begin(), backedge_blocks.end());
                         }
                         // for (auto body_stmt: else_block->stmts) {
                         //     to<stmt_block>(while_block->body)->stmts.push_back(body_stmt);
@@ -520,10 +699,46 @@ block::stmt_block::Ptr loop_info::convert_to_ast(block::stmt_block::Ptr ast) {
 				            new_cond->static_offset = while_block->cond->static_offset;
 				            new_cond->expr1 = while_block->cond;
 				            while_block->cond = new_cond;
-                        }
 
-                        for (auto body_stmt: then_block->stmts) {
-                            to<stmt_block>(while_block->body)->stmts.push_back(body_stmt);
+                            for (auto body_stmt: else_block->stmts) {
+                                to<stmt_block>(while_block->body)->stmts.push_back(body_stmt);
+                            }
+
+                            auto backedge_iter = std::find(backedge_blocks.begin(), backedge_blocks.end(), else_block);
+                            if (backedge_iter != backedge_blocks.end()) {
+                                std::cerr << "replaced BE\n";
+                                std::replace(backedge_blocks.begin(), backedge_blocks.end(), *backedge_iter, to<stmt_block>(while_block->body));
+                            }
+                            while_block->continue_blocks.insert(while_block->continue_blocks.begin(), backedge_blocks.begin(), backedge_blocks.end());
+                        }
+                        else if (then_block->stmts.size() == 1 && else_block->stmts.size() != 0 && isa<block::break_stmt>(then_block->stmts[0])) {
+                            not_expr::Ptr new_cond = std::make_shared<not_expr>();
+                            new_cond->static_offset = while_block->cond->static_offset;
+                            new_cond->expr1 = while_block->cond;
+                            while_block->cond = new_cond;
+
+                            for (auto body_stmt: else_block->stmts) {
+                                to<stmt_block>(while_block->body)->stmts.push_back(body_stmt);
+                            }
+
+                            auto backedge_iter = std::find(backedge_blocks.begin(), backedge_blocks.end(), else_block);
+                            if (backedge_iter != backedge_blocks.end()) {
+                                std::cerr << "replaced BE\n";
+                                std::replace(backedge_blocks.begin(), backedge_blocks.end(), *backedge_iter, to<stmt_block>(while_block->body));
+                            }
+                            while_block->continue_blocks.insert(while_block->continue_blocks.begin(), backedge_blocks.begin(), backedge_blocks.end());
+                        }
+                        else {
+                            for (auto body_stmt: then_block->stmts) {
+                                to<stmt_block>(while_block->body)->stmts.push_back(body_stmt);
+                            }
+
+                            auto backedge_iter = std::find(backedge_blocks.begin(), backedge_blocks.end(), then_block);
+                            if (backedge_iter != backedge_blocks.end()) {
+                                std::cerr << "replaced BE\n";
+                                std::replace(backedge_blocks.begin(), backedge_blocks.end(), *backedge_iter, to<stmt_block>(while_block->body));
+                            }
+                            while_block->continue_blocks.insert(while_block->continue_blocks.begin(), backedge_blocks.begin(), backedge_blocks.end());
                         }
                         // for (auto body_stmt: else_block->stmts) {
                         //     to<stmt_block>(while_block->body)->stmts.push_back(body_stmt);
@@ -560,9 +775,9 @@ block::stmt_block::Ptr loop_info::convert_to_ast(block::stmt_block::Ptr ast) {
             }
             worklist.clear();
 
-            // std::cerr << "after ast\n";
-            // ast->dump(std::cerr, 0);
-            // std::cerr << "after ast\n";
+            std::cerr << "after ast\n";
+            ast->dump(std::cerr, 0);
+            std::cerr << "after ast\n";
         }
     }
 

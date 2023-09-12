@@ -40,6 +40,9 @@ dominator_analysis::dominator_analysis(basic_block::cfg_block cfg, bool is_postd
     postorder.reserve(cfg_.size());
     postorder_bb_map.reserve(cfg_.size());
     postorder_bb_map.assign(cfg_.size(), -1);
+    preorder.reserve(cfg_.size());
+    preorder_bb_map.reserve(cfg_.size());
+    preorder_bb_map.assign(cfg_.size(), -1);
 
     // and call the anaylse function
     analyze();
@@ -83,12 +86,48 @@ void dominator_analysis::postorder_dfs() {
     }
 }
 
+void dominator_analysis::preorder_dfs_helper(std::vector<bool> &visited_bbs, int id) {
+        for (auto child: cfg_[id]->successor) {
+            if (!visited_bbs[child->id]) {
+                visited_bbs[child->id] = true;
+                preorder.push_back(child->id);
+                preorder_dfs_helper(visited_bbs, child->id);
+            }
+        }
+}
+
+void dominator_analysis::preorder_dfs() {
+    std::vector<bool> visited_bbs(cfg_.size());
+    visited_bbs.assign(visited_bbs.size(), false);
+    if (is_postdom_)
+        visited_bbs[cfg_.size() - 1] = true;
+    else
+        visited_bbs[0] = true;
+
+    if (is_postdom_) {
+        preorder.push_back(cfg_.size() - 1);
+        preorder_dfs_helper(visited_bbs, cfg_.size() - 1);
+    }
+    else {
+        preorder.push_back(0);
+        preorder_dfs_helper(visited_bbs, 0);
+    }
+}
+
 std::vector<int> &dominator_analysis::get_postorder_bb_map() {
     return postorder_bb_map;
 }
 
 std::vector<int> &dominator_analysis::get_postorder() {
     return postorder;
+}
+
+std::vector<int> &dominator_analysis::get_preorder_bb_map() {
+    return preorder_bb_map;
+}
+
+std::vector<int> &dominator_analysis::get_preorder() {
+    return preorder;
 }
 
 std::vector<int> &dominator_analysis::get_idom() {
@@ -161,11 +200,14 @@ int dominator_analysis::intersect(int bb1_id, int bb2_id) {
 }
 
 void dominator_analysis::analyze() {
-    postorder_dfs();    
+    preorder_dfs();
+    postorder_dfs(); 
+    for (unsigned int i = 0; i < preorder.size(); i++) {
+        preorder_bb_map[preorder[i]] = i;
+    }
     for (unsigned int i = 0; i < postorder.size(); i++) {
         postorder_bb_map[postorder[i]] = i;
     }
-
     if (is_postdom_)
         idom[cfg_.size() - 1] = cfg_.size() - 1;
     else

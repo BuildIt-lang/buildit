@@ -22,6 +22,8 @@ class dominator_analysis {
         bool is_postdom_;
         std::vector<int> &get_postorder_bb_map();
         std::vector<int> &get_postorder();
+        std::vector<int> &get_preorder_bb_map();
+        std::vector<int> &get_preorder(); 
         std::vector<int> &get_idom();
         std::map<int, std::vector<int>> &get_idom_map();
         std::vector<int> &get_postorder_idom_map();
@@ -38,10 +40,14 @@ class dominator_analysis {
         std::vector<int> postorder_idom;
         std::vector<int> postorder;
         std::vector<int> postorder_bb_map;
+        std::vector<int> preorder;
+        std::vector<int> preorder_bb_map;
         void reverse_cfg();
         void postorder_idom_helper(std::vector<bool> &visited, int id);
         void postorder_dfs_helper(std::vector<bool> &visited_bbs, int id);
         void postorder_dfs();
+        void preorder_dfs_helper(std::vector<bool> &visited_bbs, int id);
+        void preorder_dfs();
         int intersect(int bb1_id, int bb2_id);
 };
 
