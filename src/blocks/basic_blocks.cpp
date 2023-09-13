@@ -3,6 +3,8 @@
 
 using namespace block;
 
+std::map<block::stmt::Ptr, std::shared_ptr<basic_block>> basic_block::ast_to_basic_block_map = {};
+
 basic_block::cfg_block generate_basic_blocks(block::stmt_block::Ptr ast) {
     std::deque<std::shared_ptr<basic_block>> work_list;
     basic_block::cfg_block return_list;
@@ -13,7 +15,6 @@ basic_block::cfg_block generate_basic_blocks(block::stmt_block::Ptr ast) {
     for (auto st: ast->stmts) {
         auto bb = std::make_shared<basic_block>(std::to_string(basic_block_count));
         bb->parent = st;
-        // bb->ast_to_basic_block_map[bb->parent] = bb;
         bb->ast_index = ast_index_counter++;
         bb->ast_depth = 0;
         work_list.push_back(bb);
@@ -41,7 +42,6 @@ basic_block::cfg_block generate_basic_blocks(block::stmt_block::Ptr ast) {
                 for (auto st: stmt_block_->stmts) {
                     stmt_block_list.push_back(std::make_shared<basic_block>(std::to_string(basic_block_count++)));
                     stmt_block_list.back()->parent = st;
-                    // stmt_block_list.back()->ast_to_basic_block_map[bb->parent] = stmt_block_list.back();
                     stmt_block_list.back()->ast_index = ast_index_counter++;
                     stmt_block_list.back()->ast_depth = bb->ast_depth + 1;
                 }
@@ -83,8 +83,6 @@ basic_block::cfg_block generate_basic_blocks(block::stmt_block::Ptr ast) {
             exit_bb->parent = std::make_shared<stmt_block>();
             // mark the basic block as exit block
             exit_bb->is_exit_block = true;
-            // add mapping in ast to bb map
-            // exit_bb->ast_to_basic_block_map[exit_bb->parent] = exit_bb;
             // set the ast depth of the basic block
             exit_bb->ast_depth = bb->ast_depth;
             // check if this is the last block, if yes the successor will be empty
@@ -104,8 +102,6 @@ basic_block::cfg_block generate_basic_blocks(block::stmt_block::Ptr ast) {
                 auto then_bb = std::make_shared<basic_block>(std::to_string(++basic_block_count));
                 // set the parent of this block as the then stmts
                 then_bb->parent = if_stmt_->then_stmt;
-                // add mapping in ast to bb map
-                // then_bb->ast_to_basic_block_map[then_bb->parent] = then_bb;
                 // set the ast depth of the basic block
                 then_bb->ast_depth = bb->ast_depth;
                 // set the successor of this block to be the exit block
@@ -122,8 +118,6 @@ basic_block::cfg_block generate_basic_blocks(block::stmt_block::Ptr ast) {
                 auto else_bb = std::make_shared<basic_block>(std::to_string(++basic_block_count));
                 // set the parent of this block as the else stmts
                 else_bb->parent = if_stmt_->else_stmt;
-                // add mapping in ast to bb map
-                // else_bb->ast_to_basic_block_map[else_bb->parent] = else_bb;
                 // set the ast depth of the basic block
                 else_bb->ast_depth = bb->ast_depth;
                 // set the successor of this block to be the exit block
@@ -201,6 +195,11 @@ basic_block::cfg_block generate_basic_blocks(block::stmt_block::Ptr ast) {
     // step 6: assign each basic_block an id
     for (unsigned int i = 0; i < return_list.size(); i++) {
         return_list[i]->id = i;
+    }
+
+    // step 7: populate the ast -> bb map
+    for (auto bb: return_list) {
+        bb->ast_to_basic_block_map[bb->parent] = bb;
     }
 
     return return_list;

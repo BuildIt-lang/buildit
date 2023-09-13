@@ -395,32 +395,49 @@ static void replace_loop_exits(std::shared_ptr<loop> loop, block::stmt_block::Pt
 static std::vector<stmt_block::Ptr> backedge_blocks;
 
 static void replace_loop_latches(std::shared_ptr<loop> loop, block::stmt_block::Ptr ast, dominator_analysis &dta_) {
+    std::cerr << "loop id: " << loop->loop_id << " : ";
     for (auto latch_iter = loop->loop_latch_blocks.begin(); latch_iter != loop->loop_latch_blocks.end(); latch_iter++) {
+        std::cerr << "loop latch id: " << (*latch_iter)->id << "\n";
         stmt::Ptr loop_latch_ast = get_loop_block(*latch_iter, ast);
         // stmt::Ptr loop_latch_ast_level_up = get_loop_block(*latch_iter, ast, true);
         bool is_last_block = false;
+        bool is_latch_in_other_loop = false;
 
         if (dta_.get_preorder_bb_map()[(*latch_iter)->id] == (int)dta_.get_preorder().size() - 1) {
             is_last_block = true;
         }
         else {
-            unsigned int next_preorder = dta_.get_preorder()[dta_.get_preorder_bb_map()[(*latch_iter)->id] + 1];
-            unsigned int next_next_preorder = dta_.get_preorder()[dta_.get_preorder_bb_map()[next_preorder] + 1];
+            int next_preorder = dta_.get_preorder_bb_map()[(*latch_iter)->id] + 1 < (int)dta_.get_preorder().size() ? dta_.get_preorder()[dta_.get_preorder_bb_map()[(*latch_iter)->id] + 1] : -1;
+            int next_next_preorder = dta_.get_preorder_bb_map()[next_preorder] + 1 < (int)dta_.get_preorder().size() ? dta_.get_preorder()[dta_.get_preorder_bb_map()[next_preorder] + 1] : -1;
 
             std::cerr << next_preorder << " : " << next_next_preorder << "\n";
             if (loop->blocks_id_map.count(next_preorder))
                 is_last_block = false;
             else {
-                if (loop->unique_exit_block && (next_preorder == loop->unique_exit_block->id))
+                if (loop->unique_exit_block && (next_preorder == (int)loop->unique_exit_block->id))
                     is_last_block = true;
-                else if (loop->unique_exit_block && (next_next_preorder == loop->unique_exit_block->id))
+                else if (loop->unique_exit_block && (next_next_preorder == (int)loop->unique_exit_block->id))
+                    is_last_block = true;
+                else if (next_preorder != -1 && next_next_preorder == -1 && dta_.cfg_[next_preorder]->is_exit_block)
+                    is_last_block = true;
+                else if (next_preorder != -1 && next_next_preorder != -1 && dta_.cfg_[next_preorder]->is_exit_block && isa<goto_stmt>(dta_.cfg_[next_next_preorder]->parent))
                     is_last_block = true;
                 else
                     is_last_block = false;
             }
         }
+        std::cerr << "==== ast ====\n";
+        loop_latch_ast->dump(std::cerr, 0);
+        if ((*latch_iter)->ast_to_basic_block_map.count(loop_latch_ast)) {
+            std::cerr << "break in latch: " << (*latch_iter)->ast_to_basic_block_map.at(loop_latch_ast)->id << "\n";
+            auto bb = (*latch_iter)->ast_to_basic_block_map.at(loop_latch_ast);
+            for (auto subloop: loop->subloops) {
+                if (subloop->blocks_id_map.count(bb->id))
+                    is_latch_in_other_loop = true;
+            }
+        }
 
-        std::cerr << "LL: " << (*latch_iter)->id << ": " << is_last_block << "\n";
+        std::cerr << "LL: " << (*latch_iter)->id << ": " << is_last_block  << ": " << is_latch_in_other_loop << "\n";
         if (isa<stmt_block>(loop_latch_ast)) {
             std::cerr << "stmt parent\n";
             std::vector<stmt::Ptr> &temp_ast = to<block::stmt_block>(loop_latch_ast)->stmts;
@@ -428,7 +445,7 @@ static void replace_loop_latches(std::shared_ptr<loop> loop, block::stmt_block::
                 temp_ast.erase(temp_ast.begin() + (*latch_iter)->ast_index);
             else {
                 backedge_blocks.push_back(to<stmt_block>(loop_latch_ast));
-                std::replace(temp_ast.begin(), temp_ast.end(), temp_ast[(*latch_iter)->ast_index + 1], to<stmt>(std::make_shared<continue_stmt>()));
+                std::replace(temp_ast.begin(), temp_ast.end(), temp_ast[(*latch_iter)->ast_index + 1], is_latch_in_other_loop ? to<stmt>(std::make_shared<break_stmt>()) : to<stmt>(std::make_shared<continue_stmt>()));
             }
         }
         else if (isa<if_stmt>(loop_latch_ast)) {
@@ -444,7 +461,7 @@ static void replace_loop_latches(std::shared_ptr<loop> loop, block::stmt_block::
                     temp_ast.erase(temp_ast.begin() + (*latch_iter)->ast_index);
                 else {
                     backedge_blocks.push_back(if_then_block);
-                    std::replace(temp_ast.begin(), temp_ast.end(), temp_ast[(*latch_iter)->ast_index], to<stmt>(std::make_shared<continue_stmt>()));
+                    std::replace(temp_ast.begin(), temp_ast.end(), temp_ast[(*latch_iter)->ast_index], is_latch_in_other_loop ? to<stmt>(std::make_shared<break_stmt>()) : to<stmt>(std::make_shared<continue_stmt>()));
                 }
             }
             
@@ -455,7 +472,7 @@ static void replace_loop_latches(std::shared_ptr<loop> loop, block::stmt_block::
                     temp_ast.erase(temp_ast.begin() + (*latch_iter)->ast_index);
                 else {
                     backedge_blocks.push_back(if_else_block);
-                    std::replace(temp_ast.begin(), temp_ast.end(), temp_ast[(*latch_iter)->ast_index], to<stmt>(std::make_shared<continue_stmt>()));
+                    std::replace(temp_ast.begin(), temp_ast.end(), temp_ast[(*latch_iter)->ast_index], is_latch_in_other_loop ? to<stmt>(std::make_shared<break_stmt>()) : to<stmt>(std::make_shared<continue_stmt>()));
                 }
             }
         }
@@ -478,6 +495,7 @@ block::stmt_block::Ptr loop_info::convert_to_ast(block::stmt_block::Ptr ast) {
     ast->dump(std::cerr, 0);
     std::cerr << "after ast\n";
 
+    // return ast;
     for (auto loop_map: postorder_loops_map) {
         for (auto postorder: loop_map.second) {
             std::cerr << "before ast\n";
@@ -488,7 +506,6 @@ block::stmt_block::Ptr loop_info::convert_to_ast(block::stmt_block::Ptr ast) {
             loop_header_ast->dump(std::cerr, 0);
             while_stmt::Ptr while_block = std::make_shared<while_stmt>();
             while_block->body = std::make_shared<stmt_block>();
-            // while_block->continue_blocks.insert(while_block->continue_blocks.begin(), backedge_blocks.begin(), backedge_blocks.end());
 
             if (isa<block::while_stmt>(loop_header_ast)) {
                 loop_header_ast = to<block::while_stmt>(loop_header_ast)->body;
@@ -540,15 +557,21 @@ block::stmt_block::Ptr loop_info::convert_to_ast(block::stmt_block::Ptr ast) {
                         }
                         while_block->continue_blocks.insert(while_block->continue_blocks.begin(), backedge_blocks.begin(), backedge_blocks.end());
                     }
-                    else if (then_block->stmts.size() == 1 && else_block->stmts.size() != 0 && isa<block::break_stmt>(then_block->stmts[0])) {
+                    else if (then_block->stmts.size() <= 2 && isa<block::break_stmt>(then_block->stmts.back())) {
                         not_expr::Ptr new_cond = std::make_shared<not_expr>();
                         new_cond->static_offset = while_block->cond->static_offset;
                         new_cond->expr1 = while_block->cond;
                         while_block->cond = new_cond;
 
-                        for (auto body_stmt: else_block->stmts) {
-                            to<stmt_block>(while_block->body)->stmts.push_back(body_stmt);
-                        }
+                        // if (else_block->stmts.size() != 0)
+                            for (auto body_stmt: else_block->stmts) {
+                                to<stmt_block>(while_block->body)->stmts.push_back(body_stmt);
+                            }
+                        // else {
+                            then_block->stmts.pop_back();
+                            for (auto stmt: then_block->stmts)
+                                to<block::stmt_block>(loop_header_ast)->stmts.push_back(stmt);
+                        // }
 
                         auto backedge_iter = std::find(backedge_blocks.begin(), backedge_blocks.end(), else_block);
                         if (backedge_iter != backedge_blocks.end()) {
@@ -557,6 +580,16 @@ block::stmt_block::Ptr loop_info::convert_to_ast(block::stmt_block::Ptr ast) {
                         }
                         while_block->continue_blocks.insert(while_block->continue_blocks.begin(), backedge_blocks.begin(), backedge_blocks.end());
                     }
+                    // else if (then_block->stmts.size() <= 2 && isa<block::break_stmt>(then_block->stmts.back())) {
+                    //     not_expr::Ptr new_cond = std::make_shared<not_expr>();
+                    //     new_cond->static_offset = while_block->cond->static_offset;
+                    //     new_cond->expr1 = while_block->cond;
+                    //     while_block->cond = new_cond;
+
+                    //     then_block->stmts.pop_back();
+                    //     for (auto stmt: then_block->stmts)
+                    //         to<block::stmt_block>(loop_header_ast)->stmts.push_back(stmt);
+                    // }
                     else {
                         for (auto body_stmt: then_block->stmts) {
                             to<stmt_block>(while_block->body)->stmts.push_back(body_stmt);
@@ -574,9 +607,6 @@ block::stmt_block::Ptr loop_info::convert_to_ast(block::stmt_block::Ptr ast) {
                     // }
                     // if block to be replaced with while block
                     worklist.push_back(std::make_tuple(ast_index, std::ref(to<block::stmt_block>(loop_header_ast)->stmts), to<stmt>(while_block)));
-                }
-                else {
-                    // std::cerr << "not found loop header in stmt block\n";
                 }
             }
             else if (isa<block::if_stmt>(loop_header_ast)) {
@@ -628,7 +658,7 @@ block::stmt_block::Ptr loop_info::convert_to_ast(block::stmt_block::Ptr ast) {
                             }
                             while_block->continue_blocks.insert(while_block->continue_blocks.begin(), backedge_blocks.begin(), backedge_blocks.end());
                         }
-                        else if (then_block->stmts.size() == 1 && else_block->stmts.size() != 0 && isa<block::break_stmt>(then_block->stmts[0])) {
+                        else if (then_block->stmts.size() <= 2 && isa<block::break_stmt>(then_block->stmts.back())) {
                             not_expr::Ptr new_cond = std::make_shared<not_expr>();
                             new_cond->static_offset = while_block->cond->static_offset;
                             new_cond->expr1 = while_block->cond;
@@ -638,6 +668,10 @@ block::stmt_block::Ptr loop_info::convert_to_ast(block::stmt_block::Ptr ast) {
                                 to<stmt_block>(while_block->body)->stmts.push_back(body_stmt);
                             }
 
+                            then_block->stmts.pop_back();
+                            for (auto stmt: then_block->stmts)
+                                if_then_block->stmts.push_back(stmt);
+
                             auto backedge_iter = std::find(backedge_blocks.begin(), backedge_blocks.end(), else_block);
                             if (backedge_iter != backedge_blocks.end()) {
                                 std::cerr << "replaced BE\n";
@@ -645,6 +679,16 @@ block::stmt_block::Ptr loop_info::convert_to_ast(block::stmt_block::Ptr ast) {
                             }
                             while_block->continue_blocks.insert(while_block->continue_blocks.begin(), backedge_blocks.begin(), backedge_blocks.end());
                         }
+                        // else if (then_block->stmts.size() <= 2 && isa<block::break_stmt>(then_block->stmts.back())) {
+                        //     not_expr::Ptr new_cond = std::make_shared<not_expr>();
+                        //     new_cond->static_offset = while_block->cond->static_offset;
+                        //     new_cond->expr1 = while_block->cond;
+                        //     while_block->cond = new_cond;
+
+                        //     then_block->stmts.pop_back();
+                        //     for (auto stmt: then_block->stmts)
+                        //         if_then_block->stmts.push_back(stmt);
+                        // }
                         else {
                             for (auto body_stmt: then_block->stmts) {
                                 to<stmt_block>(while_block->body)->stmts.push_back(body_stmt);
@@ -663,11 +707,9 @@ block::stmt_block::Ptr loop_info::convert_to_ast(block::stmt_block::Ptr ast) {
                         // if block to be replaced with while block
                         worklist.push_back(std::make_tuple(ast_index, std::ref(if_then_block->stmts), to<stmt>(while_block)));
                     }
-                    else {
-                        // std::cerr << "not found loop header in if-then stmt\n";
-                    }
                 }
-                else if (if_else_block->stmts.size() != 0) {
+                
+                if (if_else_block->stmts.size() != 0) {
                     std::cerr << "if else block\n";
                     // handle unconditional loops
                     if (if_else_block->stmts[ast_index] == loops[postorder]->header_block->parent && !isa<block::if_stmt>(if_else_block->stmts[ast_index + 1])) {
@@ -711,7 +753,7 @@ block::stmt_block::Ptr loop_info::convert_to_ast(block::stmt_block::Ptr ast) {
                             }
                             while_block->continue_blocks.insert(while_block->continue_blocks.begin(), backedge_blocks.begin(), backedge_blocks.end());
                         }
-                        else if (then_block->stmts.size() == 1 && else_block->stmts.size() != 0 && isa<block::break_stmt>(then_block->stmts[0])) {
+                        else if (then_block->stmts.size() <= 2 && isa<block::break_stmt>(then_block->stmts.back())) {
                             not_expr::Ptr new_cond = std::make_shared<not_expr>();
                             new_cond->static_offset = while_block->cond->static_offset;
                             new_cond->expr1 = while_block->cond;
@@ -721,6 +763,10 @@ block::stmt_block::Ptr loop_info::convert_to_ast(block::stmt_block::Ptr ast) {
                                 to<stmt_block>(while_block->body)->stmts.push_back(body_stmt);
                             }
 
+                            then_block->stmts.pop_back();
+                            for (auto stmt: then_block->stmts)
+                                if_else_block->stmts.push_back(stmt);
+
                             auto backedge_iter = std::find(backedge_blocks.begin(), backedge_blocks.end(), else_block);
                             if (backedge_iter != backedge_blocks.end()) {
                                 std::cerr << "replaced BE\n";
@@ -728,6 +774,16 @@ block::stmt_block::Ptr loop_info::convert_to_ast(block::stmt_block::Ptr ast) {
                             }
                             while_block->continue_blocks.insert(while_block->continue_blocks.begin(), backedge_blocks.begin(), backedge_blocks.end());
                         }
+                        // else if (then_block->stmts.size() <= 2 && isa<block::break_stmt>(then_block->stmts.back())) {
+                        //     not_expr::Ptr new_cond = std::make_shared<not_expr>();
+                        //     new_cond->static_offset = while_block->cond->static_offset;
+                        //     new_cond->expr1 = while_block->cond;
+                        //     while_block->cond = new_cond;
+
+                        //     then_block->stmts.pop_back();
+                        //     for (auto stmt: then_block->stmts)
+                        //         if_else_block->stmts.push_back(stmt);
+                        // }
                         else {
                             for (auto body_stmt: then_block->stmts) {
                                 to<stmt_block>(while_block->body)->stmts.push_back(body_stmt);
@@ -746,13 +802,7 @@ block::stmt_block::Ptr loop_info::convert_to_ast(block::stmt_block::Ptr ast) {
                         // if block to be replaced with while block
                         worklist.push_back(std::make_tuple(ast_index, std::ref(if_else_block->stmts), to<stmt>(while_block)));
                     }
-                    else {
-                        // std::cerr << "not found loop header in if-else stmt\n";
-                    }
                 }
-            }
-            else {
-                // std::cerr << "loop header not found\n";
             }
 
             // process worklist

@@ -22,7 +22,7 @@ class basic_block {
         unsigned int ast_depth;
         unsigned int id;
         std::string name;
-        // static std::map<block::stmt::Ptr, std::shared_ptr<basic_block>> ast_to_basic_block_map;
+        static std::map<block::stmt::Ptr, std::shared_ptr<basic_block>> ast_to_basic_block_map;
 };
 
 basic_block::cfg_block generate_basic_blocks(block::stmt_block::Ptr ast);
