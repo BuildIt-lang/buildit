@@ -16,6 +16,7 @@ class basic_block {
         block::expr::Ptr branch_expr;
         std::shared_ptr<basic_block> then_branch;
         std::shared_ptr<basic_block> else_branch;
+        std::shared_ptr<basic_block> exit_block;
         bool is_exit_block;
         block::stmt::Ptr parent;
         unsigned int ast_index;

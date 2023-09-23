@@ -10,8 +10,8 @@ using namespace block;
 class loop {
 public:
     loop(std::shared_ptr<basic_block> header): header_block(header) {}
+    stmt::Ptr convert_to_ast_impl(dominator_analysis &dta_);
 
-// private:
     struct loop_bounds_ {
         stmt::Ptr ind_var;
         // MISS: intial value of ind var
@@ -28,6 +28,7 @@ public:
     std::unordered_set<int> blocks_id_map;
     std::shared_ptr<loop> parent_loop;
     std::shared_ptr<basic_block> header_block;
+    std::shared_ptr<basic_block> condition_block;
     std::shared_ptr<basic_block> unique_exit_block;
     basic_block::cfg_block loop_latch_blocks;
     basic_block::cfg_block loop_exit_blocks;

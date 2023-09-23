@@ -137,6 +137,9 @@ basic_block::cfg_block generate_basic_blocks(block::stmt_block::Ptr ast) {
             if (!bb->then_branch) bb->then_branch = exit_bb;
             else if (!bb->else_branch) bb->else_branch = exit_bb;
 
+            // set the exit block of this if stmt
+            bb->exit_block = exit_bb;
+
             return_list.push_back(bb);
         }
         else if (isa<block::expr_stmt>(bb->parent)) {
