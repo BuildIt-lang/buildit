@@ -144,6 +144,7 @@ static void trim_ast_at_offset(block::stmt::Ptr ast, tracer::tag offset) {
 
 static std::pair<std::vector<block::stmt::Ptr>, std::vector<block::stmt::Ptr>>
 trim_common_from_back(block::stmt::Ptr ast1, block::stmt::Ptr ast2) {
+
 	std::vector<block::stmt::Ptr> trimmed_stmts;
 	std::vector<block::stmt::Ptr> &ast1_stmts = block::to<block::stmt_block>(ast1)->stmts;
 	std::vector<block::stmt::Ptr> &ast2_stmts = block::to<block::stmt_block>(ast2)->stmts;
@@ -280,7 +281,8 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 	ast->accept(&creator);
 
 	block::label_inserter inserter;
-	inserter.offset_to_label = creator.offset_to_label;
+	inserter.backup_offset_to_label = creator.offset_to_label;
+	inserter.feature_unstructured = feature_unstructured;
 	ast->accept(&inserter);
 
 	// At this point it is safe to remove statements that are

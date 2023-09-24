@@ -1,0 +1,56 @@
+FUNC_DECL
+  SCALAR_TYPE (VOID)
+  STMT_BLOCK
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var0)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var1)
+      INT_CONST (0)
+    WHILE_STMT
+      INT_CONST (1)
+      STMT_BLOCK
+        IF_STMT
+          NE_EXPR
+            VAR_EXPR
+              VAR (var0)
+            INT_CONST (1)
+          STMT_BLOCK
+            IF_STMT
+              EQUALS_EXPR
+                VAR_EXPR
+                  VAR (var0)
+                INT_CONST (2)
+              STMT_BLOCK
+                WHILE_STMT
+                  NE_EXPR
+                    VAR_EXPR
+                      VAR (var0)
+                    INT_CONST (3)
+                  STMT_BLOCK
+              STMT_BLOCK
+          STMT_BLOCK
+            WHILE_STMT
+              NE_EXPR
+                VAR_EXPR
+                  VAR (var0)
+                INT_CONST (3)
+              STMT_BLOCK
+void bar (void) {
+  int var0 = 0;
+  int var1 = 0;
+  while (1) {
+    if (var0 != 1) {
+      if (var0 == 2) {
+        while (var0 != 3) {
+        }
+      } 
+    } else {
+      while (var0 != 3) {
+      }
+    }
+  }
+}
+
