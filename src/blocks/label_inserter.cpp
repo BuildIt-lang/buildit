@@ -5,15 +5,6 @@ namespace block {
 void label_collector::visit(goto_stmt::Ptr a) {
 	collected_labels.push_back(a->temporary_label_number);
 }
-static void erase_tag(std::vector<tracer::tag> &list, tracer::tag &erase) {
-	std::vector<tracer::tag> new_list;
-	for (unsigned int i = 0; i < list.size(); i++) {
-		if (list[i] != erase) {
-			new_list.push_back(list[i]);
-		}
-	}
-	list = new_list;
-}
 void label_creator::visit(stmt_block::Ptr a) {
 	std::vector<stmt::Ptr> new_stmts;
 
@@ -30,8 +21,7 @@ void label_creator::visit(stmt_block::Ptr a) {
 			new_label_stmt->static_offset.clear();
 			new_label_stmt->label1 = new_label;
 			new_stmts.push_back(new_label_stmt);
-			// collected_labels.erase(stmt->static_offset);
-			erase_tag(collected_labels, stmt->static_offset);
+
 			offset_to_label[stmt->static_offset.stringify()] = new_label;
 		}
 		new_stmts.push_back(stmt);
@@ -39,7 +29,17 @@ void label_creator::visit(stmt_block::Ptr a) {
 	}
 	a->stmts = new_stmts;
 }
+
+void label_inserter::visit(label_stmt::Ptr a) {
+	offset_to_label[a->label1->static_offset.stringify()] = a->label1;
+}
+
 void label_inserter::visit(goto_stmt::Ptr a) {
-	a->label1 = offset_to_label[a->temporary_label_number.stringify()];
+	// Pick any jump target with feature unstructured
+	// otherwise pick the one that is in the parent block
+	if (feature_unstructured)
+		a->label1 = backup_offset_to_label[a->temporary_label_number.stringify()];
+	else
+		a->label1 = offset_to_label[a->temporary_label_number.stringify()];
 }
 } // namespace block
