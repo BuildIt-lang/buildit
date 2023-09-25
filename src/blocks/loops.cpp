@@ -1,4 +1,5 @@
 #include "blocks/loops.h"
+#include <unordered_set>
 #include <algorithm>
 #include <tuple>
 #include <set>
@@ -700,23 +701,218 @@ stmt::Ptr loop::convert_to_ast_impl(dominator_analysis &dta_) {
     return to<stmt>(while_block);
 }
 
+std::map<stmt_block::Ptr, stmt_block::Ptr> ast_parent_map_global;
 block::stmt_block::Ptr loop_info::convert_to_ast(block::stmt_block::Ptr ast) {
-    
     block::stmt_block::Ptr return_ast = std::make_shared<stmt_block>();
-    
-    for (auto bb: dta.cfg_) {
+
+    std::deque<std::pair<std::shared_ptr<basic_block>, stmt_block::Ptr>> worklist;
+    std::unordered_set<std::shared_ptr<basic_block>> visited;
+    worklist.push_back({dta.cfg_[0], return_ast});
+    visited.insert(dta.cfg_[0]);
+
+    while (worklist.size()) {
+        auto bb_ast_pair = worklist.front();
+        auto bb = bb_ast_pair.first;
+        auto ast = bb_ast_pair.second;
+        worklist.pop_front();
+
         if (isa<label_stmt>(bb->parent)) {
-            for (auto loop: top_level_loops) {
-                if (loop->header_block->parent == bb->parent)
-                    return_ast->stmts.push_back(loop->convert_to_ast_impl(dta));
+            for (auto loop : top_level_loops) {
+                if (loop->header_block->parent == bb->parent) {
+                    ast->stmts.push_back(loop->convert_to_ast_impl(dta));
+                    std::cerr << "found loop\n";
+                    break;
+                }
             }
         }
-        else if (!bb_loop_map.count(bb->id) && !visited_blocks.count(bb->parent) && !bb->is_exit_block) {
-            return_ast->stmts.push_back(bb->parent);
+        else if (isa<if_stmt>(bb->parent)) {
+
+            if (bb_loop_map.count(bb->id))
+                continue;
+            
+            if (visited_blocks.count(bb->parent))
+                continue;
+
+            if_stmt::Ptr if_stmt_copy = std::make_shared<if_stmt>();
+            if_stmt_copy->then_stmt = to<stmt>(std::make_shared<stmt_block>());
+            if_stmt_copy->else_stmt = to<stmt>(std::make_shared<stmt_block>());
+            if_stmt_copy->cond = to<if_stmt>(bb->parent)->cond;
+
+            // push the then branch onto worklist. (worklist should be a pair <processed, destination>) ?
+            if (bb->then_branch) {
+                ast_parent_map_global[to<stmt_block>(if_stmt_copy->then_stmt)] = ast;
+                worklist.push_back({bb->then_branch, to<stmt_block>(if_stmt_copy->then_stmt)});
+                visited.insert(bb->then_branch);
+            }
+
+            if (bb->else_branch) {
+                ast_parent_map_global[to<stmt_block>(if_stmt_copy->else_stmt)] = ast;
+                worklist.push_back({bb->else_branch, to<stmt_block>(if_stmt_copy->else_stmt)});
+                visited.insert(bb->else_branch);
+            }
+
+            ast->stmts.push_back(to<stmt>(if_stmt_copy));
+        }
+        else {
+            assert(bb->successor.size() <= 1);
+
+            if (bb_loop_map.count(bb->id))
+                continue;
+            
+            if (visited_blocks.count(bb->parent))
+                continue;
+
+            // what is happening is that when we see a if stmt exit block we should
+            // reduce the level of the tree, it is not being done now.
+            if (!bb->is_exit_block && !isa<stmt_block>(bb->parent))
+                ast->stmts.push_back(to<stmt>(bb->parent));
+            
+            if (bb->successor.size()) {
+                if (visited.count(bb->successor[0]))
+                    continue;
+                else
+                    visited.insert(bb->successor[0]);
+    
+                if (bb->is_exit_block)
+                    worklist.push_back({bb->successor[0], ast_parent_map_global[ast]});
+                else
+                    worklist.push_back({bb->successor[0], ast});
+            }
         }
     }
-    // for (auto loop: top_level_loops) {
-    //     return_ast->stmts.push_back(loop->convert_to_ast_impl(dta));
+    // // iterate using preorder bb
+    // // use stack for current parent block
+    // std::stack<stmt::Ptr> parent_stack;
+    // parent_stack.push(to<stmt>(return_ast));
+
+    // for (unsigned int i = 0; i < dta.get_preorder().size(); i++) {
+    //     auto bb = dta.cfg_[dta.get_preorder()[i]];
+
+    //     std::cerr << "bb: " << bb->id << "\n";
+    //     if (isa<label_stmt>(bb->parent)) {
+    //         std::cerr << "inside label block\n";
+
+    //         for (auto loop: top_level_loops) {
+    //             if (loop->header_block->parent == bb->parent) {
+    //                 to<stmt_block>(parent_stack.top())->stmts.push_back(loop->convert_to_ast_impl(dta));            
+    //                 break;
+    //             }
+    //         }
+    //     }
+    //     else if (isa<if_stmt>(bb->parent)) {
+    //         std::cerr << "inside if block\n";
+
+    //         if (bb_loop_map.count(bb->id))
+    //             continue;
+    //         std::cerr << "inside if block (exit 1)\n";
+            
+    //         if (visited_blocks.count(bb->parent))
+    //             continue;
+    //         std::cerr << "inside if block (exit 2)\n";
+            
+    //         if (dta.get_preorder().size() <= i + 1)
+    //             continue;
+    //         std::cerr << "inside if block (exit 3)\n";
+            
+    //         if_stmt::Ptr if_stmt_copy = std::make_shared<if_stmt>();
+    //         if_stmt_copy->then_stmt = to<stmt>(std::make_shared<stmt_block>());
+    //         if_stmt_copy->else_stmt = to<stmt>(std::make_shared<stmt_block>());
+    //         if_stmt_copy->cond = to<if_stmt>(bb->parent)->cond;
+
+    //         int next_block = -1;
+    //         if (dta.get_preorder()[i + 1] == (int)bb->then_branch->id)
+    //             next_block = 0;
+    //         else if (dta.get_preorder()[i + 1] == (int)bb->else_branch->id)
+    //             next_block = 1;
+            
+    //         assert(next_block != -1);
+
+    //         to<stmt_block>(parent_stack.top())->stmts.push_back(if_stmt_copy);
+    //         if (next_block == 0) {
+    //             parent_stack.push(to<stmt>(if_stmt_copy->then_stmt));
+    //         }
+    //         else if (next_block == 1) {
+    //             parent_stack.push(to<stmt>(if_stmt_copy->else_stmt));
+    //         }
+            
+    //     }
+    //     else if (bb->is_exit_block) {
+    //         std::cerr << "inside exit block\n";
+          
+    //         if (bb_loop_map.count(bb->id))
+    //             continue;
+    //         std::cerr << "inside exit block (exit 1)\n";
+            
+    //         if (visited_blocks.count(bb->parent))
+    //             continue;
+
+    //         parent_stack.pop();
+    //     }
+    //     else {
+    //         std::cerr << "inside default block\n";
+     
+    //         if (bb_loop_map.count(bb->id))
+    //             continue;
+    //         std::cerr << "inside default block (exit 1)\n";
+            
+    //         if (visited_blocks.count(bb->parent))
+    //             continue;
+    //         std::cerr << "inside default block (exit 2)\n";
+
+    //         to<stmt_block>(parent_stack.top())->stmts.push_back(bb->parent);
+    //     }
+    // }
+
+    // for (auto bb: dta.cfg_) {
+    //     std::cerr << bb->id << " " << bb_loop_map.count(bb->id) << " " << visited_blocks.count(bb->parent) << " " << bb->is_exit_block << "\n";
+    //     if (isa<label_stmt>(bb->parent)) {
+    //         std::cerr << "inside label block\n";
+    //         for (auto loop: top_level_loops) {
+    //             if (loop->header_block->parent == bb->parent) {
+    //                 if (ast_parent_map_global.count(bb->parent)) {
+    //                     ast_parent_map_global[bb->parent]->stmts.push_back(loop->convert_to_ast_impl(dta));
+    //                 }
+    //                 else {
+    //                     return_ast->stmts.push_back(loop->convert_to_ast_impl(dta));
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     else if (!bb_loop_map.count(bb->id) && !visited_blocks.count(bb->parent) && !bb->is_exit_block) {
+    //         std::cerr << "inside if block\n";
+    //         stmt::Ptr push_block = bb->parent;
+
+    //         if (isa<if_stmt>(bb->parent)) {
+    //             if_stmt::Ptr if_stmt_copy = std::make_shared<if_stmt>();
+    //             if_stmt_copy->then_stmt = to<stmt>(std::make_shared<stmt_block>());
+    //             if_stmt_copy->else_stmt = to<stmt>(std::make_shared<stmt_block>());
+    //             if_stmt_copy->cond = to<if_stmt>(bb->parent)->cond;
+    //             push_block = to<stmt>(if_stmt_copy);
+
+    //             for (auto stmt: to<stmt_block>(to<if_stmt>(bb->parent)->then_stmt)->stmts) {
+    //                 if (!isa<label_stmt>(stmt)) {
+    //                     std::cerr << "ifstmt\n";
+    //                     visited_blocks.insert(stmt);
+    //                     to<stmt_block>(if_stmt_copy->then_stmt)->stmts.push_back(stmt);
+    //                 }
+    //                 ast_parent_map_global.insert({stmt, to<stmt_block>(if_stmt_copy->then_stmt)});
+    //             }
+    //             for (auto stmt: to<stmt_block>(to<if_stmt>(bb->parent)->else_stmt)->stmts) {
+    //                 if (!isa<label_stmt>(stmt)) {
+    //                     std::cerr << "elsestmt\n";
+    //                     visited_blocks.insert(stmt);
+    //                     to<stmt_block>(if_stmt_copy->else_stmt)->stmts.push_back(stmt);
+    //                 }
+    //                 ast_parent_map_global.insert({stmt, to<stmt_block>(if_stmt_copy->else_stmt)});
+    //             }
+    //         }
+    //         else if (isa<stmt_block>(bb->parent)) {
+    //             continue;
+    //         }
+
+    //         visited_blocks.insert(bb->parent);
+    //         return_ast->stmts.push_back(push_block);
+    //     }
     // }
     
     return return_ast;
