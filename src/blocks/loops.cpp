@@ -383,7 +383,9 @@ stmt::Ptr loop::convert_to_ast_impl(dominator_analysis &dta_, std::vector<std::p
                     if (blocks_id_map.count(next_preorder))
                         is_last_block = false;
                     else {
-                        if (unique_exit_block && (next_preorder == (int)unique_exit_block->id))
+                        if (!blocks_id_map.count(next_preorder) || !blocks_id_map.count(next_next_preorder))
+                            is_last_block = true;
+                        else if (unique_exit_block && (next_preorder == (int)unique_exit_block->id))
                             is_last_block = true;
                         else if (unique_exit_block && (next_next_preorder == (int)unique_exit_block->id))
                             is_last_block = true;
@@ -397,6 +399,7 @@ stmt::Ptr loop::convert_to_ast_impl(dominator_analysis &dta_, std::vector<std::p
                 }
 
                 if (!is_last_block) {
+                    std::cerr << "inserted continue: " << bb->id << loop_id << "\n";
                     ast->stmts.push_back(to<stmt>(std::make_shared<continue_stmt>()));
                     while_block->continue_blocks.push_back(ast);
                 }
