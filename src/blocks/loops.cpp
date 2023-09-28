@@ -281,25 +281,17 @@ stmt::Ptr loop::convert_to_ast_impl(dominator_analysis &dta_, std::vector<std::p
                         worklist.push_back({bb->else_branch, to<stmt_block>(while_block->body)});
                         visited.insert(bb->else_branch);
                     }
-
-                    if (bb->successor.size() == 2 && bb->successor[1]->is_exit_block) {
-                        std::cerr << "inserting out of loop block" << bb->successor[1]->id << bb->successor[1]->is_exit_block << "\n";
-                        worklist.push_back({bb->successor[1], nullptr});
-                        visited.insert(bb->successor[1]);
-                    }
                 }
-                else {
-                    if (bb->then_branch) {
-                        ast_parent_map_loop[to<stmt_block>(while_block->body)] = ast;
-                        worklist.push_back({bb->then_branch, to<stmt_block>(while_block->body)});
-                        visited.insert(bb->then_branch);
-                    }
+                else if (bb->then_branch) {
+                    ast_parent_map_loop[to<stmt_block>(while_block->body)] = ast;
+                    worklist.push_back({bb->then_branch, to<stmt_block>(while_block->body)});
+                    visited.insert(bb->then_branch);
+                }
 
-                    if (bb->successor.size() == 2 && bb->successor[1]->is_exit_block) {
-                        std::cerr << "inserting out of loop block" << bb->successor[1]->id << bb->successor[1]->is_exit_block << "\n";
-                        worklist.push_back({bb->successor[1], nullptr});
-                        visited.insert(bb->successor[1]);
-                    }
+                if (bb->successor.size() == 2 && bb->successor[1]->is_exit_block) {
+                    std::cerr << "inserting out of loop block" << bb->successor[1]->id << bb->successor[1]->is_exit_block << "\n";
+                    worklist.push_back({bb->successor[1], nullptr});
+                    visited.insert(bb->successor[1]);
                 }
             }
             else {
@@ -318,6 +310,13 @@ stmt::Ptr loop::convert_to_ast_impl(dominator_analysis &dta_, std::vector<std::p
                     worklist.push_back({bb->else_branch, to<stmt_block>(if_stmt_copy->else_stmt)});
                     visited.insert(bb->else_branch);
                 }
+
+                if ((!bb->then_branch || !bb->else_branch) && bb->successor.size() == 2 && bb->successor[1]->is_exit_block) {
+                    std::cerr << "inserting out of loop block" << bb->successor[1]->id << bb->successor[1]->is_exit_block << "\n";
+                    worklist.push_back({bb->successor[1], nullptr});
+                    visited.insert(bb->successor[1]);
+                }
+
                 ast->stmts.push_back(to<stmt>(if_stmt_copy));
             }
         }
@@ -351,7 +350,7 @@ stmt::Ptr loop::convert_to_ast_impl(dominator_analysis &dta_, std::vector<std::p
 
                 if (!is_last_block) {
                     ast->stmts.push_back(to<stmt>(std::make_shared<continue_stmt>()));
-                    // TODO: also insert in continue stmt vector in while_stmt
+                    while_block->continue_blocks.push_back(ast);
                 }
                 visited.insert(bb);
             }
@@ -364,6 +363,11 @@ stmt::Ptr loop::convert_to_ast_impl(dominator_analysis &dta_, std::vector<std::p
             assert(bb->successor.size() <= 1);
             bool exit_bb_succ = false;
             if (bb->is_exit_block) {
+                for (auto subloop: subloops) {
+                    if (bb == subloop->unique_exit_block) {
+                        ast->stmts.push_back(to<stmt>(std::make_shared<break_stmt>()));
+                    }
+                }
                 for (auto exit: loop_exit_blocks) {
                     for (auto pred: bb->predecessor) {
                         if (pred->id == exit->id && bb->successor.size()) {
@@ -380,6 +384,10 @@ stmt::Ptr loop::convert_to_ast_impl(dominator_analysis &dta_, std::vector<std::p
 
                 if (exit_bb_succ)
                     continue;
+                
+                if (bb == unique_exit_block && dta_.get_preorder_bb_map()[bb->id] != (int)dta_.get_preorder().size() - 1) {
+                    ast->stmts.push_back(to<stmt>(std::make_shared<break_stmt>()));
+                }
             }
 
             if (!bb->is_exit_block && !isa<stmt_block>(bb->parent)) {
@@ -569,6 +577,14 @@ block::stmt_block::Ptr loop_info::convert_to_ast(block::stmt_block::Ptr ast) {
         }
         else {
             assert(bb->successor.size() <= 1);
+
+            if (bb->is_exit_block) {
+                for (auto loop: loops) {
+                    if (bb == loop->unique_exit_block) {
+                        ast->stmts.push_back(to<stmt>(std::make_shared<break_stmt>()));
+                    }
+                }
+            }
 
             if (bb_loop_map.count(bb->id))
                 continue;
