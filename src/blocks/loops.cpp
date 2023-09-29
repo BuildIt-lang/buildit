@@ -380,7 +380,9 @@ stmt::Ptr loop::convert_to_ast_impl(dominator_analysis &dta_, std::vector<std::p
                     int next_preorder = dta_.get_preorder_bb_map()[bb->id] + 1 < (int)dta_.get_preorder().size() ? dta_.get_preorder()[dta_.get_preorder_bb_map()[bb->id] + 1] : -1;
                     int next_next_preorder = dta_.get_preorder_bb_map()[next_preorder] + 1 < (int)dta_.get_preorder().size() ? dta_.get_preorder()[dta_.get_preorder_bb_map()[next_preorder] + 1] : -1;
 
-                    if (blocks_id_map.count(next_preorder))
+                    if (loop_latch_blocks.size() == 1)
+                        is_last_block = true;
+                    else if (blocks_id_map.count(next_preorder))
                         is_last_block = false;
                     else {
                         if (!blocks_id_map.count(next_preorder) || !blocks_id_map.count(next_next_preorder))
