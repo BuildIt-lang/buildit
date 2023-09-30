@@ -184,6 +184,9 @@ void loop_info::analyze() {
             continue;
 
         int unique_postdom = post_dta.get_idom(loop->loop_exit_blocks[0]->id);
+        if (unique_postdom == -1)
+            continue;
+
         bool unique_postdom_flag = true;
         for (auto exit_bb: loop->loop_exit_blocks) {
             if (post_dta.get_idom(exit_bb->id) != unique_postdom) {
@@ -270,6 +273,8 @@ stmt::Ptr loop::convert_to_ast_impl(dominator_analysis &dta_, std::vector<std::p
             if_stmt::Ptr if_stmt_copy = std::make_shared<if_stmt>();
             if_stmt_copy->then_stmt = to<stmt>(std::make_shared<stmt_block>());
             if_stmt_copy->else_stmt = to<stmt>(std::make_shared<stmt_block>());
+            if_stmt_copy->annotation = to<if_stmt>(bb->parent)->annotation;
+
             if (condition_block == bb) {
                 while_block->cond = to<if_stmt>(bb->parent)->cond;
                 
@@ -621,6 +626,7 @@ block::stmt_block::Ptr loop_info::convert_to_ast(block::stmt_block::Ptr ast) {
             if_stmt_copy->then_stmt = to<stmt>(std::make_shared<stmt_block>());
             if_stmt_copy->else_stmt = to<stmt>(std::make_shared<stmt_block>());
             if_stmt_copy->cond = to<if_stmt>(bb->parent)->cond;
+            if_stmt_copy->annotation = to<if_stmt>(bb->parent)->annotation;
 
             // push the then branch onto worklist. (worklist should be a pair <processed, destination>) ?
             if (bb->then_branch) {

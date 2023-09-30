@@ -303,6 +303,7 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 		block::eliminate_redundant_vars(ast);
 	}
 
+	// return ast;
 	if (feature_unstructured)
 		return ast;
 
@@ -334,6 +335,8 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 	dominator_analysis dom(BBs);
 	dominator_analysis post_dom(post_BBs, true);
 
+	std::cerr << "max depth: " << dom.max_depth << "\n";
+	std::cerr << "max depth bb id: " << dom.max_depth_bb_id << "\n";
 	std::cerr << "== postorder map ==\n";
 	for (int i: dom.get_postorder_bb_map()) {
 		std::cerr << i << "\n";
@@ -391,6 +394,8 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 	}
 	std::cerr << "== postorder idom ==\n";
 
+	std::cerr << "(postdom) max depth: " << post_dom.max_depth << "\n";
+	std::cerr << "(postdom) max depth bb id: " << post_dom.max_depth_bb_id << "\n";
 	std::cerr << "== (postdom) postorder map ==\n";
 	for (int i: post_dom.get_postorder_bb_map()) {
 		std::cerr << i << "\n";
@@ -500,13 +505,13 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 	std::cerr << "++++++ loop info ++++++ \n";
 
 	std::cerr << "++++++ convert to ast ++++++ \n";
-	// ast = LI.convert_to_ast(block::to<block::stmt_block>(ast));
+	ast = LI.convert_to_ast(block::to<block::stmt_block>(ast));
 	std::cerr << "++++++ convert to ast ++++++ \n";
 	
-	block::loop_finder finder;
-	finder.ast = ast;
-	ast->accept(&finder);
-	return ast;
+	// block::loop_finder finder;
+	// finder.ast = ast;
+	// ast->accept(&finder);
+	// return ast;
 
 	block::for_loop_finder for_finder;
 	for_finder.ast = ast;

@@ -8,15 +8,27 @@ void dominator_analysis::reverse_cfg() {
         assert(0);
 
     std::shared_ptr<basic_block> virtual_exit_bb = std::make_shared<basic_block>("virtualexit0");
-    virtual_exit_bb->id = cfg_.size();
-    cfg_.push_back(virtual_exit_bb);
-    
     for (auto bb: cfg_) {
         if (bb->successor.size() == 0) {
             bb->successor.push_back(virtual_exit_bb);
             virtual_exit_bb->predecessor.push_back(bb);
         }
     }
+
+    // if CFG is an inifite loop, we don't have a exit block
+    // so we need to find the farthest block from the entry
+    // of the loop and consider that as one of the exit blocks
+    if (!virtual_exit_bb->predecessor.size()) {
+        std::cerr << "infinite loop\n";
+        postorder_dfs(false);
+
+        auto bb_virtual_backedge = cfg_[max_depth_bb_id];
+        bb_virtual_backedge->successor.push_back(virtual_exit_bb);
+        virtual_exit_bb->predecessor.push_back(bb_virtual_backedge);
+    }
+
+    virtual_exit_bb->id = cfg_.size();
+    cfg_.push_back(virtual_exit_bb);
 
     for (auto bb: cfg_) {
         basic_block::cfg_block temp_pred = bb->predecessor;
@@ -35,12 +47,17 @@ dominator_analysis::dominator_analysis(basic_block::cfg_block cfg, bool is_postd
     }
 
     // TODO: Add a check for size, it should be greater than 2.
+    idom.clear();
     idom.reserve(cfg_.size());
     idom.assign(cfg_.size(), -1);
+    postorder.clear();
     postorder.reserve(cfg_.size());
+    postorder_bb_map.clear();
     postorder_bb_map.reserve(cfg_.size());
     postorder_bb_map.assign(cfg_.size(), -1);
+    preorder.clear();
     preorder.reserve(cfg_.size());
+    preorder_bb_map.clear();
     preorder_bb_map.reserve(cfg_.size());
     preorder_bb_map.assign(cfg_.size(), -1);
 
@@ -58,30 +75,40 @@ void dominator_analysis::postorder_idom_helper(std::vector<bool> &visited, int i
     }
 }
 
-void dominator_analysis::postorder_dfs_helper(std::vector<bool> &visited_bbs, int id) {
-        for (auto child: cfg_[id]->successor) {
-            if (!visited_bbs[child->id]) {
-                visited_bbs[child->id] = true;
-                postorder_dfs_helper(visited_bbs, child->id);
-                postorder.push_back(child->id);
-            }
+void dominator_analysis::postorder_dfs_helper(std::vector<bool> &visited_bbs, int id, int depth) {
+    if (depth > max_depth) {
+        max_depth = depth;
+        max_depth_bb_id = id;
+    }
+
+    for (auto child: cfg_[id]->successor) {
+        if (!visited_bbs[child->id]) {
+            visited_bbs[child->id] = true;
+            postorder_dfs_helper(visited_bbs, child->id, depth + 1);
+            postorder.push_back(child->id);
         }
+    }
 }
 
-void dominator_analysis::postorder_dfs() {
+void dominator_analysis::postorder_dfs(bool reverse_cfg) {
+    int current_depth = 0;
+    max_depth = current_depth;
+
     std::vector<bool> visited_bbs(cfg_.size());
     visited_bbs.assign(visited_bbs.size(), false);
-    if (is_postdom_)
+    if (reverse_cfg)
         visited_bbs[cfg_.size() - 1] = true;
     else
         visited_bbs[0] = true;
 
-    if (is_postdom_) {
-        postorder_dfs_helper(visited_bbs, cfg_.size() - 1);
+    if (reverse_cfg) {
+        max_depth_bb_id = cfg_.size() - 1;
+        postorder_dfs_helper(visited_bbs, cfg_.size() - 1, current_depth + 1);
         postorder.push_back(cfg_.size() - 1);
     }
     else {
-        postorder_dfs_helper(visited_bbs, 0);
+        max_depth_bb_id = 0;
+        postorder_dfs_helper(visited_bbs, 0, current_depth + 1);
         postorder.push_back(0);
     }
 }
@@ -96,15 +123,15 @@ void dominator_analysis::preorder_dfs_helper(std::vector<bool> &visited_bbs, int
         }
 }
 
-void dominator_analysis::preorder_dfs() {
+void dominator_analysis::preorder_dfs(bool reverse_cfg) {
     std::vector<bool> visited_bbs(cfg_.size());
     visited_bbs.assign(visited_bbs.size(), false);
-    if (is_postdom_)
+    if (reverse_cfg)
         visited_bbs[cfg_.size() - 1] = true;
     else
         visited_bbs[0] = true;
 
-    if (is_postdom_) {
+    if (reverse_cfg) {
         preorder.push_back(cfg_.size() - 1);
         preorder_dfs_helper(visited_bbs, cfg_.size() - 1);
     }
@@ -200,8 +227,8 @@ int dominator_analysis::intersect(int bb1_id, int bb2_id) {
 }
 
 void dominator_analysis::analyze() {
-    preorder_dfs();
-    postorder_dfs(); 
+    preorder_dfs(is_postdom_);
+    postorder_dfs(is_postdom_); 
     for (unsigned int i = 0; i < preorder.size(); i++) {
         preorder_bb_map[preorder[i]] = i;
     }
