@@ -152,17 +152,6 @@ void loop_info::analyze() {
         }
     }
 
-    // Populate loop condition block
-    for(auto loop: loops) {
-        if (!loop->header_block)
-            continue;
-        
-        std::shared_ptr<basic_block> header = loop->header_block;
-        assert(header->successor.size() == 1 && "loop header cannot have more than one successor");
-        if (isa<if_stmt>(header->successor[0]->parent))
-            loop->condition_block = header->successor[0];
-    }
-
     // Populate the loop exits
     for (auto loop: loops) {
         if (!loop->header_block)
@@ -196,6 +185,22 @@ void loop_info::analyze() {
 
         if (unique_postdom_flag)
             loop->unique_exit_block = dta.cfg_[unique_postdom];
+    }
+
+    // Populate loop condition block
+    for(auto loop: loops) {
+        if (!loop->header_block)
+            continue;
+
+        // this might be an unconditional loop or
+        // infinite loop.
+        if (loop->loop_exit_blocks.empty())
+            continue;
+
+        std::shared_ptr<basic_block> header = loop->header_block;
+        assert(header->successor.size() == 1 && "loop header cannot have more than one successor");
+        if (isa<if_stmt>(header->successor[0]->parent))
+            loop->condition_block = header->successor[0];
     }
 
     // Assign id to the loops
@@ -297,7 +302,7 @@ stmt::Ptr loop::convert_to_ast_impl(dominator_analysis &dta_, std::vector<std::p
                         worklist.push_back({bb->successor[1], nullptr});
                         visited.insert(bb->successor[1]);
                     }
-                    else {
+                    else if (blocks_id_map.count(bb->successor[1]->id) && !blocks_id_map.count(bb->successor[0]->id)){
                         std::cerr << "inserting out of loop block (0): " << bb->successor[0]->id << bb->successor[0]->is_exit_block << "\n";
                         worklist.push_back({bb->successor[0], nullptr});
                         visited.insert(bb->successor[0]);
@@ -316,7 +321,8 @@ stmt::Ptr loop::convert_to_ast_impl(dominator_analysis &dta_, std::vector<std::p
                         //     visited.insert(bb->successor[1]);                        
                         // }
                     }
-                    else if (bb->else_branch && blocks_id_map.count(bb->else_branch->id)) {
+
+                    if (bb->else_branch && blocks_id_map.count(bb->else_branch->id)) {
                         not_expr::Ptr negated_cond = std::make_shared<not_expr>();
                         negated_cond->static_offset = while_block->cond->static_offset;
                         negated_cond->expr1 = while_block->cond;
@@ -340,7 +346,7 @@ stmt::Ptr loop::convert_to_ast_impl(dominator_analysis &dta_, std::vector<std::p
                         worklist.push_back({bb->successor[0], ast_parent_map_loop[to<stmt_block>(while_block->body)]});
                         visited.insert(bb->successor[0]);
                     }
-                    else {
+                    else if (!blocks_id_map.count(bb->successor[1]->id) && blocks_id_map.count(bb->successor[0]->id)) {
                         std::cerr << "inserting out of loop block (1): " << bb->successor[1]->id << bb->successor[1]->is_exit_block << "\n";
                         worklist.push_back({bb->successor[1], nullptr});
                         visited.insert(bb->successor[1]);
