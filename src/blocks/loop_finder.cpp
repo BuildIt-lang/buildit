@@ -129,6 +129,14 @@ static void trim_from_parents(std::vector<stmt_block::Ptr> &parents, std::vector
 }
 
 void loop_finder::visit(stmt_block::Ptr a) {
+
+	// We do this inside out, first do the innermost loop
+
+	// Visit the instructions normally
+	for (auto stmt : a->stmts) {
+		stmt->accept(this);
+	}
+
 	// Check if this block has a label
 	while (1) {
 		label_stmt::Ptr found_label = nullptr;
@@ -141,11 +149,63 @@ void loop_finder::visit(stmt_block::Ptr a) {
 			break;
 		visit_label(found_label, a);
 	}
-	// Once all labels are done, visit the instructions normally
-	for (auto stmt : a->stmts) {
-		stmt->accept(this);
+}
+
+static void merge_condition_with_loop(while_stmt::Ptr new_while) {
+	// If the body of the while loop only has a single if condition and
+	// the else part of the condition is just a break, fuse the if with
+	// the loop
+
+	if (to<stmt_block>(new_while->body)->stmts.size() == 1 &&
+	    isa<if_stmt>(to<stmt_block>(new_while->body)->stmts[0])) {
+		if_stmt::Ptr if_body = to<if_stmt>(to<stmt_block>(new_while->body)->stmts[0]);
+
+		stmt::Ptr then_stmt = if_body->then_stmt;
+		stmt::Ptr else_stmt = if_body->else_stmt;
+
+		if (isa<stmt_block>(else_stmt) && to<stmt_block>(else_stmt)->stmts.size() == 1) {
+			if (isa<break_stmt>(to<stmt_block>(else_stmt)->stmts[0])) {
+				new_while->cond = if_body->cond;
+				// new_while->body =
+				// std::make_shared<stmt_block>();
+				new_while->body = then_stmt;
+				return;
+			}
+		}
+		if (isa<stmt_block>(then_stmt) && to<stmt_block>(then_stmt)->stmts.size() == 1) {
+			if (isa<break_stmt>(to<stmt_block>(then_stmt)->stmts[0])) {
+				not_expr::Ptr new_cond = std::make_shared<not_expr>();
+				new_cond->static_offset = if_body->cond->static_offset;
+				new_cond->expr1 = if_body->cond;
+				new_while->cond = new_cond;
+				new_while->body = else_stmt;
+				return;
+			}
+		}
+	}
+	// Other pattern is if the loops first statement is a if condition that
+	// breaks
+	if (isa<if_stmt>(to<stmt_block>(new_while->body)->stmts[0])) {
+		if_stmt::Ptr if_body = to<if_stmt>(to<stmt_block>(new_while->body)->stmts[0]);
+		stmt::Ptr then_stmt = if_body->then_stmt;
+
+		if (isa<stmt_block>(then_stmt) && to<stmt_block>(then_stmt)->stmts.size() == 1) {
+			if (isa<break_stmt>(to<stmt_block>(then_stmt)->stmts[0])) {
+				not_expr::Ptr new_cond = std::make_shared<not_expr>();
+				new_cond->static_offset = if_body->cond->static_offset;
+				new_cond->expr1 = if_body->cond;
+				new_while->cond = new_cond;
+				auto new_body = std::make_shared<stmt_block>();
+				for (unsigned int i = 1; i < to<stmt_block>(new_while->body)->stmts.size(); i++) {
+					new_body->stmts.push_back(to<stmt_block>(new_while->body)->stmts[i]);
+				}
+				new_while->body = new_body;
+				return;
+			}
+		}
 	}
 }
+
 void loop_finder::visit_label(label_stmt::Ptr a, stmt_block::Ptr parent) {
 
 	// First separate out the stmts before the loop begin
@@ -218,68 +278,116 @@ void loop_finder::visit_label(label_stmt::Ptr a, stmt_block::Ptr parent) {
 	}
 
 	std::reverse(trimmed.begin(), trimmed.end());
+
+	merge_condition_with_loop(new_while);
+
+	// Once we are happy with the loops, we have to make sure that this loop doesn't have any other jumps
+	// If it does, we should pull them out. So outer loops can handle them
+	outer_jump_finder outer_finder(loop_hook_counter);
+	new_while->accept(&outer_finder);
+
+	// For every control guard variable insert a initialization before the loop and the beginning of the loop
+
+	std::vector<stmt::Ptr> new_body_stmts;
+	std::vector<stmt::Ptr> guard_decl_stmts;
+	std::vector<stmt::Ptr> guarded_jumps;
+	for (auto guards : outer_finder.created_vars) {
+		var::Ptr var1 = guards.first;
+
+		auto var_expr1 = std::make_shared<var_expr>();
+		var_expr1->var1 = var1;
+		auto const_expr1 = std::make_shared<int_const>();
+		const_expr1->value = 0;
+		const_expr1->is_64bit = false;
+		auto assign_expr1 = std::make_shared<assign_expr>();
+		assign_expr1->var1 = var_expr1;
+		assign_expr1->expr1 = const_expr1;
+
+		auto expr_stmt1 = std::make_shared<expr_stmt>();
+		expr_stmt1->expr1 = assign_expr1;
+
+		new_body_stmts.push_back(expr_stmt1);
+
+		auto var_decl1 = std::make_shared<decl_stmt>();
+		var_decl1->decl_var = var1;
+		var_decl1->init_expr = const_expr1;
+		guard_decl_stmts.push_back(var_decl1);
+
+		auto if_stmt1 = std::make_shared<if_stmt>();
+		if_stmt1->else_stmt = std::make_shared<stmt_block>();
+		auto stmt_block1 = std::make_shared<stmt_block>();
+		if_stmt1->then_stmt = stmt_block1;
+		stmt_block1->stmts.push_back(guards.second);
+
+		auto var_expr2 = std::make_shared<var_expr>();
+		var_expr2->var1 = var1;
+		if_stmt1->cond = var_expr2;
+
+		guarded_jumps.push_back(if_stmt1);
+	}
+
+	// Insert all the original statements
+	for (auto stmt : to<stmt_block>(new_while->body)->stmts) {
+		new_body_stmts.push_back(stmt);
+	}
+	to<stmt_block>(new_while->body)->stmts = new_body_stmts;
+
+	// New while is ready to be inserted
 	parent->stmts = stmts_before;
+	// Insert the new guard decls we created
+	for (auto stmt : guard_decl_stmts) {
+		parent->stmts.push_back(stmt);
+	}
 	parent->stmts.push_back(new_while);
+	// Insert the guaded jumps afer
+	for (auto stmt : guarded_jumps) {
+		parent->stmts.push_back(stmt);
+	}
 	for (auto stmt : trimmed) {
 		parent->stmts.push_back(stmt);
 	}
 	for (auto stmt : stmts_after_body) {
 		parent->stmts.push_back(stmt);
 	}
-
-	// If the body of the while loop only has a single if condition and
-	// the else part of the condition is just a break, fuse the if with
-	// the loop
-
-	if (to<stmt_block>(new_while->body)->stmts.size() == 1 &&
-	    isa<if_stmt>(to<stmt_block>(new_while->body)->stmts[0])) {
-		if_stmt::Ptr if_body = to<if_stmt>(to<stmt_block>(new_while->body)->stmts[0]);
-
-		stmt::Ptr then_stmt = if_body->then_stmt;
-		stmt::Ptr else_stmt = if_body->else_stmt;
-
-		if (isa<stmt_block>(else_stmt) && to<stmt_block>(else_stmt)->stmts.size() == 1) {
-			if (isa<break_stmt>(to<stmt_block>(else_stmt)->stmts[0])) {
-				new_while->cond = if_body->cond;
-				// new_while->body =
-				// std::make_shared<stmt_block>();
-				new_while->body = then_stmt;
-				return;
-			}
-		}
-		if (isa<stmt_block>(then_stmt) && to<stmt_block>(then_stmt)->stmts.size() == 1) {
-			if (isa<break_stmt>(to<stmt_block>(then_stmt)->stmts[0])) {
-				not_expr::Ptr new_cond = std::make_shared<not_expr>();
-				new_cond->static_offset = if_body->cond->static_offset;
-				new_cond->expr1 = if_body->cond;
-				new_while->cond = new_cond;
-				new_while->body = else_stmt;
-				return;
-			}
-		}
-	}
-	// Other patter is if the loops first statement is a if condition that
-	// breaks
-	if (isa<if_stmt>(to<stmt_block>(new_while->body)->stmts[0])) {
-		if_stmt::Ptr if_body = to<if_stmt>(to<stmt_block>(new_while->body)->stmts[0]);
-		stmt::Ptr then_stmt = if_body->then_stmt;
-
-		if (isa<stmt_block>(then_stmt) && to<stmt_block>(then_stmt)->stmts.size() == 1) {
-			if (isa<break_stmt>(to<stmt_block>(then_stmt)->stmts[0])) {
-				not_expr::Ptr new_cond = std::make_shared<not_expr>();
-				new_cond->static_offset = if_body->cond->static_offset;
-				new_cond->expr1 = if_body->cond;
-				new_while->cond = new_cond;
-				auto new_body = std::make_shared<stmt_block>();
-				for (unsigned int i = 1; i < to<stmt_block>(new_while->body)->stmts.size(); i++) {
-					new_body->stmts.push_back(to<stmt_block>(new_while->body)->stmts[i]);
-				}
-				new_while->body = new_body;
-				return;
-			}
-		}
-	}
 }
+
+void outer_jump_finder::visit(stmt_block::Ptr block) {
+	// First visit all the statements normally
+	block_visitor::visit(block);
+
+	std::vector<stmt::Ptr> new_stmts;
+	for (auto stmt : block->stmts) {
+		if (isa<goto_stmt>(stmt)) {
+			// We found a jump statement, this must escape this loop, otherwise it would have
+			// been replaced with a continue
+			// we should now create a new variable and assignment
+			auto var1 = std::make_shared<var>();
+			var1->var_name = "control_guard" + std::to_string(loop_hook_counter++);
+			auto scalar_type1 = std::make_shared<scalar_type>();
+			var1->var_type = scalar_type1;
+			scalar_type1->scalar_type_id = scalar_type::INT_TYPE;
+			auto var_expr1 = std::make_shared<var_expr>();
+			var_expr1->var1 = var1;
+			auto const_expr1 = std::make_shared<int_const>();
+			const_expr1->value = 1;
+			const_expr1->is_64bit = false;
+			auto assign_expr1 = std::make_shared<assign_expr>();
+			assign_expr1->var1 = var_expr1;
+			assign_expr1->expr1 = const_expr1;
+
+			auto expr_stmt1 = std::make_shared<expr_stmt>();
+			expr_stmt1->expr1 = assign_expr1;
+
+			new_stmts.push_back(expr_stmt1);
+
+			created_vars.push_back(std::make_pair(var1, stmt));
+		} else {
+			new_stmts.push_back(stmt);
+		}
+	}
+	block->stmts = new_stmts;
+}
+
 void last_jump_finder::visit(goto_stmt::Ptr a) {
 	if (a->label1 == jump_label) {
 		has_jump_to = true;
