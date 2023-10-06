@@ -1,0 +1,125 @@
+FUNC_DECL
+  SCALAR_TYPE (VOID)
+  STMT_BLOCK
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var0)
+      INT_CONST (5)
+    WHILE_STMT
+      LT_EXPR
+        VAR_EXPR
+          VAR (var0)
+        INT_CONST (10)
+      STMT_BLOCK
+        DECL_STMT
+          SCALAR_TYPE (INT)
+          VAR (control_guard0)
+          INT_CONST (0)
+        WHILE_STMT
+          GT_EXPR
+            VAR_EXPR
+              VAR (var0)
+            INT_CONST (100)
+          STMT_BLOCK
+            EXPR_STMT
+              ASSIGN_EXPR
+                VAR_EXPR
+                  VAR (control_guard0)
+                INT_CONST (0)
+            IF_STMT
+              EQUALS_EXPR
+                VAR_EXPR
+                  VAR (var0)
+                INT_CONST (0)
+              STMT_BLOCK
+                EXPR_STMT
+                  ASSIGN_EXPR
+                    VAR_EXPR
+                      VAR (var0)
+                    PLUS_EXPR
+                      VAR_EXPR
+                        VAR (var0)
+                      INT_CONST (5)
+                WHILE_STMT
+                  NE_EXPR
+                    VAR_EXPR
+                      VAR (var0)
+                    INT_CONST (-1)
+                  STMT_BLOCK
+                    EXPR_STMT
+                      ASSIGN_EXPR
+                        VAR_EXPR
+                          VAR (var0)
+                        PLUS_EXPR
+                          VAR_EXPR
+                            VAR (var0)
+                          INT_CONST (6)
+                EXPR_STMT
+                  ASSIGN_EXPR
+                    VAR_EXPR
+                      VAR (control_guard0)
+                    INT_CONST (1)
+                BREAK_STMT
+              STMT_BLOCK
+            EXPR_STMT
+              ASSIGN_EXPR
+                VAR_EXPR
+                  VAR (var0)
+                PLUS_EXPR
+                  VAR_EXPR
+                    VAR (var0)
+                  INT_CONST (4)
+        IF_STMT
+          VAR_EXPR
+            VAR (control_guard0)
+          STMT_BLOCK
+            CONTINUE_STMT
+          STMT_BLOCK
+        EXPR_STMT
+          ASSIGN_EXPR
+            VAR_EXPR
+              VAR (var0)
+            PLUS_EXPR
+              VAR_EXPR
+                VAR (var0)
+              INT_CONST (5)
+        WHILE_STMT
+          NE_EXPR
+            VAR_EXPR
+              VAR (var0)
+            INT_CONST (-1)
+          STMT_BLOCK
+            EXPR_STMT
+              ASSIGN_EXPR
+                VAR_EXPR
+                  VAR (var0)
+                PLUS_EXPR
+                  VAR_EXPR
+                    VAR (var0)
+                  INT_CONST (6)
+void bar (void) {
+  int var0 = 5;
+  while (var0 < 10) {
+    int control_guard0 = 0;
+    while (var0 > 100) {
+      control_guard0 = 0;
+      if (var0 == 0) {
+        var0 = var0 + 5;
+        while (var0 != -1) {
+          var0 = var0 + 6;
+        }
+        control_guard0 = 1;
+        break;
+      } 
+      var0 = var0 + 4;
+    }
+    if (control_guard0) {
+      continue;
+    } 
+    var0 = var0 + 5;
+    while (var0 != -1) {
+      var0 = var0 + 6;
+    }
+  }
+}
+
