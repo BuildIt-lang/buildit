@@ -68,6 +68,7 @@ public:
 	bool run_rce = false;
 	bool feature_unstructured = false;
 	bool dynamic_use_cxx = false;
+	std::string dynamic_compiler_flags = "";
 	std::string dynamic_header_includes = "";
 
 	bool is_visited_tag(tracer::tag &new_tag);
