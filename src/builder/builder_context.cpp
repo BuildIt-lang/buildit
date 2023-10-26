@@ -243,14 +243,17 @@ trim_common_from_back(block::stmt::Ptr ast1, block::stmt::Ptr ast2) {
 	// the common part This has to be checked only in the end because gotos
 	// can appear on both the sides and should be trimmed of before
 
+	// Also allow this optimization if one of the branch ends in return
 	if (ast1_stmts.size() != 0 && ast2_stmts.size() != 0) {
-		if (block::isa<block::goto_stmt>(ast1_stmts.back())) {
+		if (block::isa<block::goto_stmt>(ast1_stmts.back()) ||
+		    block::isa<block::return_stmt>(ast1_stmts.back())) {
 			while (ast2_stmts.size() > 0) {
 				block::stmt::Ptr trimmed_stmt = ast2_stmts.back();
 				ast2_stmts.pop_back();
 				trimmed_stmts.push_back(trimmed_stmt);
 			}
-		} else if (block::isa<block::goto_stmt>(ast2_stmts.back())) {
+		} else if (block::isa<block::goto_stmt>(ast2_stmts.back()) ||
+			   block::isa<block::return_stmt>(ast2_stmts.back())) {
 			while (ast1_stmts.size() > 0) {
 				block::stmt::Ptr trimmed_stmt = ast1_stmts.back();
 				ast1_stmts.pop_back();

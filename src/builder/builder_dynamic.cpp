@@ -33,8 +33,8 @@ void *compile_and_return_ptr(builder_context &context, std::string source_name, 
 		compiler_name += " -std=c++11 -fPIC ";
 	}
 
-	std::string compile_command = compiler_name + " -shared -O3 " + source_name + " -o " + compiled_name + " "
-		+ context.dynamic_compiler_flags;
+	std::string compile_command = compiler_name + " -shared -O3 " + source_name + " -o " + compiled_name + " " +
+				      context.dynamic_compiler_flags;
 
 	int err = system(compile_command.c_str());
 	if (err != 0) {
