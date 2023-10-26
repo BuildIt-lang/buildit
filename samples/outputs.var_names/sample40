@@ -26,35 +26,28 @@ int match_re (char* arg1) {
               if (to_match_2 < str_len_1) {
                 var3 = 0;
                 return var3;
-              } else {
-                return 1;
-              }
-            } else {
-              var3 = 0;
-              return var3;
-            }
-          } else {
-            var5 = 0;
-            return var5;
-          }
-        } else {
-          if (arg1[to_match_2] == 100) {
-            goto label2;
+              } 
+              return 1;
+            } 
+            var3 = 0;
+            return var3;
           } 
-          var3 = 0;
-          return var3;
-        }
-      } else {
-        var5 = 0;
-        return var5;
-      }
-    } else {
-      var3 = 0;
-      return var3;
-    }
-  } else {
-    var5 = 0;
-    return var5;
-  }
+          var5 = 0;
+          return var5;
+        } 
+        if (arg1[to_match_2] == 100) {
+          goto label2;
+        } 
+        var3 = 0;
+        return var3;
+      } 
+      var5 = 0;
+      return var5;
+    } 
+    var3 = 0;
+    return var3;
+  } 
+  var5 = 0;
+  return var5;
 }
 

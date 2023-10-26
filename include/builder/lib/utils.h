@@ -7,7 +7,7 @@ template <typename T>
 static_var<T> up_cast_range(dyn_var<T> &v, T range) {
 	static_var<T> s;
 	for (s = 0; s < range - 1; s++) {
-		if (s == v) {
+		if (v == s) {
 			return s;
 		}
 	}
