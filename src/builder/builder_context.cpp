@@ -365,8 +365,8 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 	std::cerr << "get_idom(int) test: get_idom(0): " << dom.get_idom(0) << "\n";
 	std::cerr << "get_idom(int) test: get_idom(-1): " << dom.get_idom(-1) << "\n";
 
-	for (int i: dom.get_idom()) {
-		std::cerr << i << "\n";
+	for (unsigned int i = 0; i < dom.get_idom().size(); i++) {
+		std::cerr << i << " : " << dom.get_idom()[i] << "\n";
 	}
 	std::cerr << "== idom ==\n";
 
@@ -424,8 +424,8 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 	std::cerr << "get_idom(int) test: get_idom(0): " << post_dom.get_idom(0) << "\n";
 	std::cerr << "get_idom(int) test: get_idom(-1): " << post_dom.get_idom(-1) << "\n";
 
-	for (int i: post_dom.get_idom()) {
-		std::cerr << i << "\n";
+	for (unsigned int i = 0; i < post_dom.get_idom().size(); i++) {
+		std::cerr << i << " : " << post_dom.get_idom()[i] << "\n";
 	}
 	std::cerr << "== (postdom) idom ==\n";
 
@@ -504,6 +504,7 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 
 	std::cerr << "++++++ loop info ++++++ \n";
 
+	// return ast;
 	std::cerr << "++++++ convert to ast ++++++ \n";
 	ast = LI.convert_to_ast(block::to<block::stmt_block>(ast));
 	std::cerr << "++++++ convert to ast ++++++ \n";

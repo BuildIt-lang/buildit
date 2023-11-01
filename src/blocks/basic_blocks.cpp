@@ -96,7 +96,7 @@ basic_block::cfg_block generate_basic_blocks(block::stmt_block::Ptr ast) {
             work_list.pop_front();
             // push the exit block to the work_list
             work_list.push_front(exit_bb);
-
+            std::cerr << "inside if handler: " << bb->name << "\n";
             // if there is a then_stmt, create a basic block for it
             if (to<stmt_block>(if_stmt_->then_stmt)->stmts.size() != 0) {
                 auto then_bb = std::make_shared<basic_block>(std::to_string(++basic_block_count));
@@ -112,6 +112,7 @@ basic_block::cfg_block generate_basic_blocks(block::stmt_block::Ptr ast) {
                 bb->then_branch = then_bb;
                 // push the block to the work_list, to expand it further
                 work_list.push_front(then_bb);
+                std::cerr << "inside then" << "\n";
             }
             // if there is a else_stmt, create a basic block for it
             if (to<stmt_block>(if_stmt_->else_stmt)->stmts.size() != 0) {
@@ -128,6 +129,7 @@ basic_block::cfg_block generate_basic_blocks(block::stmt_block::Ptr ast) {
                 bb->else_branch = else_bb;
                 // push the block to the work_list, to expand it further
                 work_list.insert(work_list.begin() + 1, else_bb);
+                std::cerr << "inside else" << "\n";
             }
 
             // if there is no then/else block, then have the exit block as successor as well.
