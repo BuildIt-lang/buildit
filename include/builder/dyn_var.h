@@ -90,6 +90,13 @@ struct with_name {
 	with_name(const std::string &n, bool wd = false) : name(n), with_decl(wd) {}
 };
 
+// constructor helper to defer the initialization of dyn_var
+// This allows declaring dyn_var outside the context, but initialize
+// them later
+struct defer_init {
+	// No members
+};
+
 template <typename T>
 class dyn_var_impl : public var {
 public:
@@ -225,6 +232,19 @@ public:
 		block_var->var_name = v.name;
 		block_var->preferred_name = "";
 		var_name = v.name;
+	}
+
+	dyn_var_impl(const defer_init&) {
+		// Do nothing here
+	}
+	// The function to actually initialize a dyn_var, if it 
+	// has been deferred. It is OKAY to call this even if defer_init
+	// is not used, but is not adviced. This can definitely be called multiple 
+	// times and will produce the same dyn_var based on the static tag at the
+	// time of this call
+	// Currently we don't support init val, but can be added if needed
+	void deferred_init(void) {
+		create_dyn_var(false);
 	}
 	dyn_var_impl(const dyn_var_sentinel_type &a, std::string name = "") {
 		create_dyn_var(true);
