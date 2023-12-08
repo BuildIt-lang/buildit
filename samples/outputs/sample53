@@ -1,0 +1,10 @@
+void foo (void) {
+  int var0;
+  int var1 = 0;
+  if (var1) {
+    var0 = 1;
+  } else {
+    var0 = 2;
+  }
+}
+
