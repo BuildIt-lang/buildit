@@ -9,7 +9,7 @@ endif
 DEBUG=1
 endif
 
-EXTRA_CFLAGS?=""
+EXTRA_CFLAGS?=
 
 # Create CFLAGS, LINKER_FLAGS, CFLAGS_INTERNAL and INCLUDE_FLAGS based on config
 CFLAGS_INTERNAL=-std=c++11 -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wmissing-declarations 

@@ -10,7 +10,7 @@ jobs:
         with:
           submodules: recursive
       - run: sudo apt-get install g++
-      - run: make V=1 -C ${{ github.workspace }} -j$(nproc) run
+      - run: make -C ${{ github.workspace }} -j$(nproc) run
       - name: Install libunwind-dev
         run: sudo apt-get install libunwind-dev libdwarf-dev=20200114-1 libdwarf1=20200114-1
       - run: make -C ${{ github.workspace }} RECOVER_VAR_NAMES=1 -j$(nproc) run
