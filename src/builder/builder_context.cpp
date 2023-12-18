@@ -328,7 +328,7 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(std::vector
 	try {
 		current_builder_context = this;
 		// function();
-		lambda_wrapper();
+		lambda_wrapper(internal_stored_lambda);
 		commit_uncommitted();
 		ret_ast = ast;
 		current_builder_context = nullptr;
@@ -463,8 +463,5 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(std::vector
 	return ret_ast;
 }
 
-void lambda_wrapper_impl(void) {
-	builder_context::current_builder_context->internal_stored_lambda();
-}
 
 } // namespace builder

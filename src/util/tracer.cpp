@@ -8,7 +8,7 @@
 #endif
 
 namespace builder {
-extern void lambda_wrapper(void);
+extern void lambda_wrapper(std::function<void(void)>);
 extern void lambda_wrapper_close(void);
 } // namespace builder
 namespace tracer {

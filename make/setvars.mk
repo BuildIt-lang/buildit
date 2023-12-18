@@ -9,10 +9,11 @@ endif
 DEBUG=1
 endif
 
+EXTRA_CFLAGS?=
 
 # Create CFLAGS, LINKER_FLAGS, CFLAGS_INTERNAL and INCLUDE_FLAGS based on config
 CFLAGS_INTERNAL=-std=c++11 -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wmissing-declarations 
-CFLAGS_INTERNAL+=-Woverloaded-virtual -Wno-deprecated -Wdelete-non-virtual-dtor -Werror -Wno-vla -pedantic-errors
+CFLAGS_INTERNAL+=-Woverloaded-virtual -Wno-deprecated -Wdelete-non-virtual-dtor -Werror -Wno-vla -pedantic-errors 
 CFLAGS=
 LINKER_FLAGS=-L$(BUILD_DIR)/ -l$(LIBRARY_NAME)
 INCLUDE_FLAGS=-I$(INCLUDE_DIR) -I$(BUILD_DIR)/gen_headers/
@@ -49,4 +50,5 @@ endif
 
 
 LINKER_FLAGS+=-ldl
+CFLAGS+=$(EXTRA_CFLAGS)
 # --- flags are all ready
