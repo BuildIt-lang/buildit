@@ -10,6 +10,8 @@ all: executables
 
 CHECK_CONFIG=1
 CONFIG_STR=DEBUG=$(DEBUG) RECOVER_VAR_NAMES=$(RECOVER_VAR_NAMES) TRACER_USE_LIBUNWIND=$(TRACER_USE_LIBUNWIND)
+CONFIG_STR+=EXTRA_CFLAGS=$(EXTRA_CFLAGS)
+
 
 # Create a scratch directory where the files are stored
 $(shell mkdir -p $(BASE_DIR)/scratch)

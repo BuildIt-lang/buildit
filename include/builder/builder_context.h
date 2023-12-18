@@ -37,9 +37,11 @@ public:
 	std::unordered_map<std::string, block::stmt_block::Ptr> map;
 };
 
-void lambda_wrapper(void);
+void lambda_wrapper(std::function<void(void)>);
 void lambda_wrapper_close(void);
-void lambda_wrapper_impl(void);
+
+void coroutine_wrapper(std::function<void(void)>);
+void coroutine_wrapper_close(void);
 
 class builder_context {
 public:
@@ -47,7 +49,6 @@ public:
 	static int debug_creation_counter;
 
 	std::function<void(void)> internal_stored_lambda;
-	std::function<void(void)> current_function;
 
 	std::list<block::block::Ptr> uncommitted_sequence;
 	block::stmt::Ptr ast;
