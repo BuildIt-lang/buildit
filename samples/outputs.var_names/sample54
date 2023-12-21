@@ -1,0 +1,12 @@
+void bar (void) {
+  int z_1;
+  int y_0 = 0;
+  if (y_0) {
+    z_1 = 1;
+  } else {
+    z_1 = 2;
+  }
+  int b_2;
+  int a_3 = z_1;
+}
+

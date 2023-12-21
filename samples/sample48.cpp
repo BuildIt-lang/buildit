@@ -9,6 +9,8 @@ using builder::static_var;
 
 static void foo(void) {
 	dyn_var<int> x;
+	dyn_arr<int, 2> y = {0, 0};
+	y[0] = 1;
 	while (1)
 		dyn_arr<int, 2> z = {1, 2};
 }

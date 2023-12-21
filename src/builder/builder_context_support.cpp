@@ -13,10 +13,9 @@ void lambda_wrapper(std::function<void(void)> f) {
 }
 void lambda_wrapper_close(void) {}
 
-
 void coroutine_wrapper(std::function<void(void)> f) {
 	f();
-	tail_call_guard +=1;
+	tail_call_guard += 1;
 }
 void coroutine_wrapper_close(void) {}
 } // namespace builder
