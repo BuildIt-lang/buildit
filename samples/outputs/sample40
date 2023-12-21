@@ -1,7 +1,7 @@
 #include <string.h>
 int match_re (char* arg1) {
   int var3;
-  int var5;
+  int var4;
   int var1 = strlen(arg1);
   int var2 = 0;
   if (var2 < var1) {
@@ -27,13 +27,14 @@ int match_re (char* arg1) {
                 var3 = 0;
                 return var3;
               } 
-              return 1;
+              var4 = 1;
+              return var4;
             } 
             var3 = 0;
             return var3;
           } 
-          var5 = 0;
-          return var5;
+          var4 = 0;
+          return var4;
         } 
         if (arg1[var2] == 100) {
           goto label2;
@@ -41,13 +42,13 @@ int match_re (char* arg1) {
         var3 = 0;
         return var3;
       } 
-      var5 = 0;
-      return var5;
+      var4 = 0;
+      return var4;
     } 
     var3 = 0;
     return var3;
   } 
-  var5 = 0;
-  return var5;
+  var4 = 0;
+  return var4;
 }
 

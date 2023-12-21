@@ -306,6 +306,7 @@ void c_code_generator::visit(decl_stmt::Ptr a) {
 		a->init_expr->accept(this);
 		oss << ";";
 	}
+	// if (a->decl_var->hasMetadata<int>("escapes_static_scope")) oss << " //" << "escapes_static_scope = 1";
 }
 void c_code_generator::visit(if_stmt::Ptr a) {
 	oss << "if (";

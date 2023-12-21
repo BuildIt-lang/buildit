@@ -19,6 +19,15 @@ public:
 			for (static_var<size_t> i = 0; i < actual_size; i++) {
 				new (m_arr + i) dyn_var<T>();
 			}
+			// static tags for array nodes need to be adjusted
+			// so they are treated different from each other despite
+			// being declared at the same location.
+			// dyn_arr are special case of vars that escape their static scope but still
+			// shouldn't be treated together
+			// We do this by adding additional metadata on all of them
+			for (static_var<size_t> i = 0; i < actual_size; i++) {
+				m_arr[i].block_var->template setMetadata<int>("allow_escape_scope", 1);
+			}
 		}
 	}
 	dyn_arr(const std::initializer_list<builder> &init) {
@@ -34,6 +43,9 @@ public:
 			else
 				new (m_arr + i) dyn_var<T>();
 		}
+		for (static_var<size_t> i = 0; i < actual_size; i++) {
+			m_arr[i].block_var->template setMetadata<int>("allow_escape_scope", 1);
+		}
 	}
 	void set_size(size_t new_size) {
 		assert(size == 0 && "set_size should be only called for dyn_arr without size");
@@ -42,6 +54,9 @@ public:
 		m_arr = (dyn_var<T> *)new char[sizeof(dyn_var<T>) * actual_size];
 		for (static_var<size_t> i = 0; i < actual_size; i++) {
 			new (m_arr + i) dyn_var<T>();
+		}
+		for (static_var<size_t> i = 0; i < actual_size; i++) {
+			m_arr[i].block_var->template setMetadata<int>("allow_escape_scope", 1);
 		}
 	}
 
@@ -58,6 +73,9 @@ public:
 				new (m_arr + i) dyn_var<T>(other[i]);
 			else
 				new (m_arr + i) dyn_var<T>();
+		}
+		for (static_var<size_t> i = 0; i < actual_size; i++) {
+			m_arr[i].block_var->template setMetadata<int>("allow_escape_scope", 1);
 		}
 	}
 

@@ -1,0 +1,39 @@
+// Include the headers
+#include "blocks/c_code_generator.h"
+#include "builder/dyn_var.h"
+#include "builder/static_var.h"
+#include <iostream>
+
+// Include the BuildIt types
+using builder::dyn_var;
+using builder::static_var;
+
+static void bar(void) {
+	static_var<int> x = 0;
+
+	dyn_var<int> y = 0;
+
+	if (y) {
+		x = 1;
+	} else {
+		x = 2;
+	}
+	// When z is declared, x is in different states
+	dyn_var<int> z = x;
+
+	// Executions can now merge, but z is still in different states
+	x = 0;
+
+	// this declaration forces executions to merge because static tags are the same
+	// merge is triggered by memoization
+	dyn_var<int> b;
+
+	// this statement now has issues because z has forked
+	dyn_var<int> a = z;
+}
+
+int main(int argc, char *argv[]) {
+	block::c_code_generator::generate_code(builder::builder_context().extract_function_ast(bar, "bar"), std::cout,
+					       0);
+	return 0;
+}

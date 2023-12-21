@@ -463,5 +463,4 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(std::vector
 	return ret_ast;
 }
 
-
 } // namespace builder

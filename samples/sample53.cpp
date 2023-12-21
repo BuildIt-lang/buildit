@@ -9,21 +9,20 @@
 using builder::dyn_var;
 using builder::static_var;
 
-
 struct external_object_t {
 	dyn_var<int> member = builder::defer_init();
 };
 
-static void foo(external_object_t &obj) {	
+static void foo(external_object_t &obj) {
 	// Init not
 	obj.member.deferred_init();
-	
+
 	dyn_var<int> x = 0;
 	if (x) {
-		obj.member = 1;	
+		obj.member = 1;
 	} else {
 		obj.member = 2;
-	}	
+	}
 }
 
 int main(int argc, char *argv[]) {

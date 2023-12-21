@@ -46,7 +46,6 @@ builder::builder(const var &a) {
 	block_expr = nullptr;
 
 	tracer::tag offset = get_offset_in_function();
-
 	if (a.current_state == var::member_var) {
 		assert(a.parent_var != nullptr);
 		builder parent_expr_builder = (builder)(*a.parent_var);
@@ -65,6 +64,9 @@ builder::builder(const var &a) {
 		// It should be removed when it is used
 	} else if (a.current_state == var::standalone_var) {
 		assert(a.block_var != nullptr);
+		if (a.block_var->static_offset.stringify_stat() != offset.stringify_stat()) {
+			a.block_var->setMetadata<int>("escapes_static_scope", 1);
+		}
 		block::var_expr::Ptr var_expr = std::make_shared<block::var_expr>();
 		var_expr->static_offset = offset;
 

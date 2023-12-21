@@ -58,6 +58,33 @@ public:
 
 		return output_string;
 	}
+
+	std::string stringify_loc(void) {
+		std::string output_string = "[";
+		for (unsigned int i = 0; i < pointers.size(); i++) {
+			char temp[128];
+			sprintf(temp, "%llx", pointers[i]);
+			output_string += temp;
+			if (i != pointers.size() - 1)
+				output_string += ", ";
+		}
+		output_string += "]:[";
+		output_string += "]";
+
+		return output_string;
+	}
+	std::string stringify_stat(void) {
+		std::string output_string = "[";
+		output_string += "]:[";
+		for (unsigned int i = 0; i < static_var_snapshots.size(); i++) {
+			output_string += static_var_snapshots[i];
+			if (i != static_var_snapshots.size() - 1)
+				output_string += ", ";
+		}
+		output_string += "]";
+
+		return output_string;
+	}
 };
 
 tag get_unique_tag(void);
