@@ -63,6 +63,27 @@ void var_replacer::visit(var_expr::Ptr a) {
 void var_hoister::visit(decl_stmt::Ptr a) {
 	std::string so = get_apt_tag(a->decl_var, escaping_tags);
 	if (decls_to_hoist.find(so) != decls_to_hoist.end()) {
+
+		// if the variable is of reference type, we need to convert it to a pointer 
+		// type
+
+		if (isa<reference_type>(a->decl_var->var_type)) {
+			auto ptr_type = std::make_shared<pointer_type>();
+			ptr_type->pointee_type = to<reference_type>(a->decl_var->var_type)->referenced_type;
+			a->decl_var->var_type = ptr_type;
+			assert(a->init_expr != nullptr && "Reference type declaration withtout a init expr");
+
+			a->decl_var->setMetadata<bool>("was_reference", true);
+		}
+
+		if (a->decl_var->getBoolMetadata("was_reference")) {
+			auto addr_expr = std::make_shared<addr_of_expr>();
+			addr_expr->static_offset = a->init_expr->static_offset;
+			addr_expr->expr1 = a->init_expr;
+			a->init_expr = addr_expr;
+		}
+
+
 		// This decl needs to be flattened into an assignment
 		// but if it doesn't have an init_expr, just make a simple var_expr
 		expr_stmt::Ptr estmt = std::make_shared<expr_stmt>();
@@ -72,6 +93,8 @@ void var_hoister::visit(decl_stmt::Ptr a) {
 		var_expr::Ptr vexpr = std::make_shared<var_expr>();
 		vexpr->static_offset = a->static_offset;
 		vexpr->var1 = a->decl_var;
+
+		vexpr->setMetadata<bool>("is_reference_init", true);
 
 		if (a->init_expr == nullptr) {
 			estmt->expr1 = vexpr;
@@ -92,6 +115,26 @@ void var_hoister::visit(decl_stmt::Ptr a) {
 	node = a;
 }
 
+// This replacer replaces the uses of hoisted references
+// to dereferences since they have been converted to pointers
+void var_reference_promoter::visit(var_expr::Ptr a) {
+	node = a;
+	if (a->getBoolMetadata("is_reference_init") || !a->var1->getBoolMetadata("was_reference")) 
+		return;
+	auto sq_bkt = std::make_shared<sq_bkt_expr>();
+	sq_bkt->static_offset = a->static_offset;
+	sq_bkt->var_expr = a;
+	auto index = std::make_shared<int_const>();
+	index->static_offset = a->static_offset;
+	index->value = 0;
+	index->is_64bit = false;
+
+	sq_bkt->index = index;
+	node = sq_bkt;
+
+}
+
+
 void var_namer::name_vars(block::Ptr a) {
 	var_namer namer;
 
@@ -105,6 +148,10 @@ void var_namer::name_vars(block::Ptr a) {
 
 	var_hoister hoister(namer.decls_to_hoist, namer.escaping_tags);
 	a->accept(&hoister);
+
+
+	var_reference_promoter promoter;
+	a->accept(&promoter);
 
 	std::vector<stmt::Ptr> new_stmts;
 	// Now insert all the hoisted decls at the top
