@@ -64,7 +64,7 @@ void var_hoister::visit(decl_stmt::Ptr a) {
 	std::string so = get_apt_tag(a->decl_var, escaping_tags);
 	if (decls_to_hoist.find(so) != decls_to_hoist.end()) {
 
-		// if the variable is of reference type, we need to convert it to a pointer 
+		// if the variable is of reference type, we need to convert it to a pointer
 		// type
 
 		if (isa<reference_type>(a->decl_var->var_type)) {
@@ -82,7 +82,6 @@ void var_hoister::visit(decl_stmt::Ptr a) {
 			addr_expr->expr1 = a->init_expr;
 			a->init_expr = addr_expr;
 		}
-
 
 		// This decl needs to be flattened into an assignment
 		// but if it doesn't have an init_expr, just make a simple var_expr
@@ -119,7 +118,7 @@ void var_hoister::visit(decl_stmt::Ptr a) {
 // to dereferences since they have been converted to pointers
 void var_reference_promoter::visit(var_expr::Ptr a) {
 	node = a;
-	if (a->getBoolMetadata("is_reference_init") || !a->var1->getBoolMetadata("was_reference")) 
+	if (a->getBoolMetadata("is_reference_init") || !a->var1->getBoolMetadata("was_reference"))
 		return;
 	auto sq_bkt = std::make_shared<sq_bkt_expr>();
 	sq_bkt->static_offset = a->static_offset;
@@ -131,9 +130,7 @@ void var_reference_promoter::visit(var_expr::Ptr a) {
 
 	sq_bkt->index = index;
 	node = sq_bkt;
-
 }
-
 
 void var_namer::name_vars(block::Ptr a) {
 	var_namer namer;
@@ -148,7 +145,6 @@ void var_namer::name_vars(block::Ptr a) {
 
 	var_hoister hoister(namer.decls_to_hoist, namer.escaping_tags);
 	a->accept(&hoister);
-
 
 	var_reference_promoter promoter;
 	a->accept(&promoter);

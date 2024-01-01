@@ -21,7 +21,7 @@ static void bar(void) {
 	}
 	// When z is declared, x is in different states
 	dyn_var<int> z = x;
-	dyn_var<int&> k = m;
+	dyn_var<int &> k = m;
 
 	// Executions can now merge, but z is still in different states
 	x = 0;
@@ -34,8 +34,6 @@ static void bar(void) {
 	dyn_var<int> a = z;
 
 	z = z + k;
-
-
 }
 
 int main(int argc, char *argv[]) {

@@ -1,12 +1,18 @@
 void bar (void) {
-  int z_1;
+  int z_3;
+  int* k_4;
   int y_0 = 0;
+  int m_1;
+  int n_2;
   if (y_0) {
-    z_1 = 1;
+    z_3 = 1;
+    k_4 = (&(m_1));
   } else {
-    z_1 = 2;
+    z_3 = 2;
+    k_4 = (&(m_1));
   }
-  int b_2;
-  int a_3 = z_1;
+  int b_5;
+  int a_6 = z_3;
+  z_3 = z_3 + k_4[0];
 }
 
