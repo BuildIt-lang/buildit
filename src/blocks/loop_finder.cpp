@@ -222,6 +222,21 @@ void loop_finder::visit_label(label_stmt::Ptr a, stmt_block::Ptr parent) {
 		if (jump_finder.has_jump_to == true)
 			last_stmt = stmt;
 	}
+
+	if (last_stmt == nullptr) {
+		// This label was created but has no jump.
+		// this currently happens when two statements have the same tag
+		// For now we will just delete this label
+		std::vector<stmt::Ptr> new_stmts;
+		for (auto stmt : parent->stmts) {
+			if (stmt == a)
+				continue;
+			new_stmts.push_back(stmt);
+		}
+		parent->stmts = new_stmts;
+		return;
+	}
+
 	std::vector<stmt::Ptr>::iterator stmt;
 	for (stmt = parent->stmts.begin(); stmt != parent->stmts.end(); stmt++) {
 		if (*stmt == a)

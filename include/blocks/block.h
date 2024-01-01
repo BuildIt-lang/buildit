@@ -95,6 +95,9 @@ public:
 		typename block_metadata::Ptr mdnode = metadata_map[mdname];
 		return mdnode->to<T>()->val;
 	}
+	bool getBoolMetadata(std::string mdname) {
+		return hasMetadata<bool>(mdname) && getMetadata<bool>(mdname);
+	}
 
 	virtual void dump(std::ostream &, int);
 	virtual void accept(block_visitor *visitor) {

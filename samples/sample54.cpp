@@ -12,6 +12,7 @@ static void bar(void) {
 	static_var<int> x = 0;
 
 	dyn_var<int> y = 0;
+	dyn_var<int> m, n;
 
 	if (y) {
 		x = 1;
@@ -20,6 +21,7 @@ static void bar(void) {
 	}
 	// When z is declared, x is in different states
 	dyn_var<int> z = x;
+	dyn_var<int &> k = m;
 
 	// Executions can now merge, but z is still in different states
 	x = 0;
@@ -30,6 +32,8 @@ static void bar(void) {
 
 	// this statement now has issues because z has forked
 	dyn_var<int> a = z;
+
+	z = z + k;
 }
 
 int main(int argc, char *argv[]) {

@@ -52,6 +52,12 @@ public:
 	virtual void visit(decl_stmt::Ptr) override;
 };
 
+class var_reference_promoter : public block_replacer {
+public:
+	using block_replacer::visit;
+	virtual void visit(var_expr::Ptr) override;
+};
+
 } // namespace block
 
 #endif
