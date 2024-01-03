@@ -271,6 +271,12 @@ block::stmt::Ptr builder_context::extract_ast_from_lambda(std::function<void(voi
 }
 
 block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
+
+#ifndef ENABLE_D2X
+	if (enable_d2x)
+		assert(false && "D2X support cannot be enabled without the ENABLE_D2X build option");
+#endif
+
 	std::vector<bool> b;
 
 	block::stmt::Ptr ast = extract_ast_from_function_internal(b);
@@ -349,6 +355,7 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(std::vector
 		true_context.visited_offsets = visited_offsets;
 		true_context.internal_stored_lambda = internal_stored_lambda;
 		true_context.feature_unstructured = feature_unstructured;
+		true_context.enable_d2x = enable_d2x;
 
 		std::vector<bool> true_bv;
 		true_bv.push_back(true);
@@ -362,6 +369,7 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(std::vector
 		false_context.visited_offsets = visited_offsets;
 		false_context.internal_stored_lambda = internal_stored_lambda;
 		false_context.feature_unstructured = feature_unstructured;
+		false_context.enable_d2x = enable_d2x;
 
 		std::vector<bool> false_bv;
 		false_bv.push_back(false);

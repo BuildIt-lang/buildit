@@ -1,5 +1,11 @@
 #ifndef C_CODE_GENERATOR_H
 #define C_CODE_GENERATOR_H
+
+#ifdef ENABLE_D2X
+#include "d2x/d2x.h"
+#include "d2x/utils.h"
+#endif
+
 #include "blocks/block_visitor.h"
 #include "blocks/stmt.h"
 #include "builder/dyn_var.h"
@@ -18,6 +24,14 @@ public:
 	std::ostream &oss;
 	int curr_indent = 0;
 	bool decl_only = false;
+	bool use_d2x = false;
+
+#ifdef ENABLE_D2X
+	d2x::d2x_context xctx;
+#endif
+	void save_static_info(block::Ptr a);
+	void nextl(void);
+
 	virtual void visit(not_expr::Ptr);
 	virtual void visit(and_expr::Ptr);
 	virtual void visit(bitwise_and_expr::Ptr);
@@ -73,6 +87,17 @@ public:
 
 	static void generate_code(block::Ptr ast, std::ostream &oss, int indent = 0, bool decl_only = false) {
 		c_code_generator generator(oss);
+		generator.decl_only = decl_only;
+		generator.curr_indent = indent;
+		ast->accept(&generator);
+		oss << std::endl;
+	}
+	static void generate_code_d2x(block::Ptr ast, std::ostream &oss, int indent = 0, bool decl_only = false) {
+#ifndef ENABLE_D2X
+		assert(false && "Cannot generate code with D2X support without ENABLE_D2X build option");
+#endif
+		c_code_generator generator(oss);
+		generator.use_d2x = true;
 		generator.decl_only = decl_only;
 		generator.curr_indent = indent;
 		ast->accept(&generator);
