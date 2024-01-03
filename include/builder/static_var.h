@@ -3,6 +3,7 @@
 
 #include "builder/builder.h"
 #include "builder/builder_context.h"
+#include "util/var_finder.h"
 
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
@@ -10,8 +11,18 @@
 
 namespace builder {
 
+// Base class for all static vars
+class static_var_base {
+public:
+	mutable std::string var_name;
+	virtual std::string serialize() {
+		return "";
+	}
+	virtual ~static_var_base() {}
+};
+
 template <typename T>
-class static_var {
+class static_var : static_var_base {
 public:
 	static_assert(std::is_same<T, short int>::value || std::is_same<T, unsigned short int>::value ||
 			  std::is_same<T, int>::value || std::is_same<T, unsigned int>::value ||
@@ -24,8 +35,19 @@ public:
 							 "= " TOSTRING(MAX_TRACKING_VARIABLE_SIZE));
 	T val;
 
+	mutable bool name_checked = false;
+	void try_get_name() const {
+		if (builder_context::current_builder_context->enable_d2x == false)
+			return;
+		if (var_name == "" && name_checked == false) {
+			var_name = util::find_variable_name(const_cast<void *>(static_cast<const void *>(this)));
+		}
+	}
+
 	static_var(const static_var &other) : static_var((T)other) {}
 	static_var &operator=(const static_var &other) {
+		try_get_name();
+		name_checked = true;
 		*this = (T)other;
 		return *this;
 	}
@@ -34,30 +56,40 @@ public:
 	static_var(const static_var<OT> &other) : static_var((T)(OT)other) {}
 	template <typename OT>
 	static_var &operator=(const static_var<OT> &other) {
+		try_get_name();
+		name_checked = true;
 		*this = (T)(OT)other;
 		return *this;
 	}
 
 	operator T &() {
+		try_get_name();
+		name_checked = true;
 		return val;
 	}
 	operator const T &() const {
+		try_get_name();
+		name_checked = true;
 		return val;
 	}
 	const T &operator=(const T &t) {
+		try_get_name();
+		name_checked = true;
 		val = t;
 		return t;
 	}
 	static_var() {
 		assert(builder_context::current_builder_context != nullptr);
 		builder_context::current_builder_context->static_var_tuples.push_back(
-		    tracking_tuple((unsigned char *)&val, sizeof(T)));
+		    tracking_tuple((unsigned char *)&val, sizeof(T), this));
+		try_get_name();
 	}
 	static_var(const T &v) {
 		assert(builder_context::current_builder_context != nullptr);
 		builder_context::current_builder_context->static_var_tuples.push_back(
-		    tracking_tuple((unsigned char *)&val, sizeof(T)));
+		    tracking_tuple((unsigned char *)&val, sizeof(T), this));
 		val = v;
+		try_get_name();
 	}
 	~static_var() {
 		assert(builder_context::current_builder_context != nullptr);
@@ -66,12 +98,16 @@ public:
 		builder_context::current_builder_context->static_var_tuples.pop_back();
 	}
 	operator builder() {
+		try_get_name();
 		return (builder)val;
+	}
+	virtual std::string serialize() override {
+		return std::to_string(val);
 	}
 };
 
 template <typename T>
-class static_var<T[]> {
+class static_var<T[]> : static_var_base {
 public:
 	static_assert(std::is_same<T, short int>::value || std::is_same<T, unsigned short int>::value ||
 			  std::is_same<T, int>::value || std::is_same<T, unsigned int>::value ||
@@ -94,24 +130,27 @@ public:
 		return val[index];
 	}
 	static_var() {
+		var_name = "ArrayVar";
 		assert(builder_context::current_builder_context != nullptr);
 		// This val _should_ not be used. But we will insert it to hold place
 		// for this static var in the list of tuples, otherwise destructor order will be weird
 		val = new T[1];
 
 		builder_context::current_builder_context->static_var_tuples.push_back(
-		    tracking_tuple((unsigned char *)val, 1));
+		    tracking_tuple((unsigned char *)val, 1, this));
 	}
 	static_var(const std::initializer_list<T> &list) {
+		var_name = "ArrayVar";
 		assert(builder_context::current_builder_context != nullptr);
 		val = new T[list.size()];
 		builder_context::current_builder_context->static_var_tuples.push_back(
-		    tracking_tuple((unsigned char *)val, sizeof(T) * list.size()));
+		    tracking_tuple((unsigned char *)val, sizeof(T) * list.size(), this));
 		for (int i = 0; i < list.size(); i++) {
 			val[i] = list[i];
 		}
 	}
 	void resize(size_t s) {
+		var_name = "ArrayVar";
 		T *new_ptr = new T[s];
 		assert(builder_context::current_builder_context != nullptr);
 		assert(builder_context::current_builder_context->static_var_tuples.size() > 0);
@@ -119,7 +158,7 @@ public:
 			if (builder_context::current_builder_context->static_var_tuples[i].ptr ==
 			    (unsigned char *)val) {
 				builder_context::current_builder_context->static_var_tuples[i] =
-				    tracking_tuple((unsigned char *)new_ptr, sizeof(T) * s);
+				    tracking_tuple((unsigned char *)new_ptr, sizeof(T) * s, this);
 				break;
 			}
 		}
@@ -132,6 +171,9 @@ public:
 		assert(builder_context::current_builder_context->static_var_tuples.back().ptr == (unsigned char *)val);
 		builder_context::current_builder_context->static_var_tuples.pop_back();
 		delete[] val;
+	}
+	virtual std::string serialize() override {
+		return "<array>";
 	}
 };
 } // namespace builder

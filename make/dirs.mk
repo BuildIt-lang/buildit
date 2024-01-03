@@ -20,3 +20,7 @@ UTIL_OBJS=$(subst $(SRC_DIR),$(BUILD_DIR),$(UTIL_SRC:.cpp=.o))
 
 LIBRARY_OBJS=$(BUILDER_OBJS) $(BLOCKS_OBJS) $(UTIL_OBJS) 
 LIBRARY=$(BUILD_DIR)/lib$(LIBRARY_NAME).a
+
+D2X_DIR?=$(BASE_DIR)/deps/d2x
+D2X_BUILD_DIR?=$(D2X_DIR)/build
+D2X_DEPS=$(wildcard $(D2X_DIR)/src/*) $(wildcard $(D2X_DIR)/include/*) $(wildcard $(D2X_DIR)/runtime/*)

@@ -16,11 +16,17 @@ block::expr::Ptr create_foreign_expr(const T t);
 template <typename T>
 builder create_foreign_expr_builder(const T t);
 
+class static_var_base;
+
 class tracking_tuple {
 public:
 	const unsigned char *ptr;
 	uint32_t size;
-	tracking_tuple(const unsigned char *_ptr, uint32_t _size) : ptr(_ptr), size(_size) {}
+	static_var_base *var_ref;
+
+	tracking_tuple(const unsigned char *_ptr, uint32_t _size, static_var_base *_var_ref)
+	    : ptr(_ptr), size(_size), var_ref(_var_ref) {}
+
 	std::string snapshot(void) {
 		std::string output_string;
 		char temp[4];
@@ -71,6 +77,7 @@ public:
 	bool dynamic_use_cxx = false;
 	std::string dynamic_compiler_flags = "";
 	std::string dynamic_header_includes = "";
+	bool enable_d2x = false;
 
 	bool is_visited_tag(tracer::tag &new_tag);
 	void erase_tag(tracer::tag &erase_tag);

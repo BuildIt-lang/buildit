@@ -15,6 +15,7 @@ class tag {
 public:
 	std::vector<unsigned long long> pointers;
 	std::vector<std::string> static_var_snapshots;
+	std::vector<std::pair<std::string, std::string>> static_var_key_values;
 
 	bool operator==(const tag &other) {
 		if (other.pointers.size() != pointers.size())

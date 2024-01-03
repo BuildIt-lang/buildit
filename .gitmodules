@@ -1,0 +1,3 @@
+[submodule "deps/d2x"]
+	path = deps/d2x
+	url = https://github.com/BuildIt-lang/d2x.git
