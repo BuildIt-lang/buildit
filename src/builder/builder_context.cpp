@@ -426,6 +426,7 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(std::vector
 		}
 		ret_ast = ast;
 	}
+	current_builder_context = nullptr;
 
 	// Update the memoized table with the stmt block we just created
 	for (unsigned int i = 0; i < current_block_stmt->stmts.size(); i++) {
