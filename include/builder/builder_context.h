@@ -122,6 +122,7 @@ public:
 	std::string current_label;
 
 	std::vector<tracking_tuple> static_var_tuples;
+	std::vector<tracking_tuple> deferred_static_var_tuples;
 
 	std::vector<var *> assume_variables;
 

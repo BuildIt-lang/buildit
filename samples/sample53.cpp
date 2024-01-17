@@ -11,11 +11,13 @@ using builder::static_var;
 
 struct external_object_t {
 	dyn_var<int> member = builder::defer_init();
+	static_var<int> counter = builder::defer_init();
 };
 
 static void foo(external_object_t &obj) {
 	// Init not
 	obj.member.deferred_init();
+	obj.counter.deferred_init();
 
 	dyn_var<int> x = 0;
 	if (x) {
@@ -23,6 +25,10 @@ static void foo(external_object_t &obj) {
 	} else {
 		obj.member = 2;
 	}
+
+	for (obj.counter = 0; obj.counter < 10; obj.counter++)
+		if (obj.member % 2 == 0)
+			obj.member += obj.counter;
 }
 
 int main(int argc, char *argv[]) {

@@ -33,6 +33,13 @@ tag get_offset_in_function_impl(builder::builder_context *current_builder_contex
 	}
 	// Now add snapshots of static vars
 	assert(current_builder_context != nullptr);
+
+	for (builder::tracking_tuple tuple : current_builder_context->deferred_static_var_tuples) {
+		new_tag.static_var_snapshots.push_back(tuple.snapshot());
+		if (builder::builder_context::current_builder_context->enable_d2x) {
+			new_tag.static_var_key_values.push_back({tuple.var_ref->var_name, tuple.var_ref->serialize()});
+		}
+	}
 	for (builder::tracking_tuple tuple : current_builder_context->static_var_tuples) {
 		new_tag.static_var_snapshots.push_back(tuple.snapshot());
 		if (builder::builder_context::current_builder_context->enable_d2x) {
@@ -59,6 +66,13 @@ tag get_offset_in_function_impl(builder::builder_context *current_builder_contex
 
 	// Now add snapshots of static vars
 	assert(current_builder_context != nullptr);
+
+	for (builder::tracking_tuple tuple : current_builder_context->deferred_static_var_tuples) {
+		new_tag.static_var_snapshots.push_back(tuple.snapshot());
+		if (builder::builder_context::current_builder_context->enable_d2x) {
+			new_tag.static_var_key_values.push_back({tuple.var_ref->var_name, tuple.var_ref->serialize()});
+		}
+	}
 	for (builder::tracking_tuple tuple : current_builder_context->static_var_tuples) {
 		new_tag.static_var_snapshots.push_back(tuple.snapshot());
 		if (builder::builder_context::current_builder_context->enable_d2x) {

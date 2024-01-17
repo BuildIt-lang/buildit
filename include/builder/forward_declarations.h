@@ -42,6 +42,13 @@ struct extract_signature;
 template <typename T, typename... OtherArgs>
 struct extract_signature_from_lambda;
 
+// constructor helper to defer the initialization of dyn_var
+// This allows declaring dyn_var outside the context, but initialize
+// them later
+struct defer_init {
+	// No members
+};
+
 // This class does nothing
 // Apart from just being used in the copy constructor to
 // tell the constructor to no create without context

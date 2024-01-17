@@ -34,6 +34,7 @@ public:
 	static_assert(sizeof(T) < MAX_TRACKING_VAR_SIZE, "Currently builder::static_var supports variables of max size "
 							 "= " TOSTRING(MAX_TRACKING_VARIABLE_SIZE));
 	T val;
+	bool is_deferred = false;
 
 	mutable bool name_checked = false;
 	void try_get_name() const {
@@ -91,7 +92,26 @@ public:
 		val = v;
 		try_get_name();
 	}
+
+	static_var(const defer_init &) {
+		// Just like dynamic variables, no registration happens here
+		is_deferred = true;
+	}
+	void deferred_init(void) {
+		assert(builder_context::current_builder_context != nullptr);
+		// Deferred static variables are kept separate because they are never untracked
+		// in the destructor
+		builder_context::current_builder_context->deferred_static_var_tuples.push_back(
+		    tracking_tuple((unsigned char *)&val, sizeof(T), this));
+		try_get_name();
+	}
+
 	~static_var() {
+		if (is_deferred) {
+			// Must be a deferred init object
+			return;
+		}
+
 		assert(builder_context::current_builder_context != nullptr);
 		assert(builder_context::current_builder_context->static_var_tuples.size() > 0);
 		assert(builder_context::current_builder_context->static_var_tuples.back().ptr == (unsigned char *)&val);

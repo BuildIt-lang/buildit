@@ -6,5 +6,35 @@ void foo (void) {
   } else {
     var0 = 2;
   }
+  if ((var0 % 2) == 0) {
+    var0 = var0 + 0;
+  } 
+  if ((var0 % 2) == 0) {
+    var0 = var0 + 1;
+  } 
+  if ((var0 % 2) == 0) {
+    var0 = var0 + 2;
+  } 
+  if ((var0 % 2) == 0) {
+    var0 = var0 + 3;
+  } 
+  if ((var0 % 2) == 0) {
+    var0 = var0 + 4;
+  } 
+  if ((var0 % 2) == 0) {
+    var0 = var0 + 5;
+  } 
+  if ((var0 % 2) == 0) {
+    var0 = var0 + 6;
+  } 
+  if ((var0 % 2) == 0) {
+    var0 = var0 + 7;
+  } 
+  if ((var0 % 2) == 0) {
+    var0 = var0 + 8;
+  } 
+  if ((var0 % 2) == 0) {
+    var0 = var0 + 9;
+  } 
 }
 

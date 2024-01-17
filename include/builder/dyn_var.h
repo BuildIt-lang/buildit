@@ -90,13 +90,6 @@ struct with_name {
 	with_name(const std::string &n, bool wd = false) : name(n), with_decl(wd) {}
 };
 
-// constructor helper to defer the initialization of dyn_var
-// This allows declaring dyn_var outside the context, but initialize
-// them later
-struct defer_init {
-	// No members
-};
-
 template <typename T>
 class dyn_var_impl : public var {
 public:
