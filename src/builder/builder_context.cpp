@@ -504,7 +504,6 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 
 	std::cerr << "++++++ loop info ++++++ \n";
 
-	// return ast;
 	std::cerr << "++++++ convert to ast ++++++ \n";
 	ast = LI.convert_to_ast(block::to<block::stmt_block>(ast));
 	std::cerr << "++++++ convert to ast ++++++ \n";
@@ -512,7 +511,6 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 	// block::loop_finder finder;
 	// finder.ast = ast;
 	// ast->accept(&finder);
-	// return ast;
 
 	block::for_loop_finder for_finder;
 	for_finder.ast = ast;

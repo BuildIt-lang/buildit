@@ -237,7 +237,7 @@ std::set<stmt::Ptr> visited_blocks;
 std::map<stmt_block::Ptr, stmt_block::Ptr> ast_parent_map_loop;
 // std::map<std::shared_ptr<basic_block>, while_stmt::Ptr> return_blocks_parent_loop;
 int jump_condition_counter = 0;
-stmt::Ptr loop::convert_to_ast_impl(loop_info &li, dominator_analysis &dta_, std::vector<std::pair<std::shared_ptr<basic_block>, stmt_block::Ptr>> &return_blocks, stmt::Ptr &jump_condition_def, stmt::Ptr &jump_condition_block) {
+stmt::Ptr loop::convert_to_ast_impl(loop_info &li, dominator_analysis &dta_, std::vector<std::pair<std::shared_ptr<basic_block>, stmt_block::Ptr>> &return_blocks) {
     while_stmt::Ptr while_block = std::make_shared<while_stmt>();
     while_block->body = std::make_shared<stmt_block>();
     structured_ast_loop = while_block;
@@ -263,8 +263,7 @@ stmt::Ptr loop::convert_to_ast_impl(loop_info &li, dominator_analysis &dta_, std
                 if (subloop->header_block->parent == bb->parent) {
                     std::cerr << "found subloop\n";
                     std::vector<std::pair<std::shared_ptr<basic_block>, stmt_block::Ptr>> loop_out_blocks;
-                    stmt::Ptr jump_def, jump_block;
-                    ast->stmts.push_back(subloop->convert_to_ast_impl(li, dta_, loop_out_blocks, jump_def, jump_block));
+                    ast->stmts.push_back(subloop->convert_to_ast_impl(li, dta_, loop_out_blocks));
 
                     for (auto block: loop_out_blocks) {
                         // return_blocks_parent_loop.insert({block.first, to<while_stmt>(ast->stmts.back())});
@@ -364,7 +363,9 @@ stmt::Ptr loop::convert_to_ast_impl(loop_info &li, dominator_analysis &dta_, std
                 std::cerr << bb->successor[0]->id << " " << bb->successor[1]->id << "\n";
 
                 if (bb->then_branch) {
-                    std::cerr << "non-cond if then: " << bb->id << "\n";
+                    std::cerr << "non-cond if then: " << bb->id << " " << bb->then_branch->id << "\n";
+                    bb->then_branch->parent->dump(std::cerr, 0);
+                    to<stmt_block>(if_stmt_copy->then_stmt)->dump(std::cerr, 0);
                     ast_parent_map_loop[to<stmt_block>(if_stmt_copy->then_stmt)] = ast;
                     if (!blocks_id_map.count(bb->then_branch->id) && !bb->then_branch->is_exit_block) {
                         return_blocks.push_back({bb->then_branch, to<stmt_block>(if_stmt_copy->then_stmt)});
@@ -376,7 +377,9 @@ stmt::Ptr loop::convert_to_ast_impl(loop_info &li, dominator_analysis &dta_, std
                 }
 
                 if (bb->else_branch) {
-                    std::cerr << "non-cond if else: " << bb->id <<"\n";
+                    std::cerr << "non-cond if else: " << bb->id << " " << bb->else_branch->id <<"\n";
+                    bb->else_branch->parent->dump(std::cerr, 0);
+                    to<stmt_block>(if_stmt_copy->else_stmt)->dump(std::cerr, 0);
                     ast_parent_map_loop[to<stmt_block>(if_stmt_copy->else_stmt)] = ast;
                     if (!blocks_id_map.count(bb->else_branch->id) && !bb->else_branch->is_exit_block) {
                         return_blocks.push_back({bb->else_branch, to<stmt_block>(if_stmt_copy->else_stmt)});
@@ -400,6 +403,10 @@ stmt::Ptr loop::convert_to_ast_impl(loop_info &li, dominator_analysis &dta_, std
             if (to<goto_stmt>(bb->parent)->label1 == to<label_stmt>(header_block->parent)->label1) {
                 bool is_last_block = false;
                 bool is_goto_to_outerloop = false;
+                std::cerr << "goto handler\n";
+                std::cerr << "ast dump\n";
+                ast->dump(std::cerr, 0);
+                std::cerr << "bb dump\n";
                 bb->parent->dump(std::cerr, 0);
                 if (dta_.get_preorder_bb_map()[bb->id] == (int)dta_.get_preorder().size() - 1) {
                     is_last_block = true;
@@ -434,6 +441,7 @@ stmt::Ptr loop::convert_to_ast_impl(loop_info &li, dominator_analysis &dta_, std
                     auto target_bb = bb->successor[0];
                     auto pointer_bb = bb;
                     std::vector<std::shared_ptr<loop>> loop_parent_tree;
+                    std::vector<std::shared_ptr<basic_block>> mixed_walkback_tree;
                     do {
                         std::cerr << "iter: " << pointer_bb->id << "\n";
                         
@@ -450,89 +458,178 @@ stmt::Ptr loop::convert_to_ast_impl(loop_info &li, dominator_analysis &dta_, std
                             pointer_bb = pointer_bb->predecessor[0];
                         }
 
+                        // runtime can be optimized if we create a hashmap for (header_block->id => loop) map
+                        // also a map for (conditional_block->id => loop)
                         for (auto loop: li.loops) {
+                            if (isa<if_stmt>(pointer_bb->parent) && mixed_walkback_tree.size() == 0) {
+                                bool skip_if_stmt = false;
+                                for (auto iloop: li.loops) {
+                                    if (iloop->condition_block->id == pointer_bb->id) {
+                                        skip_if_stmt = true;
+                                        break;
+                                    }
+                                }
+                                if (skip_if_stmt)
+                                    continue;
+
+                                std::cerr << "looping back from a if statement\n";
+                                mixed_walkback_tree.push_back(pointer_bb);
+                            }
+
                             if (loop->header_block == pointer_bb) {
                                 loop_parent_tree.push_back(loop);
+                                mixed_walkback_tree.push_back(loop->header_block);
                                 break;
                             }
                         }
                     } while (target_bb != pointer_bb);
                     
+                    std::cerr << "loop parent tree\n";
                     for (auto loops : loop_parent_tree) {
                         std::cerr << loops->header_block->id << "\n";
                     }
 
-                    while_stmt::Ptr jump_target_loop = loop_parent_tree.back()->structured_ast_loop;
-                    while_stmt::Ptr guard_target_loop = (*(loop_parent_tree.rbegin() + 1))->structured_ast_loop;
-
-                    std::cerr << "handingling break cond\n";
-                    is_goto_to_outerloop = true;
-
-                    auto jump_cond_def = std::make_shared<var>();
-                    jump_cond_def->var_name = "control_guard" + std::to_string(jump_condition_counter++);
-
-                    auto scalar_type1 = std::make_shared<scalar_type>();
-                    jump_cond_def->var_type = scalar_type1;
-                    scalar_type1->scalar_type_id = scalar_type::INT_TYPE;
-
-                    auto var_expr1 = std::make_shared<var_expr>();
-                    var_expr1->var1 = jump_cond_def;
-
-                    auto const_expr1 = std::make_shared<int_const>();
-                    const_expr1->value = 1;
-                    const_expr1->is_64bit = false;
-
-                    auto assign_expr1 = std::make_shared<assign_expr>();
-                    assign_expr1->var1 = var_expr1;
-                    assign_expr1->expr1 = const_expr1;
-
-                    auto jump_expr = std::make_shared<expr_stmt>();
-                    jump_expr->expr1 = assign_expr1;
-
-                    ast->stmts.push_back(jump_expr);
-
-                    auto var_expr2 = std::make_shared<var_expr>();
-                    var_expr2->var1 = jump_cond_def;
-
-                    auto const_expr2 = std::make_shared<int_const>();
-                    const_expr2->value = 0;
-                    const_expr2->is_64bit = false;
-
-                    auto assign_expr2 = std::make_shared<assign_expr>();
-                    assign_expr2->var1 = var_expr2;
-                    assign_expr2->expr1 = const_expr2;
-
-                    auto expr_stmt2 = std::make_shared<expr_stmt>();
-                    expr_stmt2->expr1 = assign_expr2;
-
-                    // guard decl stmt
-                    auto var_decl1 = std::make_shared<decl_stmt>();
-                    var_decl1->decl_var = jump_cond_def;
-                    var_decl1->init_expr = const_expr2;
-
-                    auto while_body = to<stmt_block>(while_block->body);
-                    while_body->stmts.insert(while_body->stmts.begin(), var_decl1);
-
-                    // guard if stmt
-                    auto if_stmt1 = std::make_shared<if_stmt>();
-                    if_stmt1->else_stmt = std::make_shared<stmt_block>();
-                    auto stmt_block1 = std::make_shared<stmt_block>();
-                    if_stmt1->then_stmt = stmt_block1;
-                    stmt_block1->stmts.push_back(std::make_shared<continue_stmt>());
-
-                    auto var_expr3 = std::make_shared<var_expr>();
-                    var_expr3->var1 = jump_cond_def;
-                    if_stmt1->cond = var_expr3;
-
-                    auto guard_while_body = to<stmt_block>(guard_target_loop->body);
-                    auto jump_while_body = to<stmt_block>(jump_target_loop->body);
-
-                    guard_while_body->stmts.insert(guard_while_body->stmts.begin(), to<stmt>(expr_stmt2));
-
-                    auto guard_decl_insertion_point = std::find(jump_while_body->stmts.begin(), jump_while_body->stmts.end(), to<stmt>(guard_target_loop));
-                    if (guard_decl_insertion_point != jump_while_body->stmts.end()) {
-                        jump_while_body->stmts.insert(guard_decl_insertion_point + 1, to<stmt>(if_stmt1));
+                    std::cerr << "mixed walkback tree\n";
+                    for (auto bb: mixed_walkback_tree) {
+                        std::cerr << bb->id << "\n";
                     }
+
+                    bool use_mixed_tree = false;
+                    if (isa<if_stmt>(mixed_walkback_tree[0]->parent) && mixed_walkback_tree.size() > loop_parent_tree.size())
+                        use_mixed_tree = true;
+                    
+                    // generate guard variable definitions
+                    std::cerr << "creating guard variable definitions\n";
+                    std::vector<std::shared_ptr<var>> guard_variables;
+                    std::vector<std::shared_ptr<decl_stmt>> guard_variable_defs;
+                    for (unsigned i = 0; i < loop_parent_tree.size() - 2 + (unsigned)use_mixed_tree; i++) {
+                        // create the var and set it's attributes
+                        auto guard_variable = std::make_shared<var>();
+                        guard_variable->var_name = "control_guard" + std::to_string(jump_condition_counter++);
+                        guard_variable->var_type = std::make_shared<scalar_type>();
+                        to<scalar_type>(guard_variable->var_type)->scalar_type_id = scalar_type::INT_TYPE;
+                        
+                        // create a constant equal to 0
+                        auto int_constant_zero = std::make_shared<int_const>();
+                        int_constant_zero->value = 0;
+                        int_constant_zero->is_64bit = false;
+
+                        // create the variable declaration statement
+                        auto guard_variable_declaration = std::make_shared<decl_stmt>();
+                        guard_variable_declaration->decl_var = guard_variable;
+                        guard_variable_declaration->init_expr = int_constant_zero;
+
+                        guard_variables.push_back(guard_variable);
+                        guard_variable_defs.push_back(guard_variable_declaration);
+                        guard_variable_declaration->dump(std::cerr, 0);
+                    }
+
+                    std::cerr << "creating guard variable assign statements\n";
+                    std::vector<std::pair<std::shared_ptr<expr_stmt>, std::shared_ptr<expr_stmt>>> set_guard_variable_exprs;
+                    for (auto guard_var: guard_variables) {
+                        // create a constant equal to 0
+                        auto int_constant_zero = std::make_shared<int_const>();
+                        int_constant_zero->value = 0;
+                        int_constant_zero->is_64bit = false;
+
+                        // create a constant equal to 1
+                        auto int_constant_one = std::make_shared<int_const>();
+                        int_constant_one->value = 1;
+                        int_constant_one->is_64bit = false;
+
+                        // create an expr for guard variable equal to 0
+                        auto guard_variable_expr_zero = std::make_shared<var_expr>();
+                        guard_variable_expr_zero->var1 = guard_var;
+
+                        // create an expr for guard variable equal to 1
+                        auto guard_variable_expr_one = std::make_shared<var_expr>();
+                        guard_variable_expr_one->var1 = guard_var;
+
+                        // create a guard variable assign expr for equal to 0
+                        auto guard_variable_assign_expr_zero = std::make_shared<assign_expr>();
+                        guard_variable_assign_expr_zero->var1 = guard_variable_expr_zero;
+                        guard_variable_assign_expr_zero->expr1 = int_constant_zero;
+
+                        // create a guard variable assign expr for equal to 1
+                        auto guard_variable_assign_expr_one = std::make_shared<assign_expr>();
+                        guard_variable_assign_expr_one->var1 = guard_variable_expr_one;
+                        guard_variable_assign_expr_one->expr1 = int_constant_one;
+
+                        // create the guard variable expression statement equal to 0
+                        auto guard_variable_expr_statement_zero = std::make_shared<expr_stmt>();
+                        guard_variable_expr_statement_zero->expr1 = guard_variable_assign_expr_zero;
+
+                        // create the guard variable expression statement equal to 1
+                        auto guard_variable_expr_statement_one = std::make_shared<expr_stmt>();
+                        guard_variable_expr_statement_one->expr1 = guard_variable_assign_expr_one;
+
+                        set_guard_variable_exprs.push_back({guard_variable_expr_statement_zero, guard_variable_expr_statement_one});
+                        guard_variable_expr_statement_zero->dump(std::cerr, 0);
+                        guard_variable_expr_statement_one->dump(std::cerr, 0);
+                    }
+
+                    std::cerr << "creating guard if statements\n";
+                    std::vector<std::shared_ptr<if_stmt>> guard_if_blocks;
+                    for (unsigned i = 0; i < guard_variables.size(); i++) {
+                        // create guard if statement
+                        auto guard_if_statement = std::make_shared<if_stmt>();
+                        auto guard_statement_block = std::make_shared<stmt_block>();
+                        guard_if_statement->then_stmt = guard_statement_block;
+                        guard_if_statement->else_stmt = std::make_shared<stmt_block>();
+
+                        // create guard if condition
+                        auto guard_if_condition_expr = std::make_shared<var_expr>();
+                        guard_if_condition_expr->var1 = guard_variables[i];
+
+                        // set the guard if condition
+                        guard_if_statement->cond = guard_if_condition_expr;
+
+                        // insert set expressions inside if only if it is not the last guard block
+                        if (guard_variables.size() >= 2 && i < guard_variables.size() - 1)
+                            guard_statement_block->stmts.push_back(to<stmt>(set_guard_variable_exprs[i + 1].second));
+                        
+                        // insert break/continue inside the if statement based on the location of it
+                        if (i < guard_variables.size() - 1)
+                            guard_statement_block->stmts.push_back(std::make_shared<break_stmt>());
+                        else
+                            guard_statement_block->stmts.push_back(std::make_shared<continue_stmt>());
+                        
+                        guard_if_blocks.push_back(guard_if_statement);
+                        guard_if_statement->dump(std::cerr, 0);
+                    }
+
+                    // first we need to set the innermost guard variable = 1;
+                    ast->stmts.push_back(set_guard_variable_exprs[0].second);
+
+                    // now we can take care of inserting other operations
+                    // 1) insert guard variable definition
+                    // 2) set guard variable = 0
+                    // 3) inser the if guard block
+                    unsigned i = 0;
+                    if (use_mixed_tree) {
+                        i = 0;
+                    }
+                    else {
+                        i = 1;
+                    }
+                    for (unsigned blocks_counter = 0; i + 1 < loop_parent_tree.size() && blocks_counter < guard_variables.size(); i++, blocks_counter++) {
+                        while_stmt::Ptr guard_set_insertion_loop = loop_parent_tree[i]->structured_ast_loop;
+                        while_stmt::Ptr if_block_insertion_loop = loop_parent_tree[i + 1]->structured_ast_loop;
+
+                        auto guard_set_insertion_block = to<stmt_block>(guard_set_insertion_loop->body);
+                        auto if_block_insertion_block = to<stmt_block>(if_block_insertion_loop->body);
+
+                        guard_set_insertion_block->stmts.insert(guard_set_insertion_block->stmts.begin(), to<stmt>(set_guard_variable_exprs[blocks_counter].first));
+
+                        auto guard_insertion_loop = std::find(if_block_insertion_block->stmts.begin(), if_block_insertion_block->stmts.end(), to<stmt>(guard_set_insertion_loop));
+                        if (guard_insertion_loop != if_block_insertion_block->stmts.end()) {
+                            if_block_insertion_block->stmts.insert(guard_insertion_loop + 1, to<stmt>(guard_if_blocks[blocks_counter]));
+                            if_block_insertion_block->stmts.insert(if_block_insertion_block->stmts.begin(), to<stmt>(guard_variable_defs[blocks_counter]));
+                        }
+                    }
+
+                    std::cerr << "handling break cond\n";
+                    is_goto_to_outerloop = true;
                 }
                 if (!is_last_block) {
                     std::cerr << "inserted continue: " << bb->id << loop_id << "\n";
@@ -546,6 +643,7 @@ stmt::Ptr loop::convert_to_ast_impl(loop_info &li, dominator_analysis &dta_, std
             assert(bb->successor.size() <= 1);
             bool exit_bb_succ = false;
 
+            std::cerr << "bb (open): " << bb->id << "\n";
             if (bb->is_exit_block && !blocks_id_map.count(bb->id)) {
                 for (auto subloop: subloops) {
                     if (bb == subloop->unique_exit_block) {
@@ -576,7 +674,13 @@ stmt::Ptr loop::convert_to_ast_impl(loop_info &li, dominator_analysis &dta_, std
 
             if (!blocks_id_map.count(bb->id) && !bb->is_exit_block) {
                 std::cerr << "case for 26: " << bb->id << worklist.size() << loop_id << "\n";
-                return_blocks.push_back({bb, nullptr});
+
+                if (isa<goto_stmt>(bb->successor[0]->parent) && (int)bb->ast_depth - 2 > (int)bb->successor[0]->successor[0]->ast_depth) {
+                    return_blocks.push_back({bb, ast});
+                }
+                else {
+                    return_blocks.push_back({bb, nullptr});
+                }
                 continue;
             }
 
@@ -624,9 +728,8 @@ block::stmt_block::Ptr loop_info::convert_to_ast(block::stmt_block::Ptr ast) {
             for (auto loop : top_level_loops) {
                 if (loop->header_block->parent == bb->parent) {
                     std::cerr << "found outerloop\n";
-                    stmt::Ptr jump_def, jump_block;
                     std::vector<std::pair<std::shared_ptr<basic_block>, stmt_block::Ptr>> loop_out_blocks;
-                    ast->stmts.push_back(loop->convert_to_ast_impl(*this, dta, loop_out_blocks, jump_def, jump_block));
+                    ast->stmts.push_back(loop->convert_to_ast_impl(*this, dta, loop_out_blocks));
                     loop->structured_ast_loop = to<while_stmt>(ast->stmts.back());
 
                     for (auto block: loop_out_blocks) {

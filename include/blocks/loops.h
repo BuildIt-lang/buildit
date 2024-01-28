@@ -11,7 +11,7 @@ class loop_info;
 class loop {
 public:
     loop(std::shared_ptr<basic_block> header): header_block(header) {}
-    stmt::Ptr convert_to_ast_impl(loop_info &li, dominator_analysis &dta_, std::vector<std::pair<std::shared_ptr<basic_block>, stmt_block::Ptr>> &return_blocks, stmt::Ptr &jump_condition_def, stmt::Ptr &jump_condition_block);
+    stmt::Ptr convert_to_ast_impl(loop_info &li, dominator_analysis &dta_, std::vector<std::pair<std::shared_ptr<basic_block>, stmt_block::Ptr>> &return_blocks);
 
     struct loop_bounds_ {
         stmt::Ptr ind_var;
