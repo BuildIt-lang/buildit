@@ -13,7 +13,7 @@ class builder;
 struct sentinel_member;
 
 template <typename T>
-using is_builder_type = typename std::is_base_of<builder_root, T>;
+using is_builder_type = typename std::is_same<builder, T>;
 
 template <typename T>
 using if_builder = typename std::enable_if<is_builder_type<T>::value, T>::type;

@@ -29,7 +29,7 @@ public:
 	virtual ~builder_root() = default;
 };
 
-class builder : builder_root {
+class builder {
 
 	typedef builder BT;
 
@@ -46,7 +46,7 @@ public:
 	// and set the block_expr immediately
 	builder() = default;
 	// Copy constructor from another builder
-	builder(const BT &other) : builder_root() {
+	builder(const BT &other) {
 		block_expr = other.block_expr;
 	}
 
