@@ -24,12 +24,7 @@ std::vector<block::expr::Ptr> extract_call_arguments(const arg_types &...args);
 template <typename BT, typename... arg_types>
 std::vector<block::expr::Ptr> extract_call_arguments_helper(const arg_types &...args);
 
-class builder_root {
-public:
-	virtual ~builder_root() = default;
-};
-
-class builder : builder_root {
+class builder {
 
 	typedef builder BT;
 
@@ -46,7 +41,7 @@ public:
 	// and set the block_expr immediately
 	builder() = default;
 	// Copy constructor from another builder
-	builder(const BT &other) : builder_root() {
+	builder(const BT &other) {
 		block_expr = other.block_expr;
 	}
 
@@ -302,10 +297,6 @@ public:
 		push_to_sequence(block_expr);
 	}
 
-	// This is an overload for the virtual function inside member_base
-	virtual block::expr::Ptr get_parent() const {
-		return this->block_expr;
-	}
 };
 
 void annotate(std::string);

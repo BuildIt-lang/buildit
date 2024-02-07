@@ -396,6 +396,39 @@ public:
 	}
 };
 
+// dyn var specialization for pointer types to return the appropriate types on [], * and ->
+
+template <typename T>
+class dyn_var<T *>
+    : public dyn_var_impl<T *> { // No need for parent selector, pointers types aren't custom types by themselves
+public:
+	typedef dyn_var_impl<T *> super;
+	using super::super;
+	using super::operator=;
+
+	dyn_var() : dyn_var_impl<T *>() {}
+
+	dyn_var(const dyn_var<T *> &t) : dyn_var_impl<T *>((builder)t) {}
+
+	builder operator=(const dyn_var<T *> &t) {
+		return *this = (builder)t;
+	}
+
+	// Specialization for the [] operator to return the right type
+	dyn_var<T> operator[](const builder &bt) {
+		return (cast)this->dyn_var_impl<T *>::operator[](bt);
+	}
+	dyn_var<T> operator*() {
+		return this->operator[](0);
+	}
+	// Hack for creating a member that's live across return site
+	dyn_var<T> _p = as_member(this, "_p");
+	dyn_var<T> *operator->() {
+		_p = (cast)this->operator[](0);
+		return _p.addr();
+	}
+};
+
 template <typename T>
 typename std::enable_if<std::is_base_of<var, T>::value>::type create_return_stmt(const T &a) {
 	create_return_stmt((typename T::associated_BT)a);

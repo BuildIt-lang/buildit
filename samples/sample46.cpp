@@ -38,6 +38,11 @@ static void bar(void) {
 
 	dyn_var<CarT<int, BarT<float>>> l;
 	l.my_member = g.member;
+
+	dyn_var<FooT *> i;
+	i->member = l.my_member;
+	(*i).member = 0;
+	i[3].member = 0;
 }
 
 int main(int argc, char *argv[]) {

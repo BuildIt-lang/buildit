@@ -30,34 +30,7 @@ public:
 	dyn_var<int> member = as_member(this, "member");
 };
 
-// Create specialization for foo_t* so that we can overload the * operator
-
-template <>
-class dyn_var<foo_t *> : public dyn_var_impl<foo_t *> {
-public:
-	typedef dyn_var_impl<foo_t *> super;
-	using super::super;
-	using super::operator=;
-	builder operator=(const dyn_var<foo_t *> &t) {
-		return (*this) = (builder)t;
-	}
-	dyn_var(const dyn_var &t) : dyn_var_impl((builder)t) {}
-	dyn_var() : dyn_var_impl<foo_t *>() {}
-
-	dyn_var<foo_t> operator*() {
-		// Rely on copy elision
-		return (cast)this->operator[](0);
-	}
-
-	// This is POC of how -> operator can
-	// be implemented. Requires the hack of creating a dummy
-	// member because -> needs to return a pointer.
-	dyn_var<foo_t> _p = as_member(this, "_p");
-	dyn_var<foo_t> *operator->() {
-		_p = (cast)this->operator[](0);
-		return _p.addr();
-	}
-};
+/* Specialization for foo_t* is not required because it comes built in with dyn_var now */
 
 } // namespace builder
 
