@@ -6,6 +6,7 @@
 #include <string>
 #include <map>
 
+namespace block {
 class basic_block {
     public:
         typedef std::vector<std::shared_ptr<basic_block>> cfg_block;
@@ -13,19 +14,21 @@ class basic_block {
 
         cfg_block predecessor;
         cfg_block successor;
-        block::expr::Ptr branch_expr;
+        expr::Ptr branch_expr;
         std::shared_ptr<basic_block> then_branch;
         std::shared_ptr<basic_block> else_branch;
         std::shared_ptr<basic_block> exit_block;
         bool is_exit_block = false;
-        block::stmt::Ptr parent;
+        stmt::Ptr parent;
         unsigned int ast_index;
         unsigned int ast_depth;
         unsigned int id;
         std::string name;
-        static std::map<block::stmt::Ptr, std::shared_ptr<basic_block>> ast_to_basic_block_map;
+        static std::map<stmt::Ptr, std::shared_ptr<basic_block>> ast_to_basic_block_map;
 };
 
-basic_block::cfg_block generate_basic_blocks(block::stmt_block::Ptr ast);
+basic_block::cfg_block generate_basic_blocks(stmt_block::Ptr ast);
+void dump(basic_block::cfg_block basic_block_list);
+} // namespace block
 
 #endif

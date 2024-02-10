@@ -1,10 +1,10 @@
 #include "blocks/basic_blocks.h"
 #include <algorithm>
 
-using namespace block;
-std::map<block::stmt::Ptr, std::shared_ptr<basic_block>> basic_block::ast_to_basic_block_map = {};
+namespace block {
+std::map<stmt::Ptr, std::shared_ptr<basic_block>> basic_block::ast_to_basic_block_map = {};
 
-basic_block::cfg_block generate_basic_blocks(block::stmt_block::Ptr ast) {
+basic_block::cfg_block generate_basic_blocks(stmt_block::Ptr ast) {
     std::deque<std::shared_ptr<basic_block>> work_list;
     basic_block::cfg_block return_list;
     int basic_block_count = 0;
@@ -29,7 +29,7 @@ basic_block::cfg_block generate_basic_blocks(block::stmt_block::Ptr ast) {
     while (work_list.size()) {
         auto bb = work_list.front();
 
-        if (isa<block::stmt_block>(bb->parent)) {
+        if (isa<stmt_block>(bb->parent)) {
             ast_index_counter = 0;
             stmt_block::Ptr stmt_block_ = to<stmt_block>(bb->parent);
             bb->name = "stmt" + bb->name;
@@ -95,7 +95,6 @@ basic_block::cfg_block generate_basic_blocks(block::stmt_block::Ptr ast) {
             work_list.pop_front();
             // push the exit block to the work_list
             work_list.push_front(exit_bb);
-            std::cerr << "inside if handler: " << bb->name << "\n";
             // if there is a then_stmt, create a basic block for it
             if (to<stmt_block>(if_stmt_->then_stmt)->stmts.size() != 0) {
                 auto then_bb = std::make_shared<basic_block>(std::to_string(++basic_block_count));
@@ -111,7 +110,6 @@ basic_block::cfg_block generate_basic_blocks(block::stmt_block::Ptr ast) {
                 bb->then_branch = then_bb;
                 // push the block to the work_list, to expand it further
                 work_list.push_front(then_bb);
-                std::cerr << "inside then" << "\n";
             }
             // if there is a else_stmt, create a basic block for it
             if (to<stmt_block>(if_stmt_->else_stmt)->stmts.size() != 0) {
@@ -128,7 +126,6 @@ basic_block::cfg_block generate_basic_blocks(block::stmt_block::Ptr ast) {
                 bb->else_branch = else_bb;
                 // push the block to the work_list, to expand it further
                 work_list.insert(work_list.begin() + 1, else_bb);
-                std::cerr << "inside else" << "\n";
             }
 
             // if there is no then/else block, then have the exit block as successor as well.
@@ -143,27 +140,27 @@ basic_block::cfg_block generate_basic_blocks(block::stmt_block::Ptr ast) {
 
             return_list.push_back(bb);
         }
-        else if (isa<block::expr_stmt>(bb->parent)) {
+        else if (isa<expr_stmt>(bb->parent)) {
             bb->name = "expr" + bb->name;
             return_list.push_back(bb);
             work_list.pop_front();
         }
-        else if (isa<block::decl_stmt>(bb->parent)) {
+        else if (isa<decl_stmt>(bb->parent)) {
             bb->name = "decl" + bb->name;
             return_list.push_back(bb);
             work_list.pop_front();
         }
-        else if (isa<block::label_stmt>(bb->parent)) {
+        else if (isa<label_stmt>(bb->parent)) {
             bb->name = "label" + bb->name;
             return_list.push_back(bb);
             work_list.pop_front();
         }
-        else if (isa<block::goto_stmt>(bb->parent)) {
+        else if (isa<goto_stmt>(bb->parent)) {
             bb->name = "goto" + bb->name;
             return_list.push_back(bb);
             work_list.pop_front();
         }
-        else if (isa<block::return_stmt>(bb->parent)) {
+        else if (isa<return_stmt>(bb->parent)) {
             bb->name = "return" + bb->name;
             return_list.push_back(bb);
             work_list.pop_front();
@@ -174,7 +171,7 @@ basic_block::cfg_block generate_basic_blocks(block::stmt_block::Ptr ast) {
 
     // step 4: resolve goto calls to successors of labels
     for (auto bb: return_list) {
-        if (isa<block::goto_stmt>(bb->parent)) {
+        if (isa<goto_stmt>(bb->parent)) {
             auto goto_source = std::find_if(return_list.begin(), return_list.end(), 
                 [bb](std::shared_ptr<basic_block> bb_l) {
                     if (isa<label_stmt>(bb_l->parent)) {
@@ -206,5 +203,33 @@ basic_block::cfg_block generate_basic_blocks(block::stmt_block::Ptr ast) {
         bb->ast_to_basic_block_map[bb->parent] = bb;
     }
 
+    // print debug logs
+#ifdef BASIC_BLOCK_DEBUG
+    dump(return_list);
+#endif
     return return_list;
 }
+
+void dump(basic_block::cfg_block basic_block_list) {
+	std::cerr << "++++++ basic blocks ++++++ \n";
+	for (auto bb: basic_block_list) {
+		std::cerr << bb->id << ":" << bb->name << ":" << "  ; ";
+		for (auto pred: bb->predecessor) {
+			std::cerr << pred->name << ", ";
+		}
+		std::cerr << bb->ast_depth;
+		std::cerr << "\n";
+		if (bb->branch_expr) {
+			std::cerr << "  ";
+			bb->branch_expr->dump(std::cerr, 0);
+		}
+		std::cerr << "  ";
+		std::cerr << "br ";
+		for (auto branches: bb->successor) {
+			std::cerr << branches->name << ", ";
+		}
+		std::cerr << "\n";
+	}
+	std::cerr << "++++++ basic blocks ++++++ \n";
+}
+} // namespace block
