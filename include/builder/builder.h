@@ -5,7 +5,6 @@
 
 namespace builder {
 
-struct sentinel_member {};
 
 } // namespace builder
 

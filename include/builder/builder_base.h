@@ -31,7 +31,6 @@ class builder {
 public:
 	// All members here
 	block::expr::Ptr block_expr;
-	static BT sentinel_builder;
 
 	typedef builder super;
 

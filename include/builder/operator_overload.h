@@ -19,7 +19,7 @@ struct return_type_helper<T, typename std::enable_if<is_builder_type<T>::value>:
 };
 template <typename T>
 struct return_type_helper<T, typename std::enable_if<!is_builder_type<T>::value && is_dyn_var_type<T>::value>::type> {
-	typedef typename T::associated_BT type;
+	typedef builder type;
 };
 
 template <typename T1, typename T2, class Enable = void>

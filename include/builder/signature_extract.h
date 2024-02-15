@@ -15,6 +15,7 @@ struct peel_dyn<T, typename std::enable_if<std::is_base_of<var, T>::value>::type
 	typedef typename T::stored_type type;
 };
 
+
 struct extract_signature_enable;
 template <typename T, class Enable = void>
 struct filter_var_type {

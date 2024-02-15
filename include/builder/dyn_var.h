@@ -93,79 +93,35 @@ struct with_name {
 template <typename T>
 class dyn_var_impl : public var {
 public:
-	typedef builder BT;
-	typedef dyn_var_impl<T> my_type;
-	// These are required for overloads
-	typedef BT associated_BT;
+	typedef dyn_var_impl<T> self_type;
 	typedef T stored_type;
 
+
 	template <typename... types>
-	BT operator()(const types &...args) {
-		return ((BT) * this)(args...);
+	builder operator()(const types &...args) {
+		return ((builder) * this)(args...);
 	}
 
 	// These three need to be defined inside the class, cannot be defined globally
-	BT operator=(const var &a) {
-		return (BT) * this = a;
+	builder operator[](const builder &a) {
+		return ((builder) * this)[a];
 	}
-
-	BT operator[](const BT &a) {
-		return ((BT) * this)[a];
+	builder operator*(void) {
+		return ((builder) * this)[0];
 	}
-	BT operator*(void) {
-		return ((BT) * this)[0];
-	}
-	BT operator=(const BT &a) {
-		return (BT) * this = a;
-	}
-
-	BT operator=(const dyn_var_impl<T> &a) {
-		return (BT) * this = a;
-	}
-
-	template <typename TO>
-	BT operator=(const dyn_var_impl<TO> &a) {
-		return (BT) * this = a;
-	}
-
-	BT operator=(const unsigned int &a) {
-		return operator=((BT)a);
-	}
-	BT operator=(const int &a) {
-		return operator=((BT)a);
-	}
-	BT operator=(const long long &a) {
-		return operator=((BT)a);
-	}
-	BT operator=(const unsigned long long &a) {
-		return operator=((BT)a);
-	}
-
-	BT operator=(const double &a) {
-		return operator=((BT)a);
-	}
-
-	BT operator=(const std::string &s) {
-		return operator=((BT)s);
-	}
-	BT operator=(char *s) {
-		return operator=((BT)s);
-	}
-	BT operator=(const char *s) {
-		return operator=((BT)s);
-	}
-
-	template <typename Ts>
-	BT operator=(const static_var<Ts> &a) {
-		return operator=((BT)a);
-	}
-
-	BT operator!() {
-		return !(BT) * this;
+	builder operator!() {
+		return !(builder) * this;
 	}
 	operator bool() {
-		return (bool)(BT) * this;
+		return (bool)(builder) * this;
 	}
+
+	// Unified operator= that offloads implementation to builder
+	template <typename X>
+	builder operator=(const X& a) {
+		return ((builder)*this) = ((builder)a);
+	}
+	
 
 	static block::type::Ptr create_block_type(void) {
 		return type_extractor<T>::extract_type();
@@ -239,13 +195,6 @@ public:
 	void deferred_init(void) {
 		create_dyn_var(false);
 	}
-	dyn_var_impl(const dyn_var_sentinel_type &a, std::string name = "") {
-		create_dyn_var(true);
-		if (name != "") {
-			block_var->var_name = name;
-			var_name = name;
-		}
-	}
 	// Constructor to initialize a dyn_var as member
 	// This declaration does not produce a declaration
 	dyn_var_impl(const as_member &a) {
@@ -278,23 +227,8 @@ public:
 		block_decl_stmt = nullptr;
 		encompassing_expr = a.encompassing_expr;
 	}
-	// A very special move constructor that is used to create exact
-	// replicas of variables
-	dyn_var_impl(const dyn_var_consume &a) {
-		block_var = a.block_var;
-		var_name = block_var->var_name;
-		block_decl_stmt = nullptr;
-	}
 
-	dyn_var_impl(const my_type &a) : my_type((BT)a) {}
-
-	template <typename TO>
-	dyn_var_impl(const dyn_var_impl<TO> &a) : my_type((BT)a) {}
-
-	template <typename TO>
-	dyn_var_impl(const static_var<TO> &a) : my_type((TO)a) {}
-
-	dyn_var_impl(const BT &a) {
+	dyn_var_impl(const builder &a) {
 		builder_context::current_builder_context->remove_node_from_sequence(a.block_expr);
 		create_dyn_var();
 		if (builder_context::current_builder_context->bool_vector.size() > 0)
@@ -302,19 +236,22 @@ public:
 		block_decl_stmt->init_expr = a.block_expr;
 	}
 
-	dyn_var_impl(const int &a) : my_type((BT)a) {}
-	dyn_var_impl(const unsigned int &a) : my_type((BT)a) {}
-	dyn_var_impl(const long long &a) : my_type((BT)a) {}
-	dyn_var_impl(const unsigned long long &a) : my_type((BT)a) {}
-	dyn_var_impl(const bool &a) : my_type((BT)a) {}
-	dyn_var_impl(const double &a) : my_type((BT)a) {}
-	dyn_var_impl(const float &a) : my_type((BT)a) {}
-	dyn_var_impl(const std::string &a) : my_type((BT)a) {}
-	dyn_var_impl(const char *s) : my_type((BT)(std::string)s) {}
-	dyn_var_impl(char *s) : my_type((BT)(std::string)s) {}
+	template <typename TO>
+	struct is_builder_constructible {
+		static const bool value = std::is_arithmetic<TO>::value 
+		|| std::is_base_of<static_var_base, TO>::value || std::is_base_of<var, TO>::value;
+	};
 
-	dyn_var_impl(const std::initializer_list<BT> &_a) {
-		std::vector<BT> a(_a);
+	template <typename TO>
+	dyn_var_impl(const TO& a, typename std::enable_if<is_builder_constructible<TO>::value>::type* _ = NULL)
+		: self_type((builder)a) {}
+
+	dyn_var_impl(const std::string &a) : self_type((builder)a) {}
+	dyn_var_impl(const char *s) : self_type((builder)(std::string)s) {}
+	dyn_var_impl(char *s) : self_type((builder)(std::string)s) {}
+
+	dyn_var_impl(const std::initializer_list<builder> &_a) {
+		std::vector<builder> a(_a);
 
 		assert(builder_context::current_builder_context != nullptr);
 		for (unsigned int i = 0; i < a.size(); i++) {
@@ -431,7 +368,7 @@ public:
 
 template <typename T>
 typename std::enable_if<std::is_base_of<var, T>::value>::type create_return_stmt(const T &a) {
-	create_return_stmt((typename T::associated_BT)a);
+	create_return_stmt((builder)a);
 }
 
 } // namespace builder

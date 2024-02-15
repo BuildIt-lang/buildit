@@ -128,8 +128,7 @@ public:
 
 	template <typename T>
 	T *assume_variable(std::string name) {
-		T *new_asm_variable = new T(dyn_var_sentinel_type());
-		new_asm_variable->block_var->var_name = name;
+		T * new_asm_variable = new T(with_name(name));
 		assume_variables.push_back(new_asm_variable);
 
 		return new_asm_variable;
