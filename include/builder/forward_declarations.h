@@ -10,8 +10,6 @@ class builder_root;
 // The builder base class
 class builder;
 
-struct sentinel_member;
-
 template <typename T>
 using is_builder_type = typename std::is_same<builder, T>;
 
@@ -49,18 +47,19 @@ struct defer_init {
 	// No members
 };
 
-// This class does nothing
-// Apart from just being used in the copy constructor to
-// tell the constructor to no create without context
-struct dyn_var_sentinel_type {};
 
-// This class is used for creating exact replicas of a variable
-// One possible use if when initializing args for func_decls
-class dyn_var_consume {
-public:
-	block::var::Ptr block_var = nullptr;
-	dyn_var_consume(const var &a);
-	dyn_var_consume(const dyn_var_consume &);
+// Constructor helpers for dyn_var
+struct as_global {
+	std::string name;
+	as_global(const std::string &n) : name(n) {}
 };
+// With name is just like as_global but can be used locally
+struct with_name {
+	std::string name;
+	bool with_decl;
+	with_name(const std::string &n, bool wd = false) : name(n), with_decl(wd) {}
+};
+
+
 } // namespace builder
 #endif

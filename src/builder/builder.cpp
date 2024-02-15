@@ -14,14 +14,6 @@ std::vector<block::type::Ptr> extract_type_vector_dyn<>(void) {
 	return empty_vector;
 }
 
-dyn_var_consume::dyn_var_consume(const var &a) {
-	block_var = a.block_var;
-}
-dyn_var_consume::dyn_var_consume(const dyn_var_consume &a) {
-	block_var = a.block_var;
-}
-
-builder builder::sentinel_builder;
 void create_return_stmt(const builder &a) {
 
 	builder_context::current_builder_context->remove_node_from_sequence(a.block_expr);
