@@ -47,7 +47,19 @@ struct defer_init {
 	// No members
 };
 
-struct with_name;
+
+// Constructor helpers for dyn_var
+struct as_global {
+	std::string name;
+	as_global(const std::string &n) : name(n) {}
+};
+// With name is just like as_global but can be used locally
+struct with_name {
+	std::string name;
+	bool with_decl;
+	with_name(const std::string &n, bool wd = false) : name(n), with_decl(wd) {}
+};
+
 
 } // namespace builder
 #endif

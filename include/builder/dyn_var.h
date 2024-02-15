@@ -79,17 +79,6 @@ struct as_compound_expr {
 };
 using cast = as_compound_expr;
 
-struct as_global {
-	std::string name;
-	as_global(const std::string &n) : name(n) {}
-};
-// With name is just like as_global but can be used locally
-struct with_name {
-	std::string name;
-	bool with_decl;
-	with_name(const std::string &n, bool wd = false) : name(n), with_decl(wd) {}
-};
-
 template <typename T>
 class dyn_var_impl : public var {
 public:
