@@ -303,12 +303,214 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 		block::eliminate_redundant_vars(ast);
 	}
 
+	// return ast;
 	if (feature_unstructured)
 		return ast;
 
-	block::loop_finder finder;
-	finder.ast = ast;
-	ast->accept(&finder);
+	basic_block::cfg_block BBs = generate_basic_blocks(block::to<block::stmt_block>(ast));
+	basic_block::cfg_block post_BBs = generate_basic_blocks(block::to<block::stmt_block>(ast));
+
+	std::cerr << "++++++ basic blocks ++++++ \n";
+	for (auto bb: BBs) {
+		std::cerr << bb->id << ":" << bb->name << ":" << "  ; ";
+		for (auto pred: bb->predecessor) {
+			std::cerr << pred->name << ", ";
+		}
+		std::cerr << bb->ast_depth;
+		std::cerr << "\n";
+		if (bb->branch_expr) {
+			std::cerr << "  ";
+			bb->branch_expr->dump(std::cerr, 0);
+		}
+		std::cerr << "  ";
+		std::cerr << "br ";
+		for (auto branches: bb->successor) {
+			std::cerr << branches->name << ", ";
+		}
+		std::cerr << "\n";
+	}
+	std::cerr << "++++++ basic blocks ++++++ \n";
+
+	std::cerr << "++++++ dominance ++++++ \n";
+	dominator_analysis dom(BBs);
+	dominator_analysis post_dom(post_BBs, true);
+
+	std::cerr << "max depth: " << dom.max_depth << "\n";
+	std::cerr << "max depth bb id: " << dom.max_depth_bb_id << "\n";
+	std::cerr << "== postorder map ==\n";
+	for (int i: dom.get_postorder_bb_map()) {
+		std::cerr << i << "\n";
+	}
+	std::cerr << "== postorder map ==\n";
+
+	std::cerr << "== postorder ==\n";
+	for (int i: dom.get_postorder()) {
+		std::cerr << i << "\n";
+	}
+	std::cerr << "== postorder ==\n";
+
+	std::cerr << "== preorder map ==\n";
+	for (int i: dom.get_preorder_bb_map()) {
+		std::cerr << i << "\n";
+	}
+	std::cerr << "== preorder map ==\n";
+
+	std::cerr << "== preorder ==\n";
+	for (int i: dom.get_preorder()) {
+		std::cerr << i << "\n";
+	}
+	std::cerr << "== preorder ==\n";
+
+	std::cerr << "== idom ==\n";
+	std::cerr << "get_idom(int) test: get_idom(0): " << dom.get_idom(0) << "\n";
+	std::cerr << "get_idom(int) test: get_idom(-1): " << dom.get_idom(-1) << "\n";
+
+	for (unsigned int i = 0; i < dom.get_idom().size(); i++) {
+		std::cerr << i << " : " << dom.get_idom()[i] << "\n";
+	}
+	std::cerr << "== idom ==\n";
+
+	std::cerr << "== idom map ==\n";
+	std::cerr << "get_idom_map(int) test: get_idom_map(0): ";
+	for (int i : dom.get_idom_map(0)) std::cerr << i << " ";
+	std::cerr << "\n";
+
+	std::cerr << "get_idom_map(int) test: get_idom_map(-1): ";
+	for (int i : dom.get_idom_map(-1)) std::cerr << i << " ";
+	std::cerr << "\n";
+
+	for (auto children: dom.get_idom_map()) {
+		std::cerr << children.first << ": ";
+		for (int child: children.second) {
+			std::cerr << child << " ";
+		}
+		std::cerr << "\n";
+	}
+	std::cerr << "== idom map ==\n";
+
+	std::cerr << "== postorder idom ==\n";
+	for (auto idom: dom.get_postorder_idom_map()) {
+		std::cerr << idom << "\n";
+	}
+	std::cerr << "== postorder idom ==\n";
+
+	std::cerr << "(postdom) max depth: " << post_dom.max_depth << "\n";
+	std::cerr << "(postdom) max depth bb id: " << post_dom.max_depth_bb_id << "\n";
+	std::cerr << "== (postdom) postorder map ==\n";
+	for (int i: post_dom.get_postorder_bb_map()) {
+		std::cerr << i << "\n";
+	}
+	std::cerr << "== (postdom) postorder map ==\n";
+
+	std::cerr << "== (postdom) postorder ==\n";
+	for (int i: post_dom.get_postorder()) {
+		std::cerr << i << "\n";
+	}
+	std::cerr << "== (postdom) postorder ==\n";
+
+	std::cerr << "== (postdom) preorder map ==\n";
+	for (int i: dom.get_preorder_bb_map()) {
+		std::cerr << i << "\n";
+	}
+	std::cerr << "== (postdom) preorder map ==\n";
+
+	std::cerr << "== (postdom) preorder ==\n";
+	for (int i: dom.get_preorder()) {
+		std::cerr << i << "\n";
+	}
+	std::cerr << "== (postdom) preorder ==\n";
+
+	std::cerr << "== (postdom) idom ==\n";
+	std::cerr << "get_idom(int) test: get_idom(0): " << post_dom.get_idom(0) << "\n";
+	std::cerr << "get_idom(int) test: get_idom(-1): " << post_dom.get_idom(-1) << "\n";
+
+	for (unsigned int i = 0; i < post_dom.get_idom().size(); i++) {
+		std::cerr << i << " : " << post_dom.get_idom()[i] << "\n";
+	}
+	std::cerr << "== (postdom) idom ==\n";
+
+	std::cerr << "== (postdom) idom map ==\n";
+	std::cerr << "get_idom_map(int) test: get_idom_map(0): ";
+	for (int i : post_dom.get_idom_map(0)) std::cerr << i << " ";
+	std::cerr << "\n";
+
+	std::cerr << "get_idom_map(int) test: get_idom_map(-1): ";
+	for (int i : post_dom.get_idom_map(-1)) std::cerr << i << " ";
+	std::cerr << "\n";
+
+	for (auto children: post_dom.get_idom_map()) {
+		std::cerr << children.first << ": ";
+		for (int child: children.second) {
+			std::cerr << child << " ";
+		}
+		std::cerr << "\n";
+	}
+	std::cerr << "== (postdom) idom map ==\n";
+
+	std::cerr << "== (postdom) postorder idom ==\n";
+	for (auto idom: post_dom.get_postorder_idom_map()) {
+		std::cerr << idom << "\n";
+	}
+	std::cerr << "== (postdom) postorder idom ==\n";
+	std::cerr << "++++++ dominance ++++++ \n";
+
+	std::cerr << "++++++ loop info ++++++ \n";
+	loop_info LI(BBs, dom, post_dom);
+	int loop_num = 0;
+	for (auto loop: LI.loops) {
+		std::cerr << "++++++ loop " << loop_num++ << " ++++++ \n";
+
+		std::cerr << "loop headers: " << loop->header_block->id << "\n";
+		
+		std::cerr << "blocks: ";
+		for (auto bb: loop->blocks) std::cerr << bb->id << " ";
+		std::cerr << "\n";
+
+		std::cerr << "loop latches: ";
+		for (auto bb: loop->loop_latch_blocks) std::cerr << bb->id << " ";
+		std::cerr << "\n";
+		
+		std::cerr << "loop exits: ";
+		for (auto bb: loop->loop_exit_blocks) std::cerr << bb->id << " ";
+		std::cerr << "\n";
+		if (loop->unique_exit_block) std::cerr << "loop unique exit block: " << loop->unique_exit_block->id << "\n";
+
+		std::cerr << "parent loop: (loop header: " << (loop->parent_loop ? (int)loop->parent_loop->header_block->id : -1) << ")\n";
+		
+		std::cerr << "subloops: ";
+		for (auto subl: loop->subloops) std::cerr << "(loop header: " << subl->header_block->id << ") ";
+		std::cerr << "\n";
+	}
+
+	std::cerr << "++++++ top level loops ++++++ \n";
+	for (auto top_level_loop: LI.top_level_loops) std::cerr << "(loop header: " << top_level_loop->header_block->id << ") ";
+	std::cerr << "\n";
+
+	std::cerr << "++++++ preorder loops tree ++++++ \n";
+	for (auto loop_tree: LI.preorder_loops_map) {
+		std::cerr << "loop tree root: (loop header: " << LI.loops[loop_tree.first]->header_block->id << ")\n";
+		std::cerr << "preorder: ";
+		for (auto node: loop_tree.second) std::cerr << node << " ";
+		std::cerr << "\n";
+	}
+
+	std::cerr << "++++++ postorder loops tree ++++++ \n";
+	for (auto loop_tree: LI.postorder_loops_map) {
+		std::cerr << "loop tree root: (loop header: " << LI.loops[loop_tree.first]->header_block->id << ")\n";
+		std::cerr << "postorder: ";
+		for (auto node: loop_tree.second) std::cerr << node << " ";
+		std::cerr << "\n";
+	}
+
+	std::cerr << "++++++ loop info ++++++ \n";
+
+	std::cerr << "++++++ convert to ast ++++++ \n";
+	ast = LI.convert_to_ast(block::to<block::stmt_block>(ast));
+	std::cerr << "++++++ convert to ast ++++++ \n";
+	
+	// block::loop_finder finder;
+	// finder.ast = ast;
+	// ast->accept(&finder);
 
 	block::for_loop_finder for_finder;
 	for_finder.ast = ast;
@@ -405,7 +607,6 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(std::vector
 		ret_ast = ast;
 	} catch (LoopBackException &e) {
 		current_builder_context = nullptr;
-
 		block::goto_stmt::Ptr goto_stmt = std::make_shared<block::goto_stmt>();
 		goto_stmt->static_offset.clear();
 		goto_stmt->temporary_label_number = e.static_offset;
@@ -421,7 +622,15 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(std::vector
 			add_stmt_to_current_block(goto_stmt, false);
 		} else {
 			for (unsigned int i = e.child_id; i < e.parent->stmts.size(); i++) {
-				add_stmt_to_current_block(e.parent->stmts[i], false);
+				if (isa<block::goto_stmt>(e.parent->stmts[i])) {
+					block::goto_stmt::Ptr goto_stmt = std::make_shared<block::goto_stmt>();
+					goto_stmt->static_offset.clear();
+					goto_stmt->temporary_label_number = to<block::goto_stmt>(e.parent->stmts[i])->temporary_label_number;
+					add_stmt_to_current_block(goto_stmt, false);
+				}
+				else {
+					add_stmt_to_current_block(e.parent->stmts[i], false);
+				}
 			}
 		}
 		ret_ast = ast;
