@@ -184,6 +184,13 @@ public:
 	void deferred_init(void) {
 		create_dyn_var(false);
 	}
+	// This version allows deferred init to accept other constructor helpers
+	void deferred_init(const with_name &v) {
+		create_dyn_var(!v.with_decl);
+		block_var->var_name = v.name;
+		block_var->preferred_name = "";
+		var_name = v.name;
+	}
 	// Constructor to initialize a dyn_var as member
 	// This declaration does not produce a declaration
 	dyn_var_impl(const as_member &a) {

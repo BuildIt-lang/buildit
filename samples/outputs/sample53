@@ -1,40 +1,40 @@
 void foo (void) {
-  int var0;
-  int var1 = 0;
-  if (var1) {
-    var0 = 1;
+  int member_var;
+  int var0 = 0;
+  if (var0) {
+    member_var = 1;
   } else {
-    var0 = 2;
+    member_var = 2;
   }
-  if ((var0 % 2) == 0) {
-    var0 = var0 + 0;
+  if ((member_var % 2) == 0) {
+    member_var = member_var + 0;
   } 
-  if ((var0 % 2) == 0) {
-    var0 = var0 + 1;
+  if ((member_var % 2) == 0) {
+    member_var = member_var + 1;
   } 
-  if ((var0 % 2) == 0) {
-    var0 = var0 + 2;
+  if ((member_var % 2) == 0) {
+    member_var = member_var + 2;
   } 
-  if ((var0 % 2) == 0) {
-    var0 = var0 + 3;
+  if ((member_var % 2) == 0) {
+    member_var = member_var + 3;
   } 
-  if ((var0 % 2) == 0) {
-    var0 = var0 + 4;
+  if ((member_var % 2) == 0) {
+    member_var = member_var + 4;
   } 
-  if ((var0 % 2) == 0) {
-    var0 = var0 + 5;
+  if ((member_var % 2) == 0) {
+    member_var = member_var + 5;
   } 
-  if ((var0 % 2) == 0) {
-    var0 = var0 + 6;
+  if ((member_var % 2) == 0) {
+    member_var = member_var + 6;
   } 
-  if ((var0 % 2) == 0) {
-    var0 = var0 + 7;
+  if ((member_var % 2) == 0) {
+    member_var = member_var + 7;
   } 
-  if ((var0 % 2) == 0) {
-    var0 = var0 + 8;
+  if ((member_var % 2) == 0) {
+    member_var = member_var + 8;
   } 
-  if ((var0 % 2) == 0) {
-    var0 = var0 + 9;
+  if ((member_var % 2) == 0) {
+    member_var = member_var + 9;
   } 
 }
 
