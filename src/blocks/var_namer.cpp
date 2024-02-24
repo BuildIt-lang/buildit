@@ -3,6 +3,10 @@
 namespace block {
 
 void var_gather_escapes::visit(decl_stmt::Ptr stmt) {
+	// Disabling escape var analysis 
+	// We are not supporting hoisting of escaped variables now
+	// TODO: Implement this by selecting merging of path based on live dyn vars
+	return;
 	if (stmt->decl_var->hasMetadata<int>("escapes_static_scope") &&
 	    stmt->decl_var->getMetadata<int>("escapes_static_scope")) {
 

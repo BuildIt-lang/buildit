@@ -1,3 +1,5 @@
+/*NO_TEST*/
+/* This feature has been disabled for now. TODO: Enable this test after selective path merging implementation */
 // Include the headers
 #include "blocks/c_code_generator.h"
 #include "builder/dyn_var.h"
