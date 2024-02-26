@@ -1,5 +1,6 @@
 #ifndef BUILDER_CONTEXT
 #define BUILDER_CONTEXT
+#include "blocks/basic_blocks.h"
 #include "blocks/expr.h"
 #include "blocks/stmt.h"
 #include "builder/forward_declarations.h"

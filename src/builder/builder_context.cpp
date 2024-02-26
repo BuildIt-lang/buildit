@@ -306,6 +306,8 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 	if (feature_unstructured)
 		return ast;
 
+	block::basic_block::cfg_block BBs = generate_basic_blocks(block::to<block::stmt_block>(ast));
+	
 	block::loop_finder finder;
 	finder.ast = ast;
 	ast->accept(&finder);
@@ -405,7 +407,6 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(std::vector
 		ret_ast = ast;
 	} catch (LoopBackException &e) {
 		current_builder_context = nullptr;
-
 		block::goto_stmt::Ptr goto_stmt = std::make_shared<block::goto_stmt>();
 		goto_stmt->static_offset.clear();
 		goto_stmt->temporary_label_number = e.static_offset;
@@ -421,7 +422,15 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(std::vector
 			add_stmt_to_current_block(goto_stmt, false);
 		} else {
 			for (unsigned int i = e.child_id; i < e.parent->stmts.size(); i++) {
-				add_stmt_to_current_block(e.parent->stmts[i], false);
+				if (block::isa<block::goto_stmt>(e.parent->stmts[i])) {
+					block::goto_stmt::Ptr goto_stmt = std::make_shared<block::goto_stmt>();
+					goto_stmt->static_offset.clear();
+					goto_stmt->temporary_label_number = block::to<block::goto_stmt>(e.parent->stmts[i])->temporary_label_number;
+					add_stmt_to_current_block(goto_stmt, false);
+				}
+				else {
+					add_stmt_to_current_block(e.parent->stmts[i], false);
+				}
 			}
 		}
 		ret_ast = ast;
