@@ -21,6 +21,11 @@
 
 namespace util {
 
+// Default member separator is "_"
+// this can be set by callers if they want 
+// the separator to be .
+std::string member_separator = "_";
+
 static int backtrace_find_cursor(void *addr, unw_cursor_t *ret, unw_cursor_t *ret_prev) {
 	unw_cursor_t cursor, cursor_next, cursor_prev;
 	unw_context_t context;
@@ -251,6 +256,85 @@ static void *decode_address_from_die(Dwarf_Debug dbg, Dwarf_Die die, uint64_t fr
 	return NULL;
 }
 
+
+static int find_var_size(Dwarf_Debug dbg, Dwarf_Die var_die) {
+	Dwarf_Attribute attr;
+	Dwarf_Error de;
+	Dwarf_Off off;	
+	Dwarf_Die type_die;
+	Dwarf_Unsigned size;
+
+	if (dwarf_attr(var_die, DW_AT_type, &attr, &de) != DW_DLV_OK)
+		return -1;
+
+	if (dwarf_global_formref(attr, &off, &de) != DW_DLV_OK)
+		return -1;
+
+	if (dwarf_offdie(dbg, off, &type_die, &de) != DW_DLV_OK)
+		return -1;
+
+	if (dwarf_attr(type_die, DW_AT_byte_size, &attr, &de) != DW_DLV_OK) 
+		return -1;
+
+	if (dwarf_formudata(attr, &size, &de) != DW_DLV_OK) 
+		return -1;
+
+	return (int) size;	
+
+}
+
+
+static std::string find_member_at_offset(Dwarf_Debug dbg, Dwarf_Die var_die, int offset) {
+	Dwarf_Attribute attr;
+	Dwarf_Error de;
+	Dwarf_Off off;	
+	Dwarf_Die type_die;
+	Dwarf_Half tag;
+
+	if (dwarf_attr(var_die, DW_AT_type, &attr, &de) != DW_DLV_OK)
+		return "";
+
+	if (dwarf_global_formref(attr, &off, &de) != DW_DLV_OK)
+		return "";
+
+	if (dwarf_offdie(dbg, off, &type_die, &de) != DW_DLV_OK)
+		return "";
+
+	// Now we iterate over the members and check their offsets;
+	Dwarf_Die child, next_child;
+
+	if (dwarf_child(type_die, &next_child, &de) != DW_DLV_OK) 
+		return "";
+	child = NULL;
+
+	do {
+		if (child != NULL)
+			dwarf_dealloc(dbg, child, DW_DLA_DIE);
+		child = next_child;
+		if (dwarf_tag(child, &tag, &de) != DW_DLV_OK)
+			continue;
+		if (tag == DW_TAG_member) {
+			if (dwarf_attr(child, DW_AT_data_member_location, &attr, &de) != DW_DLV_OK)
+				continue;
+			Dwarf_Unsigned mem_offset;
+			if (dwarf_formudata(attr, &mem_offset, &de) != DW_DLV_OK)
+				continue;
+			if (offset == (int) mem_offset) {
+				char* name = NULL;
+				if (dwarf_diename(child, &name, &de) != DW_DLV_OK) {
+					dwarf_dealloc(dbg, child, DW_DLA_DIE);
+					return "";
+				}
+				dwarf_dealloc(dbg, child, DW_DLA_DIE);
+				return name;	
+			}
+		}	
+	} while (dwarf_siblingof(dbg, child, &next_child, &de) == DW_DLV_OK);
+
+	return "";	
+}
+
+
 static std::string find_var_in_f_tree(Dwarf_Debug dbg, Dwarf_Die in_die, uint64_t addr, uint64_t var_offset,
 				      char *base_ptr) {
 	Dwarf_Error de;
@@ -276,6 +360,19 @@ static std::string find_var_in_f_tree(Dwarf_Debug dbg, Dwarf_Die in_die, uint64_
 			if (var_addr == var_offset) {
 				dwarf_dealloc(dbg, die, DW_DLA_DIE);
 				return vname;
+			}
+			// We couldn't find an exact match, now let's look for members
+			int var_size = find_var_size(dbg, die);
+			if (var_size != -1) {
+				if (var_offset >= var_addr && var_offset < var_addr + var_size) {
+					int offset = var_offset - var_addr;
+					// Add the member name only if we find it
+					std::string mem_name = find_member_at_offset(dbg, die, offset);
+					if (mem_name != "")
+						vname = vname + member_separator + mem_name;
+					dwarf_dealloc(dbg, die, DW_DLA_DIE);
+					return vname;
+				}
 			}
 		}
 	} while (dwarf_siblingof(dbg, die, &curr_die, &de) == DW_DLV_OK);
