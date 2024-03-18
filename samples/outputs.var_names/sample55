@@ -1,0 +1,9 @@
+void bar (void) {
+  int x_0;
+  char x_mem2_1;
+  int y_mem1_2;
+  char y_mem2_3;
+  x_0 = x_mem2_1;
+  y_mem2_3 = y_mem1_2;
+}
+

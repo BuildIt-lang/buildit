@@ -1,0 +1,9 @@
+void bar (void) {
+  int var0;
+  char var1;
+  int var2;
+  char var3;
+  var0 = var1;
+  var3 = var2;
+}
+
