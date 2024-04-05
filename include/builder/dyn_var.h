@@ -35,6 +35,8 @@ public:
 
 	// Feature to gather members of this type
 	std::vector<var *> members;
+	// Counter for naming unnamed members
+	int member_counter = 0;
 
 	static block::type::Ptr create_block_type(void) {
 		// Cannot create block type for abstract class
@@ -146,6 +148,22 @@ public:
 	}
 
 	dyn_var_impl() {
+		// implementation for auto member detection
+		if (parents_stack && parents_stack->size() != 0) {
+			current_state = member_var;
+			parent_var = parents_stack->back();
+			var_name = "mem" + std::to_string(parent_var->member_counter++);
+			block_var = nullptr;
+			block_decl_stmt = nullptr;
+
+			if (options::track_members) {
+				parent_var->members.push_back(this);
+				block_var = std::make_shared<block::var>();
+				block_var->var_type = create_block_type();
+				block_var->var_name = var_name;
+			}	
+			return;
+		}
 		create_dyn_var(false);
 	}
 	// Basic and other constructors
@@ -165,6 +183,21 @@ public:
 		*ptr_to_leak = block_var;
 	}
 	dyn_var_impl(const with_name &v) {
+		if (parents_stack && parents_stack->size() != 0) {
+			current_state = member_var;
+			parent_var = parents_stack->back();
+			var_name = v.name;
+			block_var = nullptr;
+			block_decl_stmt = nullptr;
+
+			if (options::track_members) {
+				parent_var->members.push_back(this);
+				block_var = std::make_shared<block::var>();
+				block_var->var_type = create_block_type();
+				block_var->var_name = var_name;
+			}	
+			return;
+		}
 		// with_name constructors don't usually get declarations
 		create_dyn_var(!v.with_decl);
 		block_var->var_name = v.name;
@@ -174,6 +207,8 @@ public:
 
 	dyn_var_impl(const defer_init &) {
 		// Do nothing here
+		// Defer init "automatically" supports custom types
+		// because well, we don't create declarations anyway
 	}
 	// The function to actually initialize a dyn_var, if it
 	// has been deferred. It is OKAY to call this even if defer_init
@@ -302,7 +337,11 @@ struct member_initializer_end {
 };
 
 template <typename T>
-struct dyn_var_parent_selector<T, typename std::enable_if<std::is_base_of<custom_type_base, T>::value>::type>
+struct dyn_var_parent_selector<T, 
+	typename std::enable_if<
+		std::is_class<T>::value && !std::is_base_of<var, T>::value 
+			&& !std::is_base_of<static_var_base, T>::value
+	>::type>
     : public member_initializer_begin<T>, public T, public member_initializer_end {};
 
 // Actual dyn_var implementation

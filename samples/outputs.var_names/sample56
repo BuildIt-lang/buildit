@@ -1,0 +1,57 @@
+FUNC_DECL
+  SCALAR_TYPE (VOID)
+  STMT_BLOCK
+    DECL_STMT
+      NAMED_TYPE (my_type)
+      VAR (a_0)
+      NO_INITIALIZATION
+    DECL_STMT
+      NAMED_TYPE (custom_struct0)
+      VAR (b_1)
+      NO_INITIALIZATION
+    EXPR_STMT
+      ASSIGN_EXPR
+        MEMBER_ACCESS_EXPR (nested)
+          VAR_EXPR
+            VAR (a_0)
+        VAR_EXPR
+          VAR (b_1)
+    EXPR_STMT
+      ASSIGN_EXPR
+        MEMBER_ACCESS_EXPR (mem0)
+          MEMBER_ACCESS_EXPR (nested)
+            VAR_EXPR
+              VAR (a_0)
+        MEMBER_ACCESS_EXPR (mem0)
+          VAR_EXPR
+            VAR (a_0)
+    EXPR_STMT
+      MINUS_EXPR
+        ASSIGN_EXPR
+          MEMBER_ACCESS_EXPR (mem1)
+            MEMBER_ACCESS_EXPR (nested)
+              VAR_EXPR
+                VAR (a_0)
+          PLUS_EXPR
+            MEMBER_ACCESS_EXPR (mem1)
+              MEMBER_ACCESS_EXPR (nested)
+                VAR_EXPR
+                  VAR (a_0)
+            INT_CONST (1)
+        INT_CONST (1)
+struct custom_struct0 {
+  int mem0;
+  float mem1;
+};
+struct my_type {
+  custom_struct0 nested;
+  int mem0;
+};
+void bar (void) {
+  my_type a_0;
+  custom_struct0 b_1;
+  a_0.nested = b_1;
+  (a_0.nested).mem0 = a_0.mem0;
+  ((a_0.nested).mem1 = (a_0.nested).mem1 + 1) - 1;
+}
+
