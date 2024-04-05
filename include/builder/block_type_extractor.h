@@ -8,6 +8,50 @@ namespace builder {
 
 struct custom_type_base;
 
+
+
+template <typename T>
+struct check_valid_type {
+	typedef void type;
+};
+
+extern int type_naming_counter;
+
+template <typename T, typename V=void>
+struct type_namer {
+	static std::string obtained_name;
+	static std::string get_type_name() {
+		if (obtained_name == "") {
+			obtained_name = "custom_struct" + std::to_string(type_naming_counter++);
+		}
+		return obtained_name;
+	}
+};
+template <typename T, typename V>
+std::string type_namer<T, V>::obtained_name = "";
+
+template <typename T>
+struct type_namer<T, typename check_valid_type<decltype(T::type_name)>::type> {
+	static std::string get_type_name() {
+		return T::type_name;
+	}
+};
+
+template <typename T, typename V=void>
+struct type_template {
+	static std::vector<block::type::Ptr> get_templates() {
+		return {};
+	}
+};
+
+template <typename T>
+struct type_template<T, typename check_valid_type<decltype(T::get_template_arg_types)>::type> {
+	static std::vector<block::type::Ptr> get_templates() {
+		return T::get_template_arg_types();
+	}
+};
+
+
 // The main definition of the type extractor classes
 template <typename T>
 class type_extractor {
@@ -15,11 +59,11 @@ public:
 	// This implementation is currenty only used
 	// by custom types which are derived from custom_type_base
 	static block::type::Ptr extract_type(void) {
-		static_assert(std::is_base_of<custom_type_base, T>::value,
-			      "Custom types should inherit from builder::custom_type_base");
+		//static_assert(std::is_base_of<custom_type_base, T>::value,
+			      //"Custom types should inherit from builder::custom_type_base");
 		block::named_type::Ptr type = std::make_shared<block::named_type>();
-		type->type_name = T::type_name;
-		type->template_args = T::get_template_arg_types();
+		type->type_name = type_namer<T>::get_type_name();
+		type->template_args = type_template<T>::get_templates();
 		return type;
 	}
 };
