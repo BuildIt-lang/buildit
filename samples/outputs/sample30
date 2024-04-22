@@ -22,7 +22,7 @@ STMT_BLOCK
   DECL_STMT
     SCALAR_TYPE (UNSIGNED_LONG_INT)
     VAR (var5)
-    NO_INITIALIZATION
+    INT_CONST (5)
   DECL_STMT
     SCALAR_TYPE (LONG_LONG_INT)
     VAR (var6)
@@ -64,8 +64,13 @@ STMT_BLOCK
         VAR (var13)
       STRING_CONST ("new string")
   DECL_STMT
-    SCALAR_TYPE (INT)
+    POINTER_TYPE
+      SCALAR_TYPE (CHAR)
     VAR (var14)
+    STRING_CONST ("Hello world")
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (var15)
     INT_CONST (0)
 {
   short int var0;
@@ -73,7 +78,7 @@ STMT_BLOCK
   int var2;
   unsigned int var3;
   long int var4;
-  unsigned long int var5;
+  unsigned long int var5 = 5ll;
   long long int var6;
   unsigned long long int var7 = 4ll;
   char var8;
@@ -83,5 +88,6 @@ STMT_BLOCK
   void* var12;
   char var13[] = "Hello world";
   var13 = "new string";
-  int var14 = 0;
+  char const* const volatile var14 = "Hello world";
+  int var15 = 0;
 }

@@ -15,7 +15,7 @@ static void foo(void) {
 	dyn_var<int> c;
 	dyn_var<unsigned int> d;
 	dyn_var<long> e;
-	dyn_var<unsigned long> f;
+	dyn_var<unsigned long> f = (unsigned long)5;
 	dyn_var<long long> g;
 	dyn_var<unsigned long long> h = (unsigned long long)4;
 	dyn_var<char> i;
@@ -25,6 +25,8 @@ static void foo(void) {
 	dyn_var<void *> m;
 	dyn_var<char[]> n = "Hello world";
 	n = "new string";
+
+	dyn_var<const char* const volatile> o = "Hello world";
 
 	// bool test, fixes a bug
 	// that causes false as an init value creates a variable

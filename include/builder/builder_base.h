@@ -102,6 +102,9 @@ public:
 		push_to_sequence(block_expr);
 	}
 
+	builder(const unsigned long &a): builder((unsigned long long)a){}
+	builder(const long &a): builder((long long)a){}
+
 	builder(const double &a) {
 		if (builder_precheck()) {
 			builder_from_sequence();

@@ -9,6 +9,9 @@ class type : public block {
 public:
 	typedef std::shared_ptr<type> Ptr;
 
+	bool is_const = false;
+	bool is_volatile = false;
+
 	virtual void accept(block_visitor *a) override {
 		a->visit(self<type>());
 	}
