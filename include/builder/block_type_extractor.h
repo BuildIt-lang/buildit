@@ -240,6 +240,42 @@ public:
 	}
 };
 
+template <typename T>
+class type_extractor<const T> {
+public:
+	static block::type::Ptr extract_type(void) {
+		block::type::Ptr type = type_extractor<T>::extract_type();
+		type->is_const = true;
+		return type;
+	}
+
+};
+
+template <typename T>
+class type_extractor<volatile T> {
+public:
+	static block::type::Ptr extract_type(void) {
+		block::type::Ptr type = type_extractor<T>::extract_type();
+		type->is_volatile = true;
+		return type;
+	}
+
+};
+
+template <typename T>
+class type_extractor<const volatile T> {
+public:
+	static block::type::Ptr extract_type(void) {
+		block::type::Ptr type = type_extractor<T>::extract_type();
+		type->is_volatile = true;
+		type->is_const = true;
+		return type;
+	}
+
+};
+
+
+
 // Type extractor for complete closure
 template <typename T>
 class type_extractor<dyn_var<T>> {
