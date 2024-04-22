@@ -43,6 +43,10 @@ static void bar(void) {
 	dyn_var<foo_t *> ptr = &g;
 	(*ptr).member = 0;
 	ptr->member = 1;
+
+	// This SHOULD produce a copy
+	dyn_var<foo_t> i = *ptr;
+	i.member = 3;
 }
 
 int main(int argc, char *argv[]) {
