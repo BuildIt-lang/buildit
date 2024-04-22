@@ -51,6 +51,19 @@ STMT_BLOCK
             VAR (ptr_3)
           INT_CONST (0)
       INT_CONST (1)
+  DECL_STMT
+    NAMED_TYPE (FooT)
+    VAR (i_4)
+    SQ_BKT_EXPR
+      VAR_EXPR
+        VAR (ptr_3)
+      INT_CONST (0)
+  EXPR_STMT
+    ASSIGN_EXPR
+      MEMBER_ACCESS_EXPR (member)
+        VAR_EXPR
+          VAR (i_4)
+      INT_CONST (3)
 {
   FooT g_0;
   g_0 = g_0 + 1;
@@ -60,4 +73,6 @@ STMT_BLOCK
   FooT* ptr_3 = (&(g_0));
   ptr_3->member = 0;
   ptr_3->member = 1;
+  FooT i_4 = ptr_3[0];
+  i_4.member = 3;
 }

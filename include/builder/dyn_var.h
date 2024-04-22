@@ -339,10 +339,10 @@ struct member_initializer_end {
 template <typename T>
 struct dyn_var_parent_selector<T, 
 	typename std::enable_if<
-		std::is_class<T>::value && !std::is_base_of<var, T>::value 
-			&& !std::is_base_of<static_var_base, T>::value
+		std::is_class<typename std::remove_reference<T>::type>::value && !std::is_base_of<var, typename std::remove_reference<T>::type>::value 
+			&& !std::is_base_of<static_var_base, typename std::remove_reference<T>::type>::value
 	>::type>
-    : public member_initializer_begin<T>, public T, public member_initializer_end {};
+    : public member_initializer_begin<T>, public std::remove_reference<T>::type, public member_initializer_end {};
 
 // Actual dyn_var implementation
 // Split design to allow for easily extending types with specialization
@@ -371,6 +371,23 @@ public:
 // dyn var specialization for pointer types to return the appropriate types on [], * and ->
 
 template <typename T>
+class dyn_var_mimic: public dyn_var<T> {
+	// Behaves exactly like a dyn_var for most purposes
+	// including accessign members	
+	// But allows us to disable copy elision when required
+	// Currently only used when returning dyn_vars from [] and * operators
+public:
+	typedef dyn_var<T> super;
+
+	using super::super;
+	using super::operator=;
+	builder operator=(const dyn_var_mimic<T> &t) {
+		return *this = (builder)t;
+	}
+};
+
+
+template <typename T>
 class dyn_var<T *>
     : public dyn_var_impl<T *> { // No need for parent selector, pointers types aren't custom types by themselves
 public:
@@ -387,10 +404,10 @@ public:
 	}
 
 	// Specialization for the [] operator to return the right type
-	dyn_var<T> operator[](const builder &bt) {
-		return (cast)this->dyn_var_impl<T *>::operator[](bt);
+	dyn_var_mimic<T> operator[](const builder &bt) {
+		return (dyn_var_mimic<T>)(cast)this->dyn_var_impl<T *>::operator[](bt);
 	}
-	dyn_var<T> operator*() {
+	dyn_var_mimic<T> operator*() {
 		return this->operator[](0);
 	}
 	// Hack for creating a member that's live across return site
