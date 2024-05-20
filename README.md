@@ -67,7 +67,7 @@ Checkout [D2X](https://buildit.so/d2x) a debugging library that works in tandem 
 
 ## Build and Run
 
-BuildIt is a pure library framework and does not require any special compiler support. To build the library, clone the repository, navigate to the top-level directory and run -
+BuildIt is a pure library framework and does not require any special compiler support. To build the library, clone the repository, navigate to the top-level directory and run (please make sure you are using [GNU-make](https://www.gnu.org/software/make/) and not just make) - 
 
     make
    
