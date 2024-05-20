@@ -20,6 +20,8 @@ static void bar(void) {
 		*y -= x;
 		y[x] /= 2;
 	}
+
+	(*y)++;
 }
 
 int main(int argc, char *argv[]) {
