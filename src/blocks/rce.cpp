@@ -30,6 +30,16 @@ public:
 		if (std::find(assigned_vars.begin(), assigned_vars.end(), v) == assigned_vars.end())
 			assigned_vars.push_back(v);
 	}
+	virtual void visit(addr_of_expr::Ptr e) override {
+		e->expr1->accept(this);
+		if (!isa<var_expr>(e->expr1))
+			return;
+		var_expr::Ptr ve = to<var_expr>(e->expr1);
+		var::Ptr v = ve->var1;
+		// Variables that have their addresses taken can potentially be assigned and hence should not be copy eliminated
+		if (std::find(assigned_vars.begin(), assigned_vars.end(), v) == assigned_vars.end())
+			assigned_vars.push_back(v);
+	}
 };
 
 class check_side_effects : public block_visitor {

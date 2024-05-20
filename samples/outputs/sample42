@@ -8,5 +8,6 @@ void bar (void) {
     var0[0] = var0[0] - var2;
     var0[var2] = var0[var2] / 2;
   }
+  (var0[0] = var0[0] + 1) - 1;
 }
 

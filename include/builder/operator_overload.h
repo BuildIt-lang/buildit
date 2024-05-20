@@ -156,22 +156,22 @@ typename return_type_helper<T>::type operator&(const T &a) {
 
 // Prefix increment
 template <typename T>
-typename return_type_helper<T>::type operator++(T &a) {
+typename return_type_helper<typename std::remove_reference<T>::type>::type operator++(T &&a) {
 	return (a = a + 1);
 }
 // Postfix increment
 template <typename T>
-typename return_type_helper<T>::type operator++(T &a, int) {
+typename return_type_helper<typename std::remove_reference<T>::type>::type operator++(T &&a, int) {
 	return ((a = a + 1) - 1);
 }
 // Prefix decrement
 template <typename T>
-typename return_type_helper<T>::type operator--(T &a) {
+typename return_type_helper<typename std::remove_reference<T>::type>::type operator--(T &&a) {
 	return (a = a - 1);
 }
 // Postfix increment
 template <typename T>
-typename return_type_helper<T>::type operator--(T &a, int) {
+typename return_type_helper<typename std::remove_reference<T>::type>::type operator--(T &&a, int) {
 	return ((a = a - 1) + 1);
 }
 
