@@ -3,209 +3,185 @@
 #include "blocks/block_visitor.h"
 #include "blocks/expr.h"
 #include "blocks/stmt.h"
-#include <algorithm>
 #include <map>
-#include <vector>
+#include <algorithm>
+
 namespace block {
 
-class var_use_counter : public block_visitor {
+// General utility visitor to find usage statistics
+class usage_counter: public block_visitor {
 public:
 	using block_visitor::visit;
-	std::map<var::Ptr, uint64_t> usage_count;
-	std::vector<var::Ptr> assigned_vars;
-	virtual void visit(var_expr::Ptr e) override {
+
+	std::map<var::Ptr, int> usage_count;
+	std::vector<var::Ptr> address_taken_vars;
+
+	virtual void visit(var_expr::Ptr e) override {	
 		var::Ptr v = e->var1;
 		if (usage_count.find(v) != usage_count.end())
 			usage_count[v]++;
 		else
 			usage_count[v] = 1;
-	}
-	virtual void visit(assign_expr::Ptr e) override {
-		e->var1->accept(this);
-		e->expr1->accept(this);
-		if (!isa<var_expr>(e->var1))
-			return;
-		var_expr::Ptr ve = to<var_expr>(e->var1);
-		var::Ptr v = ve->var1;
-		if (std::find(assigned_vars.begin(), assigned_vars.end(), v) == assigned_vars.end())
-			assigned_vars.push_back(v);
-	}
+	}	
+
+	// We don't care if variables are assigned to, but only ones that
+	// have their address taken. 
+	// TODO: also discard variables that have references bound to them
 	virtual void visit(addr_of_expr::Ptr e) override {
 		e->expr1->accept(this);
 		if (!isa<var_expr>(e->expr1))
 			return;
-		var_expr::Ptr ve = to<var_expr>(e->expr1);
-		var::Ptr v = ve->var1;
-		// Variables that have their addresses taken can potentially be assigned and hence should not be copy eliminated
-		if (std::find(assigned_vars.begin(), assigned_vars.end(), v) == assigned_vars.end())
-			assigned_vars.push_back(v);
+		var::Ptr v = to<var_expr>(e->expr1)->var1;
+		if (std::find(address_taken_vars.begin(), address_taken_vars.end(), v) == address_taken_vars.end())
+			address_taken_vars.push_back(v);	
 	}
 };
-
-class check_side_effects : public block_visitor {
+// General utility to check if an expression has side effects 
+class check_side_effects: public block_visitor {
 public:
 	using block_visitor::visit;
+
 	bool has_side_effects = false;
 	virtual void visit(assign_expr::Ptr) override {
 		has_side_effects = true;
 	}
+
 	virtual void visit(function_call_expr::Ptr) override {
-		has_side_effects = true;
-	}
-	virtual void visit(addr_of_expr::Ptr) override {
-		has_side_effects = true;
+		has_side_effects = true;	
 	}
 };
 
-class gather_rce_decls : public block_visitor {
-public:
-	using block_visitor::visit;
-	std::vector<decl_stmt::Ptr> gathered_decls;
-	// This are vars (y) that may have one use but the use is of the form int x = y (use of y)
-	// and x has multiple uses. When x is replaced with y it will have multiple uses
-	// so we want to black list such x's
-	std::vector<var::Ptr> duplicated_vars;
-	std::map<var::Ptr, uint64_t> usage_count;
-	std::vector<var::Ptr> assigned_vars;
 
-	virtual void visit(decl_stmt::Ptr decl) {
-		if (decl->init_expr == nullptr)
-			return;
-		var::Ptr v = decl->decl_var;
-		if (std::find(assigned_vars.begin(), assigned_vars.end(), v) != assigned_vars.end())
-			return;
-		int use_count = 0;
-		if (usage_count.find(v) != usage_count.end())
-			use_count = usage_count[v];
-		if (isa<var_expr>(decl->init_expr)) {
-			// This is time to blacklist y
-			if (use_count > 1) {
-				var_expr::Ptr ve = to<var_expr>(decl->init_expr);
-				var::Ptr v = ve->var1;
-				if (std::find(duplicated_vars.begin(), duplicated_vars.end(), v) ==
-				    duplicated_vars.end()) {
-					duplicated_vars.push_back(v);
-				}
-			}
-			gathered_decls.push_back(decl);
-			return;
-		}
+// Both RCE phases leave variables that have their addresses taken, untouched
 
-		if (use_count == 1) {
-			check_side_effects checker;
-			decl->init_expr->accept(&checker);
-			// We will also allow variables that are used exactly once
-			// and don't have side effects
-			if (checker.has_side_effects == false) {
-				gathered_decls.push_back(decl);
-				return;
-			}
-		}
-	}
-};
+// Phase 1 finds vars of the form int x = <complex expression> where x only has 
+// one use and <complex expression> has no side effects. 
+// With this, the substitution is stopped as soon as any side effect occurs, like assignment or function calls
 
-class replace_rce_vars : public block_replacer {
+class phase1_visitor: public block_replacer {
 public:
 	using block_replacer::visit;
-	std::vector<decl_stmt::Ptr> gathered_decls;
-	std::map<var::Ptr, decl_stmt::Ptr> var_decl_map;
-	std::vector<var::Ptr> perma_enabled_decls;
-	std::vector<var::Ptr> enabled_decls;
 
-	virtual void visit(decl_stmt::Ptr decl) override {
-		if (decl->init_expr)
-			decl->init_expr = rewrite(decl->init_expr);
-		if (std::find(gathered_decls.begin(), gathered_decls.end(), decl) != gathered_decls.end()) {
-			if (isa<var_expr>(decl->init_expr))
-				perma_enabled_decls.push_back(decl->decl_var);
-			else {
-				// Store decls that have a complex expression on the RHS
-				// separately, if there is any statement that has side-effects,
-				// we can immediately clear this
-				enabled_decls.push_back(decl->decl_var);
-			}
-		}
-		node = decl;
+	std::map<var::Ptr, expr::Ptr> value_map;
+	std::map<var::Ptr, int> usage_count;
+	std::vector<var::Ptr> address_taken_vars;
+	
+	virtual void visit(decl_stmt::Ptr ds) override {
+		// We are not changing decls, so this is okay to be written first
+		node = ds;
+
+		// Before we do anything, visit the RHS
+		// If there is no RHS, stop
+		if (ds->init_expr != nullptr)
+			ds->init_expr = rewrite(ds->init_expr);
+		else 
+			return;
+
+		// Check if this variable is eligible for phase 1 RCE
+		var::Ptr v = ds->decl_var;
+		// If the variable has no usage info, stop
+		if (usage_count.find(v) == usage_count.end())
+			return;
+		// If usage count > 1 stop
+		if (usage_count[v] > 1) 
+			return;
+		// If variable has its address taken stop
+		if (std::find(address_taken_vars.begin(), address_taken_vars.end(), v) != address_taken_vars.end())
+			return;
+		// Finally check if the init expr as side effects
+		check_side_effects checker;
+		ds->init_expr->accept(&checker);
+		if (checker.has_side_effects)
+			return;
+		
+		// All good, we are ready to substiture this variable
+		value_map[v] = ds->init_expr;
 	}
-	virtual void visit(assign_expr::Ptr assign) override {
-		assign->expr1 = rewrite(assign->expr1);
-		assign->var1 = rewrite(assign->var1);
-		enabled_decls.clear();
-		node = assign;
+
+	virtual void visit(stmt_block::Ptr sb) override {
+		node = sb;
+		for (unsigned int i = 0; i < sb->stmts.size(); i++) {
+			// Before we rewrite statements check if it has side effects
+			// If it does, clear the value map
+			check_side_effects checker;
+			sb->stmts[i]->accept(&checker);
+			if (checker.has_side_effects)
+				value_map.clear();
+			sb->stmts[i] = rewrite<stmt>(sb->stmts[i]);
+		}	
 	}
-	virtual void visit(addr_of_expr::Ptr addr) override {
-		addr->expr1 = rewrite(addr->expr1);
-		enabled_decls.clear();
-		node = addr;
-	}
-	virtual void visit(function_call_expr::Ptr f) override {
-		for (unsigned int i = 0; i < f->args.size(); i++) {
-			f->args[i] = rewrite(f->args[i]);
-		}
-		enabled_decls.clear();
-		node = f;
-	}
+
 	virtual void visit(var_expr::Ptr ve) override {
-		var::Ptr v = ve->var1;
-		if (std::find(perma_enabled_decls.begin(), perma_enabled_decls.end(), v) != perma_enabled_decls.end() ||
-		    std::find(enabled_decls.begin(), enabled_decls.end(), v) != enabled_decls.end()) {
-			decl_stmt::Ptr de = var_decl_map[v];
-			node = de->init_expr;
-		} else {
-			node = ve;
-		}
+		node = ve;
+		if (value_map.find(ve->var1) == value_map.end())
+			return;	
+		// If we have a substitution make it now
+		node = value_map[ve->var1];
 	}
 };
 
-class rce_decl_deleter : public block_visitor {
+class decl_deleter: public block_visitor {
 public:
 	using block_visitor::visit;
-	std::map<var::Ptr, uint64_t> usage_count;
-	virtual void visit(stmt_block::Ptr b) {
+	std::map<var::Ptr, int> usage_count;
+	virtual void visit(stmt_block::Ptr sb) override {
 		std::vector<stmt::Ptr> new_stmts;
-		for (auto stmt : b->stmts) {
-			if (isa<decl_stmt>(stmt)) {
-				var::Ptr v = to<decl_stmt>(stmt)->decl_var;
-				if (usage_count.find(v) != usage_count.end()) {
-					// TODO: ensure that we are not deleting decls who's RHS have side-effects
-					new_stmts.push_back(stmt);
-				}
-			} else {
+		for (auto stmt : sb->stmts) {
+			if (!isa<decl_stmt>(stmt)) {
+				stmt->accept(this);
 				new_stmts.push_back(stmt);
+				continue;
 			}
-			stmt->accept(this);
+			decl_stmt::Ptr ds = to<decl_stmt>(stmt);
+			var::Ptr dv = ds->decl_var;
+			if (usage_count.find(dv) != usage_count.end() && usage_count[dv] > 0) {
+				// No need to visit decl stmts, they cannot have decl stmts inside (right?)
+				new_stmts.push_back(stmt);
+				continue;
+			}
+			if (ds->init_expr != nullptr) {
+				check_side_effects checker;
+				ds->init_expr->accept(&checker);
+				if (checker.has_side_effects) {
+					new_stmts.push_back(stmt);
+					continue;
+				}
+			}
+			// All good, we are ready to drop
 		}
-		b->stmts = new_stmts;
+		sb->stmts = new_stmts;
 	}
 };
 
-void eliminate_redundant_vars(block::Ptr ast) {
-	var_use_counter counter;
+static void rce_phase1(block::Ptr ast) {
+	// gather general statistics first
+	usage_counter counter;
 	ast->accept(&counter);
-	gather_rce_decls gatherer;
-	gatherer.usage_count = counter.usage_count;
-	gatherer.assigned_vars = counter.assigned_vars;
-	ast->accept(&gatherer);
 
-	replace_rce_vars replacer;
-	for (auto decl : gatherer.gathered_decls) {
-		var::Ptr v = decl->decl_var;
 
-		if (!isa<var_expr>(decl->init_expr) &&
-		    std::find(gatherer.duplicated_vars.begin(), gatherer.duplicated_vars.end(), v) !=
-			gatherer.duplicated_vars.end())
-			continue;
-		replacer.gathered_decls.push_back(decl);
-		replacer.var_decl_map[v] = decl;
-	}
-	ast->accept(&replacer);
-	// Now that all th replacements have been done, we will decls that are not used
-	var_use_counter post_counter;
-	ast->accept(&post_counter);
+	phase1_visitor p1v;
+	p1v.usage_count = counter.usage_count;
+	p1v.address_taken_vars = counter.address_taken_vars;
+	ast->accept(&p1v);
+	
+	// Perform a second usage count before cleanup
+	usage_counter counter2;
+	ast->accept(&counter2);
 
-	rce_decl_deleter deleter;
-	deleter.usage_count = post_counter.usage_count;
+	decl_deleter deleter;
+	deleter.usage_count = counter2.usage_count;
 	ast->accept(&deleter);
+	
+	// Phase 1 RCE done	
+	
 }
 
-} // namespace block
+static void rce_phase2(block::Ptr ast) {
+}
+
+void eliminate_redundant_vars(block::Ptr ast) {
+	rce_phase1(ast);	
+	rce_phase2(ast);
+}
+
+}
