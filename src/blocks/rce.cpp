@@ -51,6 +51,12 @@ public:
 	}
 };
 
+static bool has_side_effects(block::Ptr b) {
+	check_side_effects checker;
+	b->accept(&checker);
+	return checker.has_side_effects;	
+}
+	
 
 // Both RCE phases leave variables that have their addresses taken, untouched
 
@@ -72,9 +78,11 @@ public:
 
 		// Before we do anything, visit the RHS
 		// If there is no RHS, stop
-		if (ds->init_expr != nullptr)
+		if (ds->init_expr != nullptr) {
+			if (has_side_effects(ds->init_expr))
+				value_map.clear();
 			ds->init_expr = rewrite(ds->init_expr);
-		else 
+		} else 
 			return;
 
 		// Check if this variable is eligible for phase 1 RCE
@@ -89,27 +97,58 @@ public:
 		if (std::find(address_taken_vars.begin(), address_taken_vars.end(), v) != address_taken_vars.end())
 			return;
 		// Finally check if the init expr as side effects
-		check_side_effects checker;
-		ds->init_expr->accept(&checker);
-		if (checker.has_side_effects)
+		if (has_side_effects(ds->init_expr))
 			return;
 		
 		// All good, we are ready to substiture this variable
 		value_map[v] = ds->init_expr;
 	}
 
-	virtual void visit(stmt_block::Ptr sb) override {
-		node = sb;
-		for (unsigned int i = 0; i < sb->stmts.size(); i++) {
-			// Before we rewrite statements check if it has side effects
-			// If it does, clear the value map
-			check_side_effects checker;
-			sb->stmts[i]->accept(&checker);
-			if (checker.has_side_effects)
-				value_map.clear();
-			sb->stmts[i] = rewrite<stmt>(sb->stmts[i]);
-		}	
+	virtual void visit(expr_stmt::Ptr es) override {
+		node = es;
+
+		// TODO: Special case for top-level assign exprs to defer clearing if each 
+		// subexpression has no side effects
+
+		if (has_side_effects(es->expr1))
+			value_map.clear();
+		es->expr1 = rewrite(es->expr1);	
 	}
+
+	virtual void visit(return_stmt::Ptr rs) override {
+		node = rs;
+		if (has_side_effects(rs->return_val))
+			value_map.clear();
+		rs->return_val = rewrite(rs->return_val);
+	}
+	
+	virtual void visit(while_stmt::Ptr ws) override {
+		node = ws;
+		if (has_side_effects(ws->cond))
+			value_map.clear();
+		ws->cond = rewrite(ws->cond);
+		ws->body = rewrite<stmt>(ws->body);
+	}
+	virtual void visit(for_stmt::Ptr fs) override {
+		node = fs;
+		fs->decl_stmt = rewrite<stmt>(fs->decl_stmt);
+		if (has_side_effects(fs->cond))
+			value_map.clear();
+		if (has_side_effects(fs->update))
+			value_map.clear();
+		fs->cond = rewrite(fs->cond);
+		fs->update = rewrite(fs->update);
+		fs->body = rewrite<stmt>(fs->body);
+	}
+	virtual void visit(if_stmt::Ptr is) override {
+		node = is;
+		if (has_side_effects(is->cond)) 
+			value_map.clear();
+		is->cond = rewrite(is->cond);
+		is->then_stmt = rewrite<stmt>(is->then_stmt);
+		is->else_stmt = rewrite<stmt>(is->else_stmt);
+	}
+
 
 	virtual void visit(var_expr::Ptr ve) override {
 		node = ve;
