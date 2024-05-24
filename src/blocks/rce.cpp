@@ -4,6 +4,7 @@
 #include "blocks/expr.h"
 #include "blocks/stmt.h"
 #include <map>
+#include <set>
 #include <algorithm>
 
 namespace block {
@@ -159,6 +160,116 @@ public:
 	}
 };
 
+
+
+// Utility class to find modified variables from an expression
+class side_effects_gather: public block_visitor {
+public:
+	using block_visitor::visit;
+	std::set<var::Ptr> modify_set;
+	virtual void visit(assign_expr::Ptr ae) {
+		if (isa<var_expr>(ae->var1)) {
+			var::Ptr v = to<var_expr>(ae->var1)->var1;
+			modify_set.insert(v);	
+		}
+	}	
+};
+
+
+// Phase 2 finds vars of the form int x = y where x can have more than one use. 
+// With this, the substitution is stopped as soon as either of x or y are modified
+// Variables that have their addresses taken are discarded from both the x and y
+
+class phase2_visitor: public block_replacer {
+public:
+	using block_replacer::visit;
+
+	std::map<var::Ptr, var::Ptr> value_map;
+	std::vector<var::Ptr> address_taken_vars;
+
+
+	void purge_side_effects(expr::Ptr e) {
+		side_effects_gather gatherer;
+		e->accept(&gatherer);
+		for (auto pair: value_map) {
+			var::Ptr v1 = pair.first;
+			var::Ptr v2 = pair.second;
+			if (gatherer.modify_set.find(v1) != gatherer.modify_set.end() || gatherer.modify_set.find(v2) 
+				!= gatherer.modify_set.end()) {
+				value_map[v1] = nullptr;
+			}	
+		}
+	}
+
+	virtual void visit(decl_stmt::Ptr ds) override {
+		node = ds;
+		// Before handling this decl, process the RHS
+		if (ds->init_expr) {
+			purge_side_effects(ds->init_expr);
+			ds->init_expr = rewrite(ds->init_expr);
+		} else {
+			return;
+		}
+			
+		// Only keep decls of the form int x = y;
+		if (!isa<var_expr>(ds->init_expr))
+			return;	
+		var::Ptr v1 = ds->decl_var;
+		var::Ptr v2 = to<var_expr>(ds->init_expr)->var1;
+
+		// If either of the two have address taken, discard
+		if (std::find(address_taken_vars.begin(), address_taken_vars.end(), v1) != address_taken_vars.end())
+			return;
+		if (std::find(address_taken_vars.begin(), address_taken_vars.end(), v2) != address_taken_vars.end())
+			return;
+
+		value_map[v1] = v2;
+	}
+	
+	virtual void visit(expr_stmt::Ptr es) {
+		node = es;
+		purge_side_effects(es->expr1);
+		es->expr1 = rewrite(es->expr1);
+	}
+
+	virtual void visit(return_stmt::Ptr rs) {
+		node = rs;
+		purge_side_effects(rs->return_val);
+		rs->return_val = rewrite(rs->return_val);
+	}
+
+	virtual void visit(while_stmt::Ptr ws) {
+		node = ws;
+		purge_side_effects(ws->cond);
+		ws->cond = rewrite(ws->cond);
+		ws->body = rewrite<stmt>(ws->body);
+	}
+
+	virtual void visit(for_stmt::Ptr fs) {
+		node = fs;
+		fs->decl_stmt = rewrite<stmt>(fs->decl_stmt);
+		purge_side_effects(fs->cond);
+		purge_side_effects(fs->update);
+		fs->cond = rewrite(fs->cond);
+		fs->update = rewrite(fs->update);
+		fs->body = rewrite<stmt>(fs->body);
+	}
+	virtual void visit(if_stmt::Ptr is) {
+		node = is;
+		purge_side_effects(is->cond);
+		is->cond = rewrite(is->cond);
+		is->then_stmt = rewrite<stmt>(is->then_stmt);
+		is->else_stmt = rewrite<stmt>(is->else_stmt);
+	}
+	
+	virtual void visit(var_expr::Ptr ve) {
+		node = ve;
+		var::Ptr v1 = ve->var1;
+		if (value_map.find(v1) != value_map.end() && value_map[v1] != nullptr)
+			ve->var1 = value_map[v1];
+	}
+};
+
 class decl_deleter: public block_visitor {
 public:
 	using block_visitor::visit;
@@ -197,11 +308,20 @@ static void rce_phase1(block::Ptr ast) {
 	usage_counter counter;
 	ast->accept(&counter);
 
-
+	// Phase 1 RCE
 	phase1_visitor p1v;
 	p1v.usage_count = counter.usage_count;
 	p1v.address_taken_vars = counter.address_taken_vars;
 	ast->accept(&p1v);
+
+	// Phase 2 RCE
+	// Since Phase 2 RCE only uses address_taken
+	// we don't need to run usage_counter again	
+
+	phase2_visitor p2v;
+	p2v.address_taken_vars = counter.address_taken_vars;
+	ast->accept(&p2v);
+
 	
 	// Perform a second usage count before cleanup
 	usage_counter counter2;
@@ -210,12 +330,14 @@ static void rce_phase1(block::Ptr ast) {
 	decl_deleter deleter;
 	deleter.usage_count = counter2.usage_count;
 	ast->accept(&deleter);
-	
-	// Phase 1 RCE done	
-	
 }
 
 static void rce_phase2(block::Ptr ast) {
+	// phase 2 also needs usage information
+	// for filtering out variables that have their address taken
+
+	usage_counter counter;
+	ast->accept(&counter);
 }
 
 void eliminate_redundant_vars(block::Ptr ast) {
