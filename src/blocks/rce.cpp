@@ -303,17 +303,15 @@ public:
 	}
 };
 
-static void rce_phase1(block::Ptr ast) {
-	// gather general statistics first
-	usage_counter counter;
-	ast->accept(&counter);
-
+static void rce_phase1(block::Ptr ast, const usage_counter& counter) {
 	// Phase 1 RCE
 	phase1_visitor p1v;
 	p1v.usage_count = counter.usage_count;
 	p1v.address_taken_vars = counter.address_taken_vars;
 	ast->accept(&p1v);
+}
 
+static void rce_phase2(block::Ptr ast, const usage_counter& counter) {
 	// Phase 2 RCE
 	// Since Phase 2 RCE only uses address_taken
 	// we don't need to run usage_counter again	
@@ -321,8 +319,16 @@ static void rce_phase1(block::Ptr ast) {
 	phase2_visitor p2v;
 	p2v.address_taken_vars = counter.address_taken_vars;
 	ast->accept(&p2v);
+}
 
-	
+void eliminate_redundant_vars(block::Ptr ast) {
+	// gather general statistics first
+	usage_counter counter;
+	ast->accept(&counter);
+
+	rce_phase1(ast, counter);	
+	rce_phase2(ast, counter);
+
 	// Perform a second usage count before cleanup
 	usage_counter counter2;
 	ast->accept(&counter2);
@@ -330,19 +336,6 @@ static void rce_phase1(block::Ptr ast) {
 	decl_deleter deleter;
 	deleter.usage_count = counter2.usage_count;
 	ast->accept(&deleter);
-}
-
-static void rce_phase2(block::Ptr ast) {
-	// phase 2 also needs usage information
-	// for filtering out variables that have their address taken
-
-	usage_counter counter;
-	ast->accept(&counter);
-}
-
-void eliminate_redundant_vars(block::Ptr ast) {
-	rce_phase1(ast);	
-	rce_phase2(ast);
 }
 
 }
