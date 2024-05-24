@@ -167,7 +167,7 @@ class side_effects_gather: public block_visitor {
 public:
 	using block_visitor::visit;
 	std::set<var::Ptr> modify_set;
-	virtual void visit(assign_expr::Ptr ae) {
+	virtual void visit(assign_expr::Ptr ae) override {
 		if (isa<var_expr>(ae->var1)) {
 			var::Ptr v = to<var_expr>(ae->var1)->var1;
 			modify_set.insert(v);	
@@ -226,26 +226,26 @@ public:
 		value_map[v1] = v2;
 	}
 	
-	virtual void visit(expr_stmt::Ptr es) {
+	virtual void visit(expr_stmt::Ptr es) override {
 		node = es;
 		purge_side_effects(es->expr1);
 		es->expr1 = rewrite(es->expr1);
 	}
 
-	virtual void visit(return_stmt::Ptr rs) {
+	virtual void visit(return_stmt::Ptr rs) override {
 		node = rs;
 		purge_side_effects(rs->return_val);
 		rs->return_val = rewrite(rs->return_val);
 	}
 
-	virtual void visit(while_stmt::Ptr ws) {
+	virtual void visit(while_stmt::Ptr ws) override {
 		node = ws;
 		purge_side_effects(ws->cond);
 		ws->cond = rewrite(ws->cond);
 		ws->body = rewrite<stmt>(ws->body);
 	}
 
-	virtual void visit(for_stmt::Ptr fs) {
+	virtual void visit(for_stmt::Ptr fs) override {
 		node = fs;
 		fs->decl_stmt = rewrite<stmt>(fs->decl_stmt);
 		purge_side_effects(fs->cond);
@@ -254,7 +254,7 @@ public:
 		fs->update = rewrite(fs->update);
 		fs->body = rewrite<stmt>(fs->body);
 	}
-	virtual void visit(if_stmt::Ptr is) {
+	virtual void visit(if_stmt::Ptr is) override {
 		node = is;
 		purge_side_effects(is->cond);
 		is->cond = rewrite(is->cond);
@@ -262,7 +262,7 @@ public:
 		is->else_stmt = rewrite<stmt>(is->else_stmt);
 	}
 	
-	virtual void visit(var_expr::Ptr ve) {
+	virtual void visit(var_expr::Ptr ve) override {
 		node = ve;
 		var::Ptr v1 = ve->var1;
 		if (value_map.find(v1) != value_map.end() && value_map[v1] != nullptr)
