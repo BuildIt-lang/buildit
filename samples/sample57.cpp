@@ -16,6 +16,15 @@ static void bar(void) {
     dyn_var<int*> y = &x;
     
     (*y)++;
+
+    dyn_var<int> z = 0;
+    z++;
+
+    dyn_var<int> a = z;
+    z++;
+
+    dyn_var<int> b = a;
+    b++;
      
      
 }
