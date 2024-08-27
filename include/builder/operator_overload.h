@@ -60,6 +60,11 @@ typename allowed_builder_return<T1, T2>::type operator|(const T1 &a, const T2 &b
 	typedef typename allowed_builder_return<T1, T2>::type ret_type;
 	return ret_type(a).template builder_binary_op<block::bitwise_or_expr>((ret_type)b);
 }
+template <typename T1, typename T2>
+typename allowed_builder_return<T1, T2>::type operator^(const T1 &a, const T2 &b) {
+	typedef typename allowed_builder_return<T1, T2>::type ret_type;
+	return ret_type(a).template builder_binary_op<block::bitwise_xor_expr>((ret_type)b);
+}
 
 template <typename T1, typename T2>
 typename allowed_builder_return<T1, T2>::type operator+(const T1 &a, const T2 &b) {
@@ -147,6 +152,12 @@ typename return_type_helper<T>::type operator!(const T &a) {
 }
 
 template <typename T>
+typename return_type_helper<T>::type operator~(const T &a) {
+	typedef typename return_type_helper<T>::type ret_type;
+	return ret_type(a).template builder_unary_op<block::bitwise_not_expr>();
+}
+
+template <typename T>
 typename return_type_helper<T>::type operator&(const T &a) {
 	typedef typename return_type_helper<T>::type ret_type;
 	return ret_type(a).template builder_unary_op<block::addr_of_expr>();
@@ -190,6 +201,18 @@ typename allowed_builder_return<typename std::remove_reference<T1>::type, T2>::t
 template <typename T1, typename T2>
 typename allowed_builder_return<typename std::remove_reference<T1>::type, T2>::type operator/=(T1 &&a, const T2 &b) {
 	return (a = a / b);
+}
+template <typename T1, typename T2>
+typename allowed_builder_return<typename std::remove_reference<T1>::type, T2>::type operator&=(T1 &&a, const T2 &b) {
+	return (a = a & b);
+}
+template <typename T1, typename T2>
+typename allowed_builder_return<typename std::remove_reference<T1>::type, T2>::type operator|=(T1 &&a, const T2 &b) {
+	return (a = a | b);
+}
+template <typename T1, typename T2>
+typename allowed_builder_return<typename std::remove_reference<T1>::type, T2>::type operator^=(T1 &&a, const T2 &b) {
+	return (a = a ^ b);
 }
 
 } // namespace builder

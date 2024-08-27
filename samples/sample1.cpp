@@ -17,6 +17,13 @@ static void foo(void) {
 	a | 2;
 	a >> 2;
 	b << 3;
+	a ^ b;
+	a+=b;
+	b*=b;
+	a&=b;
+	a|=b;
+	a^=b;
+	~b;
 }
 int main(int argc, char *argv[]) {
 	builder::builder_context context;

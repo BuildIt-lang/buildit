@@ -83,6 +83,19 @@ public:
 	}
 };
 
+// For the bitwise not operator
+class bitwise_not_expr : public unary_expr {
+public:
+	typedef std::shared_ptr<bitwise_not_expr> Ptr;
+	virtual void dump(std::ostream &, int) override;
+	virtual void accept(block_visitor *a) override {
+		a->visit(self<bitwise_not_expr>());
+	}
+	virtual bool is_same(block::Ptr other) override {
+		return unary_is_same(self<bitwise_not_expr>(), other);
+	}
+};
+
 class and_expr : public binary_expr {
 public:
 	typedef std::shared_ptr<and_expr> Ptr;
@@ -128,6 +141,18 @@ public:
 	}
 	virtual bool is_same(block::Ptr other) override {
 		return binary_is_same(self<bitwise_or_expr>(), other);
+	}
+};
+
+class bitwise_xor_expr : public binary_expr {
+public:
+	typedef std::shared_ptr<bitwise_xor_expr> Ptr;
+	virtual void dump(std::ostream &, int) override;
+	virtual void accept(block_visitor *a) override {
+		a->visit(self<bitwise_xor_expr>());
+	}
+	virtual bool is_same(block::Ptr other) override {
+		return binary_is_same(self<bitwise_xor_expr>(), other);
 	}
 };
 

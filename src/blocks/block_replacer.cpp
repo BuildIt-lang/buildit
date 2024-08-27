@@ -27,6 +27,9 @@ void block_replacer::visit(binary_expr::Ptr a) {
 void block_replacer::visit(not_expr::Ptr a) {
 	unary_helper(a);
 }
+void block_replacer::visit(bitwise_not_expr::Ptr a) {
+	unary_helper(a);
+}
 void block_replacer::visit(and_expr::Ptr a) {
 	binary_helper(a);
 }
@@ -37,6 +40,9 @@ void block_replacer::visit(or_expr::Ptr a) {
 	binary_helper(a);
 }
 void block_replacer::visit(bitwise_or_expr::Ptr a) {
+	binary_helper(a);
+}
+void block_replacer::visit(bitwise_xor_expr::Ptr a) {
 	binary_helper(a);
 }
 void block_replacer::visit(plus_expr::Ptr a) {

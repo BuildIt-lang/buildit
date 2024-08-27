@@ -30,6 +30,11 @@ void not_expr::dump(std::ostream &oss, int indent) {
 	oss << "NOT_EXPR" << std::endl;
 	expr1->dump(oss, indent + 1);
 }
+void bitwise_not_expr::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "BITWISE_NOT_EXPR" << std::endl;
+	expr1->dump(oss, indent + 1);
+}
 void and_expr::dump(std::ostream &oss, int indent) {
 	printer::indent(oss, indent);
 	oss << "AND_EXPR" << std::endl;
@@ -51,6 +56,12 @@ void or_expr::dump(std::ostream &oss, int indent) {
 void bitwise_or_expr::dump(std::ostream &oss, int indent) {
 	printer::indent(oss, indent);
 	oss << "BITWISE_OR_EXPR" << std::endl;
+	expr1->dump(oss, indent + 1);
+	expr2->dump(oss, indent + 1);
+}
+void bitwise_xor_expr::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "BITWISE_xOR_EXPR" << std::endl;
 	expr1->dump(oss, indent + 1);
 	expr2->dump(oss, indent + 1);
 }
