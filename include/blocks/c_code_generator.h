@@ -33,10 +33,12 @@ public:
 	void nextl(void);
 
 	virtual void visit(not_expr::Ptr);
+	virtual void visit(bitwise_not_expr::Ptr);
 	virtual void visit(and_expr::Ptr);
 	virtual void visit(bitwise_and_expr::Ptr);
 	virtual void visit(or_expr::Ptr);
 	virtual void visit(bitwise_or_expr::Ptr);
+	virtual void visit(bitwise_xor_expr::Ptr);
 	virtual void visit(plus_expr::Ptr);
 	virtual void visit(minus_expr::Ptr);
 	virtual void visit(mul_expr::Ptr);

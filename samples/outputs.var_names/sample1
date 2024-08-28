@@ -50,6 +50,61 @@ STMT_BLOCK
       VAR_EXPR
         VAR (b_1)
       INT_CONST (3)
+  EXPR_STMT
+    BITWISE_XOR_EXPR
+      VAR_EXPR
+        VAR (a_0)
+      VAR_EXPR
+        VAR (b_1)
+  EXPR_STMT
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (a_0)
+      PLUS_EXPR
+        VAR_EXPR
+          VAR (a_0)
+        VAR_EXPR
+          VAR (b_1)
+  EXPR_STMT
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (b_1)
+      MUL_EXPR
+        VAR_EXPR
+          VAR (b_1)
+        VAR_EXPR
+          VAR (b_1)
+  EXPR_STMT
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (a_0)
+      BITWISE_AND_EXPR
+        VAR_EXPR
+          VAR (a_0)
+        VAR_EXPR
+          VAR (b_1)
+  EXPR_STMT
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (a_0)
+      BITWISE_OR_EXPR
+        VAR_EXPR
+          VAR (a_0)
+        VAR_EXPR
+          VAR (b_1)
+  EXPR_STMT
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (a_0)
+      BITWISE_XOR_EXPR
+        VAR_EXPR
+          VAR (a_0)
+        VAR_EXPR
+          VAR (b_1)
+  EXPR_STMT
+    BITWISE_NOT_EXPR
+      VAR_EXPR
+        VAR (b_1)
 {
   int a_0 = 0;
   int b_1 = a_0;
@@ -61,4 +116,11 @@ STMT_BLOCK
   a_0 | 2;
   a_0 >> 2;
   b_1 << 3;
+  a_0 ^ b_1;
+  a_0 = a_0 + b_1;
+  b_1 = b_1 * b_1;
+  a_0 = a_0 & b_1;
+  a_0 = a_0 | b_1;
+  a_0 = a_0 ^ b_1;
+  ~(b_1);
 }
