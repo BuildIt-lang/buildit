@@ -51,7 +51,7 @@ STMT_BLOCK
         VAR (var1)
       INT_CONST (3)
   EXPR_STMT
-    BITWISE_xOR_EXPR
+    BITWISE_XOR_EXPR
       VAR_EXPR
         VAR (var0)
       VAR_EXPR
@@ -96,7 +96,7 @@ STMT_BLOCK
     ASSIGN_EXPR
       VAR_EXPR
         VAR (var0)
-      BITWISE_xOR_EXPR
+      BITWISE_XOR_EXPR
         VAR_EXPR
           VAR (var0)
         VAR_EXPR
