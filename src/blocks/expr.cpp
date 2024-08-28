@@ -61,7 +61,7 @@ void bitwise_or_expr::dump(std::ostream &oss, int indent) {
 }
 void bitwise_xor_expr::dump(std::ostream &oss, int indent) {
 	printer::indent(oss, indent);
-	oss << "BITWISE_xOR_EXPR" << std::endl;
+	oss << "BITWISE_XOR_EXPR" << std::endl;
 	expr1->dump(oss, indent + 1);
 	expr2->dump(oss, indent + 1);
 }
