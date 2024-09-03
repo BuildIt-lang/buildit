@@ -48,6 +48,12 @@ void c_code_generator::visit(not_expr::Ptr a) {
 	oss << ")";
 }
 
+void c_code_generator::visit(unary_minus_expr::Ptr a) {
+	oss << "-(";
+	a->expr1->accept(this);
+	oss << ")";
+}
+
 void c_code_generator::visit(bitwise_not_expr::Ptr a) {
 	oss << "~(";
 	a->expr1->accept(this);

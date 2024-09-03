@@ -152,6 +152,12 @@ typename return_type_helper<T>::type operator!(const T &a) {
 }
 
 template <typename T>
+typename return_type_helper<T>::type operator-(const T &a) {
+	typedef typename return_type_helper<T>::type ret_type;
+	return ret_type(a).template builder_unary_op<block::unary_minus_expr>();
+}
+
+template <typename T>
 typename return_type_helper<T>::type operator~(const T &a) {
 	typedef typename return_type_helper<T>::type ret_type;
 	return ret_type(a).template builder_unary_op<block::bitwise_not_expr>();

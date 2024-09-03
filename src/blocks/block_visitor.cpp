@@ -14,6 +14,9 @@ void block_visitor::visit(binary_expr::Ptr a) {
 void block_visitor::visit(not_expr::Ptr a) {
 	a->expr1->accept(this);
 }
+void block_visitor::visit(unary_minus_expr::Ptr a) {
+	a->expr1->accept(this);
+}
 void block_visitor::visit(bitwise_not_expr::Ptr a) {
 	a->expr1->accept(this);
 }
