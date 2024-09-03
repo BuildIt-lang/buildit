@@ -8,6 +8,7 @@ class expr;
 class unary_expr;
 class binary_expr;
 class not_expr;
+class unary_minus_expr;
 class bitwise_not_expr;
 class and_expr;
 class bitwise_and_expr;
@@ -73,6 +74,7 @@ public:
 	virtual void visit(std::shared_ptr<expr>);
 	virtual void visit(std::shared_ptr<unary_expr>);
 	virtual void visit(std::shared_ptr<binary_expr>);
+	virtual void visit(std::shared_ptr<unary_minus_expr>);
 	virtual void visit(std::shared_ptr<not_expr>);
 	virtual void visit(std::shared_ptr<bitwise_not_expr>);
 	virtual void visit(std::shared_ptr<and_expr>);

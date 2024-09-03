@@ -82,7 +82,18 @@ public:
 		return unary_is_same(self<not_expr>(), other);
 	}
 };
-
+// For the unary minus operator
+class unary_minus_expr : public unary_expr {
+public:
+	typedef std::shared_ptr<unary_minus_expr> Ptr;
+	virtual void dump(std::ostream &, int) override;
+	virtual void accept(block_visitor *a) override {
+		a->visit(self<unary_minus_expr>());
+	}
+	virtual bool is_same(block::Ptr other) override {
+		return unary_is_same(self<unary_minus_expr>(), other);
+	}
+};
 // For the bitwise not operator
 class bitwise_not_expr : public unary_expr {
 public:
