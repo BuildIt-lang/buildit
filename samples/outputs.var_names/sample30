@@ -69,8 +69,12 @@ STMT_BLOCK
     VAR (o_14)
     STRING_CONST ("Hello world")
   DECL_STMT
+    SCALAR_TYPE (BOOL)
+    VAR (p_15)
+    INT_CONST (1)
+  DECL_STMT
     SCALAR_TYPE (INT)
-    VAR (x_15)
+    VAR (x_16)
     INT_CONST (0)
 {
   short int a_0;
@@ -89,5 +93,6 @@ STMT_BLOCK
   char n_13[] = "Hello world";
   n_13 = "new string";
   char const* const volatile o_14 = "Hello world";
-  int x_15 = 0;
+  bool p_15 = 1;
+  int x_16 = 0;
 }

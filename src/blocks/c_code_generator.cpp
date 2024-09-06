@@ -233,6 +233,9 @@ void c_code_generator::visit(scalar_type::Ptr type) {
 	case scalar_type::DOUBLE_TYPE:
 		oss << "double";
 		break;
+	case scalar_type::BOOL_TYPE:
+		oss << "bool";
+		break;
 	default:
 		assert(false && "Invalid scalar type");
 	}

@@ -187,6 +187,15 @@ public:
 	}
 };
 
+template <>
+class type_extractor<bool> {
+public:
+	static block::type::Ptr extract_type(void) {
+		block::scalar_type::Ptr type = std::make_shared<block::scalar_type>();
+		type->scalar_type_id = block::scalar_type::BOOL_TYPE;
+		return type;
+	}
+};
 // Type specialization for pointer type
 template <typename T>
 class type_extractor<T *> {

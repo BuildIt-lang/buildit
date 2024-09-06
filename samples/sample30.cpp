@@ -28,6 +28,8 @@ static void foo(void) {
 
 	dyn_var<const char* const volatile> o = "Hello world";
 
+	dyn_var<bool> p = true;
+
 	// bool test, fixes a bug
 	// that causes false as an init value creates a variable
 	// without context

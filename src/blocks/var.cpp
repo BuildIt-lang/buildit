@@ -41,6 +41,8 @@ void scalar_type::dump(std::ostream &oss, int indent) {
 		oss << "FLOAT";
 	else if (scalar_type_id == DOUBLE_TYPE)
 		oss << "DOUBLE";
+	else if (scalar_type_id == BOOL_TYPE)
+		oss << "BOOL";
 	oss << ")" << std::endl;
 }
 void pointer_type::dump(std::ostream &oss, int indent) {
