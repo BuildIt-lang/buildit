@@ -33,7 +33,8 @@ public:
 		UNSIGNED_CHAR_TYPE,
 		VOID_TYPE,
 		FLOAT_TYPE,
-		DOUBLE_TYPE
+		DOUBLE_TYPE,
+		BOOL_TYPE
 	} scalar_type_id;
 	virtual void accept(block_visitor *a) override {
 		a->visit(self<scalar_type>());
