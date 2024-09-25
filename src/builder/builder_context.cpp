@@ -280,6 +280,10 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 	std::vector<bool> b;
 
 	block::stmt::Ptr ast = extract_ast_from_function_internal(b);
+
+	// Before making any changes, untangle the whole AST
+	ast = clone(ast);
+
 	block::var_namer::name_vars(ast);
 
 	block::label_collector collector;

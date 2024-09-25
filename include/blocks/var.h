@@ -17,6 +17,15 @@ public:
 	}
 	virtual void dump(std::ostream &, int) override;
 };
+
+template <typename T>
+std::shared_ptr<T> clone_type(T* t) {
+	auto np = clone_obj(t);
+	np->is_const = t->is_const;
+	np->is_volatile = t->is_volatile;
+	return np;	
+}
+
 class scalar_type : public type {
 public:
 	typedef std::shared_ptr<scalar_type> Ptr;
@@ -40,6 +49,12 @@ public:
 		a->visit(self<scalar_type>());
 	}
 	virtual void dump(std::ostream &, int) override;
+
+	virtual block::Ptr clone_impl(void) override {
+		auto np = clone_type(this);
+		np->scalar_type_id = scalar_type_id;
+		return np;
+	}
 };
 
 class pointer_type : public type {
@@ -50,6 +65,11 @@ public:
 		a->visit(self<pointer_type>());
 	}
 	virtual void dump(std::ostream &, int) override;
+	virtual block::Ptr clone_impl(void) override {
+		auto np = clone_type(this);
+		np->pointee_type = clone(pointee_type);
+		return np;
+	}
 };
 
 class reference_type : public type {
@@ -60,6 +80,11 @@ public:
 		a->visit(self<reference_type>());
 	}
 	virtual void dump(std::ostream &, int) override;
+	virtual block::Ptr clone_impl(void) override {
+		auto np = clone_type(this);
+		np->referenced_type = clone(referenced_type);
+		return np;
+	}
 };
 
 class function_type : public type {
@@ -73,6 +98,14 @@ public:
 	std::vector<type::Ptr> arg_types;
 
 	virtual void dump(std::ostream &, int) override;
+	virtual block::Ptr clone_impl(void) override {
+		auto np = clone_type(this);
+		np->return_type = clone(return_type);
+		for (auto t: arg_types) {
+			np->arg_types.push_back(clone(t));
+		}
+		return np;
+	}
 };
 class array_type : public type {
 public:
@@ -84,6 +117,12 @@ public:
 	int size;
 
 	virtual void dump(std::ostream &, int) override;
+	virtual block::Ptr clone_impl(void) override {
+		auto np = clone_type(this);
+		np->element_type = clone(element_type);
+		np->size = size;
+		return np;
+	}
 };
 
 // Types for complete closure
@@ -97,6 +136,12 @@ public:
 	type::Ptr closure_type;
 
 	virtual void dump(std::ostream &, int) override;
+	virtual block::Ptr clone_impl(void) override {
+		auto np = clone_type(this);
+		np->builder_var_type_id = builder_var_type_id;
+		np->closure_type = clone(closure_type);
+		return np;
+	}
 };
 
 class named_type : public type {
@@ -109,6 +154,15 @@ public:
 	}
 
 	virtual void dump(std::ostream &, int) override;
+
+	virtual block::Ptr clone_impl(void) override {
+		auto np = clone_type(this);
+		np->type_name = type_name;
+		for (auto t: template_args) {
+			np->template_args.push_back(clone(t));
+		}
+		return np;
+	}
 };
 
 class var : public block {
@@ -136,6 +190,13 @@ public:
 		if (static_offset != other->static_offset)
 			return false;
 		return true;
+	}
+	virtual block::Ptr clone_impl(void) override {
+		auto np = clone_obj(this);
+		np->var_name = var_name;
+		np->preferred_name = preferred_name;
+		np->var_type = clone(var_type);
+		return np;
 	}
 };
 

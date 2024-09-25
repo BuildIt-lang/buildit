@@ -19,6 +19,13 @@ public:
 	}
 };
 
+template <typename T>
+std::shared_ptr<T> clone_stmt(T* t) {
+	auto np = clone_obj(t);
+	np->annotation = t->annotation;
+	return np;
+}
+
 class expr_stmt : public stmt {
 public:
 	typedef std::shared_ptr<expr_stmt> Ptr;
@@ -41,6 +48,13 @@ public:
 			return false;
 		return true;
 	}
+	virtual block::Ptr clone_impl(void) override {
+		auto np = clone_stmt(this);
+		np->expr1 = clone(expr1);
+		np->mark_for_deletion = mark_for_deletion;
+		return np;
+	}
+	
 };
 
 class stmt_block : public stmt {
@@ -64,6 +78,13 @@ public:
 				return false;
 		}
 		return true;
+	}
+	virtual block::Ptr clone_impl(void) override {
+		auto np = clone_stmt(this);
+		for (auto stmt: stmts) {
+			np->stmts.push_back(clone(stmt));
+		}
+		return np;
 	}
 };
 
@@ -93,6 +114,17 @@ public:
 		if (!init_expr->is_same(other_stmt->init_expr))
 			return false;
 		return true;
+	}
+	virtual block::Ptr clone_impl(void) override {
+		auto np = clone_stmt(this);
+		// Vars are not to be cloned because 
+		// they are compared by pointers sometimes
+
+		// If we _do_ end up duplicating them, 
+		// they should be consistently updated
+		np->decl_var = decl_var;
+		np->init_expr = clone(init_expr);
+		return np;
 	}
 };
 
@@ -132,6 +164,13 @@ public:
 			return true;
 		assert(false && "Statement unreachable");
 	}
+	virtual block::Ptr clone_impl(void) override {
+		auto np = clone_stmt(this);
+		np->cond = clone(cond);
+		np->then_stmt = clone(then_stmt);
+		np->else_stmt = clone(else_stmt);
+		return np;
+	}
 };
 class label : public block {
 public:
@@ -148,6 +187,11 @@ public:
 		if (label_name != other_stmt->label_name)
 			return false;
 		return true;
+	}
+	virtual block::Ptr clone_impl(void) override {
+		// Don't duplicate labels
+		// just like vars these might be compared by ptr
+		return self<label>();
 	}
 };
 class label_stmt : public stmt {
@@ -166,6 +210,12 @@ public:
 		if (!label1->is_same(other_stmt->label1))
 			return false;
 		return true;
+	}
+	virtual block::Ptr clone_impl(void) override {
+		auto np = clone_stmt(this);
+		// Doesn't need to be duplicated
+		np->label1 = label1;
+		return np;
 	}
 };
 class goto_stmt : public stmt {
@@ -194,6 +244,12 @@ public:
 		}
 		return true;
 	}
+	virtual block::Ptr clone_impl(void) override {
+		auto np = clone_stmt(this);
+		np->label1 = label1;
+		np->temporary_label_number = temporary_label_number;
+		return np;
+	}
 };
 class while_stmt : public stmt {
 public:
@@ -216,6 +272,12 @@ public:
 		if (!cond->is_same(other_stmt->cond))
 			return false;
 		return true;
+	}
+	virtual block::Ptr clone_impl(void) override {
+		auto np = clone_stmt(this);
+		np->body = clone(body);
+		np->cond = clone(cond);
+		return np;
 	}
 };
 class for_stmt : public stmt {
@@ -244,10 +306,17 @@ public:
 			return false;
 		return true;
 	}
+	virtual block::Ptr clone_impl(void) override {
+		auto np = clone_stmt(this);
+		np->decl_stmt = clone(decl_stmt);
+		np->cond = clone(cond);
+		np->update = clone(update);
+		np->body = clone(body);
+		return np;
+	}
 };
 class break_stmt : public stmt {
 public:
-	std::string type;
 	typedef std::shared_ptr<break_stmt> Ptr;
 	virtual void dump(std::ostream &, int) override;
 	virtual void accept(block_visitor *a) override {
@@ -257,6 +326,10 @@ public:
 		if (!isa<break_stmt>(other))
 			return false;
 		return true;
+	}
+	virtual block::Ptr clone_impl(void) override {
+		auto np = clone_stmt(this);
+		return np;
 	}
 };
 class continue_stmt : public stmt {
@@ -270,6 +343,10 @@ public:
 		if (!isa<continue_stmt>(other))
 			return false;
 		return true;
+	}
+	virtual block::Ptr clone_impl(void) override {
+		auto np = clone_stmt(this);
+		return np;
 	}
 };
 
@@ -301,6 +378,16 @@ public:
 			return false;
 		return true;
 	}
+	virtual block::Ptr clone_impl(void) override {
+		auto np = clone_stmt(this);
+		np->func_name = func_name;
+		np->return_type = clone(return_type);
+		for (auto arg: args) {
+			np->args.push_back(clone(arg));
+		}
+		np->body = clone(body);
+		return np;
+	}
 };
 
 class return_stmt : public stmt {
@@ -317,6 +404,11 @@ public:
 		if (!return_val->is_same(other_stmt->return_val))
 			return false;
 		return true;
+	}
+	virtual block::Ptr clone_impl(void) override {
+		auto np = clone_stmt(this);
+		np->return_val = clone(return_val);
+		return np;
 	}
 };
 } // namespace block
