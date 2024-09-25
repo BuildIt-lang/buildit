@@ -30,6 +30,20 @@ std::shared_ptr<T> to(std::shared_ptr<block> p) {
 }
 
 template <typename T>
+std::shared_ptr<T> clone(std::shared_ptr<T> p) {
+	if (!p) return nullptr;
+	return to<T>(p->clone_impl());
+}
+
+template <typename T>
+std::shared_ptr<T> clone_obj(T* t) {
+	auto np = std::make_shared<T>();
+	np->static_offset = t->static_offset;
+	np->metadata_map = t->metadata_map;
+	return np;
+}
+
+template <typename T>
 class block_metadata_impl;
 
 class block_metadata : public std::enable_shared_from_this<block_metadata> {
@@ -61,6 +75,8 @@ public:
 	T val;
 	block_metadata_impl(T _val) : val(_val) {}
 };
+
+
 
 class block : public std::enable_shared_from_this<block> {
 public:
@@ -112,6 +128,11 @@ public:
 		if (static_offset != other->static_offset)
 			return false;
 		return true;
+	}
+
+	virtual block::Ptr clone_impl(void) {
+		// abstract class always returns nullptr
+		return nullptr;
 	}
 };
 } // namespace block

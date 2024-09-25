@@ -70,6 +70,23 @@ public:
 		return binary_is_same(self<binary_expr>(), other);
 	}
 };
+
+
+template <typename T>
+std::shared_ptr<T> unary_clone_helper(T* t) {
+	auto np = clone_obj(t);
+	np->expr1 = clone(t->expr1);
+	return np;
+}
+
+template <typename T>
+std::shared_ptr<T> binary_clone_helper(T* t) {
+	auto np = clone_obj(t);
+	np->expr1 = clone(t->expr1);
+	np->expr2 = clone(t->expr2);
+	return np;
+}
+
 // For the logical not operator
 class not_expr : public unary_expr {
 public:
@@ -80,6 +97,9 @@ public:
 	}
 	virtual bool is_same(block::Ptr other) override {
 		return unary_is_same(self<not_expr>(), other);
+	}
+	virtual block::Ptr clone_impl(void) override {
+		return unary_clone_helper(this);
 	}
 };
 // For the unary minus operator
@@ -93,6 +113,9 @@ public:
 	virtual bool is_same(block::Ptr other) override {
 		return unary_is_same(self<unary_minus_expr>(), other);
 	}
+	virtual block::Ptr clone_impl(void) override {
+		return unary_clone_helper(this);
+	}
 };
 // For the bitwise not operator
 class bitwise_not_expr : public unary_expr {
@@ -104,6 +127,9 @@ public:
 	}
 	virtual bool is_same(block::Ptr other) override {
 		return unary_is_same(self<bitwise_not_expr>(), other);
+	}
+	virtual block::Ptr clone_impl(void) override {
+		return unary_clone_helper(this);
 	}
 };
 
@@ -117,6 +143,9 @@ public:
 	virtual bool is_same(block::Ptr other) override {
 		return binary_is_same(self<and_expr>(), other);
 	}
+	virtual block::Ptr clone_impl(void) override {
+		return binary_clone_helper(this);
+	}
 };
 
 class bitwise_and_expr : public binary_expr {
@@ -128,6 +157,9 @@ public:
 	}
 	virtual bool is_same(block::Ptr other) override {
 		return binary_is_same(self<bitwise_and_expr>(), other);
+	}
+	virtual block::Ptr clone_impl(void) override {
+		return binary_clone_helper(this);
 	}
 };
 
@@ -141,6 +173,9 @@ public:
 	virtual bool is_same(block::Ptr other) override {
 		return binary_is_same(self<or_expr>(), other);
 	}
+	virtual block::Ptr clone_impl(void) override {
+		return binary_clone_helper(this);
+	}
 };
 
 class bitwise_or_expr : public binary_expr {
@@ -152,6 +187,9 @@ public:
 	}
 	virtual bool is_same(block::Ptr other) override {
 		return binary_is_same(self<bitwise_or_expr>(), other);
+	}
+	virtual block::Ptr clone_impl(void) override {
+		return binary_clone_helper(this);
 	}
 };
 
@@ -165,6 +203,9 @@ public:
 	virtual bool is_same(block::Ptr other) override {
 		return binary_is_same(self<bitwise_xor_expr>(), other);
 	}
+	virtual block::Ptr clone_impl(void) override {
+		return binary_clone_helper(this);
+	}
 };
 
 class plus_expr : public binary_expr {
@@ -176,6 +217,9 @@ public:
 	}
 	virtual bool is_same(block::Ptr other) override {
 		return binary_is_same(self<plus_expr>(), other);
+	}
+	virtual block::Ptr clone_impl(void) override {
+		return binary_clone_helper(this);
 	}
 };
 
@@ -189,6 +233,9 @@ public:
 	virtual bool is_same(block::Ptr other) override {
 		return binary_is_same(self<minus_expr>(), other);
 	}
+	virtual block::Ptr clone_impl(void) override {
+		return binary_clone_helper(this);
+	}
 };
 
 class mul_expr : public binary_expr {
@@ -200,6 +247,9 @@ public:
 	}
 	virtual bool is_same(block::Ptr other) override {
 		return binary_is_same(self<mul_expr>(), other);
+	}
+	virtual block::Ptr clone_impl(void) override {
+		return binary_clone_helper(this);
 	}
 };
 
@@ -213,6 +263,9 @@ public:
 	virtual bool is_same(block::Ptr other) override {
 		return binary_is_same(self<div_expr>(), other);
 	}
+	virtual block::Ptr clone_impl(void) override {
+		return binary_clone_helper(this);
+	}
 };
 class lt_expr : public binary_expr {
 public:
@@ -223,6 +276,9 @@ public:
 	}
 	virtual bool is_same(block::Ptr other) override {
 		return binary_is_same(self<lt_expr>(), other);
+	}
+	virtual block::Ptr clone_impl(void) override {
+		return binary_clone_helper(this);
 	}
 };
 class gt_expr : public binary_expr {
@@ -235,6 +291,9 @@ public:
 	virtual bool is_same(block::Ptr other) override {
 		return binary_is_same(self<gt_expr>(), other);
 	}
+	virtual block::Ptr clone_impl(void) override {
+		return binary_clone_helper(this);
+	}
 };
 class lte_expr : public binary_expr {
 public:
@@ -245,6 +304,9 @@ public:
 	}
 	virtual bool is_same(block::Ptr other) override {
 		return binary_is_same(self<lte_expr>(), other);
+	}
+	virtual block::Ptr clone_impl(void) override {
+		return binary_clone_helper(this);
 	}
 };
 class gte_expr : public binary_expr {
@@ -257,6 +319,9 @@ public:
 	virtual bool is_same(block::Ptr other) override {
 		return binary_is_same(self<gte_expr>(), other);
 	}
+	virtual block::Ptr clone_impl(void) override {
+		return binary_clone_helper(this);
+	}
 };
 class lshift_expr : public binary_expr {
 public:
@@ -267,6 +332,9 @@ public:
 	}
 	virtual bool is_same(block::Ptr other) override {
 		return binary_is_same(self<lshift_expr>(), other);
+	}
+	virtual block::Ptr clone_impl(void) override {
+		return binary_clone_helper(this);
 	}
 };
 class rshift_expr : public binary_expr {
@@ -279,6 +347,9 @@ public:
 	virtual bool is_same(block::Ptr other) override {
 		return binary_is_same(self<rshift_expr>(), other);
 	}
+	virtual block::Ptr clone_impl(void) override {
+		return binary_clone_helper(this);
+	}
 };
 class equals_expr : public binary_expr {
 public:
@@ -289,6 +360,9 @@ public:
 	}
 	virtual bool is_same(block::Ptr other) override {
 		return binary_is_same(self<equals_expr>(), other);
+	}
+	virtual block::Ptr clone_impl(void) override {
+		return binary_clone_helper(this);
 	}
 };
 
@@ -302,6 +376,9 @@ public:
 	virtual bool is_same(block::Ptr other) override {
 		return binary_is_same(self<ne_expr>(), other);
 	}
+	virtual block::Ptr clone_impl(void) override {
+		return binary_clone_helper(this);
+	}
 };
 
 class mod_expr : public binary_expr {
@@ -313,6 +390,9 @@ public:
 	}
 	virtual bool is_same(block::Ptr other) override {
 		return binary_is_same(self<mod_expr>(), other);
+	}
+	virtual block::Ptr clone_impl(void) override {
+		return binary_clone_helper(this);
 	}
 };
 class var_expr : public expr {
@@ -331,6 +411,13 @@ public:
 		if (!var1->is_same(other_expr->var1))
 			return false;
 		return true;
+	}
+	virtual block::Ptr clone_impl(void) override {
+		auto np = clone_obj(this);
+		// Vars are special cases and should not be cloned
+		// This is to avoid problems where vars are compared by pointers
+		np->var1 = var1;
+		return np;	
 	}
 };
 
@@ -368,6 +455,12 @@ public:
 			return false;
 		return true;
 	}
+	virtual block::Ptr clone_impl(void) override {
+		auto np = clone_obj(this);
+		np->value = value;
+		np->is_64bit = is_64bit;
+		return np;
+	}
 };
 class double_const : public const_expr {
 public:
@@ -387,6 +480,12 @@ public:
 			return false;
 		return true;
 	}
+	virtual block::Ptr clone_impl(void) override {
+		auto np = clone_obj(this);
+		np->value = value;
+		return np;
+	}
+	
 };
 class float_const : public const_expr {
 public:
@@ -405,6 +504,11 @@ public:
 		if (value != other_expr->value)
 			return false;
 		return true;
+	}
+	virtual block::Ptr clone_impl(void) override {
+		auto np = clone_obj(this);
+		np->value = value;
+		return np;
 	}
 };
 
@@ -425,6 +529,11 @@ public:
 		if (value != other_expr->value)
 			return false;
 		return true;
+	}
+	virtual block::Ptr clone_impl(void) override {
+		auto np = clone_obj(this);
+		np->value = value;
+		return np;
 	}
 };
 
@@ -449,6 +558,12 @@ public:
 			return false;
 		return true;
 	}
+	virtual block::Ptr clone_impl(void) override {
+		auto np = clone_obj(this);
+		np->var1 = clone(var1);
+		np->expr1 = clone(expr1);
+		return np;
+	}	
 };
 class sq_bkt_expr : public expr {
 public:
@@ -470,6 +585,12 @@ public:
 			return false;
 		return true;
 	}
+	virtual block::Ptr clone_impl(void) override {
+		auto np = clone_obj(this);
+		np->var_expr = clone(var_expr);
+		np->index = clone(index);
+		return np;
+	}	
 };
 class function_call_expr : public expr {
 public:
@@ -496,6 +617,14 @@ public:
 		}
 		return true;
 	}
+	virtual block::Ptr clone_impl(void) override {
+		auto np = clone_obj(this);
+		np->expr1 = clone(expr1);
+		for (auto arg: args) {
+			np->args.push_back(clone(arg));
+		}
+		return np;
+	}	
 };
 
 class initializer_list_expr : public expr {
@@ -518,6 +647,13 @@ public:
 				return false;
 		}
 		return true;
+	}
+	virtual block::Ptr clone_impl(void) override {
+		auto np = clone_obj(this);
+		for (auto elem: elems) {
+			np->elems.push_back(clone(elem));
+		}
+		return np;
 	}
 };
 
@@ -558,6 +694,11 @@ public:
 			return false;
 		return true;
 	}
+	virtual block::Ptr clone_impl(void) override {
+		auto np = clone_obj(this);
+		np->inner_expr = inner_expr;
+		return np;
+	}
 };
 
 class member_access_expr : public expr {
@@ -580,6 +721,12 @@ public:
 			return false;
 		return true;
 	}
+	virtual block::Ptr clone_impl(void) override {
+		auto np = clone_obj(this);
+		np->parent_expr = clone(parent_expr);
+		np->member_name = member_name;
+		return np;
+	}
 };
 
 class addr_of_expr : public expr {
@@ -598,6 +745,11 @@ public:
 		if (!other_expr->expr1->is_same(expr1))
 			return false;
 		return true;
+	}
+	virtual block::Ptr clone_impl(void) override {
+		auto np = clone_obj(this);
+		np->expr1 = clone(expr1);
+		return np;
 	}
 };
 } // namespace block
