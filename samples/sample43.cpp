@@ -4,7 +4,21 @@
 
 using builder::dyn_arr;
 using builder::dyn_var;
+using builder::arr;
+
 using namespace std;
+
+
+
+struct container {
+	dyn_var<int> idx;
+	dyn_var<int*> next;
+
+	container() {
+		idx = 0;
+	}
+};
+
 
 static void foo() {
 	dyn_arr<int, 3> x;
@@ -21,6 +35,14 @@ static void foo() {
 
 	dyn_arr<int> b = y;
 	dyn_arr<int, 5> c = a;
+
+
+	arr<container, 5> containers;
+	containers[0].next = &(containers[1].idx);
+
+
+	arr<container, 2> conts = {containers[0], containers[1]};
+
 }
 int main(int argc, char *argv[]) {
 	auto ast = builder::builder_context().extract_function_ast(foo, "foo");
