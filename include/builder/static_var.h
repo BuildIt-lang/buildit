@@ -114,8 +114,27 @@ public:
 
 		assert(builder_context::current_builder_context != nullptr);
 		assert(builder_context::current_builder_context->static_var_tuples.size() > 0);
-		assert(builder_context::current_builder_context->static_var_tuples.back().ptr == (unsigned char *)&val);
-		builder_context::current_builder_context->static_var_tuples.pop_back();
+
+		/* Instead of assuming that the last variable is the static_var we are destroying,
+		   we find the appropriate one and set its size to 0. Then we clean up all the trailing 0s 
+		
+		This allows out of order destruction while still maintaining good static tags */
+		
+		int index = -1;
+		for (int i = builder_context::current_builder_context->static_var_tuples.size() - 1; i >= 0; i--) {
+			if (builder_context::current_builder_context->static_var_tuples[i].ptr == (unsigned char*) &val) {
+				index = i;
+				builder_context::current_builder_context->static_var_tuples[i].size = 0;
+				break;
+			}
+		}
+		assert(index != -1 && "Static variable to destroy not valid");
+
+		while (!builder_context::current_builder_context->static_var_tuples.empty() 
+			&& builder_context::current_builder_context->static_var_tuples.back().size == 0) {
+			builder_context::current_builder_context->static_var_tuples.pop_back();
+		}
+		
 	}
 	operator builder() {
 		try_get_name();
@@ -188,8 +207,20 @@ public:
 	~static_var() {
 		assert(builder_context::current_builder_context != nullptr);
 		assert(builder_context::current_builder_context->static_var_tuples.size() > 0);
-		assert(builder_context::current_builder_context->static_var_tuples.back().ptr == (unsigned char *)val);
-		builder_context::current_builder_context->static_var_tuples.pop_back();
+		int index = -1;
+		for (int i = builder_context::current_builder_context->static_var_tuples.size() - 1; i >= 0; i--) {
+			if (builder_context::current_builder_context->static_var_tuples[i].ptr == (unsigned char*) val) {
+				index = i;
+				builder_context::current_builder_context->static_var_tuples[i].size = 0;
+				break;
+			}
+		}
+		assert(index != -1 && "Static variable to destroy not valid");
+
+		while (!builder_context::current_builder_context->static_var_tuples.empty() 
+			&& builder_context::current_builder_context->static_var_tuples.back().size == 0) {
+			builder_context::current_builder_context->static_var_tuples.pop_back();
+		}
 		delete[] val;
 	}
 	virtual std::string serialize() override {

@@ -1,0 +1,74 @@
+FUNC_DECL
+  SCALAR_TYPE (VOID)
+  VAR (arg0)
+  STMT_BLOCK
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var0)
+      VAR_EXPR
+        VAR (arg0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (y_1)
+      NO_INITIALIZATION
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (c_2)
+      VAR_EXPR
+        VAR (var0)
+    IF_STMT
+      EQUALS_EXPR
+        INT_CONST (0)
+        VAR_EXPR
+          VAR (c_2)
+      STMT_BLOCK
+        DECL_STMT
+          SCALAR_TYPE (FLOAT)
+          VAR (c_3)
+          FLOAT_CONST (2)
+      STMT_BLOCK
+        IF_STMT
+          EQUALS_EXPR
+            INT_CONST (1)
+            VAR_EXPR
+              VAR (c_2)
+          STMT_BLOCK
+            DECL_STMT
+              SCALAR_TYPE (FLOAT)
+              VAR (c_4)
+              FLOAT_CONST (3)
+          STMT_BLOCK
+            IF_STMT
+              EQUALS_EXPR
+                INT_CONST (2)
+                VAR_EXPR
+                  VAR (c_2)
+              STMT_BLOCK
+                DECL_STMT
+                  SCALAR_TYPE (FLOAT)
+                  VAR (c_5)
+                  FLOAT_CONST (5)
+              STMT_BLOCK
+                DECL_STMT
+                  SCALAR_TYPE (FLOAT)
+                  VAR (c_6)
+                  FLOAT_CONST (2)
+void bar (int arg0) {
+  int var0 = arg0;
+  int y_1;
+  int c_2 = var0;
+  if (0 == c_2) {
+    float c_3 = 2.0f;
+  } else {
+    if (1 == c_2) {
+      float c_4 = 3.0f;
+    } else {
+      if (2 == c_2) {
+        float c_5 = 5.0f;
+      } else {
+        float c_6 = 2.0f;
+      }
+    }
+  }
+}
+
