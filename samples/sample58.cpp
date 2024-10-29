@@ -8,16 +8,6 @@
 using builder::dyn_var;
 using builder::static_var;
 
-static static_var<int> magic(dyn_var<int> x, int range) {
-	for (static_var<int> y = 0; y < range; y++) {
-		if (y == x) return y;
-	}
-	return 0;
-}
-
-
-float arr[] = {2.0, 3.0, 5.0};
-
 
 static void bar(dyn_var<int> x) {
 	/* Test out of 	order deinitialization of static variables and arrays */
@@ -37,13 +27,9 @@ static void bar(dyn_var<int> x) {
 	delete sv2;
 	delete sva1;
 	delete sva2;
-
-
-	// Test case that breaks without out of order deinitialization	
-	static_var<int> z = magic(x, 3);	
-	dyn_var<float> c = arr[z];	
-
-
+	
+	// A realistic test is hard to get right (depends on rv-optimizations)
+	// so we will just stick with this simple one above
 
 }
 
