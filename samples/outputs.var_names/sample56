@@ -39,6 +39,12 @@ FUNC_DECL
                   VAR (a_0)
             INT_CONST (1)
         INT_CONST (1)
+    EXPR_STMT
+      ASSIGN_EXPR
+        MEMBER_ACCESS_EXPR (mem0)
+          VAR_EXPR
+            VAR (p)
+        INT_CONST (0)
 struct custom_struct0 {
   int mem0;
   float mem1;
@@ -53,5 +59,6 @@ void bar (void) {
   a_0.nested = b_1;
   (a_0.nested).mem0 = a_0.mem0;
   ((a_0.nested).mem1 = (a_0.nested).mem1 + 1) - 1;
+  p.mem0 = 0;
 }
 
