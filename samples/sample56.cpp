@@ -21,6 +21,9 @@ struct my_type {
 	dyn_var<int> another;
 };
 
+
+dyn_var<struct_type> p = builder::as_global("p");
+
 static void bar(void) {
 	dyn_var<my_type> a;
 	dyn_var<struct_type> b;
@@ -29,6 +32,7 @@ static void bar(void) {
 	a.nested.x = a.another;
 	
 	a.nested.y++;
+	p.x = 0;
 }
 
 int main(int argc, char *argv[]) {

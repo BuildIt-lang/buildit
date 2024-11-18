@@ -19,16 +19,20 @@ extern int type_naming_counter;
 
 template <typename T, typename V=void>
 struct type_namer {
-	static std::string obtained_name;
+	// Use a pointer to a string instead of 
+	// a string because it is possible get_type_name is called
+	// from global constructors before obtained_name is initialized
+	static std::string *obtained_name;
 	static std::string get_type_name() {
-		if (obtained_name == "") {
-			obtained_name = "custom_struct" + std::to_string(type_naming_counter++);
+		if (obtained_name == nullptr) {
+			obtained_name = new std::string();
+			*obtained_name = "custom_struct" + std::to_string(type_naming_counter++);
 		}
-		return obtained_name;
+		return *obtained_name;
 	}
 };
 template <typename T, typename V>
-std::string type_namer<T, V>::obtained_name = "";
+std::string *type_namer<T, V>::obtained_name = nullptr;
 
 template <typename T>
 struct type_namer<T, typename check_valid_type<decltype(T::type_name)>::type> {
