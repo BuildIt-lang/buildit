@@ -344,10 +344,36 @@ struct dyn_var_parent_selector<T,
 	>::type>
     : public member_initializer_begin<T>, public std::remove_reference<T>::type, public member_initializer_end {};
 
+
+template <typename T>
+class dyn_var_mimic;
+
+
+// These helper classes provide implementation of the operator[]
+// The return type is selected based on whether the T has a member called dereference_type defined
+// if it is defined, the return is builder::cast'd to a dyn_var (mimic) of that type (just like *)
+// otherwise a regular builder return implementation is provided
+// This allows implementation of vector<> types with appropriate return types
+template <typename T, typename V> 
+struct dyn_var_deref_provider {
+	builder operator[] (const builder& b) {
+		return static_cast<dyn_var<T>*>(this)->dyn_var_impl<T>::operator[](b);
+	}
+};
+
+template <typename T>
+struct dyn_var_deref_provider<T, typename check_valid_type<typename T::dereference_type>::type> {
+	dyn_var_mimic<typename T::dereference_type> operator[] (const builder& b) {
+		return (cast)(static_cast<dyn_var<T>*>(this)->dyn_var_impl<T>::operator[](b));
+	}
+};
+
+
+
 // Actual dyn_var implementation
 // Split design to allow for easily extending types with specialization
 template <typename T>
-class dyn_var : public dyn_var_impl<T>, public dyn_var_parent_selector<T, void> {
+class dyn_var : public dyn_var_impl<T>, public dyn_var_parent_selector<T, void>, public dyn_var_deref_provider<T, void> {
 public:
 	typedef dyn_var_impl<T> super;
 
@@ -366,10 +392,12 @@ public:
 	builder operator=(const dyn_var<T> &t) {
 		return *this = (builder)t;
 	}
+
+	using dyn_var_deref_provider<T, void>::operator[];
 };
 
-// dyn var specialization for pointer types to return the appropriate types on [], * and ->
 
+// dyn var specialization for pointer types to return the appropriate types on [], * and ->
 template <typename T>
 class dyn_var_mimic: public dyn_var<T> {
 	// Behaves exactly like a dyn_var for most purposes

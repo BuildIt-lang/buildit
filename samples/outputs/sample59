@@ -1,0 +1,29 @@
+FUNC_DECL
+  SCALAR_TYPE (VOID)
+  STMT_BLOCK
+    DECL_STMT
+      NAMED_TYPE (std::vector)
+        NAMED_TYPE (std::vector)
+          SCALAR_TYPE (INT)
+      VAR (var0)
+      NO_INITIALIZATION
+    EXPR_STMT
+      FUNCTION_CALL_EXPR
+        MEMBER_ACCESS_EXPR (resize)
+          VAR_EXPR
+            VAR (var0)
+        INT_CONST (2)
+    EXPR_STMT
+      FUNCTION_CALL_EXPR
+        MEMBER_ACCESS_EXPR (resize)
+          SQ_BKT_EXPR
+            VAR_EXPR
+              VAR (var0)
+            INT_CONST (1)
+        INT_CONST (1)
+void bar (void) {
+  std::vector<std::vector<int>> var0;
+  var0.resize(2);
+  (var0[1]).resize(1);
+}
+

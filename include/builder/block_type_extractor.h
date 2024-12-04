@@ -10,11 +10,6 @@ struct custom_type_base;
 
 
 
-template <typename T>
-struct check_valid_type {
-	typedef void type;
-};
-
 extern int type_naming_counter;
 
 template <typename T, typename V=void>
