@@ -60,6 +60,12 @@ struct with_name {
 	with_name(const std::string &n, bool wd = false) : name(n), with_decl(wd) {}
 };
 
+template <typename T>
+struct check_valid_type {
+	typedef void type;
+};
+
+
 
 } // namespace builder
 #endif
