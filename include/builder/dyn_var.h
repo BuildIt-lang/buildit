@@ -64,7 +64,8 @@ struct custom_type : custom_type_base {
 	}
 };
 
-static std::vector<var *> *parents_stack = nullptr;
+extern std::vector<var *> *parents_stack;
+
 // Struct to initialize a dyn_var as member;
 struct as_member {
 	var *parent_var;
