@@ -40,7 +40,7 @@ STMT_BLOCK
       MEMBER_ACCESS_EXPR (member)
         SQ_BKT_EXPR
           VAR_EXPR
-            VAR (var0)
+            VAR (var3)
           INT_CONST (0)
       INT_CONST (0)
 {
@@ -50,5 +50,5 @@ STMT_BLOCK
   FooT var2 = var0;
   var2 = var0;
   FooT* var3 = (&(var0));
-  var0->member = 0;
+  (var3[0]).member = 0;
 }
