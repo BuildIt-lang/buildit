@@ -576,18 +576,20 @@ void c_code_generator::visit(return_stmt::Ptr a) {
 void c_code_generator::visit(member_access_expr::Ptr a) {
 	if (isa<sq_bkt_expr>(a->parent_expr)) {
 		sq_bkt_expr::Ptr parent = to<sq_bkt_expr>(a->parent_expr);
-		if (isa<int_const>(parent->index)) {
-			auto index = to<int_const>(parent->index);
-			if (index->value == 0) {
-				if (!isa<var_expr>(parent->var_expr)) {
-					oss << "(";
+		if (parent->getBoolMetadata("deref_is_star")) {
+			if (isa<int_const>(parent->index)) {
+				auto index = to<int_const>(parent->index);
+				if (index->value == 0) {
+					if (!isa<var_expr>(parent->var_expr)) {
+						oss << "(";
+					}
+					parent->var_expr->accept(this);
+					if (!isa<var_expr>(parent->var_expr)) {
+						oss << ")";
+					}
+					oss << "->" << a->member_name;
+					return;
 				}
-				parent->var_expr->accept(this);
-				if (!isa<var_expr>(parent->var_expr)) {
-					oss << ")";
-				}
-				oss << "->" << a->member_name;
-				return;
 			}
 		}
 	}

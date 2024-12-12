@@ -19,11 +19,11 @@ FUNC_DECL
           SQ_BKT_EXPR
             VAR_EXPR
               VAR (x_0)
-            INT_CONST (1)
+            INT_CONST (0)
         INT_CONST (1)
 void bar (void) {
   std::vector<std::vector<int>> x_0;
   x_0.resize(2);
-  (x_0[1]).resize(1);
+  (x_0[0]).resize(1);
 }
 

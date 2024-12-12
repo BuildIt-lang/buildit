@@ -98,7 +98,7 @@ public:
 		return ((builder) * this)[a];
 	}
 	builder operator*(void) {
-		return ((builder) * this)[0];
+		return *((builder) * this);
 	}
 	builder operator!() {
 		return !(builder) * this;
@@ -436,12 +436,14 @@ public:
 		return (dyn_var_mimic<T>)(cast)this->dyn_var_impl<T *>::operator[](bt);
 	}
 	dyn_var_mimic<T> operator*() {
-		return this->operator[](0);
+		return (cast)(this->dyn_var_impl<T*>::operator*());
 	}
 	// Hack for creating a member that's live across return site
 	dyn_var<T> _p = as_member(this, "_p");
 	dyn_var<T> *operator->() {
-		_p = (cast)this->operator[](0);
+		auto b = this->operator[](0);
+		b.encompassing_expr->template setMetadata<bool>("deref_is_star", true);
+		_p = (cast)b;
 		return _p.addr();
 	}
 };

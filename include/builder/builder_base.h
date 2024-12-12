@@ -231,7 +231,9 @@ public:
 		return ret_builder;
 	}
 	BT operator*(void) {
-		return (*this)[0];
+		auto b = (*this)[0];
+		b.block_expr->template setMetadata<bool>("deref_is_star", true);
+		return b;
 	}
 
 	BT assign(const BT &a) {

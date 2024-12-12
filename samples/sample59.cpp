@@ -19,7 +19,7 @@ struct vector: public builder::custom_type<T> {
 static void bar(void) {
 	dyn_var<vector<vector<int>>> x;
 	x.resize(2);
-	x[1].resize(1);
+	x[0].resize(1);
 }
 
 int main(int argc, char *argv[]) {

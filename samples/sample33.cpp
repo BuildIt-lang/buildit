@@ -32,7 +32,7 @@ static void bar(void) {
 	FooT h = g;
 	h = g;
 	dyn_var<foo_t *> ptr = &g;
-	((FooT)(builder::cast)g[0]).member = 0;
+	((FooT)(builder::cast)ptr[0]).member = 0;
 }
 
 int main(int argc, char *argv[]) {
