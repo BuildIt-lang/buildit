@@ -334,6 +334,11 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(std::vector
 	current_block_stmt->static_offset.clear();
 	assert(current_block_stmt != nullptr);
 	ast = current_block_stmt;
+
+	if (parents_stack != nullptr) {
+		parents_stack->clear();
+	}
+
 	bool_vector = b;
 
 	block::stmt::Ptr ret_ast;

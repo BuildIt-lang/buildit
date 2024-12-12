@@ -8,6 +8,8 @@ namespace options {
 bool track_members = false;
 }
 
+std::vector<var *> *parents_stack = nullptr;
+
 template <>
 std::vector<block::type::Ptr> extract_type_vector_dyn<>(void) {
 	std::vector<block::type::Ptr> empty_vector;
