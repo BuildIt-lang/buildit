@@ -1,7 +1,9 @@
 #ifndef TYPE_EXTRACTOR_H
 #define TYPE_EXTRACTOR_H
 
+
 #include "builder/forward_declarations.h"
+#include "builder/generics.h"
 #include <algorithm>
 
 namespace builder {
@@ -305,6 +307,19 @@ public:
 		return type;
 	}
 };
+
+
+template <>
+class type_extractor<generic> {
+public:
+	static block::type::Ptr extract_type(void) {
+		// generic types don't actually have any types associated with them
+		// and would be assigned a type separately
+		return nullptr;	
+	}
+};
+
+
 
 // Extracting function types
 template <typename... args>

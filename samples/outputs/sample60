@@ -1,0 +1,22 @@
+void bar (void) {
+  int var0;
+  int var2;
+  int var3;
+  float var4;
+  float var5;
+  int var8;
+  if (var2 < var3) {
+    var8 = var3;
+  } else {
+    var8 = var2;
+  }
+  float var12;
+  if (var4 < var5) {
+    var12 = var5;
+  } else {
+    var12 = var4;
+  }
+  int* var14 = (&(var0));
+  var14[0] = 0;
+}
+

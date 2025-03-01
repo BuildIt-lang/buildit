@@ -55,6 +55,11 @@ public:
 		np->scalar_type_id = scalar_type_id;
 		return np;
 	}
+	virtual bool is_same(block::Ptr other) override {
+		if (!isa<scalar_type>(other)) return false;
+		if (to<scalar_type>(other)->scalar_type_id != scalar_type_id) return false;
+		return true;
+	}
 };
 
 class pointer_type : public type {
@@ -70,6 +75,12 @@ public:
 		np->pointee_type = clone(pointee_type);
 		return np;
 	}
+
+	virtual bool is_same(block::Ptr other) override {
+		if (!isa<pointer_type>(other)) return false;
+		if (!to<pointer_type>(other)->pointee_type->is_same(pointee_type)) return false;
+		return true;
+	}
 };
 
 class reference_type : public type {
@@ -84,6 +95,11 @@ public:
 		auto np = clone_type(this);
 		np->referenced_type = clone(referenced_type);
 		return np;
+	}
+	virtual bool is_same(block::Ptr other) override {
+		if (!isa<reference_type>(other)) return false;
+		if (!to<reference_type>(other)->referenced_type->is_same(referenced_type)) return false;
+		return true;
 	}
 };
 
@@ -106,6 +122,16 @@ public:
 		}
 		return np;
 	}
+	virtual bool is_same(block::Ptr other) override {
+		if (!isa<function_type>(other)) return false;
+		function_type::Ptr ftype = to<function_type>(other);
+		if (!ftype->return_type->is_same(return_type)) return false;
+		if (ftype->arg_types.size() != arg_types.size()) return false;
+		for (unsigned i = 0; i < arg_types.size(); i++) {
+			if (!ftype->arg_types[i]->is_same(arg_types[i])) return false;
+		}
+		return true;
+	}
 };
 class array_type : public type {
 public:
@@ -123,6 +149,12 @@ public:
 		np->size = size;
 		return np;
 	}
+	virtual bool is_same(block::Ptr other) override {
+		if (!isa<array_type>(other)) return false;
+		if (!to<array_type>(other)->element_type->is_same(element_type)) return false;
+		if (to<array_type>(other)->size != size) return false;
+		return true;
+	}
 };
 
 // Types for complete closure
@@ -136,11 +168,18 @@ public:
 	type::Ptr closure_type;
 
 	virtual void dump(std::ostream &, int) override;
+
 	virtual block::Ptr clone_impl(void) override {
 		auto np = clone_type(this);
 		np->builder_var_type_id = builder_var_type_id;
 		np->closure_type = clone(closure_type);
 		return np;
+	}
+	virtual bool is_same(block::Ptr other) override {
+		if (!isa<builder_var_type>(other)) return false;
+		if (to<builder_var_type>(other)->builder_var_type_id != builder_var_type_id) return false;
+		if (!to<builder_var_type>(other)->closure_type->is_same(closure_type)) return false;
+		return true;
 	}
 };
 
@@ -163,7 +202,18 @@ public:
 		}
 		return np;
 	}
+	virtual bool is_same(block::Ptr other) override {
+		if (!isa<named_type>(other)) return false;
+		named_type::Ptr ntype = to<named_type>(other);
+		if (ntype->type_name != type_name) return false;
+		if (ntype->template_args.size() != template_args.size()) return false;
+		for (unsigned i = 0; i < template_args.size(); i++) {
+			if (!ntype->template_args[i]->is_same(template_args[i])) return false;
+		}
+		return true;
+	}
 };
+
 
 class var : public block {
 public:

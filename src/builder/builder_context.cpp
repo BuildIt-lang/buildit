@@ -6,6 +6,7 @@
 #include "blocks/loop_roll.h"
 #include "blocks/rce.h"
 #include "blocks/sub_expr_cleanup.h"
+#include "blocks/generic_checker.h"
 #include "blocks/var_namer.h"
 #include "builder/builder.h"
 #include "builder/dyn_var.h"
@@ -283,6 +284,11 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 
 	// Before making any changes, untangle the whole AST
 	ast = clone(ast);
+	
+	// Make sure any generics haven't been left 
+	// unspecialized
+	block::generic_null_checker checker;
+	ast->accept(&checker);
 
 	block::var_namer::name_vars(ast);
 

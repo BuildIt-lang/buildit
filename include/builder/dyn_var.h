@@ -449,6 +449,61 @@ public:
 	}
 };
 
+
+struct with_type {
+	type t;
+	block::expr::Ptr init_expr;
+	with_type(const type& t): t(t), init_expr(nullptr) {}
+	with_type(const type& t, const builder &a): t(t), init_expr(a.block_expr) {}
+	with_type(const var& v): t(type_of(v)), init_expr(nullptr) {
+		builder a = v;
+		init_expr = a.block_expr;
+	}
+};
+
+// Specialization for dyn_var<generic>
+template <>
+class dyn_var<generic>: public dyn_var_impl<generic> {
+public:
+	typedef dyn_var_impl<generic> super;
+	using super::super;
+	using super::operator=;
+
+	// default constructor and copy constructor
+	dyn_var() : dyn_var_impl<generic>() {}
+	
+	// Copy type if the initialization is just another variable
+	dyn_var(const dyn_var<generic>& t): dyn_var_impl<generic>((builder)t) {
+		block_var->var_type = t.block_var->var_type;
+	}
+	template <typename T>
+	dyn_var(const dyn_var<T>& t): dyn_var_impl<generic>((builder)t) {
+		block_var->var_type = t.block_var->var_type;
+	}
+			
+	
+	// default copy assignment operator
+	builder operator=(const dyn_var<generic>& t) {
+		return *this = (builder) t;
+	}
+
+
+	void set_type(type t) {
+		block_var->var_type = t.enclosed_type;
+	}
+	dyn_var(const with_type& wt): dyn_var_impl<generic>(defer_init()) {
+		// We invoked the empty constructor from impl
+		// so we can manually construct here. This allows to properly 
+		// handle init_expr
+		if (wt.init_expr)
+			builder_context::current_builder_context->remove_node_from_sequence(wt.init_expr);
+		create_dyn_var();
+		block_var->var_type = wt.t.enclosed_type;
+		if (block_decl_stmt) 
+			block_decl_stmt->init_expr = wt.init_expr;	
+	}
+};
+
 template <typename T>
 typename std::enable_if<std::is_base_of<var, T>::value>::type create_return_stmt(const T &a) {
 	create_return_stmt((builder)a);
