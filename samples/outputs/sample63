@@ -1,0 +1,5 @@
+void bar (void) {
+  linked_list* var0;
+  ((var0->next)->next)->next = 0;
+}
+
