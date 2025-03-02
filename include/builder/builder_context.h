@@ -52,24 +52,43 @@ void coroutine_wrapper_close(void);
 
 class builder_context {
 public:
+	// Purely static state for the entire program
 	static builder_context *current_builder_context;
 	static int debug_creation_counter;
 
-	std::function<void(void)> internal_stored_lambda;
 
+	// TODO: Consider separating different levels of run states into 
+	// separate objects so managing it is easier
+
+	// Per run state
+	std::function<void(void)> internal_stored_lambda;
 	std::list<block::block::Ptr> uncommitted_sequence;
 	block::stmt::Ptr ast;
 	block::stmt_block::Ptr current_block_stmt;
-
 	std::vector<bool> bool_vector;
 	std::unordered_set<std::string> visited_offsets;
-
 	std::vector<block::expr::Ptr> expr_sequence;
 	unsigned long long expr_counter = 0;
+	std::string current_label;
 
+	std::vector<tracking_tuple> static_var_tuples;
+	std::vector<tracking_tuple> deferred_static_var_tuples;
+
+	// Run shared state
 	tag_map _internal_tags;
 	tag_map *memoized_tags;
 
+	// State shared across non-deterministic failures
+	std::unordered_map<std::string, std::shared_ptr<nd_var_gen_base>> *nd_state_map = nullptr;
+	std::unordered_map<std::string, std::shared_ptr<nd_var_gen_base>> _nd_state_map;
+
+	void reset_for_nd_failure();
+	
+	// Some members are out of the scope of the executions and are never reset
+	std::vector<var *> assume_variables;
+	block::func_decl::Ptr current_func_decl;
+
+	// Flags are just constants that shouldn't get updated anyway
 	// Flags for controlling BuildIt extraction
 	// and code generation behavior
 	bool use_memoization = true;
@@ -109,7 +128,6 @@ public:
 	block::stmt::Ptr extract_ast_from_function_impl(void);
 	block::stmt::Ptr extract_ast_from_function_internal(std::vector<bool> bl = std::vector<bool>());
 
-	block::func_decl::Ptr current_func_decl;
 	template <typename F, typename... OtherArgs>
 	block::stmt::Ptr extract_function_ast(F func_input, std::string func_name, OtherArgs &&...other_args) {
 		current_func_decl = std::make_shared<block::func_decl>();
@@ -119,13 +137,6 @@ public:
 		    extract_signature_from_lambda<F, OtherArgs &...>::from(this, func_input, func_name, other_args...));
 		return current_func_decl;
 	}
-
-	std::string current_label;
-
-	std::vector<tracking_tuple> static_var_tuples;
-	std::vector<tracking_tuple> deferred_static_var_tuples;
-
-	std::vector<var *> assume_variables;
 
 	template <typename T>
 	T *assume_variable(std::string name) {

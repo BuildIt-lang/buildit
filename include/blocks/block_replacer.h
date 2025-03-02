@@ -8,6 +8,11 @@ class block_replacer : public block_visitor {
 public:
 	using block_visitor::visit;
 	std::shared_ptr<block> node;
+
+	// optional generic exact replacing mechanism
+	std::shared_ptr<block> to_replace;
+	std::shared_ptr<block> replace_with;
+
 	template <typename T = expr>
 	typename T::Ptr rewrite(typename T::Ptr ptr) {
 		auto tmp = node;
@@ -15,6 +20,8 @@ public:
 		ptr->accept(this);
 		auto ret = to<T>(node);
 		node = tmp;
+		if (to_replace != nullptr && ret == to_replace)
+			return to<T>(replace_with);
 		return ret;
 	}
 	void unary_helper(std::shared_ptr<unary_expr> a);

@@ -1,0 +1,5 @@
+void bar (void) {
+  int x_0 = 1;
+  int y_1 = 0;
+}
+

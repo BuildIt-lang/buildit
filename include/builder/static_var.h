@@ -101,6 +101,9 @@ public:
 		assert(builder_context::current_builder_context != nullptr);
 		// Deferred static variables are kept separate because they are never untracked
 		// in the destructor
+		// Even though the usual static vars can be destroyed out of order, these might create
+		// unncessary bubbles in the queue
+		// TODO: Consider merging these two
 		builder_context::current_builder_context->deferred_static_var_tuples.push_back(
 		    tracking_tuple((unsigned char *)&val, sizeof(T), this));
 		try_get_name();

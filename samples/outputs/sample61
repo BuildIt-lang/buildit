@@ -1,0 +1,5 @@
+void bar (void) {
+  int var0 = 1;
+  int var1 = 0;
+}
+
