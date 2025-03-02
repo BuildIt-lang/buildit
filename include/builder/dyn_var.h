@@ -440,12 +440,17 @@ public:
 		return (cast)(this->dyn_var_impl<T*>::operator*());
 	}
 	// Hack for creating a member that's live across return site
-	dyn_var<T> _p = as_member(this, "_p");
+	
+	std::unique_ptr<dyn_var<T>> _p = nullptr;
+
 	dyn_var<T> *operator->() {
 		auto b = this->operator[](0);
 		b.encompassing_expr->template setMetadata<bool>("deref_is_star", true);
-		_p = (cast)b;
-		return _p.addr();
+		if (_p == nullptr) {
+			_p = std::unique_ptr<dyn_var<T>>(new dyn_var<T>(as_member(this, "_p")));	
+		}
+		*_p = (cast)b;
+		return _p->addr();
 	}
 };
 
