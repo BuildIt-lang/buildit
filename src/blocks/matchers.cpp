@@ -53,11 +53,19 @@ bool check_match(std::shared_ptr<pattern> p, block::Ptr node, std::map<std::stri
 		case pattern::node_type::var:
 			// For var we will allow both vars and var_exprs
 			if (!isa<::block::var>(node) && !isa<::block::var_expr>(node)) return false;	
+			if (p->var_name != "") {
+				var::Ptr v;
+				if (isa<::block::var>(node))
+					v = to<::block::var>(node);
+				else
+					v = to<::block::var_expr>(node)->var1;
+				if (v->var_name != p->var_name) return false;
+			}
 			break;
 		case pattern::node_type::var_expr:
-			if (!isa<::block::var>(node)) return false;
+			if (!isa<::block::var_expr>(node)) return false;
 			if (p->children.size() > 0) {
-				block::Ptr child = to<::block::var_expr>(node);
+				block::Ptr child = to<::block::var_expr>(node)->var1;
 				if (!check_match(p->children[0], child, captures))
 					return false;
 			}
@@ -187,7 +195,17 @@ bool check_match(std::shared_ptr<pattern> p, block::Ptr node, std::map<std::stri
 			break;
 		case pattern::node_type::function_call_expr:
 			if (!isa<::block::function_call_expr>(node)) return false;
-			// For now we will only check if it is a function call
+			if (p->children.size() > 0) {
+				auto fc = to<::block::function_call_expr>(node);
+				// THere should be an extra expression for the function itself
+				if (p->children.size() != fc->args.size() + 1) return false;
+
+				block::Ptr child1 = fc->expr1;
+				if (!check_match(p->children[0], child1, captures)) return false;
+				for (unsigned i = 0; i < fc->args.size(); i++) {
+					if (!check_match(p->children[i+1], fc->args[i], captures)) return false;
+				}
+			}	
 			break;
 		case pattern::node_type::initializer_list_expr:
 			if (!isa<::block::initializer_list_expr>(node)) return false;

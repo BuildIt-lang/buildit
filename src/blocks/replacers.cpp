@@ -178,7 +178,15 @@ block::Ptr create_ast(pattern::Ptr p, const std::map<std::string, block::Ptr>& m
 			}
 			return matches.at(p->name);
 		case pattern::node_type::function_call_expr:	
-			REPLACER_ASSERT(p->name != "", "Function call replacer currently only supports replacing with a reference to a capture");
+			REPLACER_ASSERT(p->children.size() > 0 || p->name != "", "Function call must have atleast one child or must reference a capture");
+			if (p->children.size() > 0) {
+				auto fc = std::make_shared<::block::function_call_expr>();
+				fc->expr1 = create_expr_ast(p->children[0], matches);
+				for (unsigned i = 1; i < p->children.size(); i++) {
+					fc->args.push_back(create_expr_ast(p->children[i], matches));
+				}
+				return fc;
+			}
 			return matches.at(p->name);
 		case pattern::node_type::initializer_list_expr:
 			REPLACER_ASSERT(p->name != "", "Init list expr replacer currently only supports replacing with a reference to a capture");
@@ -189,7 +197,12 @@ block::Ptr create_ast(pattern::Ptr p, const std::map<std::string, block::Ptr>& m
 		case pattern::node_type::addr_of_expr:
 			return create_unary_ast<::block::addr_of_expr>(p, matches);
 		case pattern::node_type::var:
-			REPLACER_ASSERT(p->name != "", "Var replacer must reference a capture");
+			REPLACER_ASSERT(p->name != "" || p->var_name != "", "Var replacer must reference a capture or have a var name");
+			if (p->var_name != "") {
+				::block::var::Ptr t = std::make_shared<::block::var>();
+				t->var_name = p->var_name;
+				return t;
+			}
 			return matches.at(p->name);
 		default:
 			REPLACER_ASSERT(false, "This replacer is currently not supported");		
