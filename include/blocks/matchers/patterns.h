@@ -79,10 +79,11 @@ struct pattern: public std::enable_shared_from_this<pattern> {
 	bool has_const = false;
 	double const_val_double = 0;
 	int const_val_int = 0;
-	std::string const_val_string = "";
-	
-	// Constructor that assigns a name
+	std::string const_val_string = "";	
+	// In case of variable, the variable can be identified by specific names
+	std::string var_name;
 
+	// Constructor that assigns a name
 	pattern(node_type t, std::string _name, std::vector<pattern::Ptr> _children)
 		: type (t), name(_name), children(_children) {}
 	pattern(node_type t, std::string _name): type(t), name(_name), children({}) {}
@@ -394,6 +395,12 @@ static inline pattern::Ptr sq_bkt_expr(std::string name = "") {
 static inline pattern::Ptr function_call_expr(std::string name = "") {
 	return std::make_shared<pattern>(pattern::node_type::function_call_expr, name);
 }
+static inline pattern::Ptr function_call_expr(pattern::Ptr x, std::vector<pattern::Ptr> y, std::string name = "") {
+	std::vector<pattern::Ptr> children;
+	children.push_back(x);
+	for (auto a: y) children.push_back(a);
+	return std::make_shared<pattern>(pattern::node_type::function_call_expr, name, children);
+}
 static inline pattern::Ptr initializer_list_expr(std::string name = "") {
 	return std::make_shared<pattern>(pattern::node_type::initializer_list_expr, name);
 }
@@ -411,6 +418,11 @@ static inline pattern::Ptr addr_of_expr(pattern::Ptr x, std::string name = "") {
 }
 static inline pattern::Ptr var(std::string name = "") {
 	return std::make_shared<pattern>(pattern::node_type::var, name);
+}
+static inline pattern::Ptr var_with_name(std::string var_name, std::string name = "") {
+	auto p = std::make_shared<pattern>(pattern::node_type::var, name);
+	p->var_name = var_name;
+	return p;
 }
 static inline pattern::Ptr type(std::string name = "") {
 	return std::make_shared<pattern>(pattern::node_type::type, name);
