@@ -271,6 +271,24 @@ block::stmt::Ptr builder_context::extract_ast_from_lambda(std::function<void(voi
 	return extract_ast_from_function_impl();
 }
 
+void builder_context::reset_for_nd_failure() {
+	// Clear all shared_state
+	memoized_tags->map.clear();
+	// Clear per run state if any
+	uncommitted_sequence.clear();
+	ast = nullptr;
+	current_block_stmt = nullptr;
+	bool_vector.clear();
+	visited_offsets.clear();
+	expr_sequence.clear();
+	expr_counter = 0;
+	current_label = "";
+	static_var_tuples.clear();
+	deferred_static_var_tuples.clear();
+	// Increment creation counter since we are running again
+	debug_creation_counter++;
+}
+
 block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 
 #ifndef ENABLE_D2X
@@ -280,7 +298,19 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 
 	std::vector<bool> b;
 
-	block::stmt::Ptr ast = extract_ast_from_function_internal(b);
+	nd_state_map = &_nd_state_map;	
+
+	block::stmt::Ptr ast;	
+	
+	while (1) {
+		try {
+			ast = extract_ast_from_function_internal(b);
+		} catch (NonDeterministicFailureException &e) {
+			reset_for_nd_failure();
+			continue;
+		}
+		break;
+	}
 
 	// Before making any changes, untangle the whole AST
 	ast = clone(ast);
@@ -373,6 +403,7 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(std::vector
 		true_context.internal_stored_lambda = internal_stored_lambda;
 		true_context.feature_unstructured = feature_unstructured;
 		true_context.enable_d2x = enable_d2x;
+		true_context.nd_state_map = nd_state_map;
 
 		std::vector<bool> true_bv;
 		true_bv.push_back(true);
@@ -387,6 +418,7 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(std::vector
 		false_context.internal_stored_lambda = internal_stored_lambda;
 		false_context.feature_unstructured = feature_unstructured;
 		false_context.enable_d2x = enable_d2x;
+		false_context.nd_state_map = nd_state_map;
 
 		std::vector<bool> false_bv;
 		false_bv.push_back(false);

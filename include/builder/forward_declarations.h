@@ -65,7 +65,8 @@ struct check_valid_type {
 	typedef void type;
 };
 
-
+// Generator states for non-deterministic values
+struct nd_var_gen_base;
 
 } // namespace builder
 #endif

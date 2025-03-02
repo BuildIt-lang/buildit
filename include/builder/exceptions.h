@@ -21,6 +21,11 @@ struct MemoizationException : public std::exception {
 	block::stmt_block::Ptr parent;
 	int32_t child_id;
 };
+
+struct NonDeterministicFailureException: public std::exception {
+	NonDeterministicFailureException() {}
+};
+
 } // namespace builder
 
 #endif
