@@ -9,6 +9,7 @@ DEPS_DIR=$(BASE_DIR)/deps
 SAMPLES_SRCS=$(wildcard $(SAMPLES_DIR)/*.cpp)
 SAMPLES=$(subst $(SAMPLES_DIR),$(BUILD_DIR),$(SAMPLES_SRCS:.cpp=))
 INCLUDES=$(wildcard $(INCLUDE_DIR)/*.h) $(wildcard $(INCLUDE_DIR)/*/*.h) $(BUILD_DIR)/gen_headers/gen/compiler_headers.h
+INCLUDES+=$(wildcard $(INCLUDE_DIR)/*/*/*.h)
 
 BUILDER_SRC=$(wildcard $(SRC_DIR)/builder/*.cpp)
 BLOCKS_SRC=$(wildcard $(SRC_DIR)/blocks/*.cpp)

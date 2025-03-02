@@ -1,0 +1,73 @@
+Found 1 matches
+-----
+ASSIGN_EXPR
+  VAR_EXPR
+    VAR (x_0)
+  PLUS_EXPR
+    VAR_EXPR
+      VAR (x_0)
+    INT_CONST (1)
+-----
+Found 1 matches
+-----
+PLUS_EXPR
+  VAR_EXPR
+    VAR (x_0)
+  INT_CONST (0)
+-----
+After all replacements
+FUNC_DECL
+  SCALAR_TYPE (VOID)
+  STMT_BLOCK
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (x_0)
+      INT_CONST (0)
+    EXPR_STMT
+      ASSIGN_EXPR
+        VAR_EXPR
+          VAR (x_0)
+        PLUS_EXPR
+          VAR_EXPR
+            VAR (x_0)
+          INT_CONST (1)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (y_1)
+      INT_CONST (0)
+    EXPR_STMT
+      ASSIGN_EXPR
+        VAR_EXPR
+          VAR (y_1)
+        PLUS_EXPR
+          VAR_EXPR
+            VAR (x_0)
+          INT_CONST (1)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (z_2)
+      INT_CONST (0)
+    EXPR_STMT
+      ASSIGN_EXPR
+        VAR_EXPR
+          VAR (z_2)
+        PLUS_EXPR
+          VAR_EXPR
+            VAR (z_2)
+          INT_CONST (2)
+    EXPR_STMT
+      ASSIGN_EXPR
+        VAR_EXPR
+          VAR (z_2)
+        VAR_EXPR
+          VAR (x_0)
+void foo (void) {
+  int x_0 = 0;
+  x_0 = x_0 + 1;
+  int y_1 = 0;
+  y_1 = x_0 + 1;
+  int z_2 = 0;
+  z_2 = z_2 + 2;
+  z_2 = x_0;
+}
+
