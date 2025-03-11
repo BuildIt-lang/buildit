@@ -258,5 +258,10 @@ void block_replacer::visit(addr_of_expr::Ptr a) {
 	a->expr1 = rewrite(a->expr1);
 	node = a;
 }
+void block_replacer::visit(cast_expr::Ptr a) {
+	a->expr1 = rewrite(a->expr1);
+	a->type1 = rewrite(a->type1);
+	node = a;
+}
 
 } // namespace block

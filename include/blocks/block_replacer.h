@@ -13,8 +13,8 @@ public:
 	std::shared_ptr<block> to_replace;
 	std::shared_ptr<block> replace_with;
 
-	template <typename T = expr>
-	typename T::Ptr rewrite(typename T::Ptr ptr) {
+	template <typename T>
+	typename T::Ptr rewrite(typename std::shared_ptr<T> ptr) {
 		auto tmp = node;
 		node = nullptr;
 		ptr->accept(this);
@@ -91,6 +91,8 @@ public:
 
 	virtual void visit(std::shared_ptr<func_decl>) override;
 	virtual void visit(std::shared_ptr<return_stmt>) override;
+
+	virtual void visit(std::shared_ptr<cast_expr>) override;
 };
 } // namespace block
 

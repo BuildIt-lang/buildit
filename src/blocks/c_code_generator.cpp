@@ -378,6 +378,7 @@ void c_code_generator::visit(if_stmt::Ptr a) {
 	a->cond->accept(this);
 	oss << ")";
 	if (isa<stmt_block>(a->then_stmt)) {
+		auto sb = to<stmt_block>(a->then_stmt);
 		oss << " ";
 		a->then_stmt->accept(this);
 		oss << " ";
@@ -395,6 +396,9 @@ void c_code_generator::visit(if_stmt::Ptr a) {
 	if (isa<stmt_block>(a->else_stmt)) {
 		if (to<stmt_block>(a->else_stmt)->stmts.size() == 0)
 			return;
+
+		auto sb = to<stmt_block>(a->else_stmt);
+
 		oss << "else";
 		oss << " ";
 		a->else_stmt->accept(this);
@@ -529,13 +533,18 @@ void c_code_generator::visit(func_decl::Ptr a) {
 			handle_func_arg(arg);
 		} else {
 			arg->var_type->accept(this);
-			oss << " " << arg->var_name;
+			if (arg->var_name != "")
+				oss << " " << arg->var_name;
 		}
+	}
+	if (a->getBoolMetadata("is_variadic")) {
+		oss << ", ...";
+		printDelim = true;
 	}
 	if (!printDelim)
 		oss << "void";
 	oss << ")";
-	if (decl_only) {
+	if (decl_only || a->getBoolMetadata("is_decl_only")) {
 		oss << ";";
 		return;
 	}
@@ -569,8 +578,11 @@ void c_code_generator::visit(label_stmt::Ptr a) {
 	oss << a->label1->label_name << ":";
 }
 void c_code_generator::visit(return_stmt::Ptr a) {
-	oss << "return ";
-	a->return_val->accept(this);
+	oss << "return";
+	if (a->return_val) {
+		oss << " ";
+		a->return_val->accept(this);
+	}
 	oss << ";";
 }
 void c_code_generator::visit(member_access_expr::Ptr a) {
@@ -607,4 +619,18 @@ void c_code_generator::visit(addr_of_expr::Ptr a) {
 	a->expr1->accept(this);
 	oss << "))";
 }
+
+void c_code_generator::visit(cast_expr::Ptr a) {
+	oss << "(";
+	a->type1->accept(this);
+	oss << ")";
+	if (expr_needs_bracket(a->expr1)) {
+		oss << "(";
+		a->expr1->accept(this);
+		oss << ")";
+	} else {
+		a->expr1->accept(this);
+	}
+}
+
 } // namespace block

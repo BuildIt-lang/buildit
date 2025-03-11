@@ -750,6 +750,39 @@ public:
 		return np;
 	}
 };
+
+
+
+
+/* Expressions that will never be generated but could be promoted 
+or are useful for representing some key elements */
+class cast_expr: public unary_expr {
+public:
+	type::Ptr type1;
+
+	typedef std::shared_ptr<cast_expr> Ptr;
+	virtual void dump(std::ostream &oss, int) override;
+	virtual void accept(block_visitor* a) override {
+		a->visit(self<cast_expr>());
+	}	
+	virtual bool is_same(block::Ptr other) override {
+		if (!isa<cast_expr>(other))
+			return false;
+		cast_expr::Ptr other_expr = to<cast_expr>(other);
+		if (!other_expr->expr1->is_same(expr1))
+			return false;
+		if (!other_expr->type1->is_same(type1))
+			return false;
+		return true;
+	}
+	virtual block::Ptr clone_impl(void) override {
+		auto np = clone_obj(this);
+		np->expr1 = clone(expr1);
+		np->type1 = clone(type1);
+		return np;
+	}
+};
+
 } // namespace block
 
 #endif

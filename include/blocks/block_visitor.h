@@ -68,6 +68,8 @@ class named_type;
 class func_decl;
 class return_stmt;
 
+class cast_expr;
+
 class block_visitor {
 public:
 	virtual void visit(std::shared_ptr<block>);
@@ -134,6 +136,10 @@ public:
 
 	virtual void visit(std::shared_ptr<func_decl>);
 	virtual void visit(std::shared_ptr<return_stmt>);
+
+
+
+	virtual void visit(std::shared_ptr<cast_expr>);
 };
 } // namespace block
 

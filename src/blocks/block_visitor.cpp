@@ -205,5 +205,9 @@ void block_visitor::visit(member_access_expr::Ptr a) {
 void block_visitor::visit(addr_of_expr::Ptr a) {
 	a->expr1->accept(this);
 }
+void block_visitor::visit(cast_expr::Ptr a) {
+	a->expr1->accept(this);
+	a->type1->accept(this);
+}
 
 } // namespace block

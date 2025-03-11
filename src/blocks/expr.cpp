@@ -207,4 +207,11 @@ void addr_of_expr::dump(std::ostream &oss, int indent) {
 	expr1->dump(oss, indent + 1);
 }
 
+void cast_expr::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "CAST_EXPR" << std::endl;
+	expr1->dump(oss, indent + 1);
+	type1->dump(oss, indent + 1);
+}
+
 } // namespace block
