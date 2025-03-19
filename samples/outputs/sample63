@@ -1,5 +1,10 @@
+struct linked_list {
+  linked_list* next;
+  struct foo* other;
+};
 void bar (void) {
   linked_list* var0;
   ((var0->next)->next)->next = 0;
+  var0->other = 0;
 }
 

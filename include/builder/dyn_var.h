@@ -441,13 +441,13 @@ public:
 	}
 	// Hack for creating a member that's live across return site
 	
-	std::unique_ptr<dyn_var<T>> _p = nullptr;
+	std::shared_ptr<dyn_var<T>> _p = nullptr;
 
 	dyn_var<T> *operator->() {
 		auto b = this->operator[](0);
 		b.encompassing_expr->template setMetadata<bool>("deref_is_star", true);
 		if (_p == nullptr) {
-			_p = std::unique_ptr<dyn_var<T>>(new dyn_var<T>(as_member(this, "_p")));	
+			_p = std::make_shared<dyn_var<T>>(as_member(this, "_p"));
 		}
 		*_p = (cast)b;
 		return _p->addr();

@@ -10,6 +10,9 @@ namespace builder {
 
 struct custom_type_base;
 
+template <typename T>
+struct external_type_namer;
+
 
 
 extern int type_naming_counter;
@@ -28,14 +31,31 @@ struct type_namer {
 		return *obtained_name;
 	}
 };
+
 template <typename T, typename V>
 std::string *type_namer<T, V>::obtained_name = nullptr;
 
+/* Specializations that check for typenames provided either as a 
+member or a external_namer specialization */
+
+template <typename T, typename V=void>
+struct has_type_name: public std::false_type {};
 template <typename T>
-struct type_namer<T, typename check_valid_type<decltype(T::type_name)>::type> {
+struct has_type_name<T, typename check_valid_type<decltype(T::type_name)>::type>: public std::true_type {};
+
+template <typename T>
+struct type_namer<T, typename std::enable_if<has_type_name<external_type_namer<T>>::value>::type> {
+	static std::string get_type_name() {
+		return external_type_namer<T>::type_name;
+	}	
+};
+
+template <typename T>
+struct type_namer<T, typename std::enable_if<!has_type_name<external_type_namer<T>>::value && 
+	has_type_name<T>::value>::type> {
 	static std::string get_type_name() {
 		return T::type_name;
-	}
+	}	
 };
 
 template <typename T, typename V=void>
@@ -52,6 +72,12 @@ struct type_template<T, typename check_valid_type<decltype(T::get_template_arg_t
 	}
 };
 
+template <typename T>
+struct type_template<T, typename check_valid_type<decltype(external_type_namer<T>::get_template_arg_types)>::type> {
+	static std::vector<block::type::Ptr> get_templates() {
+		return external_type_namer<T>::get_template_arg_types();
+	}
+};
 
 // The main definition of the type extractor classes
 template <typename T>
