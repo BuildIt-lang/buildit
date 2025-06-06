@@ -2,7 +2,7 @@ name: Test Cases
 on: [push, pull_request]
 jobs: 
   CI-Actions-Ubuntu:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - run: echo "Starting tests"
       - name: Checking out repository
