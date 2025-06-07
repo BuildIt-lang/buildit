@@ -16,8 +16,8 @@
 #include <memory>
 #include <unistd.h>
 
-#include <libdwarf/dwarf.h>
-#include <libdwarf/libdwarf.h>
+#include "dwarf.h"
+#include "libdwarf.h"
 
 namespace util {
 
@@ -65,7 +65,7 @@ static int find_or_create_dbg(const char *fname, Dwarf_Debug *ret) {
 	int fd = open(fname, O_RDONLY);
 	if (fd < 0)
 		return -1;
-	if (dwarf_init(fd, DW_DLC_READ, NULL, NULL, &to_ret, &de)) {
+	if (dwarf_init_b(fd, DW_GROUPNUMBER_ANY, NULL, NULL, &to_ret, &de)) {
 		close(fd);
 		return -1;
 	}
@@ -110,12 +110,13 @@ static bool check_die_pc(Dwarf_Debug dbg, Dwarf_Die die, uint64_t addr) {
 		Dwarf_Signed cnt;
 		Dwarf_Unsigned bytecnt;
 		Dwarf_Off off;
+		Dwarf_Off realoff;
 
 		if (dwarf_global_formref(attr, &off, &de) != DW_DLV_OK) {
 			return false;
 		}
 
-		if (dwarf_get_ranges(dbg, (Dwarf_Off)off, &ranges, &cnt, &bytecnt, &de) != DW_DLV_OK)
+		if (dwarf_get_ranges_b(dbg, (Dwarf_Off)off, die, &realoff, &ranges, &cnt, &bytecnt, &de) != DW_DLV_OK)
 			return false;
 		for (int i = 0; i < cnt; i++) {
 			if (ranges[i].dwr_type == DW_RANGES_END)
@@ -126,12 +127,12 @@ static bool check_die_pc(Dwarf_Debug dbg, Dwarf_Die die, uint64_t addr) {
 				lopc = ranges[i].dwr_addr1 + base;
 				hipc = ranges[i].dwr_addr2 + base;
 				if (addr >= lopc && addr < hipc) {
-					dwarf_ranges_dealloc(dbg, ranges, cnt);
+					dwarf_dealloc_ranges(dbg, ranges, cnt);
 					return true;
 				}
 			}
 		}
-		dwarf_ranges_dealloc(dbg, ranges, cnt);
+		dwarf_dealloc_ranges(dbg, ranges, cnt);
 	}
 
 	return false;
@@ -144,7 +145,7 @@ static Dwarf_Die find_cu_die(Dwarf_Debug dbg, uint64_t addr) {
 	Dwarf_Half tag;
 	while ((ret = dbg_step_cu(dbg)) == DW_DLV_OK) {
 		die = NULL;
-		while (dwarf_siblingof(dbg, die, &ret_die, &de) == DW_DLV_OK) {
+		while (dwarf_siblingof_b(dbg, die, 1, &ret_die, &de) == DW_DLV_OK) {
 			if (die != NULL)
 				dwarf_dealloc(dbg, die, DW_DLA_DIE);
 			die = ret_die;
@@ -186,7 +187,7 @@ static std::string find_die_name(Dwarf_Debug dbg, Dwarf_Die die) {
 		Dwarf_Off off;
 		Dwarf_Die spec;
 		dwarf_global_formref(at, &off, &de);
-		dwarf_offdie(dbg, off, &spec, &de);
+		dwarf_offdie_b(dbg, off, 1, &spec, &de);
 		std::string ret = find_die_name(dbg, spec);
 		if (ret != "")
 			return ret;
@@ -195,7 +196,7 @@ static std::string find_die_name(Dwarf_Debug dbg, Dwarf_Die die) {
 		Dwarf_Off off;
 		Dwarf_Die spec;
 		dwarf_global_formref(at, &off, &de);
-		dwarf_offdie(dbg, off, &spec, &de);
+		dwarf_offdie_b(dbg, off, 1, &spec, &de);
 		std::string ret = find_die_name(dbg, spec);
 		if (ret != "")
 			return ret;
@@ -210,6 +211,9 @@ static void *decode_address_from_die(Dwarf_Debug dbg, Dwarf_Die die, uint64_t fr
 	Dwarf_Loc_Head_c loclist_head = 0;
 	Dwarf_Unsigned op_count;
 	Dwarf_Locdesc_c desc;
+
+	Dwarf_Unsigned rawlowpc, rawhighpc;
+	Dwarf_Bool debug_addr_unavailable;
 
 	Dwarf_Addr expr_low;
 	Dwarf_Addr expr_high;
@@ -226,7 +230,8 @@ static void *decode_address_from_die(Dwarf_Debug dbg, Dwarf_Die die, uint64_t fr
 		if (lres != DW_DLV_OK)
 			return NULL;
 		// std::cout << "For variable, the location has no_of_elems = " << no_of_elements << std::endl;
-		lres = dwarf_get_locdesc_entry_c(loclist_head, 0, &d1, &expr_low, &expr_high, &op_count, &desc, &d4,
+		lres = dwarf_get_locdesc_entry_d(loclist_head, 0, &d1, &rawlowpc, &rawhighpc, &debug_addr_unavailable, 
+			 &expr_low, &expr_high, &op_count, &desc, &d4,
 						 &d5, &d6, &de);
 
 		if (op_count != 1 && op_count != 2)
@@ -270,7 +275,7 @@ static int find_var_size(Dwarf_Debug dbg, Dwarf_Die var_die) {
 	if (dwarf_global_formref(attr, &off, &de) != DW_DLV_OK)
 		return -1;
 
-	if (dwarf_offdie(dbg, off, &type_die, &de) != DW_DLV_OK)
+	if (dwarf_offdie_b(dbg, off, 1, &type_die, &de) != DW_DLV_OK)
 		return -1;
 
 	if (dwarf_attr(type_die, DW_AT_byte_size, &attr, &de) != DW_DLV_OK) 
@@ -297,7 +302,7 @@ static std::string find_member_at_offset(Dwarf_Debug dbg, Dwarf_Die var_die, int
 	if (dwarf_global_formref(attr, &off, &de) != DW_DLV_OK)
 		return "";
 
-	if (dwarf_offdie(dbg, off, &type_die, &de) != DW_DLV_OK)
+	if (dwarf_offdie_b(dbg, off, 1, &type_die, &de) != DW_DLV_OK)
 		return "";
 
 	// Now we iterate over the members and check their offsets;
@@ -329,7 +334,7 @@ static std::string find_member_at_offset(Dwarf_Debug dbg, Dwarf_Die var_die, int
 				return name;	
 			}
 		}	
-	} while (dwarf_siblingof(dbg, child, &next_child, &de) == DW_DLV_OK);
+	} while (dwarf_siblingof_b(dbg, child, 1, &next_child, &de) == DW_DLV_OK);
 
 	return "";	
 }
@@ -375,7 +380,7 @@ static std::string find_var_in_f_tree(Dwarf_Debug dbg, Dwarf_Die in_die, uint64_
 				}
 			}
 		}
-	} while (dwarf_siblingof(dbg, die, &curr_die, &de) == DW_DLV_OK);
+	} while (dwarf_siblingof_b(dbg, die, 1, &curr_die, &de) == DW_DLV_OK);
 	// Now check all the lexical scopes
 	if (dwarf_child(in_die, &curr_die, &de) != DW_DLV_OK)
 		return "";
@@ -395,7 +400,7 @@ static std::string find_var_in_f_tree(Dwarf_Debug dbg, Dwarf_Die in_die, uint64_
 				}
 			}
 		}
-	} while (dwarf_siblingof(dbg, die, &curr_die, &de) == DW_DLV_OK);
+	} while (dwarf_siblingof_b(dbg, die, 1, &curr_die, &de) == DW_DLV_OK);
 	return "";
 }
 
@@ -433,7 +438,7 @@ static std::string find_var_in_tree(Dwarf_Debug dbg, Dwarf_Die in_die, uint64_t 
 			dwarf_dealloc(dbg, die, DW_DLA_DIE);
 			return v;
 		}
-	} while (dwarf_siblingof(dbg, die, &curr_die, &de) == DW_DLV_OK);
+	} while (dwarf_siblingof_b(dbg, die, 1, &curr_die, &de) == DW_DLV_OK);
 	return "";
 }
 
