@@ -56,15 +56,16 @@ endif
 
 LIBUNWIND_PATH ?= _UNSET_
 ifeq ($(RECOVER_VAR_NAMES),1)
-LINKER_FLAGS+=-ldwarf -lunwind
+LINKER_FLAGS+=$(shell pkg-config --libs libdwarf libunwind)
 CFLAGS_INTERNAL+=-DRECOVER_VAR_NAMES
+INCLUDE_FLAGS+=$(shell pkg-config --cflags libdwarf)
 ifneq ($(LIBUNWIND_PATH),_UNSET_)
 INCLUDE_FLAGS+=-I $(LIBUNWIND_PATH)/include
 LINKER_FLAGS+=-L $(LIBUNWIND_PATH)/lib
 endif
 else
 ifeq ($(TRACER_USE_LIBUNWIND),1)
-LINKER_FLAGS+=-lunwind
+LINKER_FLAGS+=$(shell pkg-config --libs libunwind)
 ifneq ($(LIBUNWIND_PATH),_UNSET_)
 INCLUDE_FLAGS+=-I $(LIBUNWIND_PATH)/include
 LINKER_FLAGS+=-L $(LIBUNWIND_PATH)/lib
