@@ -79,12 +79,19 @@ void continue_stmt::dump(std::ostream &oss, int indent) {
 
 void func_decl::dump(std::ostream &oss, int indent) {
 	printer::indent(oss, indent);
-	oss << "FUNC_DECL" << std::endl;
+	oss << "FUNC_DECL (" << func_name << ")" << std::endl;
 	return_type->dump(oss, indent + 1);
 	for (auto arg : args) {
 		arg->dump(oss, indent + 1);
 	}
 	body->dump(oss, indent + 1);
+}
+void struct_decl::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "STRUCT_DECL (" << struct_name << ")"  << std::endl;
+	for (auto mem: members) {
+		mem->dump(oss, indent + 1);
+	}
 }
 void return_stmt::dump(std::ostream &oss, int indent) {
 	printer::indent(oss, indent);

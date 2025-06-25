@@ -16,7 +16,7 @@ PLUS_EXPR
   INT_CONST (0)
 -----
 After all replacements
-FUNC_DECL
+FUNC_DECL (foo)
   SCALAR_TYPE (VOID)
   STMT_BLOCK
     DECL_STMT

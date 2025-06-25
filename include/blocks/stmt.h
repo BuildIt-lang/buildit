@@ -390,6 +390,46 @@ public:
 	}
 };
 
+
+class struct_decl : public stmt {
+public:
+	typedef std::shared_ptr<struct_decl> Ptr;
+	virtual void dump(std::ostream&, int) override;
+	virtual void accept(block_visitor *a) override {
+		a->visit(self<struct_decl>());
+	}
+
+	std::string struct_name;
+	std::vector<decl_stmt::Ptr> members;
+	virtual bool is_same(block::Ptr other) override {
+		// Struct decls like Function Decls don't have static offsets
+		if (!isa<struct_decl>(other)) 
+			return false;
+		struct_decl::Ptr other_struct = to<struct_decl>(other);
+
+		if (struct_name != other_struct->struct_name)
+			return false;
+
+		if (members.size() != other_struct->members.size()) 
+			return false;
+		// We will look for exact struct matches including member names
+		// This could be relaxed to compare only types with a flag
+		for (unsigned int i = 0; i < members.size(); i++) {
+			if (!members[i]->is_same(other_struct->members[i]))
+				return false;
+		}
+		return true;
+	}
+	virtual block::Ptr clone_impl(void) override {
+		auto np = clone_stmt(this);
+		np->struct_name = struct_name;
+		for (auto mem: members) {
+			np->members.push_back(clone(mem));
+		}
+		return np;
+	}
+};
+
 class return_stmt : public stmt {
 public:
 	typedef std::shared_ptr<return_stmt> Ptr;

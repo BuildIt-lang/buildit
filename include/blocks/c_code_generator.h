@@ -81,6 +81,7 @@ public:
 
 	void handle_func_arg(var::Ptr a);
 	virtual void visit(func_decl::Ptr);
+	virtual void visit(struct_decl::Ptr);
 	virtual void visit(return_stmt::Ptr);
 	virtual void visit(member_access_expr::Ptr);
 	virtual void visit(addr_of_expr::Ptr);
@@ -113,26 +114,25 @@ public:
 		builder::options::track_members = true;
 		T v = builder::with_name("_");
 		builder::options::track_members = save;
-		/* Dump the type */
-		c_code_generator generator(oss);
-		printer::indent(oss, indent);
+
+		// Construct a struct decl
+		auto sd = std::make_shared<struct_decl>();
 		auto var_type = T::create_block_type();
 		assert(isa<named_type>(var_type) && "Cannot create struct declarations for un-named types");
 		assert(to<named_type>(var_type)->template_args.size() == 0 &&
 		       "Cannot yet, generate decls for types with template args");
-		oss << "struct " << to<named_type>(var_type)->type_name << " {\n";
-		indent++;
 
-		for (auto member : v.members) {
-			printer::indent(oss, indent);
+		sd->struct_name = to<named_type>(var_type)->type_name;
+		for (auto member: v.members) {
 			auto decl = std::make_shared<decl_stmt>();
 			decl->decl_var = member->block_var;
-			decl->accept(&generator);
-			oss << std::endl;
+			decl->init_expr = nullptr;
+			sd->members.push_back(decl);
 		}
-		indent--;
-		printer::indent(oss, indent);
-		oss << "};" << std::endl;
+
+		/* Dump the type */
+		c_code_generator generator(oss);
+		sd->accept(&generator);
 	}
 };
 } // namespace block

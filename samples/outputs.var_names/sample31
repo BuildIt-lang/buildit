@@ -1,4 +1,4 @@
-FUNC_DECL
+FUNC_DECL (func1)
   SCALAR_TYPE (INT)
   VAR (arg0)
   STMT_BLOCK
