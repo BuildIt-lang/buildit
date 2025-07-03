@@ -511,6 +511,7 @@ void c_code_generator::visit(func_decl::Ptr a) {
 	}
 #endif
 
+	printer::indent(oss, curr_indent);
 	a->return_type->accept(this);
 	if (a->hasMetadata<std::vector<std::string>>("attributes")) {
 		const auto &attributes = a->getMetadata<std::vector<std::string>>("attributes");
@@ -559,6 +560,21 @@ void c_code_generator::visit(func_decl::Ptr a) {
 		xctx.end_section();
 	}
 #endif
+}
+void c_code_generator::visit(struct_decl::Ptr a) {
+	printer::indent(oss, curr_indent);
+	oss << "struct " << a->struct_name << " {";
+	nextl();
+	curr_indent++;
+	for (auto mem: a->members) {
+		printer::indent(oss, curr_indent);
+		mem->accept(this);
+		nextl();
+	}
+	curr_indent--;
+	printer::indent(oss, curr_indent);
+	oss << "};";
+	nextl();
 }
 void c_code_generator::visit(goto_stmt::Ptr a) {
 	// a->dump(oss, 1);
