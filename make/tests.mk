@@ -12,6 +12,7 @@ endif
 TEST ?=
 run: SHELL:=/bin/bash
 run: $(SAMPLES)
+	@ export CLICOLOR=1
 	@ if [ "$(TEST)" == "" ]; then \
 		total=0;\
                 success=0;\

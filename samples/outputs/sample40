@@ -2,6 +2,7 @@
 int match_re (char* arg1) {
   int var3;
   int var5;
+  char* var0 = arg1;
   int var1 = strlen(arg1);
   int var2 = 0;
   if (var2 < var1) {
@@ -9,18 +10,18 @@ int match_re (char* arg1) {
       var2 = var2 + 1;
       label0:
       if (var2 < var1) {
-        if (arg1[var2] == 98) {
+        if (var0[var2] == 98) {
           var2 = var2 + 1;
           goto label0;
         } 
-        if (arg1[var2] == 99) {
+        if (var0[var2] == 99) {
           label1:
           var2 = var2 + 1;
           if (var2 < var1) {
-            if (arg1[var2] == 99) {
+            if (var0[var2] == 99) {
               goto label1;
             } 
-            if (arg1[var2] == 100) {
+            if (var0[var2] == 100) {
               label2:
               var2 = var2 + 1;
               if (var2 < var1) {
@@ -35,7 +36,7 @@ int match_re (char* arg1) {
           var5 = 0;
           return var5;
         } 
-        if (arg1[var2] == 100) {
+        if (var0[var2] == 100) {
           goto label2;
         } 
         var3 = 0;
