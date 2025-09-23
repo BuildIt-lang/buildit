@@ -1,15 +1,15 @@
 int power (int arg0, int arg1) {
-  int var0 = arg1;
-  int res_2 = 1;
-  int x_3 = arg0;
-  while (var0 > 1) {
-    if ((var0 % 2) == 1) {
-      res_2 = res_2 * x_3;
+  int exponent_3 = arg1;
+  int res_4 = 1;
+  int x_5 = arg0;
+  while (exponent_3 > 1) {
+    if ((exponent_3 % 2) == 1) {
+      res_4 = res_4 * x_5;
     } 
-    x_3 = x_3 * x_3;
-    var0 = var0 / 2;
+    x_5 = x_5 * x_5;
+    exponent_3 = exponent_3 / 2;
   }
-  return res_2 * x_3;
+  return res_4 * x_5;
 }
 
 void bar (void) {

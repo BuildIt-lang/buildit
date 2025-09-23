@@ -9,7 +9,12 @@
 using builder::dyn_var;
 using builder::static_var;
 
-static dyn_var<int> power(dyn_var<int> base, dyn_var<int> exponent) {
+static dyn_var<int> power(dyn_var<int> base_in, dyn_var<int> exp_in) {
+
+	// Create copies so that test cases work well
+	// MAC os has descripancy in the order arguments are copied in
+	dyn_var<int> base = base_in; dyn_var<int> exponent = exp_in;
+
 	dyn_var<int> res = 1, x = base;
 	while (exponent > 1) {
 		if (exponent % 2 == 1)
