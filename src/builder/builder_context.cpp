@@ -339,25 +339,30 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 	block::sub_expr_cleanup cleaner;
 	ast->accept(&cleaner);
 
-	if (run_rce) {
-		block::eliminate_redundant_vars(ast);
+	if (!feature_unstructured) {
+
+		block::basic_block::cfg_block BBs = generate_basic_blocks(block::to<block::stmt_block>(ast));
+		
+		block::loop_finder finder;
+		finder.ast = ast;
+		ast->accept(&finder);
+
+		block::for_loop_finder for_finder;
+		for_finder.ast = ast;
+		ast->accept(&for_finder);
 	}
-
-	if (feature_unstructured)
-		return ast;
-
-	block::basic_block::cfg_block BBs = generate_basic_blocks(block::to<block::stmt_block>(ast));
-	
-	block::loop_finder finder;
-	finder.ast = ast;
-	ast->accept(&finder);
-
-	block::for_loop_finder for_finder;
-	for_finder.ast = ast;
-	ast->accept(&for_finder);
 
 	block::if_switcher switcher;
 	ast->accept(&switcher);
+
+	
+	// Run RCE after loop finder
+	// since RCE does rely on loops being detected
+	// If labels are still kept around, RCE cannot be as aggressive 
+	// since it has to consider the worst case
+	if (run_rce) {
+		block::eliminate_redundant_vars(ast);
+	}
 
 	block::loop_roll_finder loop_roll_finder;
 	ast->accept(&loop_roll_finder);

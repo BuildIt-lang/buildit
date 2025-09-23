@@ -127,6 +127,14 @@ public:
 		node = ws;
 		if (has_side_effects(ws->cond))
 			value_map.clear();
+		// If body has side-effects, we might have changes too
+		// see sample64 for example
+		// This is however very expensive to check
+		// TODO: preprocess side effects for all statements
+		// A small optimization to avoid looking for
+		// side effects if the map is already empty
+		if (value_map.size() > 0 && has_side_effects(ws->body))
+			value_map.clear();
 		ws->cond = rewrite(ws->cond);
 		ws->body = rewrite<stmt>(ws->body);
 	}
@@ -137,6 +145,10 @@ public:
 			value_map.clear();
 		if (has_side_effects(fs->update))
 			value_map.clear();
+		// Similar to while loop above, we need to check
+		// the body for side effects too
+		if (value_map.size() > 0 && has_side_effects(fs->body))
+			value_map.clear();
 		fs->cond = rewrite(fs->cond);
 		fs->update = rewrite(fs->update);
 		fs->body = rewrite<stmt>(fs->body);
@@ -146,6 +158,9 @@ public:
 		if (has_side_effects(is->cond)) 
 			value_map.clear();
 		is->cond = rewrite(is->cond);
+		// if statements don't have the problem with the body
+		// but there could be gotos 
+		// so we will handle labels separately
 		is->then_stmt = rewrite<stmt>(is->then_stmt);
 		is->else_stmt = rewrite<stmt>(is->else_stmt);
 	}
@@ -157,6 +172,13 @@ public:
 			return;	
 		// If we have a substitution make it now
 		node = value_map[ve->var1];
+	}
+
+	virtual void visit(label_stmt::Ptr ls) override {
+		// If there is a jump target here, we could be jumping
+		// from anywhere, best to clear the value map
+		value_map.clear();
+		node = ls;
 	}
 };
 
@@ -187,8 +209,9 @@ public:
 	std::map<var::Ptr, var::Ptr> value_map;
 	std::vector<var::Ptr> address_taken_vars;
 
-
-	void purge_side_effects(expr::Ptr e) {
+	// purge side effects can accpet entire 
+	// blocks and statements
+	void purge_side_effects(block::Ptr e) {
 		side_effects_gather gatherer;
 		e->accept(&gatherer);
 		for (auto pair: value_map) {
@@ -241,6 +264,10 @@ public:
 	virtual void visit(while_stmt::Ptr ws) override {
 		node = ws;
 		purge_side_effects(ws->cond);
+		// Just like phase 1 the body could have side effects 
+		// which means we need to purge side effects from the body 
+		// TODO: Just like Phase 1 maybe there is a way to optimize this
+		purge_side_effects(ws->body);
 		ws->cond = rewrite(ws->cond);
 		ws->body = rewrite<stmt>(ws->body);
 	}
@@ -250,6 +277,8 @@ public:
 		fs->decl_stmt = rewrite<stmt>(fs->decl_stmt);
 		purge_side_effects(fs->cond);
 		purge_side_effects(fs->update);
+		// Similar to while loop, purge side effects from body
+		purge_side_effects(fs->body);
 		fs->cond = rewrite(fs->cond);
 		fs->update = rewrite(fs->update);
 		fs->body = rewrite<stmt>(fs->body);
@@ -267,6 +296,16 @@ public:
 		var::Ptr v1 = ve->var1;
 		if (value_map.find(v1) != value_map.end() && value_map[v1] != nullptr)
 			ve->var1 = value_map[v1];
+	}
+
+	virtual void visit(label_stmt::Ptr ls) override {
+		// Just like phase 1, if this is a jump target, 
+		// we can't predict any side effects, so purge everything
+		// TODO: This could however be optimized to purge 
+		// only those that have _ever_ been modified
+		// sample40 could benefit from that
+		node = ls;
+		value_map.clear();	
 	}
 };
 

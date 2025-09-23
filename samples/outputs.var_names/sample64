@@ -1,0 +1,22 @@
+int power (int arg0, int arg1) {
+  int var0 = arg1;
+  int res_2 = 1;
+  int x_3 = arg0;
+  while (var0 > 1) {
+    if ((var0 % 2) == 1) {
+      res_2 = res_2 * x_3;
+    } 
+    x_3 = x_3 * x_3;
+    var0 = var0 / 2;
+  }
+  return res_2 * x_3;
+}
+
+void bar (void) {
+  int a_0;
+  int x_1 = a_0 + 1;
+  while (x_1) {
+    a_0 = a_0 + 1;
+  }
+}
+
