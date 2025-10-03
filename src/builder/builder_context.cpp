@@ -31,13 +31,13 @@ void builder_context::add_stmt_to_current_block(block::stmt::Ptr s, bool check_f
 
 		throw LoopBackException(s->static_offset);
 	}
-	std::string tag_string = s->static_offset.stringify();
-	if (use_memoization && memoized_tags->map.find(tag_string) != memoized_tags->map.end() && check_for_conflicts &&
+	tracer::tag stag = s->static_offset;
+	if (use_memoization && memoized_tags->map.find(stag) != memoized_tags->map.end() && check_for_conflicts &&
 	    bool_vector.size() == 0) {
 		// This tag has been seen on some other execution. We can reuse.
 		// First find the tag -
 
-		block::stmt_block::Ptr parent = memoized_tags->map[tag_string];
+		block::stmt_block::Ptr parent = memoized_tags->map[stag];
 		unsigned int i = 0;
 		for (i = 0; i < parent->stmts.size(); i++) {
 			if (parent->stmts[i]->static_offset == s->static_offset)
@@ -55,7 +55,7 @@ void builder_context::add_stmt_to_current_block(block::stmt::Ptr s, bool check_f
 		if (parent->stmts[i]->is_same(s))
 			throw MemoizationException(s->static_offset, parent, i);
 	}
-	visited_offsets.insert(s->static_offset.stringify());
+	visited_offsets.insert(s->static_offset);
 	current_block_stmt->stmts.push_back(s);
 }
 tracer::tag get_offset_in_function(void) {
@@ -68,12 +68,12 @@ builder_context::~builder_context() {
 	}
 }
 bool builder_context::is_visited_tag(tracer::tag &new_tag) {
-	if (visited_offsets.find(new_tag.stringify()) != visited_offsets.end())
+	if (visited_offsets.find(new_tag) != visited_offsets.end())
 		return true;
 	return false;
 }
 void builder_context::erase_tag(tracer::tag &erase_tag) {
-	visited_offsets.erase(erase_tag.stringify());
+	visited_offsets.erase(erase_tag);
 }
 void builder_context::commit_uncommitted(void) {
 	for (auto block_ptr : uncommitted_sequence) {
@@ -507,26 +507,26 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(std::vector
 			assert(block::isa<block::stmt_block>(if1->then_stmt));
 			assert(block::isa<block::stmt_block>(if1->else_stmt));
 			for (auto &stmt : block::to<block::stmt_block>(if1->then_stmt)->stmts) {
-				auto it = memoized_tags->map.find(stmt->static_offset.stringify());
+				auto it = memoized_tags->map.find(stmt->static_offset);
 				if (it != memoized_tags->map.end())
 					memoized_tags->map.erase(it);
 
 				if (feature_unstructured) {
 					auto pblock = block::to<block::stmt_block>(if1->then_stmt);
-					memoized_tags->map[stmt->static_offset.stringify()] = pblock;
+					memoized_tags->map[stmt->static_offset] = pblock;
 				}
 			}
 			for (auto &stmt : block::to<block::stmt_block>(if1->else_stmt)->stmts) {
-				auto it = memoized_tags->map.find(stmt->static_offset.stringify());
+				auto it = memoized_tags->map.find(stmt->static_offset);
 				if (it != memoized_tags->map.end())
 					memoized_tags->map.erase(it);
 				if (feature_unstructured) {
 					auto pblock = block::to<block::stmt_block>(if1->else_stmt);
-					memoized_tags->map[stmt->static_offset.stringify()] = pblock;
+					memoized_tags->map[stmt->static_offset] = pblock;
 				}
 			}
 		}
-		memoized_tags->map[s->static_offset.stringify()] = current_block_stmt;
+		memoized_tags->map[s->static_offset] = current_block_stmt;
 	}
 
 	ast = current_block_stmt = nullptr;

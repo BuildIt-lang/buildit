@@ -28,15 +28,13 @@ struct nd_var_gen<bool>: public nd_var_gen_base {
 
 template <typename T>
 std::shared_ptr<nd_var_gen<T>> get_or_create_generator(tracer::tag req_tag) {
-	std::string tag_name = req_tag.stringify();
-
-	if (builder_context::current_builder_context->nd_state_map->find(tag_name) ==
+	if (builder_context::current_builder_context->nd_state_map->find(req_tag) ==
 		builder_context::current_builder_context->nd_state_map->end()) {
-		(*(builder_context::current_builder_context->nd_state_map))[tag_name] = std::make_shared<nd_var_gen<T>>();
+		(*(builder_context::current_builder_context->nd_state_map))[req_tag] = std::make_shared<nd_var_gen<T>>();
 	}
 
 	return std::static_pointer_cast<nd_var_gen<T>>(
-		(*(builder_context::current_builder_context->nd_state_map))[tag_name]);
+		(*(builder_context::current_builder_context->nd_state_map))[req_tag]);
 }
 
 /* contstraints on bool types

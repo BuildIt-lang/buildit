@@ -16,7 +16,7 @@ class label_creator : public block_visitor {
 public:
 	using block_visitor::visit;
 	std::vector<tracer::tag> collected_labels;
-	std::unordered_map<std::string, label::Ptr> offset_to_label;
+	std::unordered_map<tracer::tag, label::Ptr> offset_to_label;
 	int current_label = 0;
 	virtual void visit(stmt_block::Ptr);
 };
@@ -27,10 +27,10 @@ public:
 	// The main table to hold static tag to label mapping
 	// this table holds the jump target that is in the parent of the
 	// jump statement
-	std::unordered_map<std::string, label::Ptr> offset_to_label;
+	std::unordered_map<tracer::tag, label::Ptr> offset_to_label;
 	// A backup table which has atleast one label that we can jump to
 	// Only used when feature_unstructured is used
-	std::unordered_map<std::string, label::Ptr> backup_offset_to_label;
+	std::unordered_map<tracer::tag, label::Ptr> backup_offset_to_label;
 
 	bool feature_unstructured;
 

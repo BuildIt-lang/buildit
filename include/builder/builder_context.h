@@ -18,31 +18,10 @@ block::expr::Ptr create_foreign_expr(const T t);
 template <typename T>
 builder create_foreign_expr_builder(const T t);
 
-class static_var_base;
-
-class tracking_tuple {
-public:
-	const unsigned char *ptr;
-	uint32_t size;
-	static_var_base *var_ref;
-
-	tracking_tuple(const unsigned char *_ptr, uint32_t _size, static_var_base *_var_ref)
-	    : ptr(_ptr), size(_size), var_ref(_var_ref) {}
-
-	std::string snapshot(void) {
-		std::string output_string;
-		char temp[4];
-		for (unsigned int i = 0; i < size; i++) {
-			sprintf(temp, "%02x", ptr[i]);
-			output_string += temp;
-		}
-		return output_string;
-	}
-};
 
 class tag_map {
 public:
-	std::unordered_map<std::string, block::stmt_block::Ptr> map;
+	std::unordered_map<tracer::tag, block::stmt_block::Ptr> map;
 };
 
 void lambda_wrapper(std::function<void(void)>);
@@ -67,21 +46,21 @@ public:
 	block::stmt::Ptr ast;
 	block::stmt_block::Ptr current_block_stmt;
 	std::vector<bool> bool_vector;
-	std::unordered_set<std::string> visited_offsets;
+	std::unordered_set<tracer::tag> visited_offsets;
 	std::vector<block::expr::Ptr> expr_sequence;
 	unsigned long long expr_counter = 0;
 	std::string current_label;
 
-	std::vector<tracking_tuple> static_var_tuples;
-	std::vector<tracking_tuple> deferred_static_var_tuples;
+	std::vector<static_var_base*> static_var_tuples;
+	std::vector<static_var_base*> deferred_static_var_tuples;
 
 	// Run shared state
 	tag_map _internal_tags;
 	tag_map *memoized_tags;
 
 	// State shared across non-deterministic failures
-	std::unordered_map<std::string, std::shared_ptr<nd_var_gen_base>> *nd_state_map = nullptr;
-	std::unordered_map<std::string, std::shared_ptr<nd_var_gen_base>> _nd_state_map;
+	std::unordered_map<tracer::tag, std::shared_ptr<nd_var_gen_base>> *nd_state_map = nullptr;
+	std::unordered_map<tracer::tag, std::shared_ptr<nd_var_gen_base>> _nd_state_map;
 
 	void reset_for_nd_failure();
 	

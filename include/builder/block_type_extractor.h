@@ -3,6 +3,7 @@
 
 
 #include "builder/forward_declarations.h"
+#include "util/mtp_utils.h"
 #include "builder/generics.h"
 #include <algorithm>
 
@@ -12,8 +13,6 @@ struct custom_type_base;
 
 template <typename T>
 struct external_type_namer;
-
-
 
 extern int type_naming_counter;
 
@@ -41,7 +40,7 @@ member or a external_namer specialization */
 template <typename T, typename V=void>
 struct has_type_name: public std::false_type {};
 template <typename T>
-struct has_type_name<T, typename check_valid_type<decltype(T::type_name)>::type>: public std::true_type {};
+struct has_type_name<T, typename utils::check_valid_type<decltype(T::type_name)>::type>: public std::true_type {};
 
 template <typename T>
 struct type_namer<T, typename std::enable_if<has_type_name<external_type_namer<T>>::value>::type> {
@@ -66,14 +65,14 @@ struct type_template {
 };
 
 template <typename T>
-struct type_template<T, typename check_valid_type<decltype(T::get_template_arg_types)>::type> {
+struct type_template<T, typename utils::check_valid_type<decltype(T::get_template_arg_types)>::type> {
 	static std::vector<block::type::Ptr> get_templates() {
 		return T::get_template_arg_types();
 	}
 };
 
 template <typename T>
-struct type_template<T, typename check_valid_type<decltype(external_type_namer<T>::get_template_arg_types)>::type> {
+struct type_template<T, typename utils::check_valid_type<decltype(external_type_namer<T>::get_template_arg_types)>::type> {
 	static std::vector<block::type::Ptr> get_templates() {
 		return external_type_namer<T>::get_template_arg_types();
 	}

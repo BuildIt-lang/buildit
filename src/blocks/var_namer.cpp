@@ -13,23 +13,23 @@ void var_gather_escapes::visit(decl_stmt::Ptr stmt) {
 		if (!stmt->decl_var->hasMetadata<int>("allow_escape_scope") ||
 		    !stmt->decl_var->getMetadata<int>("allow_escape_scope")) {
 
-			std::string so_loc = stmt->decl_var->static_offset.stringify_loc();
+			tracer::tag so_loc = stmt->decl_var->static_offset.slice_loc();
 			if (std::find(escaping_tags.begin(), escaping_tags.end(), so_loc) == escaping_tags.end())
 				escaping_tags.push_back(so_loc);
 		}
 	}
 }
 
-static std::string get_apt_tag(var::Ptr a, std::vector<std::string> escaping_tags) {
-	std::string so_loc = a->static_offset.stringify_loc();
+static tracer::tag get_apt_tag(var::Ptr a, std::vector<tracer::tag> escaping_tags) {
+	tracer::tag so_loc = a->static_offset.slice_loc();
 	if (std::find(escaping_tags.begin(), escaping_tags.end(), so_loc) != escaping_tags.end())
 		return so_loc;
 	else
-		return a->static_offset.stringify();
+		return a->static_offset;
 }
 
 void var_namer::visit(decl_stmt::Ptr stmt) {
-	std::string so = get_apt_tag(stmt->decl_var, escaping_tags);
+	tracer::tag so = get_apt_tag(stmt->decl_var, escaping_tags);
 
 	if (collected_decls.find(so) != collected_decls.end()) {
 		// This decl has been seen before, and needs to be marked for hoisting
@@ -57,7 +57,7 @@ void var_namer::visit(decl_stmt::Ptr stmt) {
 }
 
 void var_replacer::visit(var_expr::Ptr a) {
-	std::string so = get_apt_tag(a->var1, escaping_tags);
+	tracer::tag so = get_apt_tag(a->var1, escaping_tags);
 
 	if (collected_decls.find(so) != collected_decls.end()) {
 		a->var1 = collected_decls[so];
@@ -65,7 +65,7 @@ void var_replacer::visit(var_expr::Ptr a) {
 }
 
 void var_hoister::visit(decl_stmt::Ptr a) {
-	std::string so = get_apt_tag(a->decl_var, escaping_tags);
+	tracer::tag so = get_apt_tag(a->decl_var, escaping_tags);
 	if (decls_to_hoist.find(so) != decls_to_hoist.end()) {
 
 		// if the variable is of reference type, we need to convert it to a pointer

@@ -2,7 +2,7 @@
 #include "builder/builder_context.h"
 #include "builder/dyn_var.h"
 #include "util/tracer.h"
-
+#include "builder/static_var.h"
 namespace builder {
 namespace options {
 bool track_members = false;
@@ -71,5 +71,8 @@ builder::builder(const var &a) {
 	}
 	push_to_sequence(block_expr);
 }
+
+static_var_base::~static_var_base() {}
+static_var_snapshot_base::~static_var_snapshot_base() {}
 
 } // namespace builder
