@@ -2,6 +2,7 @@
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 #include <map>
+#include <unordered_map>
 
 #ifdef RECOVER_VAR_NAMES
 #define UNW_LOCAL_ONLY
@@ -19,7 +20,7 @@
 #include <libdwarf/dwarf.h>
 #include <libdwarf/libdwarf.h>
 
-namespace util {
+namespace utils {
 
 // Default member separator is "_"
 // this can be set by callers if they want 
@@ -491,25 +492,25 @@ std::string find_variable_name(void *addr) {
 	return find_variable_from_this(addr);
 }
 
-} // namespace util
+} // namespace utils
 #else
-namespace util {
+namespace utils {
 std::string find_variable_name(void *addr) {
 	return "";
 }
-} // namespace util
+} // namespace utils
 #endif
 
-namespace util {
-static std::map<std::string, std::string> tag_var_name_map;
-std::string find_variable_name_cached(void *addr, std::string tag_string) {
-	if (tag_var_name_map.find(tag_string) != tag_var_name_map.end()) {
-		return tag_var_name_map[tag_string];
+namespace utils {
+static std::unordered_map<tracer::tag, std::string> tag_var_name_map;
+std::string find_variable_name_cached(void *addr, tracer::tag stag) {
+	if (tag_var_name_map.find(stag) != tag_var_name_map.end()) {
+		return tag_var_name_map[stag];
 	}
 
 	std::string ret = find_variable_name(addr);
 	if (ret != "")
-		tag_var_name_map[tag_string] = ret;
+		tag_var_name_map[stag] = ret;
 	return ret;
 }
-} // namespace util
+} // namespace utils

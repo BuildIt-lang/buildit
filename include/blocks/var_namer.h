@@ -11,8 +11,8 @@ namespace block {
 class var_gather_escapes : public block_visitor {
 public:
 	using block_visitor::visit;
-	std::vector<std::string> &escaping_tags;
-	var_gather_escapes(std::vector<std::string> &e) : escaping_tags(e) {}
+	std::vector<tracer::tag> &escaping_tags;
+	var_gather_escapes(std::vector<tracer::tag> &e) : escaping_tags(e) {}
 	virtual void visit(decl_stmt::Ptr) override;
 };
 
@@ -20,11 +20,11 @@ class var_namer : public block_visitor {
 public:
 	using block_visitor::visit;
 	int var_counter = 0;
-	std::map<std::string, var::Ptr> collected_decls;
-	std::map<std::string, decl_stmt::Ptr> decls_to_hoist;
-	std::vector<std::string> decl_tags_to_hoist;
+	std::unordered_map<tracer::tag, var::Ptr> collected_decls;
+	std::unordered_map<tracer::tag, decl_stmt::Ptr> decls_to_hoist;
+	std::vector<tracer::tag> decl_tags_to_hoist;
 
-	std::vector<std::string> escaping_tags;
+	std::vector<tracer::tag> escaping_tags;
 
 	virtual void visit(decl_stmt::Ptr) override;
 
@@ -34,9 +34,9 @@ public:
 class var_replacer : public block_visitor {
 public:
 	using block_visitor::visit;
-	std::map<std::string, var::Ptr> &collected_decls;
-	std::vector<std::string> &escaping_tags;
-	var_replacer(std::map<std::string, var::Ptr> &d, std::vector<std::string> &e)
+	std::unordered_map<tracer::tag, var::Ptr> &collected_decls;
+	std::vector<tracer::tag> &escaping_tags;
+	var_replacer(std::unordered_map<tracer::tag, var::Ptr> &d, std::vector<tracer::tag> &e)
 	    : collected_decls(d), escaping_tags(e) {}
 
 	virtual void visit(var_expr::Ptr) override;
@@ -45,9 +45,9 @@ public:
 class var_hoister : public block_replacer {
 public:
 	using block_replacer::visit;
-	std::map<std::string, decl_stmt::Ptr> &decls_to_hoist;
-	std::vector<std::string> &escaping_tags;
-	var_hoister(std::map<std::string, decl_stmt::Ptr> &d, std::vector<std::string> &e)
+	std::unordered_map<tracer::tag, decl_stmt::Ptr> &decls_to_hoist;
+	std::vector<tracer::tag> &escaping_tags;
+	var_hoister(std::unordered_map<tracer::tag, decl_stmt::Ptr> &d, std::vector<tracer::tag> &e)
 	    : decls_to_hoist(d), escaping_tags(e) {}
 	virtual void visit(decl_stmt::Ptr) override;
 };

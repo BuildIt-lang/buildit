@@ -16,6 +16,8 @@ using is_builder_type = typename std::is_same<builder, T>;
 template <typename T>
 using if_builder = typename std::enable_if<is_builder_type<T>::value, T>::type;
 
+class static_var_base;
+
 template <typename T>
 class static_var;
 
@@ -58,11 +60,6 @@ struct with_name {
 	std::string name;
 	bool with_decl;
 	with_name(const std::string &n, bool wd = false) : name(n), with_decl(wd) {}
-};
-
-template <typename T>
-struct check_valid_type {
-	typedef void type;
 };
 
 // Generator states for non-deterministic values

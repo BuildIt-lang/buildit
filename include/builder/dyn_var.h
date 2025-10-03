@@ -3,6 +3,7 @@
 
 #include "builder/builder.h"
 #include "util/var_finder.h"
+#include "util/mtp_utils.h"
 namespace builder {
 
 namespace options {
@@ -125,7 +126,7 @@ public:
 			dyn_var->var_type = create_block_type();
 			block_var = dyn_var;
 			// Don't try to obtain preferred names for objects created without context
-			// dyn_var->preferred_name = util::find_variable_name(this);
+			// dyn_var->preferred_name = utils::find_variable_name(this);
 			return;
 		}
 		assert(builder_context::current_builder_context != nullptr);
@@ -134,7 +135,7 @@ public:
 		block::var::Ptr dyn_var = std::make_shared<block::var>();
 		dyn_var->var_type = create_block_type();
 		tracer::tag offset = get_offset_in_function();
-		dyn_var->preferred_name = util::find_variable_name_cached(this, offset.stringify());
+		dyn_var->preferred_name = utils::find_variable_name_cached(this, offset);
 		block_var = dyn_var;
 		dyn_var->static_offset = offset;
 		block_decl_stmt = nullptr;
@@ -363,7 +364,7 @@ struct dyn_var_deref_provider {
 };
 
 template <typename T>
-struct dyn_var_deref_provider<T, typename check_valid_type<typename T::dereference_type>::type> {
+struct dyn_var_deref_provider<T, typename utils::check_valid_type<typename T::dereference_type>::type> {
 	dyn_var_mimic<typename T::dereference_type> operator[] (const builder& b) {
 		return (cast)(static_cast<dyn_var<T>*>(this)->dyn_var_impl<T>::operator[](b));
 	}

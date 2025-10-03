@@ -12,6 +12,8 @@ namespace builder {
 extern void lambda_wrapper(std::function<void(void)>);
 extern void lambda_wrapper_close(void);
 } // namespace builder
+
+
 namespace tracer {
 #ifdef TRACER_USE_LIBUNWIND
 tag get_offset_in_function_impl(builder::builder_context *current_builder_context) {
@@ -34,16 +36,24 @@ tag get_offset_in_function_impl(builder::builder_context *current_builder_contex
 	// Now add snapshots of static vars
 	assert(current_builder_context != nullptr);
 
-	for (builder::tracking_tuple tuple : current_builder_context->deferred_static_var_tuples) {
-		new_tag.static_var_snapshots.push_back(tuple.snapshot());
+	for (auto tuple : current_builder_context->deferred_static_var_tuples) {
+		if (tuple == nullptr) {
+			new_tag.static_var_snapshots.push_back(nullptr);
+			continue;
+		}
+		new_tag.static_var_snapshots.push_back(tuple->snapshot());
 		if (builder::builder_context::current_builder_context->enable_d2x) {
-			new_tag.static_var_key_values.push_back({tuple.var_ref->var_name, tuple.var_ref->serialize()});
+			new_tag.static_var_key_values.push_back({tuple->var_name, tuple->serialize()});
 		}
 	}
-	for (builder::tracking_tuple tuple : current_builder_context->static_var_tuples) {
-		new_tag.static_var_snapshots.push_back(tuple.snapshot());
+	for (auto tuple : current_builder_context->static_var_tuples) {
+		if (tuple == nullptr) {
+			new_tag.static_var_snapshots.push_back(nullptr);
+			continue;
+		}
+		new_tag.static_var_snapshots.push_back(tuple->snapshot());
 		if (builder::builder_context::current_builder_context->enable_d2x) {
-			new_tag.static_var_key_values.push_back({tuple.var_ref->var_name, tuple.var_ref->serialize()});
+			new_tag.static_var_key_values.push_back({tuple->var_name, tuple->serialize()});
 		}
 	}
 	return new_tag;
@@ -67,16 +77,24 @@ tag get_offset_in_function_impl(builder::builder_context *current_builder_contex
 	// Now add snapshots of static vars
 	assert(current_builder_context != nullptr);
 
-	for (builder::tracking_tuple tuple : current_builder_context->deferred_static_var_tuples) {
-		new_tag.static_var_snapshots.push_back(tuple.snapshot());
+	for (auto tuple : current_builder_context->deferred_static_var_tuples) {
+		if (tuple == nullptr) {
+			new_tag.static_var_snapshots.push_back(nullptr);
+			continue;
+		}
+		new_tag.static_var_snapshots.push_back(tuple->snapshot());
 		if (builder::builder_context::current_builder_context->enable_d2x) {
-			new_tag.static_var_key_values.push_back({tuple.var_ref->var_name, tuple.var_ref->serialize()});
+			new_tag.static_var_key_values.push_back({tuple->var_name, tuple->serialize()});
 		}
 	}
-	for (builder::tracking_tuple tuple : current_builder_context->static_var_tuples) {
-		new_tag.static_var_snapshots.push_back(tuple.snapshot());
+	for (auto tuple : current_builder_context->static_var_tuples) {
+		if (tuple == nullptr) {
+			new_tag.static_var_snapshots.push_back(nullptr);
+			continue;
+		}
+		new_tag.static_var_snapshots.push_back(tuple->snapshot());
 		if (builder::builder_context::current_builder_context->enable_d2x) {
-			new_tag.static_var_key_values.push_back({tuple.var_ref->var_name, tuple.var_ref->serialize()});
+			new_tag.static_var_key_values.push_back({tuple->var_name, tuple->serialize()});
 		}
 	}
 	return new_tag;
@@ -90,5 +108,77 @@ tag get_unique_tag(void) {
 	unique_tag_counter++;
 	return new_tag;
 }
+
+
+
+bool tag::operator==(const tag &other) const {
+	if (other.pointers.size() != pointers.size())
+		return false;
+	for (unsigned int i = 0; i < pointers.size(); i++)
+		if (pointers[i] != other.pointers[i])
+			return false;
+	if (other.static_var_snapshots.size() != static_var_snapshots.size())
+		return false;
+
+	for (unsigned int i = 0; i < static_var_snapshots.size(); i++) {
+		// If pointers to snapshots are equal, no need to compare
+		if (static_var_snapshots[i] == other.static_var_snapshots[i]) 
+			continue;
+		// If one of the pointers is nullptr and the other isn't, return false
+		if (static_var_snapshots[i] == nullptr)
+			return false;
+
+		// Now compare the actual snapshots
+		if (!(static_var_snapshots[i]->operator == (other.static_var_snapshots[i])))
+			return false;
+	}
+	return true;
+}
+
+std::string tag::stringify(void) {
+	if (cached_string != "")
+		return cached_string;
+
+	std::string output_string = "[";
+	for (unsigned int i = 0; i < pointers.size(); i++) {
+		char temp[128];
+		sprintf(temp, "%llx", pointers[i]);
+		output_string += temp;
+		if (i != pointers.size() - 1)
+			output_string += ", ";
+	}
+	output_string += "]:[";
+	for (unsigned int i = 0; i < static_var_snapshots.size(); i++) {
+		if (static_var_snapshots[i] == nullptr)
+			output_string += "()";
+		else 
+			output_string += "(" + static_var_snapshots[i]->serialize() + ")";
+
+		if (i != static_var_snapshots.size() - 1)
+			output_string += ", ";
+	}
+	output_string += "]";
+	cached_string = output_string;
+	return output_string;
+}
+
+std::string tag::stringify_stat(void) {
+	std::string output_string = "[";
+	output_string += "]:[";
+	for (unsigned int i = 0; i < static_var_snapshots.size(); i++) {
+		if (static_var_snapshots[i] == nullptr)
+			output_string += "()";
+		else 
+			output_string += "(" + static_var_snapshots[i]->serialize() + ")";
+
+		if (i != static_var_snapshots.size() - 1)
+			output_string += ", ";
+	}
+	output_string += "]";
+
+	return output_string;
+}
+
+
 
 } // namespace tracer

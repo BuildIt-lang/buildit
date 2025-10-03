@@ -1,10 +1,12 @@
 #ifndef UTIL_VAR_FINDER_H
 #define UTIL_VAR_FINDER_H
 #include <string>
-namespace util {
+#include "util/tracer.h"
+
+namespace utils {
 std::string find_variable_name(void *);
-std::string find_variable_name_cached(void *, std::string tag_string);
-extern std::string member_separator;
-} // namespace util
+std::string find_variable_name_cached(void *, tracer::tag stag);
+extern std::string ember_separator;
+} // namespace utils
 
 #endif

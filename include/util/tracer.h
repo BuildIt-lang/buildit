@@ -3,8 +3,11 @@
 #include <execinfo.h>
 #include <string>
 #include <vector>
+#include <memory>
+#include "util/hash_utils.h"
 
-#define MAX_TRACKING_VAR_SIZE (128)
+#include "builder/var_snapshots.h"
+
 namespace builder {
 class builder_context;
 }
@@ -14,51 +17,38 @@ namespace tracer {
 class tag {
 public:
 	std::vector<unsigned long long> pointers;
-	std::vector<std::string> static_var_snapshots;
+	std::vector<std::shared_ptr<builder::static_var_snapshot_base>> static_var_snapshots;
 	std::vector<std::pair<std::string, std::string>> static_var_key_values;
 
-	bool operator==(const tag &other) {
-		if (other.pointers.size() != pointers.size())
-			return false;
-		for (unsigned int i = 0; i < pointers.size(); i++)
-			if (pointers[i] != other.pointers[i])
-				return false;
-		if (other.static_var_snapshots.size() != static_var_snapshots.size())
-			return false;
-		for (unsigned int i = 0; i < static_var_snapshots.size(); i++)
-			if (static_var_snapshots[i] != other.static_var_snapshots[i])
-				return false;
-		return true;
-	}
-	bool operator!=(const tag &other) {
+	std::string cached_string;
+	mutable size_t cached_hash = 0;
+
+	bool operator==(const tag &other) const;
+	bool operator!=(const tag &other) const {
 		return !operator==(other);
 	}
-	bool is_empty(void) {
+	bool is_empty(void) const {
 		return pointers.size() == 0;
 	}
 	void clear(void) {
 		pointers.clear();
 		static_var_snapshots.clear();
 	}
-	std::string stringify(void) {
-		std::string output_string = "[";
-		for (unsigned int i = 0; i < pointers.size(); i++) {
-			char temp[128];
-			sprintf(temp, "%llx", pointers[i]);
-			output_string += temp;
-			if (i != pointers.size() - 1)
-				output_string += ", ";
-		}
-		output_string += "]:[";
-		for (unsigned int i = 0; i < static_var_snapshots.size(); i++) {
-			output_string += static_var_snapshots[i];
-			if (i != static_var_snapshots.size() - 1)
-				output_string += ", ";
-		}
-		output_string += "]";
 
-		return output_string;
+	// A function to create another tag
+	// that just captures the LOC part
+	// and ignores the static tags
+	tag slice_loc(void) {
+		tag new_tag;
+		new_tag.pointers = pointers;
+		return new_tag;
 	}
+
+	// Converts the static tag into a human 
+	// readable string. Should be only used for 
+	// debugging since it doesn't work for objects that
+	// cannot be coverted to a string
+	std::string stringify(void);
 
 	std::string stringify_loc(void) {
 		std::string output_string = "[";
@@ -74,23 +64,47 @@ public:
 
 		return output_string;
 	}
-	std::string stringify_stat(void) {
-		std::string output_string = "[";
-		output_string += "]:[";
-		for (unsigned int i = 0; i < static_var_snapshots.size(); i++) {
-			output_string += static_var_snapshots[i];
-			if (i != static_var_snapshots.size() - 1)
-				output_string += ", ";
-		}
-		output_string += "]";
+	std::string stringify_stat(void);
 
-		return output_string;
+	size_t hash(void) const {
+		if (cached_hash != 0) return cached_hash;
+
+		// We will start by hashing the pointers
+		size_t h = typeid(tag).hash_code();
+
+		for (unsigned i = 0; i < pointers.size(); i++) {
+			h = hash_combine(h, std::hash<unsigned long long>{}(pointers[1]));
+		}
+		// Now combine the hashes from each snapshot, snapshots take care of returning a fixed 
+		// hash if the type itself isn't hashable - to avoid virtual disaptches, we will pre compute hashes 
+		// in the base type
+
+		for (unsigned i = 0; i < static_var_snapshots.size(); i++) {
+			h = hash_combine(h, static_var_snapshots[i]->computed_hash);
+		}
+		cached_hash = h;
+		return cached_hash;	
 	}
 };
+
 
 tag get_unique_tag(void);
 
 tag get_offset_in_function_impl(builder::builder_context *current_builder_context);
 
 } // namespace tracer
+
+// We will define a hash function for tag so it can be used to index into unordered_map/set
+
+namespace std {
+
+template <>
+struct hash<tracer::tag> {
+	size_t operator() (const tracer::tag& t) const {
+		return t.hash();
+	}
+};
+
+}
+
 #endif

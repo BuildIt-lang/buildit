@@ -7,7 +7,8 @@
 
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
-#define MAX_TRACKING_VAR_SIZE (128)
+
+//#define MAX_TRACKING_VAR_SIZE (128)
 
 namespace builder {
 
@@ -18,34 +19,36 @@ public:
 	virtual std::string serialize() {
 		return "";
 	}
-	virtual ~static_var_base() {}
+
+	virtual static_var_snapshot_base::Ptr snapshot() = 0;
+
+	virtual ~static_var_base();
 };
+
+
 
 template <typename T>
 class static_var : static_var_base {
 public:
-	static_assert(std::is_same<T, short int>::value || std::is_same<T, unsigned short int>::value ||
-			  std::is_same<T, int>::value || std::is_same<T, unsigned int>::value ||
-			  std::is_same<T, long int>::value || std::is_same<T, unsigned long int>::value ||
-			  std::is_same<T, long long int>::value || std::is_same<T, unsigned long long int>::value ||
-			  std::is_same<T, char>::value || std::is_same<T, unsigned char>::value ||
-			  std::is_same<T, float>::value || std::is_same<T, double>::value || std::is_pointer<T>::value,
-		      "Currently builder::static_var is only supported for basic types\n");
-	static_assert(sizeof(T) < MAX_TRACKING_VAR_SIZE, "Currently builder::static_var supports variables of max size "
-							 "= " TOSTRING(MAX_TRACKING_VARIABLE_SIZE));
+
+	static_assert(std::is_copy_constructible<T>::value && utils::has_operator_equal<T>::value, 
+		"static_var can only be used with types that have == and are copy constructible");
+
 	T val;
 	bool is_deferred = false;
 
 	mutable bool name_checked = false;
+
 	void try_get_name() const {
 		if (builder_context::current_builder_context->enable_d2x == false)
 			return;
 		if (var_name == "" && name_checked == false) {
-			var_name = util::find_variable_name(const_cast<void *>(static_cast<const void *>(this)));
+			var_name = utils::find_variable_name(const_cast<void *>(static_cast<const void *>(this)));
 		}
 	}
 
 	static_var(const static_var &other) : static_var((T)other) {}
+
 	static_var &operator=(const static_var &other) {
 		try_get_name();
 		name_checked = true;
@@ -55,6 +58,7 @@ public:
 
 	template <typename OT>
 	static_var(const static_var<OT> &other) : static_var((T)(OT)other) {}
+
 	template <typename OT>
 	static_var &operator=(const static_var<OT> &other) {
 		try_get_name();
@@ -81,14 +85,12 @@ public:
 	}
 	static_var() {
 		assert(builder_context::current_builder_context != nullptr);
-		builder_context::current_builder_context->static_var_tuples.push_back(
-		    tracking_tuple((unsigned char *)&val, sizeof(T), this));
+		builder_context::current_builder_context->static_var_tuples.push_back(this);
 		try_get_name();
 	}
 	static_var(const T &v) {
 		assert(builder_context::current_builder_context != nullptr);
-		builder_context::current_builder_context->static_var_tuples.push_back(
-		    tracking_tuple((unsigned char *)&val, sizeof(T), this));
+		builder_context::current_builder_context->static_var_tuples.push_back(this);
 		val = v;
 		try_get_name();
 	}
@@ -104,8 +106,7 @@ public:
 		// Even though the usual static vars can be destroyed out of order, these might create
 		// unncessary bubbles in the queue
 		// TODO: Consider merging these two
-		builder_context::current_builder_context->deferred_static_var_tuples.push_back(
-		    tracking_tuple((unsigned char *)&val, sizeof(T), this));
+		builder_context::current_builder_context->deferred_static_var_tuples.push_back(this);
 		try_get_name();
 	}
 
@@ -119,22 +120,25 @@ public:
 		assert(builder_context::current_builder_context->static_var_tuples.size() > 0);
 
 		/* Instead of assuming that the last variable is the static_var we are destroying,
-		   we find the appropriate one and set its size to 0. Then we clean up all the trailing 0s 
+		   we find the appropriate one, remove it and replace it with nullptr. During tag creation
+		   nullptrs are handled properly
+		   
+		   We then clear all the trailing nullptrs
 		
 		This allows out of order destruction while still maintaining good static tags */
 		
 		int index = -1;
 		for (int i = builder_context::current_builder_context->static_var_tuples.size() - 1; i >= 0; i--) {
-			if (builder_context::current_builder_context->static_var_tuples[i].ptr == (unsigned char*) &val) {
+			if (builder_context::current_builder_context->static_var_tuples[i] == this) {
 				index = i;
-				builder_context::current_builder_context->static_var_tuples[i].size = 0;
+				builder_context::current_builder_context->static_var_tuples[i] = nullptr;
 				break;
 			}
 		}
 		assert(index != -1 && "Static variable to destroy not valid");
 
 		while (!builder_context::current_builder_context->static_var_tuples.empty() 
-			&& builder_context::current_builder_context->static_var_tuples.back().size == 0) {
+			&& builder_context::current_builder_context->static_var_tuples.back() == nullptr) {
 			builder_context::current_builder_context->static_var_tuples.pop_back();
 		}
 		
@@ -143,27 +147,28 @@ public:
 		try_get_name();
 		return (builder)val;
 	}
-	virtual std::string serialize() override {
-		return std::to_string(val);
+	std::string serialize() override {
+		return utils::can_to_string<T>::get_string(val);
+	}
+		
+	static_var_snapshot_base::Ptr snapshot() override {
+		return std::make_shared<static_var_snapshot<T>>(val);
 	}
 };
 
 template <typename T>
 class static_var<T[]> : static_var_base {
 public:
-	static_assert(std::is_same<T, short int>::value || std::is_same<T, unsigned short int>::value ||
-			  std::is_same<T, int>::value || std::is_same<T, unsigned int>::value ||
-			  std::is_same<T, long int>::value || std::is_same<T, unsigned long int>::value ||
-			  std::is_same<T, long long int>::value || std::is_same<T, unsigned long long int>::value ||
-			  std::is_same<T, char>::value || std::is_same<T, unsigned char>::value ||
-			  std::is_same<T, float>::value || std::is_same<T, double>::value || std::is_pointer<T>::value,
-		      "Currently builder::static_var arrays is only supported for basic types\n");
-	static_assert(sizeof(T) < MAX_TRACKING_VAR_SIZE, "Currently builder::static_var supports variables of max size "
-							 "= " TOSTRING(MAX_TRACKING_VARIABLE_SIZE));
+
+	static_assert(std::is_copy_constructible<T>::value && utils::has_operator_equal<T>::value, 
+		"static_var can only be used with types that have == and are copy constructible");
+
 	// Disable copy-assignment and initialization
 	static_var(const static_var &x) = delete;
 	static_var &operator=(const static_var &x) = delete;
+
 	T *val = nullptr;
+	size_t actual_size = -1;
 
 	T &operator[](size_t index) {
 		return val[index];
@@ -177,16 +182,15 @@ public:
 		// This val _should_ not be used. But we will insert it to hold place
 		// for this static var in the list of tuples, otherwise destructor order will be weird
 		val = new T[1];
-
-		builder_context::current_builder_context->static_var_tuples.push_back(
-		    tracking_tuple((unsigned char *)val, 1, this));
+		actual_size = 1;
+		builder_context::current_builder_context->static_var_tuples.push_back(this);
 	}
 	static_var(const std::initializer_list<T> &list) {
 		var_name = "ArrayVar";
 		assert(builder_context::current_builder_context != nullptr);
 		val = new T[list.size()];
-		builder_context::current_builder_context->static_var_tuples.push_back(
-		    tracking_tuple((unsigned char *)val, sizeof(T) * list.size(), this));
+		actual_size = list.size();
+		builder_context::current_builder_context->static_var_tuples.push_back(this);
 		for (int i = 0; i < list.size(); i++) {
 			val[i] = list[i];
 		}
@@ -194,40 +198,35 @@ public:
 	void resize(size_t s) {
 		var_name = "ArrayVar";
 		T *new_ptr = new T[s];
-		assert(builder_context::current_builder_context != nullptr);
-		assert(builder_context::current_builder_context->static_var_tuples.size() > 0);
-		for (size_t i = 0; i < builder_context::current_builder_context->static_var_tuples.size(); i++) {
-			if (builder_context::current_builder_context->static_var_tuples[i].ptr ==
-			    (unsigned char *)val) {
-				builder_context::current_builder_context->static_var_tuples[i] =
-				    tracking_tuple((unsigned char *)new_ptr, sizeof(T) * s, this);
-				break;
-			}
-		}
 		delete[] val;
 		val = new_ptr;
+		actual_size = s;
+		// tracking tuples dont' need to be changed anymore
 	}
 	~static_var() {
 		assert(builder_context::current_builder_context != nullptr);
 		assert(builder_context::current_builder_context->static_var_tuples.size() > 0);
 		int index = -1;
 		for (int i = builder_context::current_builder_context->static_var_tuples.size() - 1; i >= 0; i--) {
-			if (builder_context::current_builder_context->static_var_tuples[i].ptr == (unsigned char*) val) {
+			if (builder_context::current_builder_context->static_var_tuples[i] == this) {
 				index = i;
-				builder_context::current_builder_context->static_var_tuples[i].size = 0;
+				builder_context::current_builder_context->static_var_tuples[i] = nullptr;
 				break;
 			}
 		}
 		assert(index != -1 && "Static variable to destroy not valid");
 
 		while (!builder_context::current_builder_context->static_var_tuples.empty() 
-			&& builder_context::current_builder_context->static_var_tuples.back().size == 0) {
+			&& builder_context::current_builder_context->static_var_tuples.back() == nullptr) {
 			builder_context::current_builder_context->static_var_tuples.pop_back();
 		}
 		delete[] val;
 	}
 	virtual std::string serialize() override {
 		return "<array>";
+	}
+	static_var_snapshot_base::Ptr snapshot() override {
+		return std::make_shared<static_var_snapshot<T[]>>(val, actual_size);
 	}
 };
 } // namespace builder
