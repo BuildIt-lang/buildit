@@ -40,7 +40,7 @@ class execution_state;
 class invocation_state;
 class builder_context;
 template <typename>
-class nd_var_gen;
+struct nd_var_gen;
 
 class run_state {
 public:
