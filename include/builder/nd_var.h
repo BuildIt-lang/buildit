@@ -8,83 +8,106 @@
 
 namespace builder {
 
-template <typename T> 
-struct nd_var {
-};
+/* The new API for nd_var-able objects is simple
+   We require the objects to follow data-flow lattice properties
+   Each ND var wrapped T can have whatever state it wants, but it needs to derive from 
+   nd_var_base (we don't need to have separate generators any more).
+   nd_var_base objects will go across executions and will be stored
+   in the invocation state. 
 
-struct nd_var_gen_base {
-};
-
-template <typename T>
-struct nd_var_gen: public nd_var_gen_base {
-};
-
-template <>
-struct nd_var_gen<bool>: public nd_var_gen_base {
-				// false, // true	
-	bool allowed_values[2] = {true, true};
-};
-
-template <typename T>
-std::shared_ptr<nd_var_gen<T>> get_or_create_generator(tracer::tag req_tag) {
-	if (get_invocation_state()->nd_state_map.find(req_tag) ==
-		get_invocation_state()->nd_state_map.end()) {
-		(get_invocation_state()->nd_state_map)[req_tag] = std::make_shared<nd_var_gen<T>>();
-	}
-
-	return std::static_pointer_cast<nd_var_gen<T>>(
-		(get_invocation_state()->nd_state_map)[req_tag]);
-}
-
-/* contstraints on bool types
-Bool types are enumerable so it is suitable for nd_var
-Since bool has only two values we don't need too many constraints. 
-The only valid constraint is requires_equal. 
-
-The lattice for bools also has just two points, 
-the order can be specified by initial preferred value
+   The type T however needs to provide two functions : check(int) which checks if 
+   a new value satisfies the current state of the object. merge(int) merges the new 
+   value into the current state and also updates the generator.
+   
 */
 
-template <>
-struct nd_var<bool> {
-
-	static_var<int> current_value;
-	tracer::tag current_tag;
-
-	// Values can only be retrieved
-	operator bool () const {
-		return current_value;
+// Base class for nd_var wrappable objects
+// We are not making any functions virtual but we declare them here to make sure 
+// users declare them too
+class nd_var_base {
+protected: 
+	nd_var_base() = default;
+public:
+	bool check(int e) {
+		assert(false && "Every derived type must define check");
+		return false;
 	}
+	bool merge(int e) {
+		assert(false && "Every deried type must define merge");
+	}	
+};
 
-	void sample(bool default_value = false) {
-		// Before requesting a tag, make sure THIS static var is in a consistent state
-		current_value = 0;
-		current_tag = tracer::get_offset_in_function();			
-		auto generator = get_or_create_generator<bool>(current_tag);
-
-		if (generator->allowed_values[default_value] == true)
-			current_value = default_value;
-		else if (generator->allowed_values[!default_value] == true)
-			current_value = !default_value;
-		else 
-			assert(false && "nd bool has no possible values allowed");
+template <typename T, typename...Args>
+std::shared_ptr<T> get_or_create_generator(tracer::tag req_tag, Args&&...args) {
+	if (get_invocation_state()->nd_state_map.find(req_tag) == get_invocation_state()->nd_state_map.end()) {
+		get_invocation_state()->nd_state_map[req_tag] = std::make_shared<T>(std::forward<Args>(args)...);
 	}
+	return std::static_pointer_cast<T>(get_invocation_state()->nd_state_map[req_tag]);
+}
 
-	nd_var(bool default_value = false) {
-		sample(default_value);
-	}
+// A simple true at top boolean nd_var wrappable type
+class true_top: public nd_var_base {
+public:
+	typedef enum {
+		T = 1,
+		F = 0,
+	} value_t;
+
+	int value;
 	
-	void require_equal(bool value) {
-		if (value == current_value) return;
-		// We have sampled a wrong value, time to update 
-		// the generator and reset
+	true_top(int def): value(def) {}
+	true_top(): value((int)F) {}
 
-		auto generator = get_or_create_generator<bool>(current_tag);
-		generator->allowed_values[current_value] = false;
-	
-		throw NonDeterministicFailureException();
+	bool check(int e) {
+		if (value == T) return true;
+		if (e == value) return true;
+		return false;
+	}
+	void merge(int e) {
+		if (e == F) return;
+		value = e;
 	}
 };
+
+
+template <typename T>
+class nd_var {
+	static_assert(std::is_base_of<nd_var_base, T>::value, "Types wrapped in nd_var must derive from nd_var_base");
+	std::shared_ptr<T> val;	
+
+public:
+	template <typename...Args>
+	nd_var(Args&&...args) {
+		tracer::tag t = tracer::get_offset_in_function();
+		val = get_or_create_generator<T>(t, std::forward<Args>(args)...);
+	}
+
+	// Allow access to wrapped value in case user wants to access object specific APIs	
+	operator T& (void) {
+		return *val;
+	}
+	operator const T& (void) const {
+		return *val;
+	}
+
+	T* get(void) {
+		return val.get();
+	}
+	const T* get(void) const {
+		return val.get();
+	}
+
+	void require_val(int e) {
+		// If the required value is compatible with the current state, 
+		// return 
+		if (val->check(e)) return;
+		// Otherwise, merge update and throw
+		val->merge(e);
+		throw NonDeterministicFailureException();
+	}
+
+};
+
 
 
 }

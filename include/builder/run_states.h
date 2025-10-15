@@ -39,8 +39,7 @@ class run_state;
 class execution_state;
 class invocation_state;
 class builder_context;
-template <typename>
-struct nd_var_gen;
+class nd_var_base;
 
 class run_state {
 public:
@@ -142,7 +141,7 @@ public:
 
 class invocation_state {
 	/* ND_VAR state */
-	std::unordered_map<tracer::tag, std::shared_ptr<nd_var_gen_base>> nd_state_map;
+	std::unordered_map<tracer::tag, std::shared_ptr<nd_var_base>> nd_state_map;
 
 	// Main invocation function
 	std::function<void(void)> invocation_function;
@@ -166,8 +165,8 @@ public:
 	template <typename ProcessedArgTypes, typename RemainingArgTypes, typename ReturnType, typename Enable>
 	friend struct extract_signature_impl;
 
-	template <typename T>
-	friend std::shared_ptr<nd_var_gen<T>> get_or_create_generator(tracer::tag req_tag);
+	template <typename T, typename...Args>
+	friend std::shared_ptr<T> get_or_create_generator(tracer::tag req_tag, Args&&...args);
 };
 
 static inline run_state* get_run_state(void) {
