@@ -10,7 +10,7 @@ using builder::static_var;
 int main(int argc, char *argv[]) {
 	builder::builder_context context;
 	// Code to test assignments between static var and normal vars
-	auto ast = context.extract_ast_from_lambda([=](void) {
+	auto ast = context.extract_ast_from_function([=](void) {
 		static_var<int> foo = 4 + 5;
 		dyn_var<int> x = foo + 9;
 		dyn_var<int> y = 8 + foo;

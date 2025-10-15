@@ -2,9 +2,9 @@
 
 namespace builder {
 void annotate(std::string label) {
-	builder_context::current_builder_context->commit_uncommitted();
-	if (builder_context::current_builder_context->bool_vector.size() > 0)
+	get_run_state()->commit_uncommitted();
+	if (get_run_state()->is_catching_up())
 		return;
-	builder_context::current_builder_context->current_label = label;
+	get_run_state()->add_annotation(label);
 }
 } // namespace builder

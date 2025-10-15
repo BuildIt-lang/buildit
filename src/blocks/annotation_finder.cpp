@@ -2,17 +2,17 @@
 
 namespace block {
 void annotation_finder::visit(expr_stmt::Ptr stmt) {
-	if (annotation_to_find == stmt->annotation) {
+	if (stmt->annotation.find(annotation_to_find) != stmt->annotation.end()) {
 		found_stmt = stmt;
 	}
 }
 void annotation_finder::visit(decl_stmt::Ptr stmt) {
-	if (annotation_to_find == stmt->annotation) {
+	if (stmt->annotation.find(annotation_to_find) != stmt->annotation.end()) {
 		found_stmt = stmt;
 	}
 }
 void annotation_finder::visit(if_stmt::Ptr stmt) {
-	if (annotation_to_find == stmt->annotation) {
+	if (stmt->annotation.find(annotation_to_find) != stmt->annotation.end()) {
 		found_stmt = stmt;
 		return;
 	}
@@ -20,14 +20,14 @@ void annotation_finder::visit(if_stmt::Ptr stmt) {
 	stmt->else_stmt->accept(this);
 }
 void annotation_finder::visit(while_stmt::Ptr stmt) {
-	if (annotation_to_find == stmt->annotation) {
+	if (stmt->annotation.find(annotation_to_find) != stmt->annotation.end()) {
 		found_stmt = stmt;
 		return;
 	}
 	stmt->body->accept(this);
 }
 void annotation_finder::visit(for_stmt::Ptr stmt) {
-	if (annotation_to_find == stmt->annotation) {
+	if (stmt->annotation.find(annotation_to_find) != stmt->annotation.end()) {
 		found_stmt = stmt;
 		return;
 	}

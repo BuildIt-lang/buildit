@@ -4,15 +4,9 @@ FUNC_DECL (bar)
   STMT_BLOCK
     DECL_STMT
       SCALAR_TYPE (INT)
-      VAR (var0)
-      VAR_EXPR
-        VAR (arg0)
-    DECL_STMT
-      SCALAR_TYPE (INT)
-      VAR (y_1)
+      VAR (y_0)
       NO_INITIALIZATION
 void bar (int arg0) {
-  int var0 = arg0;
-  int y_1;
+  int y_0;
 }
 

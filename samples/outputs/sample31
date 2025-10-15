@@ -3,39 +3,33 @@ FUNC_DECL (func1)
   VAR (arg0)
   STMT_BLOCK
     DECL_STMT
-      SCALAR_TYPE (INT)
+      NAMED_TYPE (foo)
       VAR (var0)
-      VAR_EXPR
-        VAR (arg0)
-    DECL_STMT
-      SCALAR_TYPE (INT)
-      VAR (var1)
       PLUS_EXPR
         PLUS_EXPR
           INT_CONST (3)
           MEMBER_ACCESS_EXPR (var1)
             VAR_EXPR
-              VAR (var0)
+              VAR (arg0)
         MUL_EXPR
           INT_CONST (5)
           MEMBER_ACCESS_EXPR (var1)
             VAR_EXPR
-              VAR (var0)
+              VAR (arg0)
     DECL_STMT
       SCALAR_TYPE (INT)
-      VAR (var2)
+      VAR (var1)
       PLUS_EXPR
         MEMBER_ACCESS_EXPR (neighbor)
           VAR_EXPR
-            VAR (var1)
+            VAR (var0)
         INT_CONST (2)
     RETURN_STMT
       VAR_EXPR
-        VAR (var2)
-int func1 (int arg0) {
-  int var0 = arg0;
-  int var1 = (3 + var0.var1) + (5 * var0.var1);
-  int var2 = var1.neighbor + 2;
-  return var2;
+        VAR (var1)
+int func1 (foo arg0) {
+  foo var0 = (3 + arg0.var1) + (5 * arg0.var1);
+  int var1 = var0.neighbor + 2;
+  return var1;
 }
 

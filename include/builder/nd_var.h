@@ -25,16 +25,15 @@ struct nd_var_gen<bool>: public nd_var_gen_base {
 	bool allowed_values[2] = {true, true};
 };
 
-
 template <typename T>
 std::shared_ptr<nd_var_gen<T>> get_or_create_generator(tracer::tag req_tag) {
-	if (builder_context::current_builder_context->nd_state_map->find(req_tag) ==
-		builder_context::current_builder_context->nd_state_map->end()) {
-		(*(builder_context::current_builder_context->nd_state_map))[req_tag] = std::make_shared<nd_var_gen<T>>();
+	if (get_invocation_state()->nd_state_map.find(req_tag) ==
+		get_invocation_state()->nd_state_map.end()) {
+		(get_invocation_state()->nd_state_map)[req_tag] = std::make_shared<nd_var_gen<T>>();
 	}
 
 	return std::static_pointer_cast<nd_var_gen<T>>(
-		(*(builder_context::current_builder_context->nd_state_map))[req_tag]);
+		(get_invocation_state()->nd_state_map)[req_tag]);
 }
 
 /* contstraints on bool types
@@ -58,7 +57,9 @@ struct nd_var<bool> {
 	}
 
 	void sample(bool default_value = false) {
-		current_tag = get_offset_in_function();			
+		// Before requesting a tag, make sure THIS static var is in a consistent state
+		current_value = 0;
+		current_tag = tracer::get_offset_in_function();			
 		auto generator = get_or_create_generator<bool>(current_tag);
 
 		if (generator->allowed_values[default_value] == true)

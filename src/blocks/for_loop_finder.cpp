@@ -159,7 +159,7 @@ void for_loop_finder::visit(stmt_block::Ptr a) {
 			} else
 				for_loop->decl_stmt = a->stmts[while_loop_index];
 			for_loop->annotation = for_loop->decl_stmt->annotation;
-			for_loop->decl_stmt->annotation = "";
+			for_loop->decl_stmt->annotation.clear();
 			for_loop->cond = loop->cond;
 			if (parents.size() == 0) {
 				for_loop->update = nullptr;

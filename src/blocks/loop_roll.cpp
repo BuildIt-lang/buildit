@@ -2,9 +2,13 @@
 #include "builder/builder.h"
 #include "builder/dyn_var.h"
 namespace block {
-static bool is_roll(std::string s) {
-	if (s != "" && s.length() > 5 && s[0] == 'r' && s[1] == 'o' && s[2] == 'l' && s[3] == 'l' && s[4] == '.')
-		return true;
+static bool is_roll(std::set<std::string> ss, std::string &match) {
+	for (auto s: ss) {
+		if (s != "" && s.length() > 5 && s[0] == 'r' && s[1] == 'o' && s[2] == 'l' && s[3] == 'l' && s[4] == '.') {
+			match = s;
+			return true;
+		}
+	}
 	return false;
 }
 static int unique_counter = 0;
@@ -141,7 +145,8 @@ static void process_match(stmt_block::Ptr b, int match_start, int match_end) {
 	first->accept(&replacer);
 
 	to<stmt_block>(new_for->body)->stmts.push_back(first);
-	first->annotation = "from." + first->annotation;
+	
+	//first->annotation = "from." + first->annotation;
 
 	new_stmts.push_back(new_for);
 
@@ -160,12 +165,12 @@ void loop_roll_finder::visit(stmt_block::Ptr b) {
 		int match_end = -1;
 		for (unsigned int i = 0; i < b->stmts.size(); i++) {
 			auto stmt = b->stmts[i];
-			if (is_roll(stmt->annotation)) {
-				std::string match = stmt->annotation;
+			std::string match;
+			if (is_roll(stmt->annotation, match)) {
 				match_start = i;
 				match_end = b->stmts.size();
 				for (; i < b->stmts.size(); i++) {
-					if (b->stmts[i]->annotation != match) {
+					if (b->stmts[i]->annotation.find(match) == b->stmts[i]->annotation.end()) {
 						match_end = i;
 						break;
 					}

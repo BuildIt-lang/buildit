@@ -2,11 +2,12 @@
 #define STMT_H
 #include "blocks/expr.h"
 #include <vector>
+#include <set>
 namespace block {
 class stmt : public block {
 public:
 	typedef std::shared_ptr<stmt> Ptr;
-	std::string annotation;
+	std::set<std::string> annotation;
 	virtual void dump(std::ostream &, int) override;
 	virtual void accept(block_visitor *a) override {
 		a->visit(self<stmt>());

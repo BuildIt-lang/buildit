@@ -8,11 +8,10 @@
 using builder::dyn_var;
 using builder::static_var;
 
-const char *bf_program;
-dyn_var<void(int)> *print_value_ptr;
-dyn_var<int()> *get_value_ptr;
+dyn_var<void(int)> print_value = builder::with_name("print_value");
+dyn_var<int()> get_value = builder::with_name("get_value");
 
-static int find_matching_closing(int pc) {
+static int find_matching_closing(const char* bf_program, int pc) {
 	int count = 1;
 	while (bf_program[pc] != 0 && count > 0) {
 		pc++;
@@ -23,7 +22,7 @@ static int find_matching_closing(int pc) {
 	}
 	return pc;
 }
-static int find_matching_opening(int pc) {
+static int find_matching_opening(const char* bf_program, int pc) {
 	int count = 1;
 	while (pc >= 0 && count > 0) {
 		pc--;
@@ -35,9 +34,7 @@ static int find_matching_opening(int pc) {
 	return pc;
 }
 // BF interpreter
-static void interpret_bf(void) {
-	auto &get_value = *get_value_ptr;
-	auto &print_value = *print_value_ptr;
+static void interpret_bf(dyn_var<int> argc, dyn_var<char*[]> argv, const char* bf_program) {
 
 	dyn_var<int> pointer = 0;
 	static_var<int> pc = 0;
@@ -56,12 +53,12 @@ static void interpret_bf(void) {
 		} else if (bf_program[pc] == ',') {
 			tape[pointer] = get_value();
 		} else if (bf_program[pc] == '[') {
-			int closing = find_matching_closing(pc);
+			int closing = find_matching_closing(bf_program, pc);
 			if (tape[pointer] == 0) {
 				pc = closing;
 			}
 		} else if (bf_program[pc] == ']') {
-			int opening = find_matching_opening(pc);
+			int opening = find_matching_opening(bf_program, pc);
 			pc = opening - 1;
 		}
 		pc += 1;
@@ -72,19 +69,15 @@ static void print_wrapper_code(std::ostream &oss) {
 	oss << "#include <stdlib.h>\n";
 	oss << "void print_value(int x) {printf(\"%c\", x);}\n";
 	oss << "int get_value(void) {char x; scanf(\" %c\", &x); return x;}\n";
-	oss << "int main(int argc, char* argv[]) ";
 }
 int main(int argc, char *argv[]) {
 	builder::builder_context context;
 
 	// BF program that prints hello world
-	bf_program = "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.++++++"
+	const char* bf_program = "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.++++++"
 		     "+..+++.>>.<-.<.+++.------.--------.>>+.>++.";
 
-	print_value_ptr = context.assume_variable<dyn_var<void(int)>>("print_value");
-	get_value_ptr = context.assume_variable<dyn_var<int(void)>>("get_value");
-
-	auto ast = context.extract_ast_from_function(interpret_bf);
+	auto ast = context.extract_function_ast(interpret_bf, "main", bf_program);
 
 	print_wrapper_code(std::cout);
 	block::c_code_generator::generate_code(ast, std::cout, 0);

@@ -16,7 +16,7 @@ extern void lambda_wrapper_close(void);
 
 namespace tracer {
 #ifdef TRACER_USE_LIBUNWIND
-tag get_offset_in_function_impl(builder::builder_context *current_builder_context) {
+tag get_offset_in_function(void) {
 	unsigned long long function = (unsigned long long)(void *)builder::lambda_wrapper;
 	unsigned long long function_end = (unsigned long long)(void *)builder::lambda_wrapper_close;
 	unw_context_t context;
@@ -33,26 +33,25 @@ tag get_offset_in_function_impl(builder::builder_context *current_builder_contex
 			break;
 		new_tag.pointers.push_back((unsigned long long)ip);
 	}
-	// Now add snapshots of static vars
-	assert(current_builder_context != nullptr);
 
-	for (auto tuple : current_builder_context->deferred_static_var_tuples) {
+	// Now add snapshots of static vars
+	for (auto tuple : builder::get_run_state()->deferred_static_var_tuples) {
 		if (tuple == nullptr) {
 			new_tag.static_var_snapshots.push_back(nullptr);
 			continue;
 		}
 		new_tag.static_var_snapshots.push_back(tuple->snapshot());
-		if (builder::builder_context::current_builder_context->enable_d2x) {
+		if (get_builder_context()->enable_d2x) {
 			new_tag.static_var_key_values.push_back({tuple->var_name, tuple->serialize()});
 		}
 	}
-	for (auto tuple : current_builder_context->static_var_tuples) {
+	for (auto tuple : builder::get_run_state()->static_var_tuples) {
 		if (tuple == nullptr) {
 			new_tag.static_var_snapshots.push_back(nullptr);
 			continue;
 		}
 		new_tag.static_var_snapshots.push_back(tuple->snapshot());
-		if (builder::builder_context::current_builder_context->enable_d2x) {
+		if (get_builder_context()->enable_d2x) {
 			new_tag.static_var_key_values.push_back({tuple->var_name, tuple->serialize()});
 		}
 	}
@@ -60,7 +59,7 @@ tag get_offset_in_function_impl(builder::builder_context *current_builder_contex
 }
 
 #else
-tag get_offset_in_function_impl(builder::builder_context *current_builder_context) {
+tag get_offset_in_function(void) {
 	unsigned long long function = (unsigned long long)(void *)builder::lambda_wrapper;
 	unsigned long long function_end = (unsigned long long)(void *)builder::lambda_wrapper_close;
 
@@ -75,25 +74,24 @@ tag get_offset_in_function_impl(builder::builder_context *current_builder_contex
 	}
 
 	// Now add snapshots of static vars
-	assert(current_builder_context != nullptr);
 
-	for (auto tuple : current_builder_context->deferred_static_var_tuples) {
+	for (auto tuple : builder::get_run_state()->deferred_static_var_tuples) {
 		if (tuple == nullptr) {
 			new_tag.static_var_snapshots.push_back(nullptr);
 			continue;
 		}
 		new_tag.static_var_snapshots.push_back(tuple->snapshot());
-		if (builder::builder_context::current_builder_context->enable_d2x) {
+		if (builder::get_builder_context()->enable_d2x) {
 			new_tag.static_var_key_values.push_back({tuple->var_name, tuple->serialize()});
 		}
 	}
-	for (auto tuple : current_builder_context->static_var_tuples) {
+	for (auto tuple : builder::get_run_state()->static_var_tuples) {
 		if (tuple == nullptr) {
 			new_tag.static_var_snapshots.push_back(nullptr);
 			continue;
 		}
 		new_tag.static_var_snapshots.push_back(tuple->snapshot());
-		if (builder::builder_context::current_builder_context->enable_d2x) {
+		if (builder::get_builder_context()->enable_d2x) {
 			new_tag.static_var_key_values.push_back({tuple->var_name, tuple->serialize()});
 		}
 	}

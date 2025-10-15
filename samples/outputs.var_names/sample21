@@ -7,6 +7,6 @@ STMT_BLOCK
     SCALAR_TYPE (INT)
     VAR (bar_1)
     PLUS_EXPR
-      FOREIGN_EXPR
+      STRING_CONST ("foo")
       VAR_EXPR
         VAR (x_0)

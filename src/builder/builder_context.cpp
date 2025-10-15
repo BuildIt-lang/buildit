@@ -15,116 +15,7 @@
 #include <algorithm>
 
 namespace builder {
-builder_context *builder_context::current_builder_context = nullptr;
 
-int builder_context::debug_creation_counter = 0;
-
-void builder_context::add_stmt_to_current_block(block::stmt::Ptr s, bool check_for_conflicts) {
-	if (bool_vector.size() > 0) {
-		return;
-	}
-	if (current_label != "") {
-		s->annotation = current_label;
-		current_label = "";
-	}
-	if (!s->static_offset.is_empty() && is_visited_tag(s->static_offset) > 0) {
-
-		throw LoopBackException(s->static_offset);
-	}
-	tracer::tag stag = s->static_offset;
-	if (use_memoization && memoized_tags->map.find(stag) != memoized_tags->map.end() && check_for_conflicts &&
-	    bool_vector.size() == 0) {
-		// This tag has been seen on some other execution. We can reuse.
-		// First find the tag -
-
-		block::stmt_block::Ptr parent = memoized_tags->map[stag];
-		unsigned int i = 0;
-		for (i = 0; i < parent->stmts.size(); i++) {
-			if (parent->stmts[i]->static_offset == s->static_offset)
-				break;
-		}
-		// Special case of stmt expr and if_stmt
-		if (block::isa<block::expr_stmt>(s) && block::isa<block::if_stmt>(parent->stmts[i])) {
-			block::if_stmt::Ptr p_stmt = block::to<block::if_stmt>(parent->stmts[i]);
-			block::expr_stmt::Ptr expr = block::to<block::expr_stmt>(s);
-
-			if (p_stmt->cond->is_same(expr->expr1))
-				throw MemoizationException(s->static_offset, parent, i);
-		}
-
-		if (parent->stmts[i]->is_same(s))
-			throw MemoizationException(s->static_offset, parent, i);
-	}
-	visited_offsets.insert(s->static_offset);
-	current_block_stmt->stmts.push_back(s);
-}
-tracer::tag get_offset_in_function(void) {
-	tracer::tag offset = tracer::get_offset_in_function_impl(builder_context::current_builder_context);
-	return offset;
-}
-builder_context::~builder_context() {
-	for (unsigned int i = 0; i < assume_variables.size(); i++) {
-		delete assume_variables[i];
-	}
-}
-bool builder_context::is_visited_tag(tracer::tag &new_tag) {
-	if (visited_offsets.find(new_tag) != visited_offsets.end())
-		return true;
-	return false;
-}
-void builder_context::erase_tag(tracer::tag &erase_tag) {
-	visited_offsets.erase(erase_tag);
-}
-void builder_context::commit_uncommitted(void) {
-	for (auto block_ptr : uncommitted_sequence) {
-		block::expr_stmt::Ptr s = std::make_shared<block::expr_stmt>();
-		assert(block::isa<block::expr>(block_ptr));
-		s->static_offset = block_ptr->static_offset;
-		s->expr1 = block::to<block::expr>(block_ptr);
-		assert(current_block_stmt != nullptr);
-		add_stmt_to_current_block(s);
-	}
-	uncommitted_sequence.clear();
-}
-void builder_context::remove_node_from_sequence(block::expr::Ptr e) {
-	// At this point, there is a chance a statement _might_ have been committed if
-	// a variable was declared. This happens when you return a dyn_var from a function
-	// Now this is not particularly bad because it just leaves a stray expression in the
-	// generated code, but 1. it can mess with some pattern matchers, 2. could have
-	// unexpected side effects, so we are going to do a clean up just to be sure
-	// So we will check if the expr that we are trying to delete is in the uncommitted
-	// sequence, if not we will try to find for it in the committed expressions
-	if (std::find(uncommitted_sequence.begin(), uncommitted_sequence.end(), e) != uncommitted_sequence.end()) {
-		uncommitted_sequence.remove(e);
-	} else {
-		// Could be committed already
-		// It is safe to update the parent block here, because the memoization doesn't care about indices
-		// But don't actually delete the statement, because there could be gotos that are jumping here
-		// instead just mark it for deletion later
-		for (auto stmt : current_block_stmt->stmts) {
-			if (block::isa<block::expr_stmt>(stmt)) {
-				auto expr_s = block::to<block::expr_stmt>(stmt);
-				if (expr_s->expr1 == e) {
-					expr_s->mark_for_deletion = true;
-				}
-			}
-		}
-	}
-}
-void builder_context::add_node_to_sequence(block::expr::Ptr e) {
-	uncommitted_sequence.push_back(e);
-}
-
-bool get_next_bool_from_context(builder_context *context, block::expr::Ptr expr) {
-	context->commit_uncommitted();
-	if (context->bool_vector.size() == 0) {
-		tracer::tag offset = expr->static_offset;
-		throw OutOfBoolsException(offset);
-	}
-	bool ret_val = context->bool_vector.back();
-	context->bool_vector.pop_back();
-	return ret_val;
-}
 
 static void trim_ast_at_offset(block::stmt::Ptr ast, tracer::tag offset) {
 	return;
@@ -266,12 +157,8 @@ trim_common_from_back(block::stmt::Ptr ast1, block::stmt::Ptr ast2) {
 	std::reverse(trimmed_stmts.begin(), trimmed_stmts.end());
 	return {trimmed_stmts, split_decls};
 }
-block::stmt::Ptr builder_context::extract_ast_from_lambda(std::function<void(void)> lambda) {
-	internal_stored_lambda = lambda;
-	return extract_ast_from_function_impl();
-}
-
-void builder_context::reset_for_nd_failure() {
+/*
+static void builder_context::reset_for_nd_failure() {
 	// Clear all shared_state
 	memoized_tags->map.clear();
 	// Clear per run state if any
@@ -288,25 +175,25 @@ void builder_context::reset_for_nd_failure() {
 	// Increment creation counter since we are running again
 	debug_creation_counter++;
 }
+*/
 
-block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
+
+void builder_context::extract_function_ast_impl(invocation_state* i_state) {
 
 #ifndef ENABLE_D2X
 	if (enable_d2x)
 		assert(false && "D2X support cannot be enabled without the ENABLE_D2X build option");
 #endif
-
-	std::vector<bool> b;
-
-	nd_state_map = &_nd_state_map;	
-
-	block::stmt::Ptr ast;	
-	
+	block::stmt::Ptr ast = nullptr;
+	// Repeat till ND vars are happy
 	while (1) {
 		try {
-			ast = extract_ast_from_function_internal(b);
+			// Allocate one execution_state for this ND run
+			execution_state e_state (i_state);
+			// Allocate one run_state, rest will be allocated by the recursive calls
+			run_state r_state (&e_state, i_state);
+			ast = extract_ast_from_run(&r_state);
 		} catch (NonDeterministicFailureException &e) {
-			reset_for_nd_failure();
 			continue;
 		}
 		break;
@@ -367,69 +254,60 @@ block::stmt::Ptr builder_context::extract_ast_from_function_impl(void) {
 	block::loop_roll_finder loop_roll_finder;
 	ast->accept(&loop_roll_finder);
 
-	return ast;
+
+	i_state->generated_func_decl->body = ast;	
 }
-block::stmt::Ptr builder_context::extract_ast_from_function_internal(std::vector<bool> b) {
+block::stmt::Ptr builder_context::extract_ast_from_run(run_state* r_state) {
+	r_state->current_stmt_block = std::make_shared<block::stmt_block>();
+	block::stmt_block::Ptr ast = r_state->current_stmt_block;
 
-	current_block_stmt = std::make_shared<block::stmt_block>();
-	current_block_stmt->static_offset.clear();
-	assert(current_block_stmt != nullptr);
-	ast = current_block_stmt;
-
+	// A new run is starting, clear the parent stack
+	// for identifying nested members. This is because a run can end mid construction
 	if (parents_stack != nullptr) {
 		parents_stack->clear();
 	}
 
-	bool_vector = b;
+	block::stmt_block::Ptr ret_ast;
 
-	block::stmt::Ptr ret_ast;
+	std::vector<bool> bool_vector_copy = r_state->bool_vector;
+
 	try {
-		current_builder_context = this;
+		run_state::current_run_state = r_state;
 		// function();
-		lambda_wrapper(internal_stored_lambda);
-		commit_uncommitted();
+		lambda_wrapper(r_state->i_state->invocation_function);
+		r_state->commit_uncommitted();
 		ret_ast = ast;
-		current_builder_context = nullptr;
+		run_state::current_run_state = nullptr;
 
 	} catch (OutOfBoolsException &e) {
 
-		current_builder_context = nullptr;
+		run_state::current_run_state = nullptr;
 
-		block::expr_stmt::Ptr last_stmt = block::to<block::expr_stmt>(current_block_stmt->stmts.back());
-		current_block_stmt->stmts.pop_back();
-		// erase_tag(e.static_offset);
+		block::expr_stmt::Ptr last_stmt = block::to<block::expr_stmt>(r_state->current_stmt_block->stmts.back());
+		r_state->current_stmt_block->stmts.pop_back();
 
 		block::expr::Ptr cond_expr = last_stmt->expr1;
+	
+		// Establish two run_states
+		run_state true_r_state(r_state->e_state, r_state->i_state);
+		// Only copy over the expr_sequence since it is part of the r_state that 
+		// just terminated
+		true_r_state.cached_expr_sequence = r_state->cached_expr_sequence;
+		true_r_state.bool_vector.push_back(true);
+		true_r_state.visited_offsets = r_state->visited_offsets;
+		std::copy(bool_vector_copy.begin(), bool_vector_copy.end(), std::back_inserter(true_r_state.bool_vector));
 
-		builder_context true_context(memoized_tags);
-		true_context.expr_sequence = expr_sequence;
-		true_context.use_memoization = use_memoization;
-		true_context.visited_offsets = visited_offsets;
-		true_context.internal_stored_lambda = internal_stored_lambda;
-		true_context.feature_unstructured = feature_unstructured;
-		true_context.enable_d2x = enable_d2x;
-		true_context.nd_state_map = nd_state_map;
+		// Establish two run_states
+		run_state false_r_state(r_state->e_state, r_state->i_state);
+		false_r_state.visited_offsets = r_state->visited_offsets;
+		// Only copy over the expr_sequence since it is part of the r_state that 
+		// just terminated
+		false_r_state.cached_expr_sequence = r_state->cached_expr_sequence;
+		false_r_state.bool_vector = true_r_state.bool_vector;
+		false_r_state.bool_vector[0] = false;
 
-		std::vector<bool> true_bv;
-		true_bv.push_back(true);
-		std::copy(b.begin(), b.end(), std::back_inserter(true_bv));
-		block::stmt_block::Ptr true_ast =
-		    block::to<block::stmt_block>(true_context.extract_ast_from_function_internal(true_bv));
-
-		builder_context false_context(memoized_tags);
-		false_context.expr_sequence = std::move(expr_sequence);
-		false_context.use_memoization = use_memoization;
-		false_context.visited_offsets = visited_offsets;
-		false_context.internal_stored_lambda = internal_stored_lambda;
-		false_context.feature_unstructured = feature_unstructured;
-		false_context.enable_d2x = enable_d2x;
-		false_context.nd_state_map = nd_state_map;
-
-		std::vector<bool> false_bv;
-		false_bv.push_back(false);
-		std::copy(b.begin(), b.end(), std::back_inserter(false_bv));
-		block::stmt_block::Ptr false_ast =
-		    block::to<block::stmt_block>(false_context.extract_ast_from_function_internal(false_bv));
+		block::stmt_block::Ptr true_ast = block::to<block::stmt_block>(extract_ast_from_run(&true_r_state));
+		block::stmt_block::Ptr false_ast = block::to<block::stmt_block>(extract_ast_from_run(&false_r_state));
 
 		trim_ast_at_offset(true_ast, e.static_offset);
 		trim_ast_at_offset(false_ast, e.static_offset);
@@ -440,7 +318,7 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(std::vector
 		std::vector<block::stmt::Ptr> trimmed_stmts = trim_pair.first;
 		std::vector<block::stmt::Ptr> split_decls = trim_pair.second;
 
-		erase_tag(e.static_offset);
+		r_state->erase_tag(e.static_offset);
 
 		block::if_stmt::Ptr new_if_stmt = std::make_shared<block::if_stmt>();
 		new_if_stmt->annotation = last_stmt->annotation;
@@ -451,47 +329,48 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(std::vector
 		new_if_stmt->else_stmt = false_ast;
 
 		for (auto stmt : split_decls)
-			add_stmt_to_current_block(stmt, false);
-		add_stmt_to_current_block(new_if_stmt, false);
+			r_state->add_stmt_to_current_block(stmt, false);
+		r_state->add_stmt_to_current_block(new_if_stmt, false);
 
-		std::copy(trimmed_stmts.begin(), trimmed_stmts.end(), std::back_inserter(current_block_stmt->stmts));
+		std::copy(trimmed_stmts.begin(), trimmed_stmts.end(), std::back_inserter(r_state->current_stmt_block->stmts));
 
 		ret_ast = ast;
 	} catch (LoopBackException &e) {
-		current_builder_context = nullptr;
+		run_state::current_run_state = nullptr;
 		block::goto_stmt::Ptr goto_stmt = std::make_shared<block::goto_stmt>();
 		goto_stmt->static_offset.clear();
 		goto_stmt->temporary_label_number = e.static_offset;
 
-		add_stmt_to_current_block(goto_stmt, false);
+		r_state->add_stmt_to_current_block(goto_stmt, false);
 		ret_ast = ast;
 	} catch (MemoizationException &e) {
+		run_state::current_run_state = nullptr;
 		if (feature_unstructured) {
 			// Instead of copying statements to the current block, we will just insert a goto
 			block::goto_stmt::Ptr goto_stmt = std::make_shared<block::goto_stmt>();
 			goto_stmt->static_offset.clear();
 			goto_stmt->temporary_label_number = e.static_offset;
-			add_stmt_to_current_block(goto_stmt, false);
+			r_state->add_stmt_to_current_block(goto_stmt, false);
 		} else {
 			for (unsigned int i = e.child_id; i < e.parent->stmts.size(); i++) {
 				if (block::isa<block::goto_stmt>(e.parent->stmts[i])) {
 					block::goto_stmt::Ptr goto_stmt = std::make_shared<block::goto_stmt>();
 					goto_stmt->static_offset.clear();
 					goto_stmt->temporary_label_number = block::to<block::goto_stmt>(e.parent->stmts[i])->temporary_label_number;
-					add_stmt_to_current_block(goto_stmt, false);
+					r_state->add_stmt_to_current_block(goto_stmt, false);
 				}
 				else {
-					add_stmt_to_current_block(e.parent->stmts[i], false);
+					r_state->add_stmt_to_current_block(e.parent->stmts[i], false);
 				}
 			}
 		}
 		ret_ast = ast;
 	}
-	current_builder_context = nullptr;
+	run_state::current_run_state = nullptr;
 
 	// Update the memoized table with the stmt block we just created
-	for (unsigned int i = 0; i < current_block_stmt->stmts.size(); i++) {
-		block::stmt::Ptr s = current_block_stmt->stmts[i];
+	for (unsigned int i = 0; i < r_state->current_stmt_block->stmts.size(); i++) {
+		block::stmt::Ptr s = r_state->current_stmt_block->stmts[i];
 		// If any of the statements are if conditions, remove the
 		// internal statements from the table
 		// This is required because of the way we do memoization.
@@ -507,29 +386,29 @@ block::stmt::Ptr builder_context::extract_ast_from_function_internal(std::vector
 			assert(block::isa<block::stmt_block>(if1->then_stmt));
 			assert(block::isa<block::stmt_block>(if1->else_stmt));
 			for (auto &stmt : block::to<block::stmt_block>(if1->then_stmt)->stmts) {
-				auto it = memoized_tags->map.find(stmt->static_offset);
-				if (it != memoized_tags->map.end())
-					memoized_tags->map.erase(it);
+				auto it = r_state->e_state->memoized_tags.find(stmt->static_offset);
+				if (it != r_state->e_state->memoized_tags.end())
+					r_state->e_state->memoized_tags.erase(it);
 
 				if (feature_unstructured) {
 					auto pblock = block::to<block::stmt_block>(if1->then_stmt);
-					memoized_tags->map[stmt->static_offset] = pblock;
+					r_state->e_state->memoized_tags[stmt->static_offset] = pblock;
 				}
 			}
 			for (auto &stmt : block::to<block::stmt_block>(if1->else_stmt)->stmts) {
-				auto it = memoized_tags->map.find(stmt->static_offset);
-				if (it != memoized_tags->map.end())
-					memoized_tags->map.erase(it);
+				auto it = r_state->e_state->memoized_tags.find(stmt->static_offset);
+				if (it != r_state->e_state->memoized_tags.end())
+					r_state->e_state->memoized_tags.erase(it);
 				if (feature_unstructured) {
 					auto pblock = block::to<block::stmt_block>(if1->else_stmt);
-					memoized_tags->map[stmt->static_offset] = pblock;
+					r_state->e_state->memoized_tags[stmt->static_offset] = pblock;
 				}
 			}
 		}
-		memoized_tags->map[s->static_offset] = current_block_stmt;
+		r_state->e_state->memoized_tags[s->static_offset] = r_state->current_stmt_block;
 	}
 
-	ast = current_block_stmt = nullptr;
+	ast = r_state->current_stmt_block = nullptr;
 	return ret_ast;
 }
 

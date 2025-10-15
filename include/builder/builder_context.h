@@ -4,6 +4,8 @@
 #include "blocks/expr.h"
 #include "blocks/stmt.h"
 #include "builder/forward_declarations.h"
+#include "builder/signature_extract.h"
+#include "builder/run_states.h"
 #include <functional>
 #include <list>
 #include <unordered_map>
@@ -13,123 +15,49 @@
 
 namespace builder {
 
-template <typename T>
-block::expr::Ptr create_foreign_expr(const T t);
-template <typename T>
-builder create_foreign_expr_builder(const T t);
-
-
-class tag_map {
-public:
-	std::unordered_map<tracer::tag, block::stmt_block::Ptr> map;
-};
-
 void lambda_wrapper(std::function<void(void)>);
 void lambda_wrapper_close(void);
 
-void coroutine_wrapper(std::function<void(void)>);
-void coroutine_wrapper_close(void);
-
 class builder_context {
 public:
-	// Purely static state for the entire program
-	static builder_context *current_builder_context;
-	static int debug_creation_counter;
-
-
-	// TODO: Consider separating different levels of run states into 
-	// separate objects so managing it is easier
-
-	// Per run state
-	std::function<void(void)> internal_stored_lambda;
-	std::list<block::block::Ptr> uncommitted_sequence;
-	block::stmt::Ptr ast;
-	block::stmt_block::Ptr current_block_stmt;
-	std::vector<bool> bool_vector;
-	std::unordered_set<tracer::tag> visited_offsets;
-	std::vector<block::expr::Ptr> expr_sequence;
-	unsigned long long expr_counter = 0;
-	std::string current_label;
-
-	std::vector<static_var_base*> static_var_tuples;
-	std::vector<static_var_base*> deferred_static_var_tuples;
-
-	// Run shared state
-	tag_map _internal_tags;
-	tag_map *memoized_tags;
-
-	// State shared across non-deterministic failures
-	std::unordered_map<tracer::tag, std::shared_ptr<nd_var_gen_base>> *nd_state_map = nullptr;
-	std::unordered_map<tracer::tag, std::shared_ptr<nd_var_gen_base>> _nd_state_map;
-
-	void reset_for_nd_failure();
-	
-	// Some members are out of the scope of the executions and are never reset
-	std::vector<var *> assume_variables;
-	block::func_decl::Ptr current_func_decl;
-
 	// Flags are just constants that shouldn't get updated anyway
 	// Flags for controlling BuildIt extraction
 	// and code generation behavior
-	bool use_memoization = true;
 	bool run_rce = false;
 	bool feature_unstructured = false;
 	bool dynamic_use_cxx = false;
 	std::string dynamic_compiler_flags = "";
 	std::string dynamic_header_includes = "";
-	bool enable_d2x = false;
+	bool enable_d2x = false;	
 
-	bool is_visited_tag(tracer::tag &new_tag);
-	void erase_tag(tracer::tag &erase_tag);
+	void extract_function_ast_impl(invocation_state*);
+	block::stmt::Ptr extract_ast_from_run(run_state*);
 
-	builder_context(tag_map *_map = nullptr) {
-		if (_map == nullptr) {
-			memoized_tags = &_internal_tags;
-		} else {
-			memoized_tags = _map;
-		}
-		current_block_stmt = nullptr;
-		ast = nullptr;
-
-		debug_creation_counter++;
+	// Old API still used by some samples. TODO: phase out
+	
+	block::stmt::Ptr extract_ast_from_function(std::function<void(void)> func) {
+		invocation_state i_state;
+		i_state.generated_func_decl = std::make_shared<block::func_decl>();
+		i_state.b_ctx = this;
+		i_state.invocation_function = func;	
+		extract_function_ast_impl(&i_state);
+		return i_state.generated_func_decl->body;
 	}
-
-	void commit_uncommitted(void);
-	void remove_node_from_sequence(block::expr::Ptr);
-	void add_node_to_sequence(block::expr::Ptr);
-
-	void add_stmt_to_current_block(block::stmt::Ptr, bool check_for_conflicts = true);
-
-	block::stmt::Ptr extract_ast_from_function(void (*f)(void)) {
-		std::function<void(void)> l = f;
-		return extract_ast_from_lambda(l);
-	}
-	block::stmt::Ptr extract_ast_from_lambda(std::function<void(void)>);
-	block::stmt::Ptr extract_ast_from_function_impl(void);
-	block::stmt::Ptr extract_ast_from_function_internal(std::vector<bool> bl = std::vector<bool>());
 
 	template <typename F, typename... OtherArgs>
 	block::stmt::Ptr extract_function_ast(F func_input, std::string func_name, OtherArgs &&...other_args) {
-		current_func_decl = std::make_shared<block::func_decl>();
-		current_func_decl->func_name = func_name;
-		// The extract_signature_from_lambda will update the return type
-		current_func_decl->body = extract_ast_from_lambda(
-		    extract_signature_from_lambda<F, OtherArgs &...>::from(this, func_input, func_name, other_args...));
-		return current_func_decl;
+		// Establish a invocation state
+		invocation_state i_state = extract_signature<F>(func_input, std::forward<OtherArgs>(other_args)...);
+		i_state.b_ctx = this;
+		// Set the name of the function 
+		i_state.generated_func_decl->func_name = func_name;
+		extract_function_ast_impl(&i_state);
+		return i_state.generated_func_decl;
 	}
 
-	template <typename T>
-	T *assume_variable(std::string name) {
-		T * new_asm_variable = new T(with_name(name));
-		assume_variables.push_back(new_asm_variable);
-
-		return new_asm_variable;
-	}
-	~builder_context();
 };
-bool get_next_bool_from_context(builder_context *context, block::expr::Ptr);
-tracer::tag get_offset_in_function(void);
 
 } // namespace builder
+
 
 #endif

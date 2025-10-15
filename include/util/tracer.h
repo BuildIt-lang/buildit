@@ -90,7 +90,7 @@ public:
 
 tag get_unique_tag(void);
 
-tag get_offset_in_function_impl(builder::builder_context *current_builder_context);
+tag get_offset_in_function(void);
 
 } // namespace tracer
 

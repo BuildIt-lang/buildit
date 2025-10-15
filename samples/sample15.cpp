@@ -7,7 +7,7 @@
 using builder::dyn_var;
 // A simple function_var declaration
 static void foo(void) {
-	dyn_var<void(int, int *)> bar;
+	dyn_var<void(* )(int, int *)> bar;
 	dyn_var<int()> bar2;
 
 	dyn_var<int> a;

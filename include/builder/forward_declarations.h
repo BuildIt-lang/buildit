@@ -36,12 +36,6 @@ using is_dyn_var_type = std::is_base_of<var, T>;
 template <typename T>
 class type_extractor;
 
-template <typename ClassName, typename RetType, class Enable, typename... AllArgs>
-struct extract_signature;
-
-template <typename T, typename... OtherArgs>
-struct extract_signature_from_lambda;
-
 // constructor helper to defer the initialization of dyn_var
 // This allows declaring dyn_var outside the context, but initialize
 // them later
