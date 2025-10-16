@@ -1,54 +1,53 @@
 #include <string.h>
-int match_re (char* arg1) {
-  int var3;
-  int var5;
-  char* var0 = arg1;
-  int var1 = strlen(arg1);
-  int var2 = 0;
-  if (var2 < var1) {
-    if (arg1[var2] == 97) {
-      var2 = var2 + 1;
+int match_re (char* arg0) {
+  int var2;
+  int var4;
+  int var0 = strlen(arg0);
+  int var1 = 0;
+  if (var1 < var0) {
+    if (arg0[var1] == 97) {
+      var1 = var1 + 1;
       label0:
-      if (var2 < var1) {
-        if (var0[var2] == 98) {
-          var2 = var2 + 1;
+      if (var1 < var0) {
+        if (arg0[var1] == 98) {
+          var1 = var1 + 1;
           goto label0;
         } 
-        if (var0[var2] == 99) {
+        if (arg0[var1] == 99) {
           label1:
-          var2 = var2 + 1;
-          if (var2 < var1) {
-            if (var0[var2] == 99) {
+          var1 = var1 + 1;
+          if (var1 < var0) {
+            if (arg0[var1] == 99) {
               goto label1;
             } 
-            if (var0[var2] == 100) {
+            if (arg0[var1] == 100) {
               label2:
-              var2 = var2 + 1;
-              if (var2 < var1) {
-                var3 = 0;
-                return var3;
+              var1 = var1 + 1;
+              if (var1 < var0) {
+                var2 = 0;
+                return var2;
               } 
               return 1;
             } 
-            var3 = 0;
-            return var3;
+            var2 = 0;
+            return var2;
           } 
-          var5 = 0;
-          return var5;
+          var4 = 0;
+          return var4;
         } 
-        if (var0[var2] == 100) {
+        if (arg0[var1] == 100) {
           goto label2;
         } 
-        var3 = 0;
-        return var3;
+        var2 = 0;
+        return var2;
       } 
-      var5 = 0;
-      return var5;
+      var4 = 0;
+      return var4;
     } 
-    var3 = 0;
-    return var3;
+    var2 = 0;
+    return var2;
   } 
-  var5 = 0;
-  return var5;
+  var4 = 0;
+  return var4;
 }
 

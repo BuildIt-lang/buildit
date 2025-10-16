@@ -2,7 +2,7 @@
 #include <stdlib.h>
 void print_value(int x) {printf("%c", x);}
 int get_value(void) {char x; scanf(" %c", &x); return x;}
-int main(int argc, char* argv[]) {
+void main (int arg0, char* arg1[]) {
   int pointer_0 = 0;
   int tape_1[256] = {0};
   tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
@@ -112,3 +112,4 @@ int main(int argc, char* argv[]) {
   tape_1[pointer_0] = (tape_1[pointer_0] + 1) % 256;
   print_value(tape_1[pointer_0]);
 }
+

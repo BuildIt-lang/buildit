@@ -92,7 +92,7 @@ STMT_BLOCK
   void* m_12;
   char n_13[] = "Hello world";
   n_13 = "new string";
-  char const* const volatile o_14 = "Hello world";
+  const char* const volatile o_14 = "Hello world";
   bool p_15 = 1;
   int x_16 = 0;
 }

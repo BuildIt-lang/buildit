@@ -2,6 +2,7 @@
 #define BUILDER_HASH_UTILS_H
 
 #include "util/mtp_utils.h"
+#include <typeinfo>
 
 namespace tracer {
 // Just a hash_combine function

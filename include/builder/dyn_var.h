@@ -129,24 +129,22 @@ public:
 			// dyn_var->preferred_name = utils::find_variable_name(this);
 			return;
 		}
-		assert(builder_context::current_builder_context != nullptr);
-		assert(builder_context::current_builder_context->current_block_stmt != nullptr);
-		builder_context::current_builder_context->commit_uncommitted();
+		get_run_state()->commit_uncommitted();
 		block::var::Ptr dyn_var = std::make_shared<block::var>();
 		dyn_var->var_type = create_block_type();
-		tracer::tag offset = get_offset_in_function();
+		tracer::tag offset = tracer::get_offset_in_function();
 		dyn_var->preferred_name = utils::find_variable_name_cached(this, offset);
 		block_var = dyn_var;
 		dyn_var->static_offset = offset;
 		block_decl_stmt = nullptr;
-		if (builder_context::current_builder_context->bool_vector.size() > 0)
+		if (get_run_state()->is_catching_up())
 			return;
 		block::decl_stmt::Ptr decl_stmt = std::make_shared<block::decl_stmt>();
 		decl_stmt->static_offset = offset;
 		decl_stmt->decl_var = dyn_var;
 		decl_stmt->init_expr = nullptr;
 		block_decl_stmt = decl_stmt;
-		builder_context::current_builder_context->add_stmt_to_current_block(decl_stmt);
+		get_run_state()->add_stmt_to_current_block(decl_stmt, true);
 	}
 
 	dyn_var_impl() {
@@ -170,7 +168,7 @@ public:
 	}
 	// Basic and other constructors
 	dyn_var_impl(const as_global &v) {
-		if (builder_context::current_builder_context == nullptr) {
+		if (!is_under_run()) {
 			create_dyn_var(true);
 			block_var->var_name = v.name;
 			var_name = v.name;
@@ -262,15 +260,18 @@ public:
 	}
 
 	dyn_var_impl(const builder &a) {
-		builder_context::current_builder_context->remove_node_from_sequence(a.block_expr);
+		get_run_state()->remove_node_from_sequence(a.block_expr);
 		create_dyn_var();
-		if (builder_context::current_builder_context->bool_vector.size() > 0)
+		if (get_run_state()->is_catching_up())
 			return;
 		block_decl_stmt->init_expr = a.block_expr;
 	}
 
 	template <typename TO>
 	struct is_builder_constructible {
+		// TODO: Add more checks to is_base_of<static_var_base> to 
+		// make sure it is wrapping a type that is builder_constructible
+		// We could just check if a conversion to (builder) exists
 		static const bool value = std::is_arithmetic<TO>::value 
 		|| std::is_base_of<static_var_base, TO>::value || std::is_base_of<var, TO>::value;
 	};
@@ -283,12 +284,11 @@ public:
 	dyn_var_impl(const char *s) : self_type((builder)(std::string)s) {}
 	dyn_var_impl(char *s) : self_type((builder)(std::string)s) {}
 
-	dyn_var_impl(const std::initializer_list<builder> &_a) {
-		std::vector<builder> a(_a);
 
-		assert(builder_context::current_builder_context != nullptr);
+	void from_builder_vector(std::vector<builder> a) {
+		auto r_state = get_run_state();
 		for (unsigned int i = 0; i < a.size(); i++) {
-			builder_context::current_builder_context->remove_node_from_sequence(a[i].block_expr);
+			r_state->remove_node_from_sequence(a[i].block_expr);
 		}
 		create_dyn_var();
 		if (builder::builder_precheck()) {
@@ -297,7 +297,7 @@ public:
 				block_decl_stmt->init_expr = bt.block_expr;
 			return;
 		}
-		tracer::tag offset = get_offset_in_function();
+		tracer::tag offset = tracer::get_offset_in_function();
 		block::initializer_list_expr::Ptr list_expr = std::make_shared<block::initializer_list_expr>();
 		list_expr->static_offset = offset;
 		for (unsigned int i = 0; i < a.size(); i++) {
@@ -305,6 +305,24 @@ public:
 		}
 		block_decl_stmt->init_expr = list_expr;
 		builder::push_to_sequence(list_expr);
+	}
+
+	dyn_var_impl(const std::initializer_list<builder> &_a) {
+		std::vector<builder> a(_a);
+		from_builder_vector(a);
+	}
+
+	template <typename TO>
+	dyn_var_impl(const std::vector<TO> &_a, 
+		typename std::enable_if<is_builder_constructible<TO>::value>::type*_ = NULL ) {
+
+		std::vector<builder> a;
+		// Create builder nodes for each elements, they would be pushed to sequence 
+		// AND to the uncommitted list
+		for (auto i: _a) {
+			a.emplace_back(i);
+		}
+		from_builder_vector(a);
 	}
 
 	virtual ~dyn_var_impl() = default;
@@ -502,7 +520,7 @@ public:
 		// so we can manually construct here. This allows to properly 
 		// handle init_expr
 		if (wt.init_expr)
-			builder_context::current_builder_context->remove_node_from_sequence(wt.init_expr);
+			get_run_state()->remove_node_from_sequence(wt.init_expr);
 		create_dyn_var();
 		block_var->var_type = wt.t.enclosed_type;
 		if (block_decl_stmt) 

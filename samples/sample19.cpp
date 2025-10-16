@@ -8,7 +8,7 @@ using builder::dyn_var;
 // A simple straight line code that uses lambda instead of function
 int main(int argc, char *argv[]) {
 	builder::builder_context context;
-	auto ast = context.extract_ast_from_lambda([=](void) {
+	auto ast = context.extract_ast_from_function([=](void) {
 		dyn_var<int> a;
 		dyn_var<int> b;
 		dyn_var<int> c;

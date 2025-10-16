@@ -26,36 +26,24 @@ std::vector<block::expr::Ptr> extract_call_arguments_helper(const arg_types &...
 
 class builder {
 
-	typedef builder BT;
-
 public:
 	// All members here
 	block::expr::Ptr block_expr;
 
-	typedef builder super;
-
 	// All the costructors and copy constructors to the top
-
 	// Simple constrcutor, should only be used inside the operator
 	// and set the block_expr immediately
 	builder() = default;
 	// Copy constructor from another builder
-	builder(const BT &other) {
+	builder(const builder &other) {
 		block_expr = other.block_expr;
 	}
 
 	static bool builder_precheck(void) {
-		assert(builder_context::current_builder_context != nullptr);
-		builder_context *ctx = builder_context::current_builder_context;
-		if (builder_context::current_builder_context->bool_vector.size() > 0) {
-			assert(ctx->expr_counter < ctx->expr_sequence.size());
-			return true;
-		}
-		return false;
+		return get_run_state()->is_catching_up();
 	}
 	void builder_from_sequence(void) {
-		builder_context *ctx = builder_context::current_builder_context;
-		block_expr = ctx->expr_sequence[ctx->expr_counter++];
+		block_expr = get_run_state()->get_next_cached_expr();
 	}
 	static builder create_builder_from_sequence(void) {
 		builder ret_builder;
@@ -63,8 +51,7 @@ public:
 		return ret_builder;
 	}
 	static void push_to_sequence(block::expr::Ptr a) {
-		builder_context *ctx = builder_context::current_builder_context;
-		ctx->expr_sequence.push_back(a);
+		get_run_state()->add_to_cached_expr(a);
 	}
 	builder(const unsigned int &a) : builder((int)a) {}
 
@@ -75,11 +62,11 @@ public:
 		}
 
 		block::int_const::Ptr int_const = std::make_shared<block::int_const>();
-		tracer::tag offset = get_offset_in_function();
+		tracer::tag offset = tracer::get_offset_in_function();
 		int_const->static_offset = offset;
 		int_const->value = a;
 		int_const->is_64bit = false;
-		builder_context::current_builder_context->add_node_to_sequence(int_const);
+		get_run_state()->add_node_to_sequence(int_const);
 		block_expr = int_const;
 
 		push_to_sequence(block_expr);
@@ -92,11 +79,11 @@ public:
 		}
 
 		block::int_const::Ptr int_const = std::make_shared<block::int_const>();
-		tracer::tag offset = get_offset_in_function();
+		tracer::tag offset = tracer::get_offset_in_function();
 		int_const->static_offset = offset;
 		int_const->value = a;
 		int_const->is_64bit = true;
-		builder_context::current_builder_context->add_node_to_sequence(int_const);
+		get_run_state()->add_node_to_sequence(int_const);
 		block_expr = int_const;
 
 		push_to_sequence(block_expr);
@@ -112,10 +99,10 @@ public:
 		}
 
 		block::double_const::Ptr double_const = std::make_shared<block::double_const>();
-		tracer::tag offset = get_offset_in_function();
+		tracer::tag offset = tracer::get_offset_in_function();
 		double_const->static_offset = offset;
 		double_const->value = a;
-		builder_context::current_builder_context->add_node_to_sequence(double_const);
+		get_run_state()->add_node_to_sequence(double_const);
 		block_expr = double_const;
 
 		push_to_sequence(block_expr);
@@ -127,10 +114,10 @@ public:
 		}
 
 		block::float_const::Ptr float_const = std::make_shared<block::float_const>();
-		tracer::tag offset = get_offset_in_function();
+		tracer::tag offset = tracer::get_offset_in_function();
 		float_const->static_offset = offset;
 		float_const->value = a;
-		builder_context::current_builder_context->add_node_to_sequence(float_const);
+		get_run_state()->add_node_to_sequence(float_const);
 		block_expr = float_const;
 
 		push_to_sequence(block_expr);
@@ -145,10 +132,10 @@ public:
 		}
 
 		block::string_const::Ptr string_const = std::make_shared<block::string_const>();
-		tracer::tag offset = get_offset_in_function();
+		tracer::tag offset = tracer::get_offset_in_function();
 		string_const->static_offset = offset;
 		string_const->value = s;
-		builder_context::current_builder_context->add_node_to_sequence(string_const);
+		get_run_state()->add_node_to_sequence(string_const);
 		block_expr = string_const;
 
 		push_to_sequence(block_expr);
@@ -165,33 +152,33 @@ public:
 
 	// Other basic functions
 	template <typename T>
-	BT builder_unary_op() const {
+	builder builder_unary_op() const {
 		if (builder_precheck()) {
 			return create_builder_from_sequence();
 		}
-		builder_context::current_builder_context->remove_node_from_sequence(block_expr);
-		tracer::tag offset = get_offset_in_function();
+		get_run_state()->remove_node_from_sequence(block_expr);
+		tracer::tag offset = tracer::get_offset_in_function();
 
 		typename T::Ptr expr = std::make_shared<T>();
 		expr->static_offset = offset;
 		expr->expr1 = block_expr;
-		builder_context::current_builder_context->add_node_to_sequence(expr);
+		get_run_state()->add_node_to_sequence(expr);
 
-		BT ret_builder;
+		builder ret_builder;
 		ret_builder.block_expr = expr;
 		push_to_sequence(expr);
 		return ret_builder;
 	}
 
 	template <typename T>
-	BT builder_binary_op(const builder &a) const {
+	builder builder_binary_op(const builder &a) const {
 		if (builder_precheck()) {
 			return create_builder_from_sequence();
 		}
-		builder_context::current_builder_context->remove_node_from_sequence(block_expr);
-		builder_context::current_builder_context->remove_node_from_sequence(a.block_expr);
+		get_run_state()->remove_node_from_sequence(block_expr);
+		get_run_state()->remove_node_from_sequence(a.block_expr);
 
-		tracer::tag offset = get_offset_in_function();
+		tracer::tag offset = tracer::get_offset_in_function();
 
 		typename T::Ptr expr = std::make_shared<T>();
 		expr->static_offset = offset;
@@ -199,22 +186,22 @@ public:
 		expr->expr1 = block_expr;
 		expr->expr2 = a.block_expr;
 
-		builder_context::current_builder_context->add_node_to_sequence(expr);
+		get_run_state()->add_node_to_sequence(expr);
 
-		BT ret_builder;
+		builder ret_builder;
 		ret_builder.block_expr = expr;
 		push_to_sequence(expr);
 		return ret_builder;
 	}
 
-	BT operator[](const BT &a) {
+	builder operator[](const builder &a) {
 		if (builder_precheck()) {
 			return create_builder_from_sequence();
 		}
-		builder_context::current_builder_context->remove_node_from_sequence(block_expr);
-		builder_context::current_builder_context->remove_node_from_sequence(a.block_expr);
+		get_run_state()->remove_node_from_sequence(block_expr);
+		get_run_state()->remove_node_from_sequence(a.block_expr);
 
-		tracer::tag offset = get_offset_in_function();
+		tracer::tag offset = tracer::get_offset_in_function();
 		// assert(offset != -1);
 
 		block::sq_bkt_expr::Ptr expr = std::make_shared<block::sq_bkt_expr>();
@@ -223,27 +210,27 @@ public:
 		expr->var_expr = block_expr;
 		expr->index = a.block_expr;
 
-		builder_context::current_builder_context->add_node_to_sequence(expr);
+		get_run_state()->add_node_to_sequence(expr);
 
-		BT ret_builder;
+		builder ret_builder;
 		ret_builder.block_expr = expr;
 		push_to_sequence(expr);
 		return ret_builder;
 	}
-	BT operator*(void) {
+	builder operator*(void) {
 		auto b = (*this)[0];
 		b.block_expr->template setMetadata<bool>("deref_is_star", true);
 		return b;
 	}
 
-	BT assign(const BT &a) {
+	builder assign(const builder &a) {
 		if (builder_precheck()) {
 			return create_builder_from_sequence();
 		}
 
-		builder_context::current_builder_context->remove_node_from_sequence(block_expr);
-		builder_context::current_builder_context->remove_node_from_sequence(a.block_expr);
-		tracer::tag offset = get_offset_in_function();
+		get_run_state()->remove_node_from_sequence(block_expr);
+		get_run_state()->remove_node_from_sequence(a.block_expr);
+		tracer::tag offset = tracer::get_offset_in_function();
 
 		block::assign_expr::Ptr expr = std::make_shared<block::assign_expr>();
 		expr->static_offset = offset;
@@ -251,54 +238,43 @@ public:
 		expr->var1 = block_expr;
 		expr->expr1 = a.block_expr;
 
-		builder_context::current_builder_context->add_node_to_sequence(expr);
+		get_run_state()->add_node_to_sequence(expr);
 
-		BT ret_builder;
+		builder ret_builder;
 		ret_builder.block_expr = expr;
 		push_to_sequence(expr);
 		return ret_builder;
 	}
-	BT operator=(const BT &a) {
+	builder operator=(const builder &a) {
 		return assign(a);
 	}
 
 	explicit operator bool() {
-		builder_context::current_builder_context->commit_uncommitted();
-		return get_next_bool_from_context(builder_context::current_builder_context, block_expr);
+		get_run_state()->commit_uncommitted();
+		return get_run_state()->get_next_bool(block_expr);
 	}
 
 	template <typename... arg_types>
-	BT operator()(const arg_types &...args) {
+	builder operator()(const arg_types &...args) {
 		if (builder_precheck()) {
 			return create_builder_from_sequence();
 		}
 
-		builder_context::current_builder_context->remove_node_from_sequence(block_expr);
-		tracer::tag offset = get_offset_in_function();
+		get_run_state()->remove_node_from_sequence(block_expr);
+		tracer::tag offset = tracer::get_offset_in_function();
 
 		block::function_call_expr::Ptr expr = std::make_shared<block::function_call_expr>();
 		expr->static_offset = offset;
 
 		expr->expr1 = block_expr;
-		expr->args = extract_call_arguments<BT>(args...);
+		expr->args = extract_call_arguments<builder>(args...);
 		std::reverse(expr->args.begin(), expr->args.end());
-		builder_context::current_builder_context->add_node_to_sequence(expr);
+		get_run_state()->add_node_to_sequence(expr);
 
-		BT ret_builder;
+		builder ret_builder;
 		ret_builder.block_expr = expr;
 		push_to_sequence(expr);
 		return ret_builder;
-	}
-
-	template <typename T>
-	void construct_builder_from_foreign_expr(const T &t) {
-		if (builder_precheck()) {
-			builder_from_sequence();
-			return;
-		}
-
-		block_expr = create_foreign_expr(t);
-		push_to_sequence(block_expr);
 	}
 
 };
@@ -323,8 +299,7 @@ extract_call_arguments_helper(const T &first_arg, const arg_types &...rest_args)
 
 template <typename BT, typename... arg_types>
 std::vector<block::expr::Ptr> extract_call_arguments_helper(const BT &first_arg, const arg_types &...rest_args) {
-	assert(builder_context::current_builder_context != nullptr);
-	builder_context::current_builder_context->remove_node_from_sequence(first_arg.block_expr);
+	get_run_state()->remove_node_from_sequence(first_arg.block_expr);
 
 	std::vector<block::expr::Ptr> rest = extract_call_arguments_helper<BT>(rest_args...);
 	rest.push_back(first_arg.block_expr);
@@ -334,30 +309,6 @@ std::vector<block::expr::Ptr> extract_call_arguments_helper(const BT &first_arg,
 template <typename BT, typename... arg_types>
 std::vector<block::expr::Ptr> extract_call_arguments(const arg_types &...args) {
 	return extract_call_arguments_helper<BT>(args...);
-}
-
-// Helper functions to create foreign expressions of arbitrary types
-// Theses should be only called from the function to cast the type to builder classes
-template <typename T>
-block::expr::Ptr create_foreign_expr(const T t) {
-	assert(builder_context::current_builder_context != nullptr);
-	tracer::tag offset = get_offset_in_function();
-	typename block::foreign_expr<T>::Ptr expr = std::make_shared<block::foreign_expr<T>>();
-	expr->static_offset = offset;
-	expr->inner_expr = t;
-	builder_context::current_builder_context->add_node_to_sequence(expr);
-	return expr;
-}
-
-template <typename BT, typename T>
-BT create_foreign_expr_builder(const T t) {
-	if (builder::builder_precheck()) {
-		return builder::create_builder_from_sequence();
-	}
-	BT ret_builder;
-	ret_builder.block_expr = create_foreign_expr(t);
-	builder::push_to_sequence(ret_builder.block_expr);
-	return ret_builder;
 }
 
 } // namespace builder

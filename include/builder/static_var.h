@@ -40,7 +40,7 @@ public:
 	mutable bool name_checked = false;
 
 	void try_get_name() const {
-		if (builder_context::current_builder_context->enable_d2x == false)
+		if (get_builder_context()->enable_d2x == false)
 			return;
 		if (var_name == "" && name_checked == false) {
 			var_name = utils::find_variable_name(const_cast<void *>(static_cast<const void *>(this)));
@@ -84,13 +84,11 @@ public:
 		return t;
 	}
 	static_var() {
-		assert(builder_context::current_builder_context != nullptr);
-		builder_context::current_builder_context->static_var_tuples.push_back(this);
+		get_run_state()->static_var_tuples.push_back(this);
 		try_get_name();
 	}
 	static_var(const T &v) {
-		assert(builder_context::current_builder_context != nullptr);
-		builder_context::current_builder_context->static_var_tuples.push_back(this);
+		get_run_state()->static_var_tuples.push_back(this);
 		val = v;
 		try_get_name();
 	}
@@ -100,13 +98,12 @@ public:
 		is_deferred = true;
 	}
 	void deferred_init(void) {
-		assert(builder_context::current_builder_context != nullptr);
 		// Deferred static variables are kept separate because they are never untracked
 		// in the destructor
 		// Even though the usual static vars can be destroyed out of order, these might create
 		// unncessary bubbles in the queue
 		// TODO: Consider merging these two
-		builder_context::current_builder_context->deferred_static_var_tuples.push_back(this);
+		get_run_state()->deferred_static_var_tuples.push_back(this);
 		try_get_name();
 	}
 
@@ -116,9 +113,10 @@ public:
 			return;
 		}
 
-		assert(builder_context::current_builder_context != nullptr);
-		assert(builder_context::current_builder_context->static_var_tuples.size() > 0);
+		auto r_state = get_run_state();
 
+		assert(r_state->static_var_tuples.size() > 0);
+		
 		/* Instead of assuming that the last variable is the static_var we are destroying,
 		   we find the appropriate one, remove it and replace it with nullptr. During tag creation
 		   nullptrs are handled properly
@@ -128,18 +126,18 @@ public:
 		This allows out of order destruction while still maintaining good static tags */
 		
 		int index = -1;
-		for (int i = builder_context::current_builder_context->static_var_tuples.size() - 1; i >= 0; i--) {
-			if (builder_context::current_builder_context->static_var_tuples[i] == this) {
+		for (int i = r_state->static_var_tuples.size() - 1; i >= 0; i--) {
+			if (r_state->static_var_tuples[i] == this) {
 				index = i;
-				builder_context::current_builder_context->static_var_tuples[i] = nullptr;
+				r_state->static_var_tuples[i] = nullptr;
 				break;
 			}
 		}
 		assert(index != -1 && "Static variable to destroy not valid");
 
-		while (!builder_context::current_builder_context->static_var_tuples.empty() 
-			&& builder_context::current_builder_context->static_var_tuples.back() == nullptr) {
-			builder_context::current_builder_context->static_var_tuples.pop_back();
+		while (!r_state->static_var_tuples.empty() 
+			&& r_state->static_var_tuples.back() == nullptr) {
+			r_state->static_var_tuples.pop_back();
 		}
 		
 	}
@@ -178,19 +176,17 @@ public:
 	}
 	static_var() {
 		var_name = "ArrayVar";
-		assert(builder_context::current_builder_context != nullptr);
 		// This val _should_ not be used. But we will insert it to hold place
 		// for this static var in the list of tuples, otherwise destructor order will be weird
 		val = new T[1];
 		actual_size = 1;
-		builder_context::current_builder_context->static_var_tuples.push_back(this);
+		get_run_state()->static_var_tuples.push_back(this);
 	}
 	static_var(const std::initializer_list<T> &list) {
 		var_name = "ArrayVar";
-		assert(builder_context::current_builder_context != nullptr);
 		val = new T[list.size()];
 		actual_size = list.size();
-		builder_context::current_builder_context->static_var_tuples.push_back(this);
+		get_run_state()->static_var_tuples.push_back(this);
 		for (int i = 0; i < list.size(); i++) {
 			val[i] = list[i];
 		}
@@ -201,24 +197,24 @@ public:
 		delete[] val;
 		val = new_ptr;
 		actual_size = s;
-		// tracking tuples dont' need to be changed anymore
+		// tracking tuples dont' need to be changed anymore since we are tracking the static_var itself
 	}
 	~static_var() {
-		assert(builder_context::current_builder_context != nullptr);
-		assert(builder_context::current_builder_context->static_var_tuples.size() > 0);
+		auto r_state = get_run_state();
+		assert(r_state->static_var_tuples.size() > 0);
 		int index = -1;
-		for (int i = builder_context::current_builder_context->static_var_tuples.size() - 1; i >= 0; i--) {
-			if (builder_context::current_builder_context->static_var_tuples[i] == this) {
+		for (int i = r_state->static_var_tuples.size() - 1; i >= 0; i--) {
+			if (r_state->static_var_tuples[i] == this) {
 				index = i;
-				builder_context::current_builder_context->static_var_tuples[i] = nullptr;
+				r_state->static_var_tuples[i] = nullptr;
 				break;
 			}
 		}
 		assert(index != -1 && "Static variable to destroy not valid");
 
-		while (!builder_context::current_builder_context->static_var_tuples.empty() 
-			&& builder_context::current_builder_context->static_var_tuples.back() == nullptr) {
-			builder_context::current_builder_context->static_var_tuples.pop_back();
+		while (!r_state->static_var_tuples.empty() 
+			&& r_state->static_var_tuples.back() == nullptr) {
+			r_state->static_var_tuples.pop_back();
 		}
 		delete[] val;
 	}
