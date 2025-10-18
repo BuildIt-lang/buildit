@@ -41,7 +41,7 @@ tag get_offset_in_function(void) {
 			continue;
 		}
 		new_tag.static_var_snapshots.push_back(tuple->snapshot());
-		if (get_builder_context()->enable_d2x) {
+		if (builder::get_builder_context()->enable_d2x) {
 			new_tag.static_var_key_values.push_back({tuple->var_name, tuple->serialize()});
 		}
 	}
@@ -51,7 +51,7 @@ tag get_offset_in_function(void) {
 			continue;
 		}
 		new_tag.static_var_snapshots.push_back(tuple->snapshot());
-		if (get_builder_context()->enable_d2x) {
+		if (builder::get_builder_context()->enable_d2x) {
 			new_tag.static_var_key_values.push_back({tuple->var_name, tuple->serialize()});
 		}
 	}

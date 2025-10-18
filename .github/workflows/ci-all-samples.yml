@@ -11,6 +11,16 @@ jobs:
           submodules: recursive
       - run: sudo apt-get install g++
       - run: make -C ${{ github.workspace }} -j$(nproc) run
+      - run: echo "Tests completed"
+  CI-Actions-Ubuntu-VarNames:
+    runs-on: ubuntu-22.04
+    steps:
+      - run: echo "Starting tests"
+      - name: Checking out repository
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - run: sudo apt-get install g++
       - name: Install libunwind-dev
         run: sudo apt-get install libunwind-dev libdwarf-dev libdwarf1
       - run: make -C ${{ github.workspace }} RECOVER_VAR_NAMES=1 -j$(nproc) run
