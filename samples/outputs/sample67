@@ -1,0 +1,11 @@
+void bar (void) {
+  _Pragma("omp parallel for")
+  for (int var0 = 0; var0 < 10; var0 = var0 + 1) {
+    int var1 = 0;
+    _Pragma("unroll")
+    for (int var2 = 0; var2 < 15; var2 = var2 + 1) {
+      var1 = var1 + var2;
+    }
+  }
+}
+

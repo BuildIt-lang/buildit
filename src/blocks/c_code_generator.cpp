@@ -171,6 +171,7 @@ void c_code_generator::visit(assign_expr::Ptr a) {
 	oss << " = ";
 	a->expr1->accept(this);
 }
+
 void c_code_generator::visit(expr_stmt::Ptr a) {
 	a->expr1->accept(this);
 	oss << ";";
@@ -180,11 +181,24 @@ void c_code_generator::visit(expr_stmt::Ptr a) {
 		oss << s << " ";
 	}
 }
+
+void c_code_generator::print_pragma(stmt::Ptr s) {
+	static std::string pragma_prefix ("pragma: ");
+	for (auto a: s->annotation) {
+		if (!a.compare(0, pragma_prefix.size(), pragma_prefix)) {
+			std::string pragma_value = a.substr(pragma_prefix.size());
+			printer::indent(oss, curr_indent);
+			oss << "_Pragma(\"" << pragma_value << "\")" << std::endl;
+		}
+	}
+}
+
 void c_code_generator::visit(stmt_block::Ptr a) {
 	oss << "{";
 	nextl();
 	curr_indent += 1;
 	for (auto stmt : a->stmts) {
+		print_pragma(stmt);
 		printer::indent(oss, curr_indent);
 		stmt->accept(this);
 		save_static_info(stmt);
