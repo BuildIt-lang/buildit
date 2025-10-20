@@ -89,6 +89,8 @@ public:
 	virtual void visit(goto_stmt::Ptr);
 	virtual void visit(label_stmt::Ptr);
 
+	void print_pragma(stmt::Ptr);
+
 	static void generate_code(block::Ptr ast, std::ostream &oss, int indent = 0, bool decl_only = false) {
 		c_code_generator generator(oss);
 		generator.decl_only = decl_only;
