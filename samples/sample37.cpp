@@ -16,6 +16,20 @@ static void bar(dyn_var<int *> buffer) {
 			buffer[thread_id] = 0;
 		}
 	}
+	builder::annotate(CUDA_KERNEL_COOP);
+	for (dyn_var<int> cta = 0; cta < 128; cta = cta + 1) {
+		for (dyn_var<int> tid = 0; tid < 512; tid = tid + 1) {
+			dyn_var<int> thread_id = cta * 512 + tid;
+			buffer[thread_id] = 0;
+		}
+	}
+	builder::annotate(CUDA_KERNEL_COOP_COPY_OUT);
+	for (dyn_var<int> cta = 0; cta < 128; cta = cta + 1) {
+		for (dyn_var<int> tid = 0; tid < 512; tid = tid + 1) {
+			dyn_var<int> thread_id = cta * 512 + tid;
+			buffer[thread_id] = 0;
+		}
+	}
 }
 
 int main(int argc, char *argv[]) {
