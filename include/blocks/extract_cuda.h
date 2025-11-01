@@ -12,6 +12,7 @@
 
 #define CUDA_KERNEL "kernel:cuda:auto"
 #define CUDA_KERNEL_COOP "kernel:cuda:coop"
+#define CUDA_KERNEL_COOP_COPY_OUT "kernel:cuda:coop:copy_out"
 
 namespace block {
 

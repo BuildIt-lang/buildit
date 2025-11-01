@@ -56,11 +56,16 @@ block::Ptr extract_single_cuda(block::Ptr from, std::vector<decl_stmt::Ptr> &new
 	}
 
 	int is_coop = 0;
+	int is_copy_out = 0;
 	stmt::Ptr found_loop = annotation_finder::find_annotation(from, CUDA_KERNEL);
 	if (found_loop == nullptr) {
 		found_loop = annotation_finder::find_annotation(from, CUDA_KERNEL_COOP);
 		if (found_loop == nullptr) {
-			return nullptr;
+			found_loop = annotation_finder::find_annotation(from, CUDA_KERNEL_COOP_COPY_OUT);
+			if (found_loop == nullptr) {
+				return nullptr;
+			}
+			is_copy_out = 1;
 		}
 		is_coop = 1;
 	}
@@ -92,7 +97,7 @@ block::Ptr extract_single_cuda(block::Ptr from, std::vector<decl_stmt::Ptr> &new
 	int this_kern_index = total_created_kernels;
 	total_created_kernels++;
 	std::vector<var::Ptr> ret_vars;
-	if (is_coop) {
+	if (is_coop && is_copy_out) {
 		// If this is coop, we will create some extra decls to return the copied values
 		int i = 0;
 		for (auto v : vars) {
@@ -210,7 +215,7 @@ block::Ptr extract_single_cuda(block::Ptr from, std::vector<decl_stmt::Ptr> &new
 
 	// If this is a coop kernel, return the values
 	std::vector<stmt::Ptr> copy_backs;
-	if (is_coop) {
+	if (is_coop && is_copy_out) {
 		auto if_s = std::make_shared<if_stmt>();
 		auto nvar = std::make_shared<var>();
 		nvar->var_type = builder::dyn_var<int>::create_block_type();
