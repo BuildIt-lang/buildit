@@ -1,16 +1,16 @@
 void __global__ cuda_kernel_0 (int* arg0) {
-  int thread_id_2 = (blockIdx.x * 512) + threadIdx.x;
+  int thread_id_2 = blockIdx.x * 512 + threadIdx.x;
   arg0[thread_id_2] = 0;
 }
 
 void __global__ cuda_kernel_1 (int* arg0) {
-  int thread_id_5 = (blockIdx.x * 512) + threadIdx.x;
+  int thread_id_5 = blockIdx.x * 512 + threadIdx.x;
   arg0[thread_id_5] = 0;
 }
 
 char ret_2_0[sizeof(int*)] __device__;
 void __global__ cuda_kernel_2 (int* arg0) {
-  int thread_id_8 = (blockIdx.x * 512) + threadIdx.x;
+  int thread_id_8 = blockIdx.x * 512 + threadIdx.x;
   arg0[thread_id_8] = 0;
   if (!(blockIdx.x * blockDim.x + threadIdx.x)) {
     runtime::cudaMemcpyToSymbolMagic(ret_2_0, arg0);
@@ -24,6 +24,6 @@ void bar (int* arg0) {
   cudaDeviceSynchronize();
   runtime::LaunchCooperativeKernel((void*)cuda_kernel_2, 128, 512, arg0);
   cudaDeviceSynchronize();
-  runtime::cudaMemcpyFromSymbolMagic((&(arg0)), ret_2_0);
+  runtime::cudaMemcpyFromSymbolMagic(&arg0, ret_2_0);
 }
 

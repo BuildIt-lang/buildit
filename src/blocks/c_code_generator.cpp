@@ -42,45 +42,85 @@ void c_code_generator::nextl(void) {
 
 #endif
 
+
+struct precedence_t {
+	int pred;
+	bool is_left_assoc;	
+};
+
+static precedence_t get_operator_precedence(expr::Ptr a) {
+	// expressions that have no precedence 
+	if (isa<var_expr>(a) || isa<const_expr>(a)) 
+		return {0, true};
+
+	if (isa<function_call_expr>(a) || isa<sq_bkt_expr>(a) || isa<member_access_expr>(a)) {
+		return {2, true};	
+	} else if (isa<unary_minus_expr>(a) || isa<not_expr>(a) || isa<bitwise_not_expr>(a) || isa<addr_of_expr>(a)) {
+		return {3, false};
+	} else if (isa<mul_expr>(a) || isa<div_expr>(a) || isa<mod_expr>(a)) {
+		return {5, true};
+	} else if (isa<plus_expr>(a) || isa<minus_expr>(a)) {
+		return {6, true};
+	} else if (isa<lshift_expr>(a) || isa<rshift_expr>(a)) {
+		return {7, true};
+	} else if (isa<lt_expr>(a) || isa<lte_expr>(a) || isa<gt_expr>(a) || isa<gte_expr>(a)) {
+		return {9, true};
+	} else if (isa<equals_expr>(a) || isa<ne_expr>(a)) {
+		return {10, true};
+	} else if (isa<bitwise_and_expr>(a)) {
+		return {11, true};
+	} else if (isa<bitwise_xor_expr>(a)) {
+		return {12, true};
+	} else if (isa<bitwise_or_expr>(a)) {
+		return {13, true};
+	} else if (isa<and_expr>(a)) {
+		return {14, true};
+	} else if (isa<or_expr>(a)) {
+		return {15, true};
+	} else if (isa<assign_expr>(a)) {
+		return {16, false};
+	}
+	assert(false && "Invalid operator for precedence");
+}
+
+// Determine if bracket should be added around the child
+static bool expr_needs_bracket(expr::Ptr parent, expr::Ptr child, bool is_left) {
+	precedence_t pp = get_operator_precedence(parent);
+	precedence_t pc = get_operator_precedence(child);
+	if (pc.pred > pp.pred) return true;
+	if (pc.pred < pp.pred) return false;
+	// equal case
+	if (pc.is_left_assoc == is_left) return false;
+	return true;
+}
+
+void c_code_generator::handle_child(expr::Ptr parent, expr::Ptr child, bool is_left) {
+	bool bracket = expr_needs_bracket(parent, child, is_left);
+	if (bracket) oss << "(";
+	child->accept(this);
+	if (bracket) oss << ")";
+}
+
+
 void c_code_generator::visit(not_expr::Ptr a) {
-	oss << "!(";
-	a->expr1->accept(this);
-	oss << ")";
+	oss << "!";
+	handle_child(a, a->expr1, false);
 }
 
 void c_code_generator::visit(unary_minus_expr::Ptr a) {
-	oss << "-(";
-	a->expr1->accept(this);
-	oss << ")";
+	oss << "-";
+	handle_child(a, a->expr1, false);
 }
 
 void c_code_generator::visit(bitwise_not_expr::Ptr a) {
-	oss << "~(";
-	a->expr1->accept(this);
-	oss << ")";
+	oss << "~";
+	handle_child(a, a->expr1, false);
 }
 
-static bool expr_needs_bracket(expr::Ptr a) {
-	if (isa<binary_expr>(a))
-		return true;
-	else if (isa<assign_expr>(a))
-		return true;
-	return false;
-}
 void c_code_generator::emit_binary_expr(binary_expr::Ptr a, std::string character) {
-	if (expr_needs_bracket(a->expr1)) {
-		oss << "(";
-		a->expr1->accept(this);
-		oss << ")";
-	} else
-		a->expr1->accept(this);
+	handle_child(a, a->expr1, true);
 	oss << " " << character << " ";
-	if (expr_needs_bracket(a->expr2)) {
-		oss << "(";
-		a->expr2->accept(this);
-		oss << ")";
-	} else
-		a->expr2->accept(this);
+	handle_child(a, a->expr2, false);
 }
 void c_code_generator::visit(and_expr::Ptr a) {
 	emit_binary_expr(a, "&&");
@@ -161,15 +201,9 @@ void c_code_generator::visit(string_const::Ptr a) {
 	oss << "\"" << a->value << "\"";
 }
 void c_code_generator::visit(assign_expr::Ptr a) {
-	if (expr_needs_bracket(a->var1)) {
-		oss << "(";
-		a->var1->accept(this);
-		oss << ")";
-	} else
-		a->var1->accept(this);
-
+	handle_child(a, a->var1, true);
 	oss << " = ";
-	a->expr1->accept(this);
+	handle_child(a, a->expr1, false);
 }
 
 void c_code_generator::visit(expr_stmt::Ptr a) {
@@ -452,27 +486,17 @@ void c_code_generator::visit(continue_stmt::Ptr a) {
 	oss << "continue;";
 }
 void c_code_generator::visit(sq_bkt_expr::Ptr a) {
-	if (expr_needs_bracket(a->var_expr)) {
-		oss << "(";
-	}
-	a->var_expr->accept(this);
-	if (expr_needs_bracket(a->var_expr)) {
-		oss << ")";
-	}
+	handle_child(a, a->var_expr, true);
 	oss << "[";
+	// index never needs to be bracketed no matter what
 	a->index->accept(this);
 	oss << "]";
 }
 void c_code_generator::visit(function_call_expr::Ptr a) {
-	if (expr_needs_bracket(a->expr1)) {
-		oss << "(";
-	}
-	a->expr1->accept(this);
-	if (expr_needs_bracket(a->expr1)) {
-		oss << ")";
-	}
+	handle_child(a, a->expr1, true);
 	oss << "(";
 	for (unsigned int i = 0; i < a->args.size(); i++) {
+		// We don't have a comma operator, so we dont need brackets
 		a->args[i]->accept(this);
 		if (i != a->args.size() - 1)
 			oss << ", ";
@@ -482,25 +506,12 @@ void c_code_generator::visit(function_call_expr::Ptr a) {
 void c_code_generator::visit(initializer_list_expr::Ptr a) {
 	oss << "{";
 	for (unsigned int i = 0; i < a->elems.size(); i++) {
+		// We don't have a comma operator, so we dont need brackets
 		a->elems[i]->accept(this);
 		if (i != a->elems.size() - 1)
 			oss << ", ";
 	}
 	oss << "}";
-}
-void c_code_generator::handle_func_arg(var::Ptr a) {
-	function_type::Ptr type = to<function_type>(a->var_type);
-	type->return_type->accept(this);
-	oss << " (*";
-	oss << a->var_name;
-	oss << ")(";
-	for (unsigned int i = 0; i < type->arg_types.size(); i++) {
-		type->arg_types[i]->accept(this);
-		if (i != type->arg_types.size() - 1)
-			oss << ", ";
-	}
-	oss << ")";
-	return;
 }
 void c_code_generator::visit(func_decl::Ptr a) {
 
@@ -590,13 +601,7 @@ void c_code_generator::visit(member_access_expr::Ptr a) {
 			if (isa<int_const>(parent->index)) {
 				auto index = to<int_const>(parent->index);
 				if (index->value == 0) {
-					if (!isa<var_expr>(parent->var_expr)) {
-						oss << "(";
-					}
-					parent->var_expr->accept(this);
-					if (!isa<var_expr>(parent->var_expr)) {
-						oss << ")";
-					}
+					handle_child(a, parent->var_expr, true);
 					oss << "->" << a->member_name;
 					return;
 				}
@@ -604,17 +609,12 @@ void c_code_generator::visit(member_access_expr::Ptr a) {
 		}
 	}
 
-	if (!isa<var_expr>(a->parent_expr))
-		oss << "(";
-	a->parent_expr->accept(this);
-	if (!isa<var_expr>(a->parent_expr))
-		oss << ")";
 
+	handle_child(a, a->parent_expr, true);
 	oss << "." << a->member_name;
 }
 void c_code_generator::visit(addr_of_expr::Ptr a) {
-	oss << "(&(";
-	a->expr1->accept(this);
-	oss << "))";
+	oss << "&";
+	handle_child(a, a->expr1, false);
 }
 } // namespace block

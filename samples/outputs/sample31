@@ -28,7 +28,7 @@ FUNC_DECL (func1)
       VAR_EXPR
         VAR (var1)
 int func1 (foo arg0) {
-  foo var0 = (3 + arg0.var1) + (5 * arg0.var1);
+  foo var0 = 3 + arg0.var1 + 5 * arg0.var1;
   int var1 = var0.neighbor + 2;
   return var1;
 }

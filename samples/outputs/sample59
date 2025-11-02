@@ -24,6 +24,6 @@ FUNC_DECL (bar)
 void bar (void) {
   std::vector<std::vector<int>> var0;
   var0.resize(2);
-  (var0[0]).resize(1);
+  var0[0].resize(1);
 }
 

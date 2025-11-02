@@ -108,6 +108,6 @@ void my_bar (void) {
   FooT* var5;
   var5->member = var4.my_member;
   var5->member = 0;
-  (var5[3]).member = 0;
+  var5[3].member = 0;
 }
 

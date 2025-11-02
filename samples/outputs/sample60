@@ -16,7 +16,7 @@ void bar (void) {
   } else {
     var12 = var4;
   }
-  int* var14 = (&(var0));
+  int* var14 = &var0;
   var14[0] = 0;
 }
 

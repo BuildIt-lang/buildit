@@ -91,21 +91,21 @@ public:
 
 
 	template <typename... types>
-	builder operator()(const types &...args) {
+	builder operator()(const types &...args) const {
 		return ((builder) * this)(args...);
 	}
 
 	// These three need to be defined inside the class, cannot be defined globally
-	builder operator[](const builder &a) {
+	builder operator[](const builder &a) const {
 		return ((builder) * this)[a];
 	}
-	builder operator*(void) {
+	builder operator*(void) const {
 		return *((builder) * this);
 	}
-	builder operator!() {
+	builder operator!() const {
 		return !(builder) * this;
 	}
-	operator bool() {
+	operator bool() const {
 		return (bool)(builder) * this;
 	}
 
@@ -332,6 +332,10 @@ public:
 	dyn_var<T> *addr(void) {
 		// TODO: Consider using dynamic_cast here
 		return (dyn_var<T> *)this;
+	}
+	const dyn_var<T> *addr(void) const {
+		// TODO: Consider using dynamic_cast here
+		return (const dyn_var<T> *)this;
 	}
 };
 

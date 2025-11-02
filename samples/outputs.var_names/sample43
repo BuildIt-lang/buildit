@@ -37,7 +37,7 @@ void foo (void) {
   int var28;
   int* var29;
   var28 = 0;
-  var21 = (&(var22));
+  var21 = &var22;
   int var30 = var20;
   int* var31 = var21;
   int var32 = var22;

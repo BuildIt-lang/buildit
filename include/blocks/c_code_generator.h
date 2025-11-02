@@ -79,7 +79,6 @@ public:
 	virtual void visit(builder_var_type::Ptr);
 	virtual void visit(named_type::Ptr);
 
-	void handle_func_arg(var::Ptr a);
 	virtual void visit(func_decl::Ptr);
 	virtual void visit(struct_decl::Ptr);
 	virtual void visit(return_stmt::Ptr);
@@ -90,6 +89,7 @@ public:
 	virtual void visit(label_stmt::Ptr);
 
 	void print_pragma(stmt::Ptr);
+	void handle_child(expr::Ptr parent, expr::Ptr child, bool is_left);
 
 	static void generate_code(block::Ptr ast, std::ostream &oss, int indent = 0, bool decl_only = false) {
 		c_code_generator generator(oss);
