@@ -3,7 +3,7 @@ int power (int arg0, int arg1) {
   int res_1 = 1;
   int x_2 = arg0;
   while (exponent_0 > 1) {
-    if ((exponent_0 % 2) == 1) {
+    if (exponent_0 % 2 == 1) {
       res_1 = res_1 * x_2;
     } 
     x_2 = x_2 * x_2;

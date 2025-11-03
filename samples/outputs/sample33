@@ -49,6 +49,6 @@ STMT_BLOCK
   int var1 = var0.member;
   FooT var2 = var0;
   var2 = var0;
-  FooT* var3 = (&(var0));
-  (var3[0]).member = 0;
+  FooT* var3 = &var0;
+  var3[0].member = 0;
 }

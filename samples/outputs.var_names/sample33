@@ -49,6 +49,6 @@ STMT_BLOCK
   int x_1 = g_0.member;
   FooT h_2 = g_0;
   h_2 = g_0;
-  FooT* ptr_3 = (&(g_0));
-  (ptr_3[0]).member = 0;
+  FooT* ptr_3 = &g_0;
+  ptr_3[0].member = 0;
 }

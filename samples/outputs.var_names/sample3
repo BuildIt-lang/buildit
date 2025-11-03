@@ -79,7 +79,7 @@ STMT_BLOCK
   int a_0;
   int b_1;
   int c_2;
-  if (!(c_2)) {
+  if (!c_2) {
     a_0 && b_1;
     if (a_0 && b_1) {
       c_2 && b_1;
