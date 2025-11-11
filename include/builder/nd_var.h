@@ -28,6 +28,8 @@ class nd_var_base {
 protected: 
 	nd_var_base() = default;
 public:
+	using value_type = void;
+
 	bool check(int e) {
 		assert(false && "Every derived type must define check");
 		return false;
@@ -53,17 +55,19 @@ public:
 		F = 0,
 	} value_t;
 
-	int value;
+	value_t value;
 	
-	true_top(int def): value(def) {}
-	true_top(): value((int)F) {}
+	using value_type = value_t;
+	
+	true_top(value_t def): value(def) {}
+	true_top(): value(F) {}
 
-	bool check(int e) {
+	bool check(value_t e) {
 		if (value == T) return true;
 		if (e == value) return true;
 		return false;
 	}
-	void merge(int e) {
+	void merge(value_t e) {
 		if (e == F) return;
 		value = e;
 	}
@@ -97,7 +101,7 @@ public:
 		return val.get();
 	}
 
-	void require_val(int e) {
+	void require_val(typename T::value_type e) {
 		// If the required value is compatible with the current state, 
 		// return 
 		if (val->check(e)) return;

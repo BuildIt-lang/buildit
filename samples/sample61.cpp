@@ -13,12 +13,12 @@ using builder::nd_var;
 
 static void bar(void) {
 	nd_var<builder::true_top> t;
-	dyn_var<int> x = ((builder::true_top)t).value;
+	dyn_var<int> x = (int)((builder::true_top)t).value;
 
 	t.require_val(builder::true_top::T);
 
 	nd_var<builder::true_top> r(builder::true_top::F);
-	dyn_var<int> y = r.get()->value;
+	dyn_var<int> y = (int)(r.get()->value);
 	r.require_val(builder::true_top::F);
 	t.require_val(builder::true_top::T);
 }
