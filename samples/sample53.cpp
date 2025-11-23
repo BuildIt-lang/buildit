@@ -18,6 +18,7 @@ static void foo(external_object_t &obj) {
 	// Init not
 	obj.member.deferred_init(builder::with_name("member_var", true));
 	obj.counter.deferred_init();
+	obj.counter = 0;
 
 	dyn_var<int> x = 0;
 	if (x) {

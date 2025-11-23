@@ -226,6 +226,7 @@ void builder_context::extract_function_ast_impl(invocation_state* i_state) {
 	block::sub_expr_cleanup cleaner;
 	ast->accept(&cleaner);
 
+
 	if (!feature_unstructured) {
 
 		block::basic_block::cfg_block BBs = generate_basic_blocks(block::to<block::stmt_block>(ast));
@@ -234,15 +235,15 @@ void builder_context::extract_function_ast_impl(invocation_state* i_state) {
 		finder.ast = ast;
 		ast->accept(&finder);
 
+		block::if_switcher switcher;
+		ast->accept(&switcher);
+
 		block::for_loop_finder for_finder;
 		for_finder.ast = ast;
 		ast->accept(&for_finder);
 	}
 
-	block::if_switcher switcher;
-	ast->accept(&switcher);
 
-	
 	// Run RCE after loop finder
 	// since RCE does rely on loops being detected
 	// If labels are still kept around, RCE cannot be as aggressive 

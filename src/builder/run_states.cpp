@@ -112,4 +112,25 @@ bool run_state::get_next_bool(block::expr::Ptr expr) {
 	return ret_val;
 }
 
+void run_state::insert_live_dyn_var(const tracer::tag& t) {
+	// First convert the tag to tag_id using the invocation's tag factory
+	tracer::tag_id tid = i_state->tag_factory_instance.create_tag_id(t);
+	// Insert it into the live set and sort
+	live_dyn_vars.push_back(tid);
+	std::sort(live_dyn_vars.begin(), live_dyn_vars.end());
+}
+void run_state::remove_live_dyn_var(const tracer::tag& t) {
+	// First convert the tag to tag_id using the invocation's tag factory
+	tracer::tag_id tid = i_state->tag_factory_instance.create_tag_id(t);
+
+	// Search using binary search, might not be exact
+	auto it = std::lower_bound(live_dyn_vars.begin(), live_dyn_vars.end(), tid);
+
+	// Check if we actually found the value
+	if (it != live_dyn_vars.end() && *it == tid) {
+		// Erase it. This shifts all subsequent elements left.
+		live_dyn_vars.erase(it); 
+	}	
+}
+
 }

@@ -8,10 +8,12 @@ using builder::dyn_var;
 using builder::static_var;
 
 static dyn_var<int> foo(dyn_var<int> x) {
+	int t;
 	if (x > 10)
-		return 9;
+		t = 9;
 	else
-		return 0;
+		t = 0;
+	return t;	
 }
 
 static void bar(void) {
