@@ -10,6 +10,7 @@
 #include <set>
 #include <functional>
 #include "blocks/stmt.h"
+#include "builder/tag_factory.h"
 
 namespace builder {
 
@@ -61,6 +62,9 @@ private:
 	// Annotations to be attached to the next statement
 	std::set<std::string> current_annotations;
 
+	// Set of dyn_variables that are live
+	std::vector<tracer::tag_id> live_dyn_vars;
+
 	/* Tracing and re-execution related members */
 
 	// Vector of bools to return on branching
@@ -103,6 +107,9 @@ public:
 		current_annotations.clear();
 		return to_ret;
 	}
+
+	void insert_live_dyn_var(const tracer::tag& new_tag);
+	void remove_live_dyn_var(const tracer::tag& new_tag);
 	
 	friend class execution_state;
 	friend class invocation_state;
@@ -142,6 +149,9 @@ public:
 class invocation_state {
 	/* ND_VAR state */
 	std::unordered_map<tracer::tag, std::shared_ptr<nd_var_base>> nd_state_map;
+
+	// Tag factory state
+	tag_factory tag_factory_instance;
 
 	// Main invocation function
 	std::function<void(void)> invocation_function;

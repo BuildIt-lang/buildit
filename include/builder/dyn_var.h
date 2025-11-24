@@ -133,6 +133,8 @@ public:
 		block::var::Ptr dyn_var = std::make_shared<block::var>();
 		dyn_var->var_type = create_block_type();
 		tracer::tag offset = tracer::get_offset_in_function();
+		// push this tag into the live_dyn_vars set
+		get_run_state()->insert_live_dyn_var(offset);
 		dyn_var->preferred_name = utils::find_variable_name_cached(this, offset);
 		block_var = dyn_var;
 		dyn_var->static_offset = offset;
@@ -325,7 +327,11 @@ public:
 		from_builder_vector(a);
 	}
 
-	virtual ~dyn_var_impl() = default;
+	virtual ~dyn_var_impl() {
+		if (block_var && is_under_run()) {
+			get_run_state()->remove_live_dyn_var(block_var->static_offset);
+		}
+	}
 
 	// Assume that _impl objects will never be created
 	// Thus addr can always cast the address to dyn_var<T>
@@ -409,6 +415,9 @@ public:
 	// Some implementations don't like implicitly declared
 	// constructors so define them here
 	dyn_var(const dyn_var<T> &t) : dyn_var_impl<T>((builder)t) {}
+
+	// Since we are also defining a destructor, we should define a move constructor
+	dyn_var(dyn_var<T> &&t): dyn_var_impl<T>((builder)t) {}
 
 	// Unfortunately because we are changing the return type,
 	// the implicitly defined copy assignment will always

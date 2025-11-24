@@ -1,5 +1,3 @@
-/*NO_TEST*/
-/* This feature has been disabled for now. TODO: Enable this test after selective path merging implementation */
 // Include the headers
 #include "blocks/c_code_generator.h"
 #include "builder/dyn_var.h"
@@ -21,21 +19,27 @@ static void bar(void) {
 	} else {
 		x = 2;
 	}
-	// When z is declared, x is in different states
-	dyn_var<int> z = x;
-	dyn_var<int &> k = m;
 
-	// Executions can now merge, but z is still in different states
-	x = 0;
+	{
+		// When z is declared, x is in different states
+		dyn_var<int> z = x;
+		dyn_var<int &> k = m;
 
-	// this declaration forces executions to merge because static tags are the same
-	// merge is triggered by memoization
-	dyn_var<int> b;
+		// Executions can now merge, but z is still in different states
+		x = 0;
 
-	// this statement now has issues because z has forked
-	dyn_var<int> a = z;
+		// this declaration forces executions to merge because static tags are the same
+		// merge is triggered by memoization
+		dyn_var<int> b;
 
-	z = z + k;
+		// this statement now has issues because z has forked
+		dyn_var<int> a = z;
+
+		z = z + k;
+	}
+
+	// This statement should be merged since z's lifetime has ended
+	m = m + 3;
 }
 
 int main(int argc, char *argv[]) {

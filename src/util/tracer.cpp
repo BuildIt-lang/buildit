@@ -55,6 +55,10 @@ tag get_offset_in_function(void) {
 			new_tag.static_var_key_values.push_back({tuple->var_name, tuple->serialize()});
 		}
 	}
+
+	// Finally add the live_dyn_var set
+	new_tag.live_dyn_vars = builder::get_run_state()->live_dyn_vars;
+
 	return new_tag;
 }
 
@@ -95,6 +99,10 @@ tag get_offset_in_function(void) {
 			new_tag.static_var_key_values.push_back({tuple->var_name, tuple->serialize()});
 		}
 	}
+
+	// Finally add the live_dyn_var set
+	new_tag.live_dyn_vars = builder::get_run_state()->live_dyn_vars;
+
 	return new_tag;
 }
 #endif
@@ -129,7 +137,15 @@ bool tag::operator==(const tag &other) const {
 		// Now compare the actual snapshots
 		if (!(static_var_snapshots[i]->operator == (other.static_var_snapshots[i])))
 			return false;
+		
 	}
+
+	// Finally compare the live_dyn_vars
+	if (live_dyn_vars.size() != other.live_dyn_vars.size())
+		return false;
+	for (unsigned int i = 0; i < live_dyn_vars.size(); i++) 
+		if (!(live_dyn_vars[i] == other.live_dyn_vars[i])) 
+			return false;
 	return true;
 }
 
@@ -155,7 +171,15 @@ std::string tag::stringify(void) {
 		if (i != static_var_snapshots.size() - 1)
 			output_string += ", ";
 	}
+	output_string += "]:[";
+
+	for (unsigned int i = 0; i < live_dyn_vars.size(); i++) {
+		output_string += std::to_string(live_dyn_vars[i]);
+		if (i != live_dyn_vars.size() - 1) 
+			output_string += ", ";
+	}
 	output_string += "]";
+
 	cached_string = output_string;
 	return output_string;
 }
@@ -172,7 +196,7 @@ std::string tag::stringify_stat(void) {
 		if (i != static_var_snapshots.size() - 1)
 			output_string += ", ";
 	}
-	output_string += "]";
+	output_string += "]:[]";
 
 	return output_string;
 }

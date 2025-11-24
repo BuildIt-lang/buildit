@@ -14,11 +14,15 @@ class builder_context;
 
 namespace tracer {
 
+using tag_id = size_t;
+
 class tag {
 public:
 	std::vector<unsigned long long> pointers;
 	std::vector<std::shared_ptr<builder::static_var_snapshot_base>> static_var_snapshots;
 	std::vector<std::pair<std::string, std::string>> static_var_key_values;
+	std::vector<tag_id> live_dyn_vars;
+
 
 	std::string cached_string;
 	mutable size_t cached_hash = 0;
@@ -33,6 +37,7 @@ public:
 	void clear(void) {
 		pointers.clear();
 		static_var_snapshots.clear();
+		live_dyn_vars.clear();
 	}
 
 	// A function to create another tag
@@ -82,6 +87,13 @@ public:
 		for (unsigned i = 0; i < static_var_snapshots.size(); i++) {
 			h = hash_combine(h, static_var_snapshots[i]->computed_hash);
 		}
+
+		// Finally combine the hash of the live_dyn_vars
+
+		for (unsigned i = 0; i < live_dyn_vars.size(); i++) {
+			h = hash_combine(h, (size_t) live_dyn_vars[i]);
+		}
+
 		cached_hash = h;
 		return cached_hash;	
 	}
