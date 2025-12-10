@@ -13,8 +13,8 @@ public:
 	std::shared_ptr<block> to_replace;
 	std::shared_ptr<block> replace_with;
 
-	template <typename T = expr>
-	typename T::Ptr rewrite(typename T::Ptr ptr) {
+	template <typename T>
+	typename std::shared_ptr<T> rewrite(std::shared_ptr<T> ptr) {
 		auto tmp = node;
 		node = nullptr;
 		ptr->accept(this);
@@ -64,6 +64,8 @@ public:
 	virtual void visit(std::shared_ptr<stmt_block>) override;
 	virtual void visit(std::shared_ptr<decl_stmt>) override;
 	virtual void visit(std::shared_ptr<if_stmt>) override;
+	virtual void visit(std::shared_ptr<case_stmt>) override;
+	virtual void visit(std::shared_ptr<switch_stmt>) override;
 	virtual void visit(std::shared_ptr<label>) override;
 	virtual void visit(std::shared_ptr<label_stmt>) override;
 	virtual void visit(std::shared_ptr<goto_stmt>) override;
@@ -78,6 +80,7 @@ public:
 	virtual void visit(std::shared_ptr<foreign_expr_base>) override;
 	virtual void visit(std::shared_ptr<member_access_expr>) override;
 	virtual void visit(std::shared_ptr<addr_of_expr>) override;
+	virtual void visit(std::shared_ptr<cast_expr>) override;
 
 	virtual void visit(std::shared_ptr<var>) override;
 	virtual void visit(std::shared_ptr<type>) override;
@@ -88,6 +91,7 @@ public:
 	virtual void visit(std::shared_ptr<array_type>) override;
 	virtual void visit(std::shared_ptr<builder_var_type>) override;
 	virtual void visit(std::shared_ptr<named_type>) override;
+	virtual void visit(std::shared_ptr<anonymous_type>) override;
 
 	virtual void visit(std::shared_ptr<func_decl>) override;
 	virtual void visit(std::shared_ptr<struct_decl>) override;

@@ -545,7 +545,22 @@ template <typename T>
 typename std::enable_if<std::is_base_of<var, T>::value>::type create_return_stmt(const T &a) {
 	create_return_stmt((builder)a);
 }
+template <typename T>
+dyn_var_mimic<T> cast_to(const builder& x) {
+	if (builder::builder_precheck()) {
+		return builder::create_builder_from_sequence();
+	}
+	get_run_state()->remove_node_from_sequence(x.block_expr);
+	tracer::tag offset = tracer::get_offset_in_function();
+	auto ce = std::make_shared<block::cast_expr>();
+	ce->static_offset = offset;
+	ce->expr1 = x.block_expr;
+	ce->type1 = dyn_var<T>::create_block_type();
+	builder b;
+	b.block_expr = ce;
+	builder::push_to_sequence(ce);
+	return (cast)b;
+}
 
 } // namespace builder
-
 #endif

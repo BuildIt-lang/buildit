@@ -41,6 +41,8 @@ void scalar_type::dump(std::ostream &oss, int indent) {
 		oss << "FLOAT";
 	else if (scalar_type_id == DOUBLE_TYPE)
 		oss << "DOUBLE";
+	else if (scalar_type_id == LONG_DOUBLE_TYPE)
+		oss << "LONG_DOUBLE";
 	else if (scalar_type_id == BOOL_TYPE)
 		oss << "BOOL";
 	oss << ")" << std::endl;
@@ -85,5 +87,10 @@ void named_type::dump(std::ostream &oss, int indent) {
 	oss << type_name << ")" << std::endl;
 	for (unsigned int i = 0; i < template_args.size(); i++)
 		template_args[i]->dump(oss, indent + 1);
+}
+void anonymous_type::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "ANONYMOUS_TYPE" << std::endl;
+	ref_type->dump(oss, indent + 1);
 }
 } // namespace block

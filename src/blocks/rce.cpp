@@ -136,11 +136,11 @@ public:
 		if (value_map.size() > 0 && has_side_effects(ws->body))
 			value_map.clear();
 		ws->cond = rewrite(ws->cond);
-		ws->body = rewrite<stmt>(ws->body);
+		ws->body = rewrite(ws->body);
 	}
 	virtual void visit(for_stmt::Ptr fs) override {
 		node = fs;
-		fs->decl_stmt = rewrite<stmt>(fs->decl_stmt);
+		fs->decl_stmt = rewrite(fs->decl_stmt);
 		if (has_side_effects(fs->cond))
 			value_map.clear();
 		if (has_side_effects(fs->update))
@@ -151,7 +151,7 @@ public:
 			value_map.clear();
 		fs->cond = rewrite(fs->cond);
 		fs->update = rewrite(fs->update);
-		fs->body = rewrite<stmt>(fs->body);
+		fs->body = rewrite(fs->body);
 	}
 	virtual void visit(if_stmt::Ptr is) override {
 		node = is;
@@ -161,8 +161,8 @@ public:
 		// if statements don't have the problem with the body
 		// but there could be gotos 
 		// so we will handle labels separately
-		is->then_stmt = rewrite<stmt>(is->then_stmt);
-		is->else_stmt = rewrite<stmt>(is->else_stmt);
+		is->then_stmt = rewrite(is->then_stmt);
+		is->else_stmt = rewrite(is->else_stmt);
 	}
 
 
@@ -269,26 +269,26 @@ public:
 		// TODO: Just like Phase 1 maybe there is a way to optimize this
 		purge_side_effects(ws->body);
 		ws->cond = rewrite(ws->cond);
-		ws->body = rewrite<stmt>(ws->body);
+		ws->body = rewrite(ws->body);
 	}
 
 	virtual void visit(for_stmt::Ptr fs) override {
 		node = fs;
-		fs->decl_stmt = rewrite<stmt>(fs->decl_stmt);
+		fs->decl_stmt = rewrite(fs->decl_stmt);
 		purge_side_effects(fs->cond);
 		purge_side_effects(fs->update);
 		// Similar to while loop, purge side effects from body
 		purge_side_effects(fs->body);
 		fs->cond = rewrite(fs->cond);
 		fs->update = rewrite(fs->update);
-		fs->body = rewrite<stmt>(fs->body);
+		fs->body = rewrite(fs->body);
 	}
 	virtual void visit(if_stmt::Ptr is) override {
 		node = is;
 		purge_side_effects(is->cond);
 		is->cond = rewrite(is->cond);
-		is->then_stmt = rewrite<stmt>(is->then_stmt);
-		is->else_stmt = rewrite<stmt>(is->else_stmt);
+		is->then_stmt = rewrite(is->then_stmt);
+		is->else_stmt = rewrite(is->else_stmt);
 	}
 	
 	virtual void visit(var_expr::Ptr ve) override {

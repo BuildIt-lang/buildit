@@ -404,12 +404,19 @@ public:
 	}
 
 	var::Ptr var1;
+	std::vector<block::Ptr> template_args;
 	virtual bool is_same(block::Ptr other) override {
 		if (!isa<var_expr>(other))
 			return false;
 		var_expr::Ptr other_expr = to<var_expr>(other);
 		if (!var1->is_same(other_expr->var1))
 			return false;
+		if (template_args.size() != other_expr->template_args.size())
+			return false;
+		for (unsigned i = 0; i < template_args.size(); i++) {
+			if (!(template_args[i]->is_same(other_expr->template_args[i])))
+				return false;
+		}
 		return true;
 	}
 	virtual block::Ptr clone_impl(void) override {
@@ -417,6 +424,9 @@ public:
 		// Vars are special cases and should not be cloned
 		// This is to avoid problems where vars are compared by pointers
 		np->var1 = var1;
+		for (auto a: template_args) {
+			np->template_args.push_back(clone(a));
+		}
 		return np;	
 	}
 };
@@ -750,6 +760,37 @@ public:
 		return np;
 	}
 };
+
+/* Expressions that will never be generated but could be promoted 
+or are useful for representing some key elements */
+class cast_expr: public unary_expr {
+public:
+	type::Ptr type1;
+
+	typedef std::shared_ptr<cast_expr> Ptr;
+	virtual void dump(std::ostream &oss, int) override;
+	virtual void accept(block_visitor* a) override {
+		a->visit(self<cast_expr>());
+	}	
+	virtual bool is_same(block::Ptr other) override {
+		if (!isa<cast_expr>(other))
+			return false;
+		cast_expr::Ptr other_expr = to<cast_expr>(other);
+		if (!other_expr->expr1->is_same(expr1))
+			return false;
+		if (!other_expr->type1->is_same(type1))
+			return false;
+		return true;
+	}
+	virtual block::Ptr clone_impl(void) override {
+		auto np = clone_obj(this);
+		np->expr1 = clone(expr1);
+		np->type1 = clone(type1);
+		return np;
+	}
+};
+
+
 } // namespace block
 
 #endif

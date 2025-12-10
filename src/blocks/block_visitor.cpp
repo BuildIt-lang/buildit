@@ -94,6 +94,9 @@ void block_visitor::visit(mod_expr::Ptr a) {
 }
 void block_visitor::visit(var_expr::Ptr a) {
 	a->var1->accept(this);
+	for (auto t: a->template_args) {
+		t->accept(this);
+	}
 }
 void block_visitor::visit(const_expr::Ptr a) {}
 void block_visitor::visit(int_const::Ptr a) {}
@@ -122,6 +125,17 @@ void block_visitor::visit(if_stmt::Ptr a) {
 	a->cond->accept(this);
 	a->then_stmt->accept(this);
 	a->else_stmt->accept(this);
+}
+void block_visitor::visit(case_stmt::Ptr a) {
+	if (a->case_value)
+		a->case_value->accept(this);
+	if (a->branch)
+		a->branch->accept(this);
+}
+void block_visitor::visit(switch_stmt::Ptr a) {
+	a->cond->accept(this);
+	for (auto c: a->cases)
+		c->accept(this);
 }
 void block_visitor::visit(label::Ptr a) {}
 void block_visitor::visit(label_stmt::Ptr a) {
@@ -195,6 +209,9 @@ void block_visitor::visit(func_decl::Ptr a) {
 		arg->accept(this);
 	a->body->accept(this);
 }
+void block_visitor::visit(anonymous_type::Ptr x) {
+	x->ref_type->accept(this);
+}
 
 void block_visitor::visit(struct_decl::Ptr a) {
 	for (auto mem: a->members)
@@ -210,6 +227,10 @@ void block_visitor::visit(member_access_expr::Ptr a) {
 }
 void block_visitor::visit(addr_of_expr::Ptr a) {
 	a->expr1->accept(this);
+}
+void block_visitor::visit(cast_expr::Ptr a) {
+	a->expr1->accept(this);
+	a->type1->accept(this);
 }
 
 } // namespace block

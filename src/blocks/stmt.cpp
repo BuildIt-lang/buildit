@@ -35,6 +35,21 @@ void if_stmt::dump(std::ostream &oss, int indent) {
 	then_stmt->dump(oss, indent + 1);
 	else_stmt->dump(oss, indent + 1);
 }
+void case_stmt::dump(std::ostream &oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "CASE_STMT (" << is_default << ")" << std::endl;
+	if (case_value)
+		case_value->dump(oss, indent + 1);
+	if (branch)
+		branch->dump(oss, indent + 1);
+}
+void switch_stmt::dump(std::ostream& oss, int indent) {
+	printer::indent(oss, indent);
+	oss << "SWITCH_STMT" << std::endl;
+	cond->dump(oss, indent + 1);
+	for (auto c: cases)
+		c->dump(oss, indent + 1);
+}
 void label_stmt::dump(std::ostream &oss, int indent) {
 	printer::indent(oss, indent);
 	oss << "LABEL_STMT" << std::endl;

@@ -43,6 +43,7 @@ public:
 		VOID_TYPE,
 		FLOAT_TYPE,
 		DOUBLE_TYPE,
+		LONG_DOUBLE_TYPE,
 		BOOL_TYPE
 	} scalar_type_id;
 	virtual void accept(block_visitor *a) override {
@@ -112,11 +113,12 @@ public:
 
 	type::Ptr return_type;
 	std::vector<type::Ptr> arg_types;
-
+	bool is_variadic = false;
 	virtual void dump(std::ostream &, int) override;
 	virtual block::Ptr clone_impl(void) override {
 		auto np = clone_type(this);
 		np->return_type = clone(return_type);
+		np->is_variadic = is_variadic;
 		for (auto t: arg_types) {
 			np->arg_types.push_back(clone(t));
 		}
@@ -125,6 +127,7 @@ public:
 	virtual bool is_same(block::Ptr other) override {
 		if (!isa<function_type>(other)) return false;
 		function_type::Ptr ftype = to<function_type>(other);
+		if (is_variadic != ftype->is_variadic) return false;
 		if (!ftype->return_type->is_same(return_type)) return false;
 		if (ftype->arg_types.size() != arg_types.size()) return false;
 		for (unsigned i = 0; i < arg_types.size(); i++) {
@@ -213,6 +216,35 @@ public:
 		return true;
 	}
 };
+// This is specifically for the case where the type doesn't have a name
+// and directly references a struct decl.
+class anonymous_type : public type {
+public:
+	typedef std::shared_ptr<anonymous_type> Ptr;
+
+	// This is specifically a struct_decl, but since struct_decl isn't defined yet we
+	// will use a block
+	std::shared_ptr<block> ref_type;
+	virtual void accept(block_visitor *a) override {
+		a->visit(self<anonymous_type>());
+	}
+	virtual void dump(std::ostream&, int) override;
+	
+	virtual block::Ptr clone_impl(void) override {
+		auto np = clone_type(this);
+		np->ref_type = clone(ref_type);
+		return np;
+	}
+	virtual bool is_same(block::Ptr other) override {
+		if (!isa<anonymous_type>(other)) 
+			return false;
+		anonymous_type::Ptr atype = to<anonymous_type>(other);
+		if (!ref_type->is_same(atype->ref_type))
+			return false;
+		return true;
+	}
+};
+
 
 
 class var : public block {
