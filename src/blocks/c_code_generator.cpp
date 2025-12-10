@@ -53,9 +53,19 @@ static precedence_t get_operator_precedence(expr::Ptr a) {
 	if (isa<var_expr>(a) || isa<const_expr>(a)) 
 		return {0, true};
 
+	// Special cases
+	if (isa<sq_bkt_expr>(a) && a->getBoolMetadata("deref_is_star")) {
+		auto sk = to<sq_bkt_expr>(a);
+		if (isa<int_const>(sk->index)) {
+			if (to<int_const>(sk->index)->value == 0) {
+				return {3, false};
+			}	
+		}
+	}
 	if (isa<function_call_expr>(a) || isa<sq_bkt_expr>(a) || isa<member_access_expr>(a)) {
 		return {2, true};	
-	} else if (isa<unary_minus_expr>(a) || isa<not_expr>(a) || isa<bitwise_not_expr>(a) || isa<addr_of_expr>(a)) {
+	} else if (isa<unary_minus_expr>(a) || isa<not_expr>(a) || isa<bitwise_not_expr>(a) || isa<addr_of_expr>(a) 
+		|| isa<cast_expr>(a)) {
 		return {3, false};
 	} else if (isa<mul_expr>(a) || isa<div_expr>(a) || isa<mod_expr>(a)) {
 		return {5, true};
@@ -99,6 +109,33 @@ void c_code_generator::handle_child(expr::Ptr parent, expr::Ptr child, bool is_l
 	if (bracket) oss << "(";
 	child->accept(this);
 	if (bracket) oss << ")";
+}
+
+void c_code_generator::print_struct_type(struct_decl::Ptr a) {
+	if (a->is_union) oss << "union ";
+	else oss << "struct ";
+
+	oss << a->struct_name;
+
+	if (a->is_decl_only) {
+		return;
+	}
+
+	if (a->struct_name != "")
+		oss << " ";
+
+	oss << "{";
+	nextl();
+
+	curr_indent++;
+	for (auto mem: a->members) {
+		printer::indent(oss, curr_indent);
+		mem->accept(this);
+		nextl();
+	}
+	curr_indent--;
+	printer::indent(oss, curr_indent);
+	oss << "}";
 }
 
 
@@ -178,6 +215,15 @@ void c_code_generator::visit(mod_expr::Ptr a) {
 }
 void c_code_generator::visit(var_expr::Ptr a) {
 	oss << a->var1->var_name;
+	if (a->template_args.size() > 0) {
+		oss << "<";
+		for (unsigned i = 0; i < a->template_args.size(); i++) {
+			a->template_args[i]->accept(this);
+			if (i != a->template_args.size() - 1) 
+				oss << ", ";
+		}
+		oss << ">";
+	}
 }
 void c_code_generator::visit(int_const::Ptr a) {
 	oss << a->value;
@@ -197,8 +243,42 @@ void c_code_generator::visit(float_const::Ptr a) {
 		oss << ".0";
 	oss << "f";
 }
+static std::string escapeString(const std::string& input) {
+    std::string output;
+
+    for (unsigned char c : input) {
+        switch (c) {
+            // Standard C Escape Sequences
+            case '\a': output += "\\a"; break; // Bell
+            case '\b': output += "\\b"; break; // Backspace
+            case '\f': output += "\\f"; break; // Form feed
+            case '\n': output += "\\n"; break; // Newline
+            case '\r': output += "\\r"; break; // Carriage return
+            case '\t': output += "\\t"; break; // Horizontal tab
+            case '\v': output += "\\v"; break; // Vertical tab
+            
+            // Critical Syntax Characters
+            case '\\': output += "\\\\"; break; // Backslash
+            case '"':  output += "\\\""; break; // Double quote
+            
+            default:
+                // If it is a printable character (like 'A', '1', '!', ' '), append it.
+                if (std::isprint(c)) {
+                    output += c;
+                } 
+                // Otherwise, escape it as a Hex value (e.g., ESC becomes \x1B).
+                else {
+                    char buf[5]; // Big enough for \xHH + null terminator
+                    std::snprintf(buf, sizeof(buf), "\\x%02X", c);
+                    output += buf;
+                }
+                break;
+        }
+    }
+    return output;
+}
 void c_code_generator::visit(string_const::Ptr a) {
-	oss << "\"" << a->value << "\"";
+	oss << "\"" << escapeString(a->value) << "\"";
 }
 void c_code_generator::visit(assign_expr::Ptr a) {
 	handle_child(a, a->var1, true);
@@ -279,6 +359,12 @@ static std::string complex_type_helper(type::Ptr a, std::string name) {
 			if (i + 1 < ft->arg_types.size()) 
 				ret += ", ";
 		}
+		if (ft->is_variadic) {
+			if (ft->arg_types.size() > 0) {
+				ret += ", ";
+			}
+			ret += "...";
+		}
 		ret += ")";
 		return complex_type_helper(ft->return_type, ret);
 	} else if (isa<scalar_type>(a)) {
@@ -324,6 +410,9 @@ static std::string complex_type_helper(type::Ptr a, std::string name) {
 			case scalar_type::DOUBLE_TYPE:
 				tp = "double";
 				break;
+			case scalar_type::LONG_DOUBLE_TYPE:
+				tp = "long double";
+				break;
 			case scalar_type::BOOL_TYPE:
 				tp = "bool";
 				break;
@@ -346,6 +435,13 @@ static std::string complex_type_helper(type::Ptr a, std::string name) {
 			ret += ">";
 		}
 		return ret + name;
+	} else if (isa<anonymous_type>(a)) {
+		auto at = to<anonymous_type>(a);
+		std::string ret = addQualifiers(a);
+		std::stringstream ss;
+		c_code_generator gen(ss);
+		gen.print_struct_type(to<struct_decl>(at->ref_type));
+		return ret + ss.str() +  name;
 	} else if (isa<reference_type>(a)) {
 		auto ptr = to<reference_type>(a);
 		std::string decorated = "&" + addQualifiers(ptr, false) + name;
@@ -374,6 +470,9 @@ void c_code_generator::visit(scalar_type::Ptr type) {
 void c_code_generator::visit(named_type::Ptr type) {
 	oss << complex_type_helper(type, "");
 }
+void c_code_generator::visit(anonymous_type::Ptr type) {
+	oss << complex_type_helper(type, "");
+}
 void c_code_generator::visit(pointer_type::Ptr type) {
 	oss << complex_type_helper(type, "");
 }
@@ -391,6 +490,12 @@ void c_code_generator::visit(var::Ptr var) {
 }
 
 void c_code_generator::visit(decl_stmt::Ptr a) {
+	if (a->is_typedef) 
+		oss << "typedef ";
+	if (a->is_extern)
+		oss << "extern ";
+	if (a->is_static)
+		oss << "static ";
 	oss << complex_type_helper(a->decl_var->var_type, " " + a->decl_var->var_name);
 	if (a->decl_var->hasMetadata<std::vector<std::string>>("attributes")) {
 		const auto &attributes = a->decl_var->getMetadata<std::vector<std::string>>("attributes");
@@ -441,6 +546,34 @@ void c_code_generator::visit(if_stmt::Ptr a) {
 		curr_indent--;
 	}
 }
+void c_code_generator::visit(case_stmt::Ptr a) {
+	if (a->is_default) {
+		oss << "default";
+	} else {
+		oss << "case ";
+		a->case_value->accept(this);
+	}
+	oss << ": ";
+	save_static_info(a);
+	if (a->branch)
+		a->branch->accept(this);
+}
+void c_code_generator::visit(switch_stmt::Ptr a) {
+	oss << "switch(";
+	a->cond->accept(this);
+	oss << ") {";
+	save_static_info(a);
+	nextl();
+	curr_indent++;
+	for (auto c: a->cases) {
+		printer::indent(oss, curr_indent);
+		c->accept(this);
+		nextl();
+	}
+	curr_indent--;
+	printer::indent(oss, curr_indent);
+	oss << "}";
+}
 void c_code_generator::visit(while_stmt::Ptr a) {
 	oss << "while (";
 	a->cond->accept(this);
@@ -486,11 +619,25 @@ void c_code_generator::visit(continue_stmt::Ptr a) {
 	oss << "continue;";
 }
 void c_code_generator::visit(sq_bkt_expr::Ptr a) {
+	bool star_added = false;
+	if (a->getBoolMetadata("deref_is_star")) {
+		if (isa<int_const>(a->index)) {
+			auto index = to<int_const>(a->index);
+			if (index->value == 0) {
+				star_added = true;
+				oss << "*";
+			}
+		}
+	}
+
 	handle_child(a, a->var_expr, true);
-	oss << "[";
-	// index never needs to be bracketed no matter what
-	a->index->accept(this);
-	oss << "]";
+
+	if (!star_added) {
+		oss << "[";
+		// index never needs to be bracketed no matter what
+		a->index->accept(this);
+		oss << "]";
+	}
 }
 void c_code_generator::visit(function_call_expr::Ptr a) {
 	handle_child(a, a->expr1, true);
@@ -522,6 +669,11 @@ void c_code_generator::visit(func_decl::Ptr a) {
 #endif
 
 	printer::indent(oss, curr_indent);
+	if (a->is_static)
+		oss << "static ";
+	if (a->is_inline)
+		oss << "inline ";
+	
 	a->return_type->accept(this);
 	if (a->hasMetadata<std::vector<std::string>>("attributes")) {
 		const auto &attributes = a->getMetadata<std::vector<std::string>>("attributes");
@@ -538,10 +690,14 @@ void c_code_generator::visit(func_decl::Ptr a) {
 		printDelim = true;
 		oss << complex_type_helper(arg->var_type, " " + arg->var_name);
 	}
+	if (a->is_variadic) {
+		oss << ", ...";
+		printDelim = true;
+	}
 	if (!printDelim)
 		oss << "void";
 	oss << ")";
-	if (decl_only) {
+	if (decl_only || a->is_decl_only) {
 		oss << ";";
 		return;
 	}
@@ -579,7 +735,6 @@ void c_code_generator::visit(struct_decl::Ptr a) {
 	curr_indent--;
 	printer::indent(oss, curr_indent);
 	oss << "};";
-	nextl();
 }
 void c_code_generator::visit(goto_stmt::Ptr a) {
 	// a->dump(oss, 1);
@@ -617,4 +772,11 @@ void c_code_generator::visit(addr_of_expr::Ptr a) {
 	oss << "&";
 	handle_child(a, a->expr1, false);
 }
+void c_code_generator::visit(cast_expr::Ptr a) {
+	oss << "(";
+	a->type1->accept(this);
+	oss << ")";
+	handle_child(a, a->expr1, false);
+}
+
 } // namespace block

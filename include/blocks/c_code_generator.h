@@ -32,63 +32,68 @@ public:
 	void save_static_info(block::Ptr a);
 	void nextl(void);
 
-	virtual void visit(not_expr::Ptr);
-	virtual void visit(unary_minus_expr::Ptr);
-	virtual void visit(bitwise_not_expr::Ptr);
-	virtual void visit(and_expr::Ptr);
-	virtual void visit(bitwise_and_expr::Ptr);
-	virtual void visit(or_expr::Ptr);
-	virtual void visit(bitwise_or_expr::Ptr);
-	virtual void visit(bitwise_xor_expr::Ptr);
-	virtual void visit(plus_expr::Ptr);
-	virtual void visit(minus_expr::Ptr);
-	virtual void visit(mul_expr::Ptr);
-	virtual void visit(div_expr::Ptr);
-	virtual void visit(lt_expr::Ptr);
-	virtual void visit(gt_expr::Ptr);
-	virtual void visit(lte_expr::Ptr);
-	virtual void visit(gte_expr::Ptr);
-	virtual void visit(lshift_expr::Ptr);
-	virtual void visit(rshift_expr::Ptr);
-	virtual void visit(equals_expr::Ptr);
-	virtual void visit(ne_expr::Ptr);
-	virtual void visit(mod_expr::Ptr);
-	virtual void visit(var_expr::Ptr);
-	virtual void visit(int_const::Ptr);
-	virtual void visit(double_const::Ptr);
-	virtual void visit(float_const::Ptr);
-	virtual void visit(string_const::Ptr);
-	virtual void visit(assign_expr::Ptr);
-	virtual void visit(expr_stmt::Ptr);
-	virtual void visit(stmt_block::Ptr);
-	virtual void visit(decl_stmt::Ptr);
-	virtual void visit(if_stmt::Ptr);
-	virtual void visit(while_stmt::Ptr);
-	virtual void visit(for_stmt::Ptr);
-	virtual void visit(break_stmt::Ptr);
-	virtual void visit(continue_stmt::Ptr);
-	virtual void visit(sq_bkt_expr::Ptr);
-	virtual void visit(function_call_expr::Ptr);
-	virtual void visit(initializer_list_expr::Ptr);
+	virtual void visit(not_expr::Ptr) override;
+	virtual void visit(unary_minus_expr::Ptr) override;
+	virtual void visit(bitwise_not_expr::Ptr) override;
+	virtual void visit(and_expr::Ptr) override;
+	virtual void visit(bitwise_and_expr::Ptr) override;
+	virtual void visit(or_expr::Ptr) override;
+	virtual void visit(bitwise_or_expr::Ptr) override;
+	virtual void visit(bitwise_xor_expr::Ptr) override;
+	virtual void visit(plus_expr::Ptr) override;
+	virtual void visit(minus_expr::Ptr) override;
+	virtual void visit(mul_expr::Ptr) override;
+	virtual void visit(div_expr::Ptr) override;
+	virtual void visit(lt_expr::Ptr) override;
+	virtual void visit(gt_expr::Ptr) override;
+	virtual void visit(lte_expr::Ptr) override;
+	virtual void visit(gte_expr::Ptr) override;
+	virtual void visit(lshift_expr::Ptr) override;
+	virtual void visit(rshift_expr::Ptr) override;
+	virtual void visit(equals_expr::Ptr) override;
+	virtual void visit(ne_expr::Ptr) override;
+	virtual void visit(mod_expr::Ptr) override;
+	virtual void visit(var_expr::Ptr) override;
+	virtual void visit(int_const::Ptr) override;
+	virtual void visit(double_const::Ptr) override;
+	virtual void visit(float_const::Ptr) override;
+	virtual void visit(string_const::Ptr) override;
+	virtual void visit(assign_expr::Ptr) override;
+	virtual void visit(expr_stmt::Ptr) override;
+	virtual void visit(stmt_block::Ptr) override;
+	virtual void visit(decl_stmt::Ptr) override;
+	virtual void visit(if_stmt::Ptr) override;
+	virtual void visit(switch_stmt::Ptr) override;
+	virtual void visit(case_stmt::Ptr) override;
+	virtual void visit(while_stmt::Ptr) override;
+	virtual void visit(for_stmt::Ptr) override;
+	virtual void visit(break_stmt::Ptr) override;
+	virtual void visit(continue_stmt::Ptr) override;
+	virtual void visit(sq_bkt_expr::Ptr) override;
+	virtual void visit(function_call_expr::Ptr) override;
+	virtual void visit(initializer_list_expr::Ptr) override;
 
-	virtual void visit(var::Ptr);
-	virtual void visit(scalar_type::Ptr);
-	virtual void visit(pointer_type::Ptr);
-	virtual void visit(reference_type::Ptr);
-	virtual void visit(array_type::Ptr);
-	virtual void visit(builder_var_type::Ptr);
-	virtual void visit(named_type::Ptr);
+	virtual void visit(var::Ptr) override;
+	virtual void visit(scalar_type::Ptr) override;
+	virtual void visit(pointer_type::Ptr) override;
+	virtual void visit(reference_type::Ptr) override;
+	virtual void visit(array_type::Ptr) override;
+	virtual void visit(builder_var_type::Ptr) override;
+	virtual void visit(named_type::Ptr) override;
+	virtual void visit(anonymous_type::Ptr) override;
 
-	virtual void visit(func_decl::Ptr);
-	virtual void visit(struct_decl::Ptr);
-	virtual void visit(return_stmt::Ptr);
-	virtual void visit(member_access_expr::Ptr);
-	virtual void visit(addr_of_expr::Ptr);
+	virtual void visit(func_decl::Ptr) override;
+	virtual void visit(struct_decl::Ptr) override;
+	virtual void visit(return_stmt::Ptr) override;
+	virtual void visit(member_access_expr::Ptr) override;
+	virtual void visit(addr_of_expr::Ptr) override;
+	virtual void visit(cast_expr::Ptr) override;
 
-	virtual void visit(goto_stmt::Ptr);
-	virtual void visit(label_stmt::Ptr);
+	virtual void visit(goto_stmt::Ptr) override;
+	virtual void visit(label_stmt::Ptr) override;
 
 	void print_pragma(stmt::Ptr);
+	void print_struct_type(struct_decl::Ptr a);
 	void handle_child(expr::Ptr parent, expr::Ptr child, bool is_left);
 
 	static void generate_code(block::Ptr ast, std::ostream &oss, int indent = 0, bool decl_only = false) {
@@ -135,6 +140,7 @@ public:
 		/* Dump the type */
 		c_code_generator generator(oss);
 		sd->accept(&generator);
+		oss << std::endl;
 	}
 };
 } // namespace block

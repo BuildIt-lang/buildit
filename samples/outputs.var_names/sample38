@@ -73,6 +73,6 @@ STMT_BLOCK
   FooT* ptr_3 = &g_0;
   ptr_3->member = 0;
   ptr_3->member = 1;
-  FooT i_4 = ptr_3[0];
+  FooT i_4 = *ptr_3;
   i_4.member = 3;
 }

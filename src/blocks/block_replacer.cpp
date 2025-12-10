@@ -88,7 +88,10 @@ void block_replacer::visit(mod_expr::Ptr a) {
 	binary_helper(a);
 }
 void block_replacer::visit(var_expr::Ptr a) {
-	a->var1 = rewrite<var>(a->var1);
+	a->var1 = rewrite(a->var1);
+	for (unsigned i = 0; i < a->template_args.size(); i++) {
+		a->template_args[i] = rewrite(a->template_args[i]);
+	}
 	node = a;
 }
 void block_replacer::visit(const_expr::Ptr a) {
@@ -120,21 +123,35 @@ void block_replacer::visit(expr_stmt::Ptr a) {
 }
 void block_replacer::visit(stmt_block::Ptr a) {
 	for (unsigned int i = 0; i < a->stmts.size(); i++) {
-		auto tmp = rewrite<stmt>(a->stmts[i]);
+		auto tmp = rewrite(a->stmts[i]);
 		a->stmts.at(i) = tmp;
 	}
 	node = a;
 }
 void block_replacer::visit(decl_stmt::Ptr a) {
-	a->decl_var = rewrite<var>(a->decl_var);
+	a->decl_var = rewrite(a->decl_var);
 	if (a->init_expr != nullptr)
 		a->init_expr = rewrite(a->init_expr);
 	node = a;
 }
 void block_replacer::visit(if_stmt::Ptr a) {
 	a->cond = rewrite(a->cond);
-	a->then_stmt = rewrite<stmt>(a->then_stmt);
-	a->else_stmt = rewrite<stmt>(a->else_stmt);
+	a->then_stmt = rewrite(a->then_stmt);
+	a->else_stmt = rewrite(a->else_stmt);
+	node = a;
+}
+void block_replacer::visit(case_stmt::Ptr a) {
+	if (a->case_value)
+		a->case_value = rewrite(a->case_value);
+	if (a->branch)
+		a->branch = rewrite(a->branch);
+	node = a;
+}
+void block_replacer::visit(switch_stmt::Ptr a) {
+	a->cond = rewrite(a->cond);
+	for (unsigned i = 0; i < a->cases.size(); i++) {
+		a->cases[i] = rewrite(a->cases[i]);
+	}
 	node = a;
 }
 void block_replacer::visit(label::Ptr a) {
@@ -142,12 +159,12 @@ void block_replacer::visit(label::Ptr a) {
 }
 void block_replacer::visit(label_stmt::Ptr a) {
 	if (a->label1 != nullptr)
-		a->label1 = rewrite<label>(a->label1);
+		a->label1 = rewrite(a->label1);
 	node = a;
 }
 void block_replacer::visit(goto_stmt::Ptr a) {
 	if (a->label1 != nullptr)
-		a->label1 = rewrite<label>(a->label1);
+		a->label1 = rewrite(a->label1);
 	node = a;
 }
 void block_replacer::visit(break_stmt::Ptr a) {
@@ -158,14 +175,14 @@ void block_replacer::visit(continue_stmt::Ptr a) {
 }
 void block_replacer::visit(while_stmt::Ptr a) {
 	a->cond = rewrite(a->cond);
-	a->body = rewrite<stmt>(a->body);
+	a->body = rewrite(a->body);
 	node = a;
 }
 void block_replacer::visit(for_stmt::Ptr a) {
-	a->decl_stmt = rewrite<stmt>(a->decl_stmt);
+	a->decl_stmt = rewrite(a->decl_stmt);
 	a->cond = rewrite(a->cond);
 	a->update = rewrite(a->update);
-	a->body = rewrite<stmt>(a->body);
+	a->body = rewrite(a->body);
 	node = a;
 }
 void block_replacer::visit(sq_bkt_expr::Ptr a) {
@@ -195,7 +212,7 @@ void block_replacer::visit(foreign_expr_base::Ptr a) {
 	node = a;
 }
 void block_replacer::visit(var::Ptr a) {
-	a->var_type = rewrite<type>(a->var_type);
+	a->var_type = rewrite(a->var_type);
 	node = a;
 }
 void block_replacer::visit(type::Ptr a) {
@@ -205,50 +222,54 @@ void block_replacer::visit(scalar_type::Ptr a) {
 	node = a;
 }
 void block_replacer::visit(pointer_type::Ptr a) {
-	a->pointee_type = rewrite<type>(a->pointee_type);
+	a->pointee_type = rewrite(a->pointee_type);
 	node = a;
 }
 void block_replacer::visit(reference_type::Ptr a) {
-	a->referenced_type = rewrite<type>(a->referenced_type);
+	a->referenced_type = rewrite(a->referenced_type);
 	node = a;
 }
 void block_replacer::visit(function_type::Ptr a) {
-	a->return_type = rewrite<type>(a->return_type);
+	a->return_type = rewrite(a->return_type);
 	for (unsigned int i = 0; i < a->arg_types.size(); i++) {
-		auto tmp = rewrite<type>(a->arg_types[i]);
+		auto tmp = rewrite(a->arg_types[i]);
 		a->arg_types.at(i) = tmp;
 	}
 	node = a;
 }
 void block_replacer::visit(array_type::Ptr a) {
-	a->element_type = rewrite<type>(a->element_type);
+	a->element_type = rewrite(a->element_type);
 	node = a;
 }
 void block_replacer::visit(builder_var_type::Ptr a) {
-	a->closure_type = rewrite<type>(a->closure_type);
+	a->closure_type = rewrite(a->closure_type);
 	node = a;
 }
 void block_replacer::visit(named_type::Ptr a) {
 	std::vector<type::Ptr> new_args;
 	for (auto b : a->template_args) {
-		new_args.push_back(rewrite<type>(b));
+		new_args.push_back(rewrite(b));
 	}
 	a->template_args = new_args;
 	node = a;
 }
+void block_replacer::visit(anonymous_type::Ptr a) {
+	a->ref_type = rewrite(to<struct_decl>(a->ref_type));
+	node = a;
+}
 void block_replacer::visit(func_decl::Ptr a) {
-	a->return_type = rewrite<type>(a->return_type);
+	a->return_type = rewrite(a->return_type);
 	for (unsigned int i = 0; i < a->args.size(); i++) {
-		auto tmp = rewrite<var>(a->args[i]);
+		auto tmp = rewrite(a->args[i]);
 		a->args.at(i) = tmp;
 	}
-	a->body = rewrite<stmt>(a->body);
+	a->body = rewrite(a->body);
 	node = a;
 }
 
 void block_replacer::visit(struct_decl::Ptr a) {
 	for (unsigned int i = 0; i < a->members.size(); i++) {
-		auto tmp = rewrite<decl_stmt>(a->members[i]);
+		auto tmp = rewrite(a->members[i]);
 		a->members.at(i) = tmp;
 	}
 	node = a;
@@ -267,5 +288,11 @@ void block_replacer::visit(addr_of_expr::Ptr a) {
 	a->expr1 = rewrite(a->expr1);
 	node = a;
 }
+void block_replacer::visit(cast_expr::Ptr a) {
+	a->expr1 = rewrite(a->expr1);
+	a->type1 = rewrite(a->type1);
+	node = a;
+}
+
 
 } // namespace block

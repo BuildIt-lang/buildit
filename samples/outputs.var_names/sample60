@@ -17,6 +17,6 @@ void bar (void) {
     res_12 = m_4;
   }
   int* var14 = &x_0;
-  var14[0] = 0;
+  *var14 = 0;
 }
 

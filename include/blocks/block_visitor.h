@@ -40,6 +40,8 @@ class expr_stmt;
 class stmt_block;
 class decl_stmt;
 class if_stmt;
+class switch_stmt;
+class case_stmt;
 class label;
 class label_stmt;
 class goto_stmt;
@@ -54,6 +56,7 @@ class initializer_list_expr;
 class foreign_expr_base;
 class member_access_expr;
 class addr_of_expr;
+class cast_expr;
 
 class var;
 class type;
@@ -64,6 +67,7 @@ class function_type;
 class array_type;
 class builder_var_type;
 class named_type;
+class anonymous_type;
 
 class func_decl;
 class struct_decl;
@@ -108,6 +112,8 @@ public:
 	virtual void visit(std::shared_ptr<stmt_block>);
 	virtual void visit(std::shared_ptr<decl_stmt>);
 	virtual void visit(std::shared_ptr<if_stmt>);
+	virtual void visit(std::shared_ptr<switch_stmt>);
+	virtual void visit(std::shared_ptr<case_stmt>);
 	virtual void visit(std::shared_ptr<label>);
 	virtual void visit(std::shared_ptr<label_stmt>);
 	virtual void visit(std::shared_ptr<goto_stmt>);
@@ -122,6 +128,7 @@ public:
 	virtual void visit(std::shared_ptr<foreign_expr_base>);
 	virtual void visit(std::shared_ptr<member_access_expr>);
 	virtual void visit(std::shared_ptr<addr_of_expr>);
+	virtual void visit(std::shared_ptr<cast_expr>);
 
 	virtual void visit(std::shared_ptr<var>);
 	virtual void visit(std::shared_ptr<type>);
@@ -132,6 +139,7 @@ public:
 	virtual void visit(std::shared_ptr<array_type>);
 	virtual void visit(std::shared_ptr<builder_var_type>);
 	virtual void visit(std::shared_ptr<named_type>);
+	virtual void visit(std::shared_ptr<anonymous_type>);
 
 	virtual void visit(std::shared_ptr<func_decl>);
 	virtual void visit(std::shared_ptr<struct_decl>);

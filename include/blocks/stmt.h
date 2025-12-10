@@ -100,10 +100,21 @@ public:
 	var::Ptr decl_var;
 	// Optional initialization
 	expr::Ptr init_expr = nullptr;
+	bool is_typedef = false;
+	bool is_extern = false;
+	bool is_static = false;
 	virtual bool is_same(block::Ptr other) override {
 		if (!isa<decl_stmt>(other))
 			return false;
 		decl_stmt::Ptr other_stmt = to<decl_stmt>(other);
+
+		if (is_typedef != other_stmt->is_typedef)
+			return false;
+		if (is_extern != other_stmt->is_extern)
+			return false;
+		if (is_static != other_stmt->is_static)
+			return false;
+
 		if (!decl_var->is_same(other_stmt->decl_var))
 			return false;
 		if (init_expr == nullptr && other_stmt->init_expr != nullptr)
@@ -122,8 +133,11 @@ public:
 		// they are compared by pointers sometimes
 
 		// If we _do_ end up duplicating them, 
-		// they should be consistently updated
+		// they should be consistently updated	
 		np->decl_var = decl_var;
+		np->is_typedef = is_typedef;
+		np->is_extern = is_extern;
+		np->is_static = is_static;	
 		np->init_expr = clone(init_expr);
 		return np;
 	}
@@ -171,6 +185,83 @@ public:
 		np->then_stmt = clone(then_stmt);
 		np->else_stmt = clone(else_stmt);
 		return np;
+	}
+};
+class case_stmt: public stmt {
+public:
+	typedef std::shared_ptr<case_stmt> Ptr;
+	virtual void dump(std::ostream&, int) override;
+	virtual void accept(block_visitor* a) override {
+		a->visit(self<case_stmt>());
+	}
+	// if default, int_const is set to nullptr;
+	bool is_default;
+	int_const::Ptr case_value;
+	// Can be null in case the branch is empty
+	stmt::Ptr branch;
+
+	virtual bool is_same(block::Ptr other) override {
+		if (!isa<case_stmt>(other))
+			return false;
+		case_stmt::Ptr other_stmt = to<case_stmt>(other);
+		if (is_default != other_stmt->is_default)
+			return false;
+		if (!is_default && !case_value->is_same(other_stmt->case_value))
+			return false;
+		if (branch != nullptr && other_stmt->branch == nullptr)
+			return false;
+		if (branch == nullptr && other_stmt->branch != nullptr)
+			return false;
+		if (branch!= nullptr && !branch->is_same(other_stmt->branch))
+			return false;
+		return true;
+	}
+	virtual block::Ptr clone_impl(void) override {
+		auto nc = clone_stmt(this);
+		nc->is_default = is_default;
+		if (case_value) 
+			nc->case_value = clone(case_value);
+		else 
+			nc->case_value = nullptr;
+		if (branch)
+			nc->branch = clone(branch);
+		else
+			nc->branch = nullptr;
+		return nc;
+	}
+};
+
+class switch_stmt: public stmt {
+public:
+	typedef std::shared_ptr<switch_stmt> Ptr;
+	virtual void dump(std::ostream&, int) override;
+	virtual void accept(block_visitor *a) override {
+		a->visit(self<switch_stmt>());
+	}
+	expr::Ptr cond;	
+	std::vector<case_stmt::Ptr> cases;
+	
+	virtual bool is_same(block::Ptr other) override {
+		if (!isa<switch_stmt>(other))
+			return false;
+		switch_stmt::Ptr other_stmt = to<switch_stmt>(other);
+		if (!cond->is_same(other_stmt->cond))
+			return false;
+		if (cases.size() != other_stmt->cases.size())
+			return false;
+		for (unsigned i = 0; i < cases.size(); i++) {
+			if (!(cases[i]->is_same(other_stmt->cases[i]))) 
+				return false;
+		}
+		return true;
+	}
+	virtual block::Ptr clone_impl(void) override {
+		auto nc = clone_stmt(this);
+		nc->cond = clone(cond);	
+		for (auto c: cases) {
+			nc->cases.push_back(clone(c));
+		}	
+		return nc;
 	}
 };
 class label : public block {
@@ -362,11 +453,27 @@ public:
 	type::Ptr return_type;
 	std::vector<var::Ptr> args;
 	stmt::Ptr body;
+
+	bool is_decl_only = false;
+	bool is_variadic = false;
+	bool is_static = false;
+	bool is_inline = false;
+
 	virtual bool is_same(block::Ptr other) override {
 		// Functions don't have static offsets
 		if (!isa<func_decl>(other))
 			return false;
 		func_decl::Ptr other_func = to<func_decl>(other);
+
+		if (is_decl_only != other_func->is_decl_only) 
+			return false;
+		if (is_variadic != other_func->is_variadic) 
+			return false;
+		if (is_static != other_func->is_static) 
+			return false;
+		if (is_inline != other_func->is_inline) 
+			return false;
+
 		if (!return_type->is_same(other_func->return_type))
 			return false;
 		if (args.size() != other_func->args.size())
@@ -383,6 +490,12 @@ public:
 		auto np = clone_stmt(this);
 		np->func_name = func_name;
 		np->return_type = clone(return_type);
+
+		np->is_decl_only = is_decl_only;
+		np->is_variadic = is_variadic;
+		np->is_static = is_static;
+		np->is_inline = is_inline;
+
 		for (auto arg: args) {
 			np->args.push_back(clone(arg));
 		}
@@ -402,6 +515,8 @@ public:
 
 	std::string struct_name;
 	std::vector<decl_stmt::Ptr> members;
+	bool is_union = false;
+	bool is_decl_only = false;
 	virtual bool is_same(block::Ptr other) override {
 		// Struct decls like Function Decls don't have static offsets
 		if (!isa<struct_decl>(other)) 
@@ -409,6 +524,12 @@ public:
 		struct_decl::Ptr other_struct = to<struct_decl>(other);
 
 		if (struct_name != other_struct->struct_name)
+			return false;
+
+		if (is_union != other_struct->is_union) 
+			return false;
+
+		if (is_decl_only != other_struct->is_decl_only) 
 			return false;
 
 		if (members.size() != other_struct->members.size()) 
@@ -424,6 +545,8 @@ public:
 	virtual block::Ptr clone_impl(void) override {
 		auto np = clone_stmt(this);
 		np->struct_name = struct_name;
+		np->is_union = is_union;
+		np->is_decl_only = is_decl_only;
 		for (auto mem: members) {
 			np->members.push_back(clone(mem));
 		}
