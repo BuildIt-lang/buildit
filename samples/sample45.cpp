@@ -11,7 +11,7 @@ static void foo(dyn_var<int> count, char to_print, std::set<char> &working_set, 
 	for (dyn_var<int> i = 0; i < count; i++) {
 		myprintf("%c", to_print);
 	}
-	myprintf("\\n");
+	myprintf("\n");
 	if (to_print < 'z') {
 		if (done_set.find(to_print + 1) == done_set.end())
 			working_set.insert(to_print + 1);

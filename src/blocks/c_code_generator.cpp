@@ -243,8 +243,42 @@ void c_code_generator::visit(float_const::Ptr a) {
 		oss << ".0";
 	oss << "f";
 }
+static std::string escapeString(const std::string& input) {
+    std::string output;
+
+    for (unsigned char c : input) {
+        switch (c) {
+            // Standard C Escape Sequences
+            case '\a': output += "\\a"; break; // Bell
+            case '\b': output += "\\b"; break; // Backspace
+            case '\f': output += "\\f"; break; // Form feed
+            case '\n': output += "\\n"; break; // Newline
+            case '\r': output += "\\r"; break; // Carriage return
+            case '\t': output += "\\t"; break; // Horizontal tab
+            case '\v': output += "\\v"; break; // Vertical tab
+            
+            // Critical Syntax Characters
+            case '\\': output += "\\\\"; break; // Backslash
+            case '"':  output += "\\\""; break; // Double quote
+            
+            default:
+                // If it is a printable character (like 'A', '1', '!', ' '), append it.
+                if (std::isprint(c)) {
+                    output += c;
+                } 
+                // Otherwise, escape it as a Hex value (e.g., ESC becomes \x1B).
+                else {
+                    char buf[5]; // Big enough for \xHH + null terminator
+                    std::snprintf(buf, sizeof(buf), "\\x%02X", c);
+                    output += buf;
+                }
+                break;
+        }
+    }
+    return output;
+}
 void c_code_generator::visit(string_const::Ptr a) {
-	oss << "\"" << a->value << "\"";
+	oss << "\"" << escapeString(a->value) << "\"";
 }
 void c_code_generator::visit(assign_expr::Ptr a) {
 	handle_child(a, a->var1, true);
