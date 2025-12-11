@@ -207,6 +207,17 @@ public:
 		var_name = v.name;
 	}
 
+	dyn_var_impl(const with_block_var& v) {
+		create_dyn_var(!v.with_decl);
+		// Swap out the variable
+		block_var = v.var;
+		var_name = v.var->var_name;
+		// If a declaration was created, swap out the var too
+		if (v.with_decl) {
+			block_decl_stmt->decl_var = v.var;
+		}
+	}
+
 	dyn_var_impl(const defer_init &) {
 		// Do nothing here
 		// Defer init "automatically" supports custom types
@@ -342,6 +353,17 @@ public:
 	const dyn_var<T> *addr(void) const {
 		// TODO: Consider using dynamic_cast here
 		return (const dyn_var<T> *)this;
+	}
+
+	void add_attribute(std::string s) {
+		std::vector<std::string> attrs;
+		if (block_var->hasMetadata<std::vector<std::string>>("attributes")) {
+			attrs = block_var->getMetadata<std::vector<std::string>>("attributes");
+		}
+		if (std::find(attrs.begin(), attrs.end(), s) == attrs.end()) {
+			attrs.push_back(s);
+		}
+		block_var->setMetadata<std::vector<std::string>>("attributes", attrs);
 	}
 };
 

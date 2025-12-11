@@ -56,6 +56,12 @@ struct with_name {
 	with_name(const std::string &n, bool wd = false) : name(n), with_decl(wd) {}
 };
 
+struct with_block_var {
+	block::var::Ptr var;
+	bool with_decl;
+	with_block_var(block::var::Ptr v, bool wd = false): var(v), with_decl(wd) {}
+};
+
 // Generator states for non-deterministic values
 struct nd_var_gen_base;
 

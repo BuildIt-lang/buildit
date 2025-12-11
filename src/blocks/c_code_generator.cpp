@@ -688,7 +688,15 @@ void c_code_generator::visit(func_decl::Ptr a) {
 		if (printDelim)
 			oss << ", ";
 		printDelim = true;
-		oss << complex_type_helper(arg->var_type, " " + arg->var_name);
+		std::string name = "";
+		if (arg->hasMetadata<std::vector<std::string>>("attributes")) {
+			const auto &attributes = arg->getMetadata<std::vector<std::string>>("attributes");
+			for (auto attr : attributes) {
+				name = name + " " + attr;
+			}
+		}	
+		name = name + " " + arg->var_name;
+		oss << complex_type_helper(arg->var_type, name);
 	}
 	if (a->is_variadic) {
 		oss << ", ...";

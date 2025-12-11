@@ -1,0 +1,6 @@
+void bar (int* restrict arg0, int* restrict arg1, int arg2) {
+  for (int var0 = 0; var0 < arg2; (var0 = var0 + 1) - 1) {
+    arg0[var0] = arg1[var0];
+  }
+}
+

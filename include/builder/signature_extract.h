@@ -46,7 +46,7 @@ struct extract_signature_impl<std::tuple<ProcessedArgTypes...>, std::tuple<NextA
 	// The dyn_var version doesn't need any NextParam to exist or be used
 	template <typename F, typename...OtherParams>
 	static void fill_invocation(invocation_state* i_state, F func, int arg_index, ProcessedArgTypes...processed_args, OtherParams&&...other_params) {
-		// We don't need to heap allocate objects anymore, just throw in a with_name, it has all
+		// We don't need to heap allocate objects anymore, just throw in a with_block_var, it has all
 		// the information to create the dyn_var when invoking the actual funciton
 		std::string arg_name = "arg" + std::to_string(arg_index);
 		auto var = std::make_shared<block::var>();	
@@ -54,8 +54,8 @@ struct extract_signature_impl<std::tuple<ProcessedArgTypes...>, std::tuple<NextA
 		var->var_type = dyn_var<NextArg>::create_block_type();
 		var->var_type->static_offset = var->static_offset = tracer::get_unique_tag();
 		i_state->generated_func_decl->args.push_back(var);
-		// We explain below by with_name is wrapped in a tuple
-		extract_signature_impl<std::tuple<ProcessedArgTypes..., std::tuple<with_name>>, std::tuple<RemainingArgTypes...>, ReturnType>::fill_invocation(i_state, func, arg_index + 1, std::forward<ProcessedArgTypes>(processed_args)..., std::tuple<with_name>(with_name(arg_name)), std::forward<OtherParams>(other_params)...);
+		// We explain below by with_block_var is wrapped in a tuple
+		extract_signature_impl<std::tuple<ProcessedArgTypes..., std::tuple<with_block_var>>, std::tuple<RemainingArgTypes...>, ReturnType>::fill_invocation(i_state, func, arg_index + 1, std::forward<ProcessedArgTypes>(processed_args)..., std::tuple<with_block_var>(with_block_var(var)), std::forward<OtherParams>(other_params)...);
 	}
 };
 
@@ -82,7 +82,7 @@ struct extract_signature_impl<std::tuple<ProcessedArgTypes...>, std::tuple<>, vo
 	// Take other_args but discard them
 	template <typename F, typename...OtherParams>
 	static void fill_invocation(invocation_state* i_state, F func, int arg_index, ProcessedArgTypes...processed_args, OtherParams&&...other_params) {
-		// All conversions from with_name to dyn_var will happen INSIDE the lambda and hence the lifetype of the
+		// All conversions from with_block_var to dyn_var will happen INSIDE the lambda and hence the lifetype of the
 		// dyn_var will be valid for the run
 		// Mark the lambda to be mutable otherwise if func accepts a reference it won't bind correctly 
 		// since captured variables are const when captured by value
