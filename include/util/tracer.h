@@ -85,6 +85,7 @@ public:
 		// in the base type
 
 		for (unsigned i = 0; i < static_var_snapshots.size(); i++) {
+			if (static_var_snapshots[i] == nullptr) continue;
 			h = hash_combine(h, static_var_snapshots[i]->computed_hash);
 		}
 
