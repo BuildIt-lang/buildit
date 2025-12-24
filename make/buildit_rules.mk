@@ -13,13 +13,13 @@ $(LIBRARY_OBJS): $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp $(INCLUDES) $(DEPS_LIST)
 	$(CXXV) $(CFLAGS_INTERNAL) $(CFLAGS) $< -o $@ $(INCLUDE_FLAGS) -c
 $(BUILD_DIR)/samples/%.o: $(SAMPLES_DIR)/%.cpp $(INCLUDES) $(DEPS_LIST)
 	@mkdir -p $(@D)
-	- $(CXXV) $(CFLAGS_INTERNAL) $(CFLAGS) $< -o $@ $(INCLUDE_FLAGS) -c
+	$(CXXV) $(CFLAGS_INTERNAL) $(CFLAGS) $< -o $@ $(INCLUDE_FLAGS) -c
 $(LIBRARY): $(LIBRARY_OBJS) $(DEPS_LIST)
 	@mkdir -p $(@D)
 	$(ARV) cr $(LIBRARY) $(LIBRARY_OBJS)
 $(BUILD_DIR)/sample%: $(BUILD_DIR)/samples/sample%.o $(LIBRARY) $(DEPS_LIST)
 	@mkdir -p $(@D)
-	- $(CXXLDV) -o $@ $< $(LINKER_FLAGS)
+	$(CXXLDV) -o $@ $< $(LINKER_FLAGS)
 
 .PHONY: executables
 executables: $(SAMPLES)

@@ -6,10 +6,13 @@
 using builder::dyn_var;
 using builder::static_var;
 
-constexpr char graph_t_name[] = "GraphT";
+// Don't declare this as constexpr, so that graph_t 
+// has external linkage and operator can left undefined
+char graph_t_name[] = "GraphT";
 using graph_t = typename builder::name<graph_t_name>;
 
-constexpr char foo_t_name[] = "FooT";
+// same reason as above
+char foo_t_name[] = "FooT";
 template <typename T>
 using foo_t = typename builder::name<foo_t_name, T>;
 
