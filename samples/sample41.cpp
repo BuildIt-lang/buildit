@@ -8,7 +8,7 @@ using builder::dyn_var;
 dyn_var<int(char *)> myprintf = builder::with_name("printf");
 
 static void foo(dyn_var<int> count, char to_print, std::set<char> &working_set, std::set<char> &done_set) {
-	for (dyn_var<int> i = 0; i < count; i++) {
+	for (dyn_var<int> i = 0; i < count; ++i) {
 		myprintf("%c", to_print);
 	}
 	myprintf("\n");

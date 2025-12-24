@@ -11,14 +11,20 @@ using builder::static_var;
 char graph_t_name[] = "GraphT";
 using graph_t = typename builder::name<graph_t_name>;
 
-// same reason as above
+extern char foo_t_name[];
 char foo_t_name[] = "FooT";
+
 template <typename T>
 using foo_t = typename builder::name<foo_t_name, T>;
 
-graph_t operator + (const graph_t&, const int&); // We don't need an implementation
+// Declare the operators inside the builder namespace
+// this allows ADL to find the operators. Otherwise atleast clang
+// doesn't see this
+namespace builder {
+graph_t operator + (const graph_t& a, const int&);
 template <typename T>
-foo_t<T> operator + (const foo_t<T>&, const int&); // We don't need an implementation
+foo_t<T> operator + (const foo_t<T>& a, const int&);
+}
 
 static void bar(void) {
 	dyn_var<graph_t> g;

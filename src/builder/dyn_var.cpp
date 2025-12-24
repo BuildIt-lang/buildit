@@ -63,7 +63,7 @@ block::expr::Ptr to_expr(const std::initializer_list<expr_wrapper>& i) {
 	e->elems = argv;
 	return e;
 }
-block::expr::Ptr to_expr(const expr_wrapper& e) {
+block::expr::Ptr to_expr(const expr_wrapper_base& e) {
 	return e.e;
 }
 

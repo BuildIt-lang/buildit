@@ -33,3 +33,4 @@ jobs:
         uses: actions/checkout@v2
       - run: make -C ${{ github.workspace }} -j$(sysctl -n hw.physicalcpu) run
       - run: echo "Tests completed"
+

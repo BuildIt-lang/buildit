@@ -4,10 +4,6 @@
 #include "builder/forward_declarations.h"
 namespace builder {
 
-
-template <typename T>
-class dyn_var;
-
 // A single templated constructor to create expr blocks of any type
 // This handles removing childred from UC, adding new expresisons to UC 
 // and caching for runs, the children, aren't set but are removed from UC
@@ -70,14 +66,20 @@ block::expr::Ptr to_expr(char* s);
 // to be specifically used for initializer_lists since they need 
 // to be homogenous. This can be constructed from anything that is
 // to_expr convertible
-struct expr_wrapper {
+
+struct expr_wrapper_base {
 	block::expr::Ptr e;
+	expr_wrapper_base(block::expr::Ptr e): e(e) {}
+};
+
+struct expr_wrapper: public expr_wrapper_base {
 	template<typename T>
-	expr_wrapper(const T& t): e(to_expr(t)) {}
+	expr_wrapper(const T& t): expr_wrapper_base(to_expr(t)) {}
 };
 
 block::expr::Ptr to_expr(const std::initializer_list<expr_wrapper>& i);
-block::expr::Ptr to_expr(const expr_wrapper& e);
+block::expr::Ptr to_expr(const expr_wrapper_base&);
+
 
 }
 
