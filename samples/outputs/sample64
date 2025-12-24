@@ -1,22 +1,6 @@
-int power (int arg0, int arg1) {
-  int var0 = arg1;
-  int var1 = 1;
-  int var2 = arg0;
-  while (var0 > 1) {
-    if (var0 % 2 == 1) {
-      var1 = var1 * var2;
-    } 
-    var2 = var2 * var2;
-    var0 = var0 / 2;
-  }
-  return var1 * var2;
-}
-
 void bar (void) {
-  int var0;
-  int var1 = var0 + 1;
-  while (var1) {
-    var0 = var0 + 1;
-  }
+  int* var0 = (int*)malloc(4ll);
+  var0[0] = 123;
+  free(var0);
 }
 

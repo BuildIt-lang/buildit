@@ -1,23 +1,40 @@
-FUNC_DECL (foo)
-  SCALAR_TYPE (VOID)
-  STMT_BLOCK
-    DECL_STMT
-      SCALAR_TYPE (INT)
-      VAR (my_var)
-      NO_INITIALIZATION
-    EXPR_STMT
-      ASSIGN_EXPR
-        VAR_EXPR
-          VAR (my_var)
-        INT_CONST (1)
-    DECL_STMT
-      SCALAR_TYPE (INT)
-      VAR (y_0)
-      VAR_EXPR
-        VAR (my_var)
 void foo (void) {
-  int my_var;
-  my_var = 1;
-  int y_0 = my_var;
+  int member_var;
+  int x_0 = 0;
+  if (x_0) {
+    member_var = 1;
+  } else {
+    member_var = 2;
+  }
+  if (member_var % 2 == 0) {
+    member_var = member_var + 0;
+  } 
+  if (member_var % 2 == 0) {
+    member_var = member_var + 1;
+  } 
+  if (member_var % 2 == 0) {
+    member_var = member_var + 2;
+  } 
+  if (member_var % 2 == 0) {
+    member_var = member_var + 3;
+  } 
+  if (member_var % 2 == 0) {
+    member_var = member_var + 4;
+  } 
+  if (member_var % 2 == 0) {
+    member_var = member_var + 5;
+  } 
+  if (member_var % 2 == 0) {
+    member_var = member_var + 6;
+  } 
+  if (member_var % 2 == 0) {
+    member_var = member_var + 7;
+  } 
+  if (member_var % 2 == 0) {
+    member_var = member_var + 8;
+  } 
+  if (member_var % 2 == 0) {
+    member_var = member_var + 9;
+  } 
 }
 

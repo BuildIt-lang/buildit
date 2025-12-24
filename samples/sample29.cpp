@@ -1,47 +1,33 @@
-/*NO_TEST*/
 #include "blocks/c_code_generator.h"
-#include "builder/builder.h"
 #include "builder/builder_context.h"
-#include "builder/builder_union.h"
 #include "builder/dyn_var.h"
 #include "builder/static_var.h"
 #include <iostream>
-using builder::builder_union;
 using builder::dyn_var;
 using builder::static_var;
 
-static void foo(void) {
-	dyn_var<int> sum = 0;
-	const int arr[] = {1, 3, 4, 0, 2, 6, 0, 8, 0, 0, 1, -2, 0, 0, 3};
+constexpr char graph_t_name[] = "GraphT";
+using graph_t = typename builder::name<graph_t_name>;
 
-	for (static_var<unsigned int> x = 0; x < sizeof(arr) / sizeof(*arr); x++) {
-		if (arr[x] != 0) {
-			builder::annotate("roll.0");
-			sum = sum + arr[x];
-		}
-	}
+constexpr char foo_t_name[] = "FooT";
+template <typename T>
+using foo_t = typename builder::name<foo_t_name, T>;
 
-	const int adj[5][5] = {{4, 0, 1, 0, 0}, {5, 0, 0, 0, 1}, {0, 0, 1, 0, 0}, {1, 2, 1, 0, 0}, {0, 0, 0, 0, 0}};
+graph_t operator + (const graph_t&, const int&); // We don't need an implementation
+template <typename T>
+foo_t<T> operator + (const foo_t<T>&, const int&); // We don't need an implementation
 
-	dyn_var<int[5]> old_ranks;
-	dyn_var<int[5]> new_ranks;
+static void bar(void) {
+	dyn_var<graph_t> g;
+	g = g + 1;
 
-	for (static_var<int> src = 0; src < 5; src++) {
-		// dyn_var<int> sum = 0;
-		for (static_var<int> dst = 0; dst < 5; dst++) {
-			if (adj[src][dst] != 0) {
-				builder::annotate("roll.1");
-				// builder::annotate("roll.1." +
-				// std::to_string(src));
-				new_ranks[src] = new_ranks[src] + adj[src][dst] * old_ranks[dst];
-			}
-		}
-	}
+	dyn_var<foo_t<int>> f;
+	f = f + 1;
 }
 
 int main(int argc, char *argv[]) {
 	builder::builder_context context;
-	auto ast = context.extract_ast_from_function(foo);
+	auto ast = context.extract_ast_from_function(bar);
 	ast->dump(std::cout, 0);
 	block::c_code_generator::generate_code(ast, std::cout, 0);
 	return 0;

@@ -1,33 +1,46 @@
-// Include the headers
 #include "blocks/c_code_generator.h"
+#include "builder/builder_context.h"
 #include "builder/builder_dynamic.h"
 #include "builder/dyn_var.h"
-#include "builder/static_var.h"
-#include <iostream>
-
-// Include the BuildIt types
+#include <set>
 using builder::dyn_var;
-using builder::static_var;
 
-static const char vector_t_name[] = "std::vector";
+dyn_var<int(char *)> myprintf = builder::with_name("printf");
 
-template <typename T>
-using vector_t = builder::name<vector_t_name, T>;
-
-static dyn_var<int> power_f(void) {
-	dyn_var<vector_t<int>> x = {0, 1, 2};
-	dyn_var<vector_t<int>> y = x;
-	for (dyn_var<int> i = 0; i < 5; i = i + 1)
-		y[0] = y[1] + y[0];
-	return y[0];
+static void foo(dyn_var<int> count, char to_print, std::set<char> &working_set, std::set<char> &done_set) {
+	for (dyn_var<int> i = 0; i < count; i++) {
+		myprintf("%c", to_print);
+	}
+	myprintf("\n");
+	if (to_print < 'z') {
+		if (done_set.find(to_print + 1) == done_set.end())
+			working_set.insert(to_print + 1);
+		std::string name = "print_" + std::to_string(to_print + 1);
+		dyn_var<void(int)> bar = builder::with_name(name);
+		bar(count + 1);
+	}
 }
 
 int main(int argc, char *argv[]) {
-	builder::builder_context context;
-	context.dynamic_use_cxx = true;
-	context.dynamic_header_includes = "#include <vector>";
-	context.feature_unstructured = true;
-	auto fptr = (int (*)(void))builder::compile_function_with_context(context, power_f);
-	std::cout << fptr() << std::endl;
+	std::set<char> working_set, done_set;
+	std::vector<block::block::Ptr> functions;
+
+	working_set.insert('a');
+
+	while (!working_set.empty()) {
+		char c = *working_set.begin();
+		working_set.erase(c);
+		std::string name = "print_" + std::to_string(c);
+		auto ast = builder::builder_context().extract_function_ast(foo, name, c, working_set, done_set);
+		functions.push_back(ast);
+		done_set.insert(c);
+	}
+
+	builder::builder_context ctx;
+	ctx.dynamic_header_includes = "#include <stdio.h>";
+	void (*fptr)(int) = (void (*)(int))builder::compile_asts(ctx, functions, "print_" + std::to_string('a'));
+
+	fptr(1);
+
 	return 0;
 }

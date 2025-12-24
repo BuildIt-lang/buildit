@@ -1,44 +1,42 @@
+// Include the headers
 #include "blocks/c_code_generator.h"
-#include "builder/builder.h"
-#include "builder/builder_context.h"
+#include "blocks/extract_cuda.h"
 #include "builder/dyn_var.h"
 #include "builder/static_var.h"
 #include <iostream>
-using builder::as_member;
+
+// Include the BuildIt types
 using builder::dyn_var;
 using builder::static_var;
-
-constexpr char foo_t_name[] = "FooT";
-using foo_t = typename builder::name<foo_t_name>;
-
-class FooT : public dyn_var<foo_t> {
-public:
-	typedef dyn_var<foo_t> super;
-	using super::super;
-	using dyn_var<foo_t>::operator=;
-	FooT(const FooT &t) : dyn_var<foo_t>((builder::builder)t) {}
-	FooT() : dyn_var<foo_t>() {}
-	builder::builder operator=(const FooT &t) {
-		return (*this) = (builder::builder)t;
+static void bar(dyn_var<int *> buffer) {
+	builder::annotate(CUDA_KERNEL);
+	for (dyn_var<int> cta = 0; cta < 128; cta = cta + 1) {
+		for (dyn_var<int> tid = 0; tid < 512; tid = tid + 1) {
+			dyn_var<int> thread_id = cta * 512 + tid;
+			buffer[thread_id] = 0;
+		}
 	}
-
-	dyn_var<int> member = as_member(this, "member");
-};
-
-static void bar(void) {
-	FooT g;
-	g = g + 1;
-	dyn_var<int> x = g.member;
-	FooT h = g;
-	h = g;
-	dyn_var<foo_t *> ptr = &g;
-	((FooT)(builder::cast)ptr[0]).member = 0;
+	builder::annotate(CUDA_KERNEL_COOP);
+	for (dyn_var<int> cta = 0; cta < 128; cta = cta + 1) {
+		for (dyn_var<int> tid = 0; tid < 512; tid = tid + 1) {
+			dyn_var<int> thread_id = cta * 512 + tid;
+			buffer[thread_id] = 0;
+		}
+	}
+	builder::annotate(CUDA_KERNEL_COOP_COPY_OUT);
+	for (dyn_var<int> cta = 0; cta < 128; cta = cta + 1) {
+		for (dyn_var<int> tid = 0; tid < 512; tid = tid + 1) {
+			dyn_var<int> thread_id = cta * 512 + tid;
+			buffer[thread_id] = 0;
+		}
+	}
 }
 
 int main(int argc, char *argv[]) {
 	builder::builder_context context;
-	auto ast = context.extract_ast_from_function(bar);
-	ast->dump(std::cout, 0);
+	auto ast = context.extract_function_ast(bar, "bar");
+	auto new_decls = block::extract_cuda_from(block::to<block::func_decl>(ast)->body);
+	for (auto a : new_decls)
+		block::c_code_generator::generate_code(a, std::cout, 0);
 	block::c_code_generator::generate_code(ast, std::cout, 0);
-	return 0;
 }

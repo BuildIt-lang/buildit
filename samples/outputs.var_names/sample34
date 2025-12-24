@@ -1,52 +1,78 @@
-FUNC_DECL (bar)
-  SCALAR_TYPE (VOID)
-  STMT_BLOCK
-    DECL_STMT
-      SCALAR_TYPE (INT)
-      VAR (x_0)
-      INT_CONST (5)
-    FOR_STMT
-      DECL_STMT
-        SCALAR_TYPE (INT)
-        VAR (i_1)
-        INT_CONST (0)
-      LT_EXPR
+STMT_BLOCK
+  DECL_STMT
+    NAMED_TYPE (FooT)
+    VAR (g_0)
+    NO_INITIALIZATION
+  EXPR_STMT
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (g_0)
+      PLUS_EXPR
         VAR_EXPR
-          VAR (i_1)
-        INT_CONST (100)
-      ASSIGN_EXPR
-        VAR_EXPR
-          VAR (i_1)
-        PLUS_EXPR
+          VAR (g_0)
+        INT_CONST (1)
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (x_1)
+    MEMBER_ACCESS_EXPR (member)
+      VAR_EXPR
+        VAR (g_0)
+  DECL_STMT
+    NAMED_TYPE (FooT)
+    VAR (h_2)
+    VAR_EXPR
+      VAR (g_0)
+  EXPR_STMT
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (h_2)
+      VAR_EXPR
+        VAR (g_0)
+  DECL_STMT
+    POINTER_TYPE
+      NAMED_TYPE (FooT)
+    VAR (ptr_3)
+    ADDR_OF_EXPR
+      VAR_EXPR
+        VAR (g_0)
+  EXPR_STMT
+    ASSIGN_EXPR
+      MEMBER_ACCESS_EXPR (member)
+        SQ_BKT_EXPR
           VAR_EXPR
-            VAR (i_1)
-          INT_CONST (1)
-      STMT_BLOCK
-        IF_STMT
-          NOT_EXPR
-            EQUALS_EXPR
-              VAR_EXPR
-                VAR (i_1)
-              VAR_EXPR
-                VAR (x_0)
-          STMT_BLOCK
-            CONTINUE_STMT
-          STMT_BLOCK
-        EXPR_STMT
-          ASSIGN_EXPR
-            VAR_EXPR
-              VAR (x_0)
-            VAR_EXPR
-              VAR (i_1)
-        BREAK_STMT
-void bar (void) {
-  int x_0 = 5;
-  for (int i_1 = 0; i_1 < 100; i_1 = i_1 + 1) {
-    if (!(i_1 == x_0)) {
-      continue;
-    } 
-    x_0 = i_1;
-    break;
-  }
+            VAR (ptr_3)
+          INT_CONST (0)
+      INT_CONST (0)
+  EXPR_STMT
+    ASSIGN_EXPR
+      MEMBER_ACCESS_EXPR (member)
+        SQ_BKT_EXPR
+          VAR_EXPR
+            VAR (ptr_3)
+          INT_CONST (0)
+      INT_CONST (1)
+  DECL_STMT
+    NAMED_TYPE (FooT)
+    VAR (i_4)
+    SQ_BKT_EXPR
+      VAR_EXPR
+        VAR (ptr_3)
+      INT_CONST (0)
+  EXPR_STMT
+    ASSIGN_EXPR
+      MEMBER_ACCESS_EXPR (member)
+        VAR_EXPR
+          VAR (i_4)
+      INT_CONST (3)
+{
+  FooT g_0;
+  g_0 = g_0 + 1;
+  int x_1 = g_0.member;
+  FooT h_2 = g_0;
+  h_2 = g_0;
+  FooT* ptr_3 = &g_0;
+  ptr_3->member = 0;
+  ptr_3->member = 1;
+  FooT i_4 = *ptr_3;
+  i_4.member = 3;
 }
-

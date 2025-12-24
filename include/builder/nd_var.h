@@ -1,7 +1,6 @@
 #ifndef ND_VAR_H
 #define ND_VAR_H
 
-#include "builder/builder.h"
 #include "builder/static_var.h"
 #include "util/tracer.h"
 #include "builder/exceptions.h"

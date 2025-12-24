@@ -1,15 +1,12 @@
 #ifndef TYPE_EXTRACTOR_H
 #define TYPE_EXTRACTOR_H
 
-
 #include "builder/forward_declarations.h"
 #include "util/mtp_utils.h"
-#include "builder/generics.h"
 #include <algorithm>
 
 namespace builder {
 
-struct custom_type_base;
 
 template <typename T>
 struct external_type_namer;
@@ -83,10 +80,8 @@ template <typename T>
 class type_extractor {
 public:
 	// This implementation is currenty only used
-	// by custom types which are derived from custom_type_base
+	// by custom types which are derived from custom_type
 	static block::type::Ptr extract_type(void) {
-		//static_assert(std::is_base_of<custom_type_base, T>::value,
-			      //"Custom types should inherit from builder::custom_type_base");
 		block::named_type::Ptr type = std::make_shared<block::named_type>();
 		type->type_name = type_namer<T>::get_type_name();
 		type->template_args = type_template<T>::get_templates();
@@ -345,34 +340,13 @@ public:
 };
 
 
-
-// Extracting function types
-template <typename... args>
-std::vector<block::type::Ptr> extract_type_vector_dyn(void);
-
-template <typename T, typename... args>
-std::vector<block::type::Ptr> extract_type_vector_helper_dyn(void) {
-	std::vector<block::type::Ptr> rest = extract_type_vector_dyn<args...>();
-	rest.push_back(type_extractor<T>::extract_type());
-	return rest;
-}
-
-template <typename... args>
-std::vector<block::type::Ptr> extract_type_vector_dyn(void) {
-	return extract_type_vector_helper_dyn<args...>();
-}
-
-template <>
-std::vector<block::type::Ptr> extract_type_vector_dyn<>(void);
-
 template <typename r_type, typename... a_types>
 class type_extractor<r_type(a_types...)> {
 public:
 	static block::type::Ptr extract_type(void) {
 		block::function_type::Ptr type = std::make_shared<block::function_type>();
 		type->return_type = type_extractor<r_type>::extract_type();
-		type->arg_types = extract_type_vector_dyn<a_types...>();
-		std::reverse(type->arg_types.begin(), type->arg_types.end());
+		type->arg_types = std::vector<block::type::Ptr>({type_extractor<a_types>::extract_type()...});
 		return type;
 	}
 };
@@ -380,32 +354,13 @@ public:
 template <const char *N, typename... Args>
 struct name {};
 
-template <typename... Args>
-struct extract_type_from_args;
-
-template <typename T1, typename... Args>
-struct extract_type_from_args<T1, Args...> {
-	static std::vector<block::type::Ptr> get_types() {
-		auto a = extract_type_from_args<Args...>::get_types();
-		a.insert(a.begin(), type_extractor<T1>::extract_type());
-		return a;
-	}
-};
-
-template <>
-struct extract_type_from_args<> {
-	static std::vector<block::type::Ptr> get_types() {
-		return std::vector<block::type::Ptr>();
-	}
-};
-
 template <const char *N, typename... Args>
 class type_extractor<name<N, Args...>> {
 public:
 	static block::type::Ptr extract_type(void) {
 		block::named_type::Ptr type = std::make_shared<block::named_type>();
 		type->type_name = N;
-		type->template_args = extract_type_from_args<Args...>::get_types();
+		type->template_args = {type_extractor<Args>::extract_type()...};
 		return type;
 	}
 };

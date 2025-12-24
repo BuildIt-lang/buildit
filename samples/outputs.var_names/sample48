@@ -1,42 +1,49 @@
-FUNC_DECL (my_bar)
-  SCALAR_TYPE (VOID)
-  STMT_BLOCK
-    DECL_STMT
-      SCALAR_TYPE (INT)
-      VAR (x_0)
-      NO_INITIALIZATION
-    DECL_STMT
-      SCALAR_TYPE (INT)
-      VAR (var1)
-      INT_CONST (0)
-    DECL_STMT
-      SCALAR_TYPE (INT)
-      VAR (var2)
-      INT_CONST (0)
-    EXPR_STMT
-      ASSIGN_EXPR
-        VAR_EXPR
-          VAR (var1)
-        INT_CONST (1)
-    WHILE_STMT
-      INT_CONST (1)
-      STMT_BLOCK
-        DECL_STMT
-          SCALAR_TYPE (INT)
-          VAR (var3)
-          INT_CONST (1)
-        DECL_STMT
-          SCALAR_TYPE (INT)
-          VAR (var4)
-          INT_CONST (2)
-void my_bar (void) {
-  int x_0;
-  int var1 = 0;
-  int var2 = 0;
-  var1 = 1;
-  while (1) {
-    int var3 = 1;
-    int var4 = 2;
-  }
+int isEven (int arg0) {
+  if (arg0 == 0) {
+    return 1;
+  } 
+  if (arg0 == 1) {
+    return 0;
+  } 
+  if (arg0 == 2) {
+    return 1;
+  } 
+  if (arg0 == 3) {
+    return 0;
+  } 
+  if (arg0 == 4) {
+    return 1;
+  } 
+  if (arg0 == 5) {
+    return 0;
+  } 
+  if (arg0 == 6) {
+    return 1;
+  } 
+  if (arg0 == 7) {
+    return 0;
+  } 
+  if (arg0 == 8) {
+    return 1;
+  } 
+  if (arg0 == 9) {
+    return 0;
+  } 
+  if (arg0 == 10) {
+    return 1;
+  } 
+  if (arg0 == 11) {
+    return 0;
+  } 
+  if (arg0 == 12) {
+    return 1;
+  } 
+  if (arg0 == 13) {
+    return 0;
+  } 
+  if (arg0 == 14) {
+    return 1;
+  } 
+  return 0;
 }
 

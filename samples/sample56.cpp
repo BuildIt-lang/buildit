@@ -1,48 +1,57 @@
+// Include the headers
 #include "blocks/c_code_generator.h"
-#include "builder/builder.h"
-#include "builder/builder_context.h"
-#include "builder/dyn_var.h"
 #include "builder/static_var.h"
+#include "builder/dyn_var.h"
+#include "builder/generics.h"
+#include "blocks/rce.h"
 #include <iostream>
 
-using builder::as_member;
+// Include the BuildIt types
 using builder::dyn_var;
 using builder::static_var;
+using builder::generic;
+using builder::type_of;
+using builder::with_type;
 
 
-struct struct_type {
-	dyn_var<int> x;
-	dyn_var<float> y;
-};
+static dyn_var<generic> get_max(dyn_var<generic> x, dyn_var<generic> y) {
 
-struct my_type {
-	static constexpr const char* type_name = "my_type";
-	dyn_var<struct_type> nested = builder::with_name("nested");
-	dyn_var<int> another;
-};
+	if (type_of(x) != type_of(y)) {
+		assert(false && "get_max can only compare similar types");
+	}
 
-
-dyn_var<struct_type> p = builder::as_global("p");
-
-static void bar(void) {
-	dyn_var<my_type> a;
-	dyn_var<struct_type> b;
-	
-	a.nested = b;
-	a.nested.x = a.another;
-	
-	a.nested.y++;
-	p.x = 0;
+	dyn_var<generic> res = with_type(type_of(x));
+	if (x < y) res = y;
+	else res = x;
+	return res;
 }
 
-int main(int argc, char *argv[]) {
+static void set_zero(dyn_var<generic> ptr) {
+	*ptr = 0;
+}
 
+static void bar(void) {
+	dyn_var<generic> x;
+	x.set_type(builder::create_type<int>());
+
+	dyn_var<generic> y = with_type(builder::create_type<long>());	
+
+	dyn_var<int> a, b;
+	dyn_var<float> m,n;
+
+	dyn_var<int> m1 = get_max(with_type(a), with_type(b));
+	dyn_var<float> m2 = get_max(m, n);
+
+
+	set_zero(with_type(pointer_of(type_of(x)), &x));
+}
+
+int main(int argc, char* argv[]) {
 	builder::builder_context context;
+	context.run_rce = true;
 	auto ast = context.extract_function_ast(bar, "bar");
-	ast->dump(std::cout, 0);
-
-	block::c_code_generator::generate_struct_decl<dyn_var<struct_type>>(std::cout);
-	block::c_code_generator::generate_struct_decl<dyn_var<my_type>>(std::cout);
 	block::c_code_generator::generate_code(ast, std::cout, 0);
 	return 0;
 }
+
+

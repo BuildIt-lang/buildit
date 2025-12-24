@@ -23,9 +23,22 @@ OtherParams... - all the remaining params the other
 ProcessedArgTypes is borrowed from above and hence is not really a pack
 */
 
+// Helper function to create a return statement
 template <typename T>
-constexpr bool is_dyn_var(void) {
-	return std::is_base_of<var, T>::value;
+void create_return_stmt(const dyn_var<T>& a) {
+	auto e = to_expr(a);
+	get_run_state()->remove_node_from_sequence(e);
+	get_run_state()->commit_uncommitted();
+	if (get_run_state()->is_catching_up())
+		return;
+	block::return_stmt::Ptr ret_stmt = std::make_shared<block::return_stmt>();
+	// ret_stmt->static_offset = a.block_expr->static_offset;
+	//  Finding conflicts between return statements is somehow really hard.
+	//  So treat each return statement as different. This is okay, because a
+	//  jump is as bad a return. Also no performance issues
+	ret_stmt->static_offset = tracer::get_unique_tag();
+	ret_stmt->return_val = e;
+	get_run_state()->add_stmt_to_current_block(ret_stmt, true);
 }
 
 template <typename ProcessedArgTypes, typename RemainingArgTypes, typename ReturnType, typename Enable=void>
@@ -41,7 +54,7 @@ struct extract_signature_impl {
 // For partial specializations, the template parameter is a pack but is used inside a tuple
 // 1. When the next argument to process is dyn_var  - It has to be dyn_var<T> not any derived types
 template <typename...ProcessedArgTypes, typename NextArgWrap, typename...RemainingArgTypes, typename ReturnType>
-struct extract_signature_impl<std::tuple<ProcessedArgTypes...>, std::tuple<NextArgWrap, RemainingArgTypes...>, ReturnType, typename std::enable_if<is_dyn_var<NextArgWrap>()>::type> {
+struct extract_signature_impl<std::tuple<ProcessedArgTypes...>, std::tuple<NextArgWrap, RemainingArgTypes...>, ReturnType, typename std::enable_if<is_dyn_var_type<NextArgWrap>::value>::type> {
 	using NextArg = typename NextArgWrap::stored_type;
 	// The dyn_var version doesn't need any NextParam to exist or be used
 	template <typename F, typename...OtherParams>
@@ -61,7 +74,7 @@ struct extract_signature_impl<std::tuple<ProcessedArgTypes...>, std::tuple<NextA
 
 // 2. When the next argumetn to process isn't a dyn_var
 template <typename...ProcessedArgTypes, typename NextArg, typename...RemainingArgTypes, typename ReturnType>
-struct extract_signature_impl<std::tuple<ProcessedArgTypes...>, std::tuple<NextArg, RemainingArgTypes...>, ReturnType, typename std::enable_if<!is_dyn_var<NextArg>()>::type> {
+struct extract_signature_impl<std::tuple<ProcessedArgTypes...>, std::tuple<NextArg, RemainingArgTypes...>, ReturnType, typename std::enable_if<!is_dyn_var_type<NextArg>::value>::type> {
 	// This version needs a NextParam
 	template <typename F, typename NextParam, typename...OtherParams>
 	static void fill_invocation(invocation_state* i_state, F func, int arg_index, ProcessedArgTypes...processed_args, NextParam&& next_param, OtherParams&&...other_params) {

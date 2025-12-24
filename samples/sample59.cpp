@@ -1,31 +1,42 @@
+// Include the headers
 #include "blocks/c_code_generator.h"
-#include "builder/builder.h"
-#include "builder/builder_context.h"
-#include "builder/dyn_var.h"
 #include "builder/static_var.h"
-#include "builder/lib/utils.h"
+#include "builder/dyn_var.h"
+#include "blocks/rce.h"
 #include <iostream>
+
+// Include the BuildIt types
 using builder::dyn_var;
 using builder::static_var;
 
+struct foo;
 
-template <typename T>
-struct vector: public builder::custom_type<T> {
-	static constexpr const char* type_name = "std::vector";
-	typedef T dereference_type;
-	dyn_var<void(int)> resize = builder::with_name("resize");
+// Mechanism for assigning names to incomplete types
+namespace builder {
+template <>
+struct external_type_namer<foo> {
+	static constexpr const char* type_name = "struct foo";
+};
+}
+
+struct linked_list {
+	static constexpr const char* type_name = "linked_list";
+	dyn_var<linked_list*> next = builder::with_name("next");
+	dyn_var<foo*> other = builder::with_name("other");
 };
 
 static void bar(void) {
-	dyn_var<vector<vector<int>>> x;
-	x.resize(2);
-	x[0].resize(1);
+	dyn_var<struct linked_list*> x;
+	x->next->next->next = 0;
+	x->other = 0;
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
+	block::c_code_generator::generate_struct_decl<dyn_var<linked_list>>(std::cout);
 	builder::builder_context context;
 	auto ast = context.extract_function_ast(bar, "bar");
-	ast->dump(std::cout, 0);
 	block::c_code_generator::generate_code(ast, std::cout, 0);
 	return 0;
 }
+
+

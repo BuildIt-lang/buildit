@@ -1,31 +1,27 @@
+// Include the headers
 #include "blocks/c_code_generator.h"
-#include "builder/builder.h"
-#include "builder/builder_context.h"
+#include "builder/builder_dynamic.h"
 #include "builder/dyn_var.h"
 #include "builder/static_var.h"
 #include <iostream>
+
+// Include the BuildIt types
 using builder::dyn_var;
 using builder::static_var;
 
-constexpr char graph_t_name[] = "GraphT";
-using graph_t = typename builder::name<graph_t_name>;
-
-constexpr char foo_t_name[] = "FooT";
-template <typename T>
-using foo_t = typename builder::name<foo_t_name, T>;
-
-static void bar(void) {
-	dyn_var<graph_t> g;
-	g = g + 1;
-
-	dyn_var<foo_t<int>> f;
-	f = f + 1;
+static dyn_var<int> power_f(dyn_var<int> base, static_var<int> exponent) {
+	dyn_var<int> res = 1, x = base;
+	while (exponent > 1) {
+		if (exponent % 2 == 1)
+			res = res * x;
+		x = x * x;
+		exponent = exponent / 2;
+	}
+	return res * x;
 }
 
 int main(int argc, char *argv[]) {
-	builder::builder_context context;
-	auto ast = context.extract_ast_from_function(bar);
-	ast->dump(std::cout, 0);
-	block::c_code_generator::generate_code(ast, std::cout, 0);
+	auto fptr = (int (*)(int))builder::compile_function(power_f, 5);
+	std::cout << fptr(8) << std::endl;
 	return 0;
 }

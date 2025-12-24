@@ -1,50 +1,86 @@
-void foo (void) {
-  int var0;
-  int var1;
-  int var2;
-  var0 = 1;
-  var1 = var0 + 2;
-  var2 = var1 + var0;
-  int var3 = 0;
-  int var4 = var0 + 4;
-  int var5 = 0;
-  int var6 = 0;
-  int var7 = 1;
-  int var8 = 2;
-  int var9;
-  int var10;
-  int var11 = var3;
-  int var12 = var4;
-  int var13 = var5;
-  int var14 = var6;
-  int var15 = var9;
-  int var16 = var10;
-  int var17;
-  int var18;
-  int var19;
-  int var20;
-  int* var21;
-  var20 = 0;
-  int var22;
-  int* var23;
-  var22 = 0;
-  int var24;
-  int* var25;
-  var24 = 0;
-  int var26;
-  int* var27;
-  var26 = 0;
-  int var28;
-  int* var29;
-  var28 = 0;
-  var21 = &var22;
-  int var30 = var20;
-  int* var31 = var21;
-  int var32 = var22;
-  int* var33 = var23;
-  int var34 = var30;
-  int* var35 = var31;
-  int var36 = var32;
-  int* var37 = var33;
+FUNC_DECL (my_bar)
+  SCALAR_TYPE (VOID)
+  STMT_BLOCK
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (c_0)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (c_1)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (c_2)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (c_3)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (c_4)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (c_5)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (c_6)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (c_7)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (c_8)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (c_9)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (c_10)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (c_11)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (c_12)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (c_13)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (c_14)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (c_15)
+      INT_CONST (0)
+void my_bar (void) {
+  int c_0 = 0;
+  int c_1 = 0;
+  int c_2 = 0;
+  int c_3 = 0;
+  int c_4 = 0;
+  int c_5 = 0;
+  int c_6 = 0;
+  int c_7 = 0;
+  int c_8 = 0;
+  int c_9 = 0;
+  int c_10 = 0;
+  int c_11 = 0;
+  int c_12 = 0;
+  int c_13 = 0;
+  int c_14 = 0;
+  int c_15 = 0;
 }
 

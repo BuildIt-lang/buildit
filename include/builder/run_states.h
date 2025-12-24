@@ -5,6 +5,7 @@
 #include <memory>
 #include "util/tracer.h"
 #include "builder/forward_declarations.h"
+#include "builder/arena_dyn_var.h"
 #include <unordered_map>
 #include <unordered_set>
 #include <set>
@@ -78,7 +79,11 @@ private:
 	/* Memoization related fields */
 	
 	// Tags visited before for loopback edges
-	std::unordered_set<tracer::tag> visited_offsets;	
+	std::unordered_map<tracer::tag, block::stmt::Ptr> visited_offsets;	
+
+	// Tag deduplication set, this keeps track of tags 
+	// for statements that are the same but the statements are different
+	std::unordered_map<tracer::tag, size_t> tag_deduplication_map;
 	
 	/* Parent dynamic states */
 	execution_state* e_state;
@@ -160,6 +165,10 @@ class invocation_state {
 	block::func_decl::Ptr generated_func_decl;
 
 	builder_context* b_ctx = nullptr;
+	
+	// Arena is part of the invocation state
+	// so the buffers persist
+	dyn_var_arena var_arena;
 
 public:
 
@@ -177,6 +186,11 @@ public:
 
 	template <typename T, typename...Args>
 	friend std::shared_ptr<T> get_or_create_generator(tracer::tag req_tag, Args&&...args);
+
+public:
+	dyn_var_arena* get_arena(void) {
+		return &var_arena;
+	}
 };
 
 static inline run_state* get_run_state(void) {

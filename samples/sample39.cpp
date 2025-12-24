@@ -1,47 +1,51 @@
-/*NO_TEST*/
-// Include the headers
 #include "blocks/c_code_generator.h"
-#include "blocks/extract_cuda.h"
+#include "builder/array.h"
 #include "builder/dyn_var.h"
-#include "builder/static_var.h"
-#include <iostream>
-template <typename T>
-void resize(T &t, int size) {
-	block::to<block::array_type>(t.block_var->var_type)->size = size;
-}
 
-// Include the BuildIt types
+using builder::dyn_arr;
 using builder::dyn_var;
-using builder::static_var;
+using builder::arr;
 
-static dyn_var<int> choose(dyn_var<int> n, dyn_var<int> k, const int MAX_N) {
-	int comp[MAX_N][MAX_N];
-	for (int i = 0; i < MAX_N; i++) {
-		comp[i][0] = 1;
-		comp[i][i] = 1;
-	}
-	for (int i = 1; i < MAX_N; ++i) {
-		comp[0][i] = 0;
-		for (int j = 1; j < i; ++j) {
-			comp[i][j] = comp[i - 1][j - 1] + comp[i - 1][j];
-			comp[j][i] = 0;
-		}
-	}
-	dyn_var<int[]> comp_r;
-	resize(comp_r, MAX_N * MAX_N);
+using namespace std;
 
-	for (static_var<int> i = 0; i < MAX_N * MAX_N; i++) {
-		builder::annotate("roll.0");
-		comp_r[i] = comp[i / MAX_N][i % MAX_N];
+
+
+struct container {
+	dyn_var<int> idx;
+	dyn_var<int*> next;
+
+	container() {
+		idx = 0;
 	}
-	return comp_r[n * MAX_N + k];
+};
+
+
+static void foo() {
+	dyn_arr<int, 3> x;
+	x[0] = 1;
+	x[1] = x[0] + 2;
+	x[2] = x[1] + x[0];
+
+	dyn_arr<int, 4> y = {0, x[0] + 4, 0, 0};
+
+	dyn_arr<int> z = {1, 2};
+
+	dyn_arr<int> a;
+	a.set_size(2);
+
+	dyn_arr<int> b = y;
+	dyn_arr<int, 5> c = a;
+
+
+	arr<container, 5> containers;
+	containers[0].next = &(containers[1].idx);
+
+
+	arr<container, 2> conts = {containers[0], containers[1]};
+
 }
-
 int main(int argc, char *argv[]) {
-	builder::builder_context context;
-	auto ast = context.extract_function_ast(choose, "choose", 10);
-
-	std::cout << "#include <iostream>" << std::endl;
-	block::c_code_generator::generate_code(ast, std::cout, 0);
-	std::cout << "int main(int argc, char* argv[]) {\n\tstd::cout << choose(8, 3) << std::endl;\n}" << std::endl;
+	auto ast = builder::builder_context().extract_function_ast(foo, "foo");
+	block::c_code_generator::generate_code(ast, cout, 0);
+	return 0;
 }

@@ -1,0 +1,32 @@
+STMT_BLOCK
+  DECL_STMT
+    NAMED_TYPE (GraphT)
+    VAR (var0)
+    NO_INITIALIZATION
+  EXPR_STMT
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (var0)
+      PLUS_EXPR
+        VAR_EXPR
+          VAR (var0)
+        INT_CONST (1)
+  DECL_STMT
+    NAMED_TYPE (FooT)
+      SCALAR_TYPE (INT)
+    VAR (var1)
+    NO_INITIALIZATION
+  EXPR_STMT
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (var1)
+      PLUS_EXPR
+        VAR_EXPR
+          VAR (var1)
+        INT_CONST (1)
+{
+  GraphT var0;
+  var0 = var0 + 1;
+  FooT<int> var1;
+  var1 = var1 + 1;
+}

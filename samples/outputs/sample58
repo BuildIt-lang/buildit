@@ -1,12 +1,73 @@
-FUNC_DECL (bar)
+Found 1 matches
+-----
+ASSIGN_EXPR
+  VAR_EXPR
+    VAR (var0)
+  PLUS_EXPR
+    VAR_EXPR
+      VAR (var0)
+    INT_CONST (1)
+-----
+Found 1 matches
+-----
+PLUS_EXPR
+  VAR_EXPR
+    VAR (var0)
+  INT_CONST (0)
+-----
+After all replacements
+FUNC_DECL (foo)
   SCALAR_TYPE (VOID)
-  VAR (arg0)
   STMT_BLOCK
     DECL_STMT
       SCALAR_TYPE (INT)
       VAR (var0)
-      NO_INITIALIZATION
-void bar (int arg0) {
-  int var0;
+      INT_CONST (0)
+    EXPR_STMT
+      ASSIGN_EXPR
+        VAR_EXPR
+          VAR (var0)
+        PLUS_EXPR
+          VAR_EXPR
+            VAR (var0)
+          INT_CONST (1)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var1)
+      INT_CONST (0)
+    EXPR_STMT
+      ASSIGN_EXPR
+        VAR_EXPR
+          VAR (var1)
+        PLUS_EXPR
+          VAR_EXPR
+            VAR (var0)
+          INT_CONST (1)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var2)
+      INT_CONST (0)
+    EXPR_STMT
+      ASSIGN_EXPR
+        VAR_EXPR
+          VAR (var2)
+        PLUS_EXPR
+          VAR_EXPR
+            VAR (var2)
+          INT_CONST (2)
+    EXPR_STMT
+      ASSIGN_EXPR
+        VAR_EXPR
+          VAR (var2)
+        VAR_EXPR
+          VAR (var0)
+void foo (void) {
+  int var0 = 0;
+  var0 = var0 + 1;
+  int var1 = 0;
+  var1 = var0 + 1;
+  int var2 = 0;
+  var2 = var2 + 2;
+  var2 = var0;
 }
 

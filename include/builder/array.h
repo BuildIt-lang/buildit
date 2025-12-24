@@ -5,10 +5,8 @@
 
 namespace builder {
 
-
-// If the array is of dyn_vars, we initialize with a 
-// builder, anything else and we directly initialize with T
-// This avoids unnecessary copies unless entirely necessary
+// This helper avoids unnecessary copies for
+// dyn_var objects
 template <typename T>
 struct initializer_selector {
 	typedef const T type;
@@ -16,10 +14,8 @@ struct initializer_selector {
 
 template <typename T>
 struct initializer_selector<dyn_var<T>> {
-	typedef builder type;
+	typedef expr_wrapper type;
 };
-
-
 
 template <typename T, size_t size = 0>
 class array {

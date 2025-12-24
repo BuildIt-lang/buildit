@@ -1,6 +1,0 @@
-void bar (void) {
-  int* x_0 = (int*)malloc(4ll);
-  x_0[0] = 123;
-  free(x_0);
-}
-

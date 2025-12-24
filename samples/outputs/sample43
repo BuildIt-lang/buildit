@@ -1,50 +1,86 @@
-void foo (void) {
-  int var0;
-  int var1;
-  int var2;
-  var0 = 1;
-  var1 = var0 + 2;
-  var2 = var1 + var0;
+FUNC_DECL (my_bar)
+  SCALAR_TYPE (VOID)
+  STMT_BLOCK
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var0)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var1)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var2)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var3)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var4)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var5)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var6)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var7)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var8)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var9)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var10)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var11)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var12)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var13)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var14)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var15)
+      INT_CONST (0)
+void my_bar (void) {
+  int var0 = 0;
+  int var1 = 0;
+  int var2 = 0;
   int var3 = 0;
-  int var4 = var0 + 4;
+  int var4 = 0;
   int var5 = 0;
   int var6 = 0;
-  int var7 = 1;
-  int var8 = 2;
-  int var9;
-  int var10;
-  int var11 = var3;
-  int var12 = var4;
-  int var13 = var5;
-  int var14 = var6;
-  int var15 = var9;
-  int var16 = var10;
-  int var17;
-  int var18;
-  int var19;
-  int var20;
-  int* var21;
-  var20 = 0;
-  int var22;
-  int* var23;
-  var22 = 0;
-  int var24;
-  int* var25;
-  var24 = 0;
-  int var26;
-  int* var27;
-  var26 = 0;
-  int var28;
-  int* var29;
-  var28 = 0;
-  var21 = &var22;
-  int var30 = var20;
-  int* var31 = var21;
-  int var32 = var22;
-  int* var33 = var23;
-  int var34 = var30;
-  int* var35 = var31;
-  int var36 = var32;
-  int* var37 = var33;
+  int var7 = 0;
+  int var8 = 0;
+  int var9 = 0;
+  int var10 = 0;
+  int var11 = 0;
+  int var12 = 0;
+  int var13 = 0;
+  int var14 = 0;
+  int var15 = 0;
 }
 

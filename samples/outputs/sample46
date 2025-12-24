@@ -1,113 +1,56 @@
-FUNC_DECL (my_bar)
+FUNC_DECL (bar)
   SCALAR_TYPE (VOID)
   STMT_BLOCK
     DECL_STMT
-      NAMED_TYPE (FooT)
+      SCALAR_TYPE (INT)
       VAR (var0)
-      NO_INITIALIZATION
-    EXPR_STMT
-      ASSIGN_EXPR
-        VAR_EXPR
-          VAR (var0)
-        PLUS_EXPR
-          VAR_EXPR
-            VAR (var0)
-          INT_CONST (1)
+      INT_CONST (0)
     DECL_STMT
       SCALAR_TYPE (INT)
       VAR (var1)
-      MEMBER_ACCESS_EXPR (member)
-        VAR_EXPR
-          VAR (var0)
-    DECL_STMT
-      NAMED_TYPE (FooT)
-      VAR (var2)
-      VAR_EXPR
-        VAR (var0)
-    EXPR_STMT
-      ASSIGN_EXPR
-        VAR_EXPR
-          VAR (var2)
-        VAR_EXPR
-          VAR (var0)
-    DECL_STMT
-      NAMED_TYPE (BarT)
-      VAR (var3)
-      NO_INITIALIZATION
-    EXPR_STMT
-      ASSIGN_EXPR
-        MEMBER_ACCESS_EXPR (second_member)
-          VAR_EXPR
-            VAR (var3)
-        PLUS_EXPR
-          VAR_EXPR
-            VAR (var0)
-          INT_CONST (1)
-    DECL_STMT
-      NAMED_TYPE (CarT)
-        SCALAR_TYPE (INT)
-        NAMED_TYPE (BarT)
-      VAR (var4)
-      NO_INITIALIZATION
-    EXPR_STMT
-      ASSIGN_EXPR
-        MEMBER_ACCESS_EXPR (my_member)
-          VAR_EXPR
-            VAR (var4)
-        MEMBER_ACCESS_EXPR (member)
-          VAR_EXPR
-            VAR (var0)
-    DECL_STMT
-      POINTER_TYPE
-        NAMED_TYPE (FooT)
-      VAR (var5)
-      NO_INITIALIZATION
-    EXPR_STMT
-      ASSIGN_EXPR
-        MEMBER_ACCESS_EXPR (member)
-          SQ_BKT_EXPR
+      INT_CONST (0)
+    WHILE_STMT
+      INT_CONST (1)
+      STMT_BLOCK
+        IF_STMT
+          NE_EXPR
             VAR_EXPR
-              VAR (var5)
-            INT_CONST (0)
-        MEMBER_ACCESS_EXPR (my_member)
-          VAR_EXPR
-            VAR (var4)
-    EXPR_STMT
-      ASSIGN_EXPR
-        MEMBER_ACCESS_EXPR (member)
-          SQ_BKT_EXPR
-            VAR_EXPR
-              VAR (var5)
-            INT_CONST (0)
-        INT_CONST (0)
-    EXPR_STMT
-      ASSIGN_EXPR
-        MEMBER_ACCESS_EXPR (member)
-          SQ_BKT_EXPR
-            VAR_EXPR
-              VAR (var5)
-            INT_CONST (3)
-        INT_CONST (0)
-struct FooT {
-  int member;
-};
-struct BarT {
-  int my_member;
-  int second_member;
-};
-void my_bar (void) {
-  FooT var0;
-  var0 = var0 + 1;
-  int var1 = var0.member;
-  FooT var2 = var0;
-  var2 = var0;
-  BarT var3;
-  var3.second_member = var0 + 1;
-  CarT<int, BarT> var4;
-  var4.my_member = var0.member;
-  FooT* var5;
-  var5->member = var4.my_member;
-  var5->member = 0;
-  var5[3].member = 0;
+              VAR (var0)
+            INT_CONST (1)
+          STMT_BLOCK
+            IF_STMT
+              EQUALS_EXPR
+                VAR_EXPR
+                  VAR (var0)
+                INT_CONST (2)
+              STMT_BLOCK
+                WHILE_STMT
+                  NE_EXPR
+                    VAR_EXPR
+                      VAR (var0)
+                    INT_CONST (3)
+                  STMT_BLOCK
+              STMT_BLOCK
+          STMT_BLOCK
+            WHILE_STMT
+              NE_EXPR
+                VAR_EXPR
+                  VAR (var0)
+                INT_CONST (3)
+              STMT_BLOCK
+void bar (void) {
+  int var0 = 0;
+  int var1 = 0;
+  while (1) {
+    if (var0 != 1) {
+      if (var0 == 2) {
+        while (var0 != 3) {
+        }
+      } 
+    } else {
+      while (var0 != 3) {
+      }
+    }
+  }
 }
 

@@ -1,21 +1,6 @@
-void bar (void) {
-  int y_0 = 0ll;
-  if (y_0 < 0ll) {
-    (y_0 = y_0 + 1) - 1;
-  } else {
-    (y_0 = y_0 - 1) + 1;
-  }
-  int y_1 = 1ll;
-  if (y_1 < 1ll) {
-    (y_1 = y_1 + 1) - 1;
-  } else {
-    (y_1 = y_1 - 1) + 1;
-  }
-  int y_2 = 2ll;
-  if (y_2 < 2ll) {
-    (y_2 = y_2 + 1) - 1;
-  } else {
-    (y_2 = y_2 - 1) + 1;
+void bar (int* restrict arg0, int* restrict arg1, int arg2) {
+  for (int i_0 = 0; i_0 < arg2; (i_0 = i_0 + 1) - 1) {
+    arg0[i_0] = arg1[i_0];
   }
 }
 

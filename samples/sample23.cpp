@@ -1,5 +1,4 @@
 #include "blocks/c_code_generator.h"
-#include "builder/builder.h"
 #include "builder/builder_context.h"
 #include "builder/dyn_var.h"
 #include "builder/static_var.h"
@@ -7,35 +6,18 @@
 using builder::dyn_var;
 using builder::static_var;
 
-static dyn_var<int> foo(dyn_var<int> x) {
-	int t;
-	if (x > 10)
-		t = 9;
-	else
-		t = 0;
-	return t;	
-}
-
 static void bar(void) {
-	dyn_var<int> x;
-
-	dyn_var<int> t = foo(x);
-	if (t) {
-		dyn_var<int> k = 0;
-		k = 0;
-	}
-
-	// x = x + 1;
-
-	if (x) {
-		dyn_var<int> k = 0;
-		k = 0;
+	for (static_var<int> i = 0; i < 10; i++) {
+		for (dyn_var<static_var<int>> g = 0; g < i; g = g + 1) {
+			dyn_var<dyn_var<int>> x = i;
+			x = x + 1;
+		}
 	}
 }
 
 int main(int argc, char *argv[]) {
 	builder::builder_context context;
-	// Code to test assignments between static var and normal vars
+	// Code to generate full type closure with builder_var_type
 	auto ast = context.extract_ast_from_function(bar);
 	ast->dump(std::cout, 0);
 	block::c_code_generator::generate_code(ast, std::cout, 0);

@@ -1,45 +1,26 @@
+// Include the headers
 #include "blocks/c_code_generator.h"
-#include "builder/builder.h"
-#include "builder/builder_context.h"
-#include "builder/builder_union.h"
 #include "builder/dyn_var.h"
 #include "builder/static_var.h"
 #include <iostream>
-using builder::builder_union;
+
+// Include the BuildIt types
 using builder::dyn_var;
 using builder::static_var;
-
-static void foo(void) {
-	dyn_var<short int> a;
-	dyn_var<unsigned short int> b;
-	dyn_var<int> c;
-	dyn_var<unsigned int> d;
-	dyn_var<long> e;
-	dyn_var<unsigned long> f = (unsigned long)5;
-	dyn_var<long long> g;
-	dyn_var<unsigned long long> h = (unsigned long long)4;
-	dyn_var<char> i;
-	dyn_var<unsigned char> j;
-	dyn_var<float> k;
-	dyn_var<double> l;
-	dyn_var<void *> m;
-	dyn_var<char[]> n = "Hello world";
-	n = "new string";
-
-	dyn_var<const char* const volatile> o = "Hello world";
-
-	dyn_var<bool> p = true;
-
-	// bool test, fixes a bug
-	// that causes false as an init value creates a variable
-	// without context
-	dyn_var<int> x = false;
+static void bar(void) {
+	// Insert code to stage here
+	dyn_var<int> x = 5;
+	for (dyn_var<int> i = 0; i < 100; i = i + 1) {
+		if (i == x) {
+			x = i;
+			break;
+		}
+	}
 }
 
 int main(int argc, char *argv[]) {
 	builder::builder_context context;
-	auto ast = context.extract_ast_from_function(foo);
+	auto ast = context.extract_function_ast(bar, "bar");
 	ast->dump(std::cout, 0);
 	block::c_code_generator::generate_code(ast, std::cout, 0);
-	return 0;
 }

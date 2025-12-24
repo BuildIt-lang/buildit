@@ -26,6 +26,8 @@ tag get_offset_in_function(void) {
 	unw_init_local(&cursor, &context);
 
 	tag new_tag;
+	new_tag.dedup_id = 0;
+
 	while (unw_step(&cursor)) {
 		unw_word_t ip;
 		unw_get_reg(&cursor, UNW_REG_IP, &ip);
@@ -69,6 +71,8 @@ tag get_offset_in_function(void) {
 
 	void *buffer[50];
 	tag new_tag;
+	new_tag.dedup_id = 0;
+
 	// First add the RIP pointers
 	int backtrace_size = backtrace(buffer, 50);
 	for (int i = 0; i < backtrace_size; i++) {
@@ -118,6 +122,11 @@ tag get_unique_tag(void) {
 
 
 bool tag::operator==(const tag &other) const {
+
+	// Check the dedup id first since it is cheap
+	if (dedup_id != other.dedup_id)
+		return false;
+
 	if (other.pointers.size() != pointers.size())
 		return false;
 	for (unsigned int i = 0; i < pointers.size(); i++)
@@ -146,6 +155,7 @@ bool tag::operator==(const tag &other) const {
 	for (unsigned int i = 0; i < live_dyn_vars.size(); i++) 
 		if (!(live_dyn_vars[i] == other.live_dyn_vars[i])) 
 			return false;
+	
 	return true;
 }
 
@@ -179,6 +189,9 @@ std::string tag::stringify(void) {
 			output_string += ", ";
 	}
 	output_string += "]";
+
+	// Finally add the dedup id
+	output_string += "<" + std::to_string(dedup_id) + ">";
 
 	cached_string = output_string;
 	return output_string;

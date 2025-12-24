@@ -1,5 +1,21 @@
 void bar (void) {
-  int x_0 = 1;
-  int y_1 = 0;
+  int y_0 = 0ll;
+  if (y_0 < 0ll) {
+    (y_0 = y_0 + 1) - 1;
+  } else {
+    (y_0 = y_0 - 1) + 1;
+  }
+  int y_1 = 1ll;
+  if (y_1 < 1ll) {
+    (y_1 = y_1 + 1) - 1;
+  } else {
+    (y_1 = y_1 - 1) + 1;
+  }
+  int y_2 = 2ll;
+  if (y_2 < 2ll) {
+    (y_2 = y_2 + 1) - 1;
+  } else {
+    (y_2 = y_2 - 1) + 1;
+  }
 }
 

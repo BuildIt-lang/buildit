@@ -1,78 +1,13 @@
-STMT_BLOCK
-  DECL_STMT
-    NAMED_TYPE (FooT)
-    VAR (var0)
-    NO_INITIALIZATION
-  EXPR_STMT
-    ASSIGN_EXPR
-      VAR_EXPR
-        VAR (var0)
-      PLUS_EXPR
-        VAR_EXPR
-          VAR (var0)
-        INT_CONST (1)
-  DECL_STMT
-    SCALAR_TYPE (INT)
-    VAR (var1)
-    MEMBER_ACCESS_EXPR (member)
-      VAR_EXPR
-        VAR (var0)
-  DECL_STMT
-    NAMED_TYPE (FooT)
-    VAR (var2)
-    VAR_EXPR
-      VAR (var0)
-  EXPR_STMT
-    ASSIGN_EXPR
-      VAR_EXPR
-        VAR (var2)
-      VAR_EXPR
-        VAR (var0)
-  DECL_STMT
-    POINTER_TYPE
-      NAMED_TYPE (FooT)
-    VAR (var3)
-    ADDR_OF_EXPR
-      VAR_EXPR
-        VAR (var0)
-  EXPR_STMT
-    ASSIGN_EXPR
-      MEMBER_ACCESS_EXPR (member)
-        SQ_BKT_EXPR
-          VAR_EXPR
-            VAR (var3)
-          INT_CONST (0)
-      INT_CONST (0)
-  EXPR_STMT
-    ASSIGN_EXPR
-      MEMBER_ACCESS_EXPR (member)
-        SQ_BKT_EXPR
-          VAR_EXPR
-            VAR (var3)
-          INT_CONST (0)
-      INT_CONST (1)
-  DECL_STMT
-    NAMED_TYPE (FooT)
-    VAR (var4)
-    SQ_BKT_EXPR
-      VAR_EXPR
-        VAR (var3)
-      INT_CONST (0)
-  EXPR_STMT
-    ASSIGN_EXPR
-      MEMBER_ACCESS_EXPR (member)
-        VAR_EXPR
-          VAR (var4)
-      INT_CONST (3)
-{
-  FooT var0;
-  var0 = var0 + 1;
-  int var1 = var0.member;
-  FooT var2 = var0;
-  var2 = var0;
-  FooT* var3 = &var0;
-  var3->member = 0;
-  var3->member = 1;
-  FooT var4 = *var3;
-  var4.member = 3;
+void bar (void) {
+  int var0[10] = 0;
+  for (int var1 = 0; var1 < 10; var1 = var1 + 1) {
+    *var0 = *var0 + var1;
+    var0[var1] = var0[var1] * 2;
+  }
+  for (int var2 = 0; var2 < 10; (var2 = var2 + 1) - 1) {
+    *var0 = *var0 - var2;
+    var0[var2] = var0[var2] / 2;
+  }
+  (*var0 = *var0 + 1) - 1;
 }
+

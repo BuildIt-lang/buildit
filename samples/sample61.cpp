@@ -3,25 +3,24 @@
 #include "builder/static_var.h"
 #include "builder/dyn_var.h"
 #include "blocks/rce.h"
-#include "builder/nd_var.h"
 #include <iostream>
 
 // Include the BuildIt types
 using builder::dyn_var;
 using builder::static_var;
-using builder::nd_var;
 
 static void bar(void) {
-	nd_var<builder::true_top> t;
-	dyn_var<int> x = (int)((builder::true_top)t).value;
-
-	t.require_val(builder::true_top::T);
-
-	nd_var<builder::true_top> r(builder::true_top::F);
-	dyn_var<int> y = (int)(r.get()->value);
-	r.require_val(builder::true_top::F);
-	t.require_val(builder::true_top::T);
-}
+	static_var<std::vector<int>> x;
+	while (x.val.size() < 3) {
+		dyn_var<int> y = x.val.size();
+		if (y < x.val.size()) {
+			y++;
+		} else {
+			y--;
+		}
+		x.val.push_back(2);
+	}
+} 
 
 int main(int argc, char* argv[]) {
 	builder::builder_context context;

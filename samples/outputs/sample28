@@ -1,0 +1,98 @@
+STMT_BLOCK
+  DECL_STMT
+    SCALAR_TYPE (SHORT_INT)
+    VAR (var0)
+    NO_INITIALIZATION
+  DECL_STMT
+    SCALAR_TYPE (UNSIGNED_SHORT_INT)
+    VAR (var1)
+    NO_INITIALIZATION
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (var2)
+    NO_INITIALIZATION
+  DECL_STMT
+    SCALAR_TYPE (UNSIGNED_INT)
+    VAR (var3)
+    NO_INITIALIZATION
+  DECL_STMT
+    SCALAR_TYPE (LONG_INT)
+    VAR (var4)
+    NO_INITIALIZATION
+  DECL_STMT
+    SCALAR_TYPE (UNSIGNED_LONG_INT)
+    VAR (var5)
+    INT_CONST (5)
+  DECL_STMT
+    SCALAR_TYPE (LONG_LONG_INT)
+    VAR (var6)
+    NO_INITIALIZATION
+  DECL_STMT
+    SCALAR_TYPE (UNSIGNED_LONG_LONG_INT)
+    VAR (var7)
+    INT_CONST (4)
+  DECL_STMT
+    SCALAR_TYPE (CHAR)
+    VAR (var8)
+    NO_INITIALIZATION
+  DECL_STMT
+    SCALAR_TYPE (UNSIGNED_CHAR)
+    VAR (var9)
+    NO_INITIALIZATION
+  DECL_STMT
+    SCALAR_TYPE (FLOAT)
+    VAR (var10)
+    NO_INITIALIZATION
+  DECL_STMT
+    SCALAR_TYPE (DOUBLE)
+    VAR (var11)
+    NO_INITIALIZATION
+  DECL_STMT
+    POINTER_TYPE
+      SCALAR_TYPE (VOID)
+    VAR (var12)
+    NO_INITIALIZATION
+  DECL_STMT
+    ARRAY_TYPE
+      SCALAR_TYPE (CHAR)
+      -1
+    VAR (var13)
+    STRING_CONST ("Hello world")
+  EXPR_STMT
+    ASSIGN_EXPR
+      VAR_EXPR
+        VAR (var13)
+      STRING_CONST ("new string")
+  DECL_STMT
+    POINTER_TYPE
+      SCALAR_TYPE (CHAR)
+    VAR (var14)
+    STRING_CONST ("Hello world")
+  DECL_STMT
+    SCALAR_TYPE (BOOL)
+    VAR (var15)
+    INT_CONST (1)
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (var16)
+    INT_CONST (0)
+{
+  short int var0;
+  unsigned short int var1;
+  int var2;
+  unsigned int var3;
+  long int var4;
+  unsigned long int var5 = 5ll;
+  long long int var6;
+  unsigned long long int var7 = 4ll;
+  char var8;
+  unsigned char var9;
+  float var10;
+  double var11;
+  void* var12;
+  char var13[] = "Hello world";
+  var13 = "new string";
+  const char* const volatile var14 = "Hello world";
+  bool var15 = 1;
+  int var16 = 0;
+}
