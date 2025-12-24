@@ -6,6 +6,7 @@
 #include "builder/to_expr.h"
 #include "builder/providers_dyn_var.h"
 #include "builder/operator_overload.h"
+#include "util/var_finder.h"
 
 namespace block {
 // Forward declaring this class for friend
@@ -112,6 +113,7 @@ private:
 			tracer::tag offset = tracer::get_offset_in_function();
 			get_run_state()->insert_live_dyn_var(offset);
 			block_var->static_offset = offset;
+			block_var->preferred_name = utils::find_variable_name_cached(this, offset);
 			return offset;	
 		} else {
 			// Else return an empty tag

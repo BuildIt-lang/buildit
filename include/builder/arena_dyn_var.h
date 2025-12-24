@@ -77,7 +77,7 @@ class dyn_var_arena {
 		// If list is full add another chunk	
 		if (list.used_objects == list.chunks.size() * arena_objects_per_chunk) {	
 			// Alignment and pointer and the end
-			static_assert(alignof(T) < alignof(std::max_align_t), 
+			static_assert(alignof(T) <= alignof(std::max_align_t), 
 				"Allocated type has higher alignment requirement that std::max_align_t" 
 				"needs manual alignment");
 			byte_t* new_chunk = new byte_t[sizeof(T) * arena_objects_per_chunk];
@@ -112,6 +112,15 @@ public:
 				(*allocatable_type_registry::type_deleters)[i](&(arena_lists[i]));
 			}
 		}
+	}
+	
+	~dyn_var_arena() {
+		reset_arena();
+		for (auto& a: arena_lists) {
+			for (auto c: a.chunks) {
+				delete[] c;
+			}
+		}	
 	}
 };
 

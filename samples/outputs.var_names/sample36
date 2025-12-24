@@ -1,7 +1,5 @@
 #include <string.h>
 int match_re (char* arg0) {
-  int var2;
-  int var4;
   int str_len_0 = strlen(arg0);
   int to_match_1 = 0;
   if (to_match_1 < str_len_0) {
@@ -24,30 +22,20 @@ int match_re (char* arg0) {
               label2:
               to_match_1 = to_match_1 + 1;
               if (to_match_1 < str_len_0) {
-                var2 = 0;
-                return var2;
+                label3:
+                return 0;
               } 
               return 1;
             } 
-            var2 = 0;
-            return var2;
           } 
-          var4 = 0;
-          return var4;
-        } 
-        if (arg0[to_match_1] == 100) {
-          goto label2;
-        } 
-        var2 = 0;
-        return var2;
+        } else {
+          if (arg0[to_match_1] == 100) {
+            goto label2;
+          } 
+        }
       } 
-      var4 = 0;
-      return var4;
     } 
-    var2 = 0;
-    return var2;
   } 
-  var4 = 0;
-  return var4;
+  goto label3;
 }
 

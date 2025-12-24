@@ -3,14 +3,6 @@ STMT_BLOCK
     NAMED_TYPE (FooT)
     VAR (g_0)
     NO_INITIALIZATION
-  EXPR_STMT
-    ASSIGN_EXPR
-      VAR_EXPR
-        VAR (g_0)
-      PLUS_EXPR
-        VAR_EXPR
-          VAR (g_0)
-        INT_CONST (1)
   DECL_STMT
     SCALAR_TYPE (INT)
     VAR (x_1)
@@ -66,7 +58,6 @@ STMT_BLOCK
       INT_CONST (3)
 {
   FooT g_0;
-  g_0 = g_0 + 1;
   int x_1 = g_0.member;
   FooT h_2 = g_0;
   h_2 = g_0;

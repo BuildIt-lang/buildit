@@ -27,20 +27,15 @@ int match_re (char* arg0) {
               } 
               return 1;
             } 
-            goto label3;
           } 
-          label4:
-          return 0;
-        } 
-        if (arg0[var1] == 100) {
-          goto label2;
-        } 
-        goto label3;
+        } else {
+          if (arg0[var1] == 100) {
+            goto label2;
+          } 
+        }
       } 
-      goto label4;
     } 
-    goto label3;
   } 
-  goto label4;
+  goto label3;
 }
 

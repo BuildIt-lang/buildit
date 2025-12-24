@@ -33,20 +33,14 @@ class type_extractor;
 struct defer_init {
 	// No members
 };
-
-
-// Constructor helpers for dyn_var
-struct as_global {
-	std::string name;
-	as_global(const std::string &n) : name(n) {}
-};
 // With name is just like as_global but can be used locally
 struct with_name {
 	std::string name;
 	bool with_decl;
 	with_name(const std::string &n, bool wd = false) : name(n), with_decl(wd) {}
 };
-
+// With block var constructor helper to create a dyn_var with an existing block var
+// currently used by signature extract
 struct with_block_var {
 	block::var::Ptr var;
 	bool with_decl;
@@ -64,8 +58,8 @@ struct as_member {
 	as_member(std::string n) : parent_var(parents_stack->back()), member_name(n) {}
 };
 
-struct type;
-struct generic;
+class type;
+class generic;
 // with type is defined in generics
 struct with_type;
 

@@ -75,7 +75,7 @@ STMT_BLOCK
       PLUS_EXPR
         VAR_EXPR
           VAR (t_1)
-        INT_CONST (1)
+        INT_CONST (2)
   WHILE_STMT
     NOT_EXPR
       EQUALS_EXPR
@@ -105,7 +105,7 @@ STMT_BLOCK
     }
     t_1 = t_1 + 1;
   }
-  t_1 = t_1 + 1;
+  t_1 = t_1 + 2;
   while (!(k_0 == 0)) {
     t_1 = t_1 + 1;
   }

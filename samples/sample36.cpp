@@ -80,7 +80,7 @@ static dyn<int> match_regex(const char *re, dyn<char *> str) {
 				count++;
 		}
 		if (count == 0)
-			return false;
+			break;
 		to_match = to_match + 1;
 	}
 	// Now that the string is done,
