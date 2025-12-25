@@ -1,5 +1,4 @@
 #include "blocks/annotation_finder.h"
-#include "builder/builder.h"
 #include "builder/builder_context.h"
 #include "builder/dyn_var.h"
 #include <iostream>
@@ -24,7 +23,7 @@ static void foo(void) {
 int main(int argc, char *argv[]) {
 	builder::builder_context context;
 	auto ast = context.extract_ast_from_function(foo);
-
+	
 	block::stmt::Ptr s1_stmt = block::annotation_finder::find_annotation(ast, "s1");
 	if (s1_stmt != nullptr) {
 		s1_stmt->dump(std::cout, 0);

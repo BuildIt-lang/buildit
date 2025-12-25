@@ -1,9 +1,29 @@
+FUNC_DECL (bar)
+  SCALAR_TYPE (VOID)
+  STMT_BLOCK
+    DECL_STMT
+      NAMED_TYPE (std::vector)
+        NAMED_TYPE (std::vector)
+          SCALAR_TYPE (INT)
+      VAR (x_0)
+      NO_INITIALIZATION
+    EXPR_STMT
+      FUNCTION_CALL_EXPR
+        MEMBER_ACCESS_EXPR (resize)
+          VAR_EXPR
+            VAR (x_0)
+        INT_CONST (2)
+    EXPR_STMT
+      FUNCTION_CALL_EXPR
+        MEMBER_ACCESS_EXPR (resize)
+          SQ_BKT_EXPR
+            VAR_EXPR
+              VAR (x_0)
+            INT_CONST (0)
+        INT_CONST (1)
 void bar (void) {
-  int x_0;
-  char x_mem2_1;
-  int y_mem1_2;
-  char y_mem2_3;
-  x_0 = x_mem2_1;
-  y_mem2_3 = y_mem1_2;
+  std::vector<std::vector<int>> x_0;
+  x_0.resize(2);
+  x_0[0].resize(1);
 }
 

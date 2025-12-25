@@ -1,30 +1,49 @@
+// Include the headers
 #include "blocks/c_code_generator.h"
-#include "builder/builder.h"
-#include "builder/builder_context.h"
 #include "builder/dyn_var.h"
 #include "builder/static_var.h"
 #include <iostream>
+
+// Include the BuildIt types
 using builder::dyn_var;
 using builder::static_var;
 
 static void bar(void) {
-	dyn_var<int> k = 0;
-	dyn_var<int> t = 0;
-	while (1) {
-		while (k != 1) {
+	static_var<int> x = 0;
 
-			if (k == 2)
-				break;
-		}
-		while (k != 3) {
-		}
+	dyn_var<int> y = 0;
+	dyn_var<int> m, n;
+
+	if (y) {
+		x = 1;
+	} else {
+		x = 2;
 	}
+
+	{
+		// When z is declared, x is in different states
+		dyn_var<int> z = x;
+		dyn_var<int &> k = m;
+
+		// Executions can now merge, but z is still in different states
+		x = 0;
+
+		// this declaration forces executions to merge because static tags are the same
+		// merge is triggered by memoization
+		dyn_var<int> b;
+
+		// this statement now has issues because z has forked
+		dyn_var<int> a = z;
+
+		z = z + k;
+	}
+
+	// This statement should be merged since z's lifetime has ended
+	m = m + 3;
 }
 
 int main(int argc, char *argv[]) {
-	builder::builder_context context;
-	auto ast = context.extract_function_ast(bar, "bar");
-	ast->dump(std::cout, 0);
-	block::c_code_generator::generate_code(ast, std::cout, 0);
+	block::c_code_generator::generate_code(builder::builder_context().extract_function_ast(bar, "bar"), std::cout,
+					       0);
 	return 0;
 }

@@ -105,6 +105,10 @@ STMT_BLOCK
     BITWISE_NOT_EXPR
       VAR_EXPR
         VAR (var1)
+  EXPR_STMT
+    ADDR_OF_EXPR
+      VAR_EXPR
+        VAR (var1)
 {
   int var0 = 0;
   int var1 = var0;
@@ -123,4 +127,5 @@ STMT_BLOCK
   var0 = var0 | var1;
   var0 = var0 ^ var1;
   ~var1;
+  &var1;
 }

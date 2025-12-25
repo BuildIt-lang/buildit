@@ -5,6 +5,9 @@ namespace builder {
 
 run_state* run_state::current_run_state = nullptr;
 
+
+
+
 void run_state::add_stmt_to_current_block(block::stmt::Ptr s, bool check_for_conflicts) {
 	if (bool_vector.size() > 0) {
 		return;
@@ -13,7 +16,38 @@ void run_state::add_stmt_to_current_block(block::stmt::Ptr s, bool check_for_con
 		s->annotation = get_and_clear_annotations();
 	}
 	if (!s->static_offset.is_empty() && is_visited_tag(s->static_offset) > 0) {
-		throw LoopBackException(s->static_offset);
+		// Let's go and find that statement
+		auto lt = visited_offsets[s->static_offset];
+		// This is only a loopback if it is an exact match
+		if (lt->is_same(s)) 
+			throw LoopBackException(s->static_offset);
+
+		// We have found a tag is the same, but statemetns aren't the same
+		// The tag we have has dedup_id as 0	
+		tracer::tag tag0 = s->static_offset;
+
+		if (tag_deduplication_map.find(tag0) == tag_deduplication_map.end()) {
+			// If duplicates aren't seen before, insert this tag in the deduplication_map
+			// 1 is HOW many such tags exist, default is 1 for all tags
+			tag_deduplication_map[tag0] = 1;
+		}
+		// We have already checked 0
+		size_t d_id = 1, max_d_id = tag_deduplication_map[tag0];
+		for (d_id = 1; d_id < max_d_id; d_id++) {
+			tag0.dedup_id = d_id;
+			// Find the statement
+			auto lt = visited_offsets[tag0];
+			if (lt->is_same(s)) {
+				s->static_offset = tag0;
+				s->static_offset.cached_string = "";
+				throw LoopBackException(s->static_offset);
+			}
+		}
+		// If we reached here, there is no match, this must be a new copy, update the tag and dedup map
+		s->static_offset.dedup_id = d_id;
+		s->static_offset.cached_string = "";
+		tag0.dedup_id = 0;
+		tag_deduplication_map[tag0] = d_id + 1;	
 	}
 
 	tracer::tag stag = s->static_offset;
@@ -37,10 +71,12 @@ void run_state::add_stmt_to_current_block(block::stmt::Ptr s, bool check_for_con
 				throw MemoizationException(s->static_offset, parent, i);
 		}
 
+
 		if (parent->stmts[i]->is_same(s))
 			throw MemoizationException(s->static_offset, parent, i);
 	}
-	visited_offsets.insert(s->static_offset);
+	// If dedup happens, this has already been updated
+	visited_offsets[s->static_offset] = s;
 	current_stmt_block->stmts.push_back(s);
 }
 

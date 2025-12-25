@@ -1,26 +1,58 @@
-// Include the headers
 #include "blocks/c_code_generator.h"
+#include "builder/builder_context.h"
 #include "builder/dyn_var.h"
 #include "builder/static_var.h"
 #include <iostream>
-
-// Include the BuildIt types
+#include <memory>
+using builder::as_member;
 using builder::dyn_var;
 using builder::static_var;
-static void bar(void) {
-	// Insert code to stage here
-	dyn_var<int> x = 5;
-	for (dyn_var<int> i = 0; i < 100; i = i + 1) {
-		if (i == x) {
-			x = i;
-			break;
-		}
+
+constexpr char foo_t_name[] = "FooT";
+using foo_t = typename builder::name<foo_t_name>;
+
+namespace builder {
+
+// Use specialization instead of inheritance
+// We still support specialization in case different 
+// operator implementations need to be added
+template <>
+class dyn_var<foo_t> : public dyn_var_impl<foo_t> {
+public:
+	typedef dyn_var_impl<foo_t> super;
+	using super::super;
+	using super::operator=;
+	dyn_var<foo_t>& operator=(const dyn_var<foo_t> &t) {
+		return dyn_var_impl<foo_t>::operator=(t);
 	}
+	dyn_var() : dyn_var_impl<foo_t>() {}
+	dyn_var(const dyn_var &t) : dyn_var_impl<foo_t>(t) {}
+
+	dyn_var<int> member = as_member(this, "member");
+};
+
+/* Specialization for foo_t* is not required because it comes built in with dyn_var now */
+
+} // namespace builder
+
+static void bar(void) {
+	dyn_var<foo_t> g;
+	dyn_var<int> x = g.member;
+	dyn_var<foo_t> h = g;
+	h = g;
+	dyn_var<foo_t *> ptr = &g;
+	(*ptr).member = 0;
+	ptr->member = 1;
+
+	// This SHOULD produce a copy
+	dyn_var<foo_t> i = *ptr;
+	i.member = 3;
 }
 
 int main(int argc, char *argv[]) {
 	builder::builder_context context;
-	auto ast = context.extract_function_ast(bar, "bar");
+	auto ast = context.extract_ast_from_function(bar);
 	ast->dump(std::cout, 0);
 	block::c_code_generator::generate_code(ast, std::cout, 0);
+	return 0;
 }

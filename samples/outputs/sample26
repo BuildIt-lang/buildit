@@ -1,112 +1,27 @@
-STMT_BLOCK
-  DECL_STMT
-    SCALAR_TYPE (INT)
-    VAR (var0)
-    INT_CONST (0)
-  DECL_STMT
-    SCALAR_TYPE (INT)
-    VAR (var1)
-    INT_CONST (0)
-  WHILE_STMT
-    NOT_EXPR
-      EQUALS_EXPR
-        VAR_EXPR
-          VAR (var0)
-        INT_CONST (0)
-    STMT_BLOCK
-      EXPR_STMT
-        ASSIGN_EXPR
-          VAR_EXPR
-            VAR (var1)
-          PLUS_EXPR
-            VAR_EXPR
-              VAR (var1)
-            INT_CONST (1)
-      EXPR_STMT
-        ASSIGN_EXPR
-          VAR_EXPR
-            VAR (var1)
-          PLUS_EXPR
-            VAR_EXPR
-              VAR (var1)
-            INT_CONST (1)
-      WHILE_STMT
-        NOT_EXPR
-          EQUALS_EXPR
-            VAR_EXPR
-              VAR (var0)
-            INT_CONST (0)
-        STMT_BLOCK
-      EXPR_STMT
-        ASSIGN_EXPR
-          VAR_EXPR
-            VAR (var1)
-          PLUS_EXPR
-            VAR_EXPR
-              VAR (var1)
-            INT_CONST (1)
-      WHILE_STMT
-        NOT_EXPR
-          EQUALS_EXPR
-            VAR_EXPR
-              VAR (var0)
-            INT_CONST (0)
-        STMT_BLOCK
-          EXPR_STMT
-            ASSIGN_EXPR
-              VAR_EXPR
-                VAR (var1)
-              PLUS_EXPR
-                VAR_EXPR
-                  VAR (var1)
-                INT_CONST (1)
-      EXPR_STMT
-        ASSIGN_EXPR
-          VAR_EXPR
-            VAR (var1)
-          PLUS_EXPR
-            VAR_EXPR
-              VAR (var1)
-            INT_CONST (1)
-  EXPR_STMT
-    ASSIGN_EXPR
-      VAR_EXPR
-        VAR (var1)
-      PLUS_EXPR
-        VAR_EXPR
-          VAR (var1)
-        INT_CONST (1)
-  WHILE_STMT
-    NOT_EXPR
-      EQUALS_EXPR
-        VAR_EXPR
-          VAR (var0)
-        INT_CONST (0)
-    STMT_BLOCK
-      EXPR_STMT
-        ASSIGN_EXPR
-          VAR_EXPR
-            VAR (var1)
-          PLUS_EXPR
-            VAR_EXPR
-              VAR (var1)
-            INT_CONST (1)
-{
-  int var0 = 0;
-  int var1 = 0;
-  while (!(var0 == 0)) {
-    var1 = var1 + 1;
-    var1 = var1 + 1;
-    while (!(var0 == 0)) {
-    }
-    var1 = var1 + 1;
-    while (!(var0 == 0)) {
-      var1 = var1 + 1;
-    }
-    var1 = var1 + 1;
-  }
-  var1 = var1 + 1;
-  while (!(var0 == 0)) {
-    var1 = var1 + 1;
-  }
+int power_15 (int arg0) {
+  int var0 = 1;
+  int var1 = arg0;
+  var0 = var0 * var1;
+  var1 = var1 * var1;
+  var0 = var0 * var1;
+  var1 = var1 * var1;
+  var0 = var0 * var1;
+  var1 = var1 * var1;
+  var0 = var0 * var1;
+  var1 = var1 * var1;
+  return var0;
 }
+
+int power_5 (int arg0) {
+  int var0 = 1;
+  int var1 = 5;
+  while (arg0 > 0) {
+    if (arg0 % 2 == 1) {
+      var0 = var0 * var1;
+    } 
+    var1 = var1 * var1;
+    arg0 = arg0 / 2;
+  }
+  return var0;
+}
+

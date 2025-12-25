@@ -1,47 +1,42 @@
-/*NO_TEST*/
 #include "blocks/c_code_generator.h"
-#include "builder/builder.h"
 #include "builder/builder_context.h"
-#include "builder/builder_union.h"
 #include "builder/dyn_var.h"
 #include "builder/static_var.h"
 #include <iostream>
-using builder::builder_union;
 using builder::dyn_var;
 using builder::static_var;
 
-static void foo(void) {
-	dyn_var<int> sum = 0;
-	const int arr[] = {1, 3, 4, 0, 2, 6, 0, 8, 0, 0, 1, -2, 0, 0, 3};
+// Don't declare this as constexpr, so that graph_t 
+// has external linkage and operator can left undefined
+char graph_t_name[] = "GraphT";
+using graph_t = typename builder::name<graph_t_name>;
 
-	for (static_var<unsigned int> x = 0; x < sizeof(arr) / sizeof(*arr); x++) {
-		if (arr[x] != 0) {
-			builder::annotate("roll.0");
-			sum = sum + arr[x];
-		}
-	}
+extern char foo_t_name[];
+char foo_t_name[] = "FooT";
 
-	const int adj[5][5] = {{4, 0, 1, 0, 0}, {5, 0, 0, 0, 1}, {0, 0, 1, 0, 0}, {1, 2, 1, 0, 0}, {0, 0, 0, 0, 0}};
+template <typename T>
+using foo_t = typename builder::name<foo_t_name, T>;
 
-	dyn_var<int[5]> old_ranks;
-	dyn_var<int[5]> new_ranks;
+// Declare the operators inside the builder namespace
+// this allows ADL to find the operators. Otherwise atleast clang
+// doesn't see this
+namespace builder {
+graph_t operator + (const graph_t& a, const int&);
+template <typename T>
+foo_t<T> operator + (const foo_t<T>& a, const int&);
+}
 
-	for (static_var<int> src = 0; src < 5; src++) {
-		// dyn_var<int> sum = 0;
-		for (static_var<int> dst = 0; dst < 5; dst++) {
-			if (adj[src][dst] != 0) {
-				builder::annotate("roll.1");
-				// builder::annotate("roll.1." +
-				// std::to_string(src));
-				new_ranks[src] = new_ranks[src] + adj[src][dst] * old_ranks[dst];
-			}
-		}
-	}
+static void bar(void) {
+	dyn_var<graph_t> g;
+	g = g + 1;
+
+	dyn_var<foo_t<int>> f;
+	f = f + 1;
 }
 
 int main(int argc, char *argv[]) {
 	builder::builder_context context;
-	auto ast = context.extract_ast_from_function(foo);
+	auto ast = context.extract_ast_from_function(bar);
 	ast->dump(std::cout, 0);
 	block::c_code_generator::generate_code(ast, std::cout, 0);
 	return 0;

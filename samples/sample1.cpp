@@ -1,5 +1,4 @@
 #include "blocks/c_code_generator.h"
-#include "builder/builder.h"
 #include "builder/builder_context.h"
 #include "builder/dyn_var.h"
 #include <iostream>
@@ -24,6 +23,7 @@ static void foo(void) {
 	a|=b;
 	a^=b;
 	~b;
+	&b;
 }
 int main(int argc, char *argv[]) {
 	builder::builder_context context;

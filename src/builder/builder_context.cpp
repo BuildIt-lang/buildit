@@ -8,7 +8,6 @@
 #include "blocks/sub_expr_cleanup.h"
 #include "blocks/generic_checker.h"
 #include "blocks/var_namer.h"
-#include "builder/builder.h"
 #include "builder/dyn_var.h"
 #include "builder/exceptions.h"
 #include "util/tracer.h"
@@ -226,7 +225,6 @@ void builder_context::extract_function_ast_impl(invocation_state* i_state) {
 	block::sub_expr_cleanup cleaner;
 	ast->accept(&cleaner);
 
-
 	if (!feature_unstructured) {
 
 		block::basic_block::cfg_block BBs = generate_basic_blocks(block::to<block::stmt_block>(ast));
@@ -278,9 +276,13 @@ block::stmt::Ptr builder_context::extract_ast_from_run(run_state* r_state) {
 		lambda_wrapper(r_state->i_state->invocation_function);
 		r_state->commit_uncommitted();
 		ret_ast = ast;
+		get_invocation_state()->get_arena()->reset_arena();
 		run_state::current_run_state = nullptr;
 
 	} catch (OutOfBoolsException &e) {
+
+		// Reset dyn_var arena before starting new runs
+		get_invocation_state()->get_arena()->reset_arena();
 
 		run_state::current_run_state = nullptr;
 
@@ -296,11 +298,13 @@ block::stmt::Ptr builder_context::extract_ast_from_run(run_state* r_state) {
 		true_r_state.cached_expr_sequence = r_state->cached_expr_sequence;
 		true_r_state.bool_vector.push_back(true);
 		true_r_state.visited_offsets = r_state->visited_offsets;
+		true_r_state.tag_deduplication_map = r_state->tag_deduplication_map;
 		std::copy(bool_vector_copy.begin(), bool_vector_copy.end(), std::back_inserter(true_r_state.bool_vector));
 
 		// Establish two run_states
 		run_state false_r_state(r_state->e_state, r_state->i_state);
 		false_r_state.visited_offsets = r_state->visited_offsets;
+		false_r_state.tag_deduplication_map = r_state->tag_deduplication_map;
 		// Only copy over the expr_sequence since it is part of the r_state that 
 		// just terminated
 		false_r_state.cached_expr_sequence = r_state->cached_expr_sequence;
@@ -337,6 +341,7 @@ block::stmt::Ptr builder_context::extract_ast_from_run(run_state* r_state) {
 
 		ret_ast = ast;
 	} catch (LoopBackException &e) {
+		get_invocation_state()->get_arena()->reset_arena();
 		run_state::current_run_state = nullptr;
 		block::goto_stmt::Ptr goto_stmt = std::make_shared<block::goto_stmt>();
 		goto_stmt->static_offset.clear();
@@ -345,6 +350,7 @@ block::stmt::Ptr builder_context::extract_ast_from_run(run_state* r_state) {
 		r_state->add_stmt_to_current_block(goto_stmt, false);
 		ret_ast = ast;
 	} catch (MemoizationException &e) {
+		get_invocation_state()->get_arena()->reset_arena();
 		run_state::current_run_state = nullptr;
 		if (feature_unstructured) {
 			// Instead of copying statements to the current block, we will just insert a goto
@@ -366,7 +372,9 @@ block::stmt::Ptr builder_context::extract_ast_from_run(run_state* r_state) {
 			}
 		}
 		ret_ast = ast;
-	}
+	} 
+
+
 	run_state::current_run_state = nullptr;
 
 	// Update the memoized table with the stmt block we just created

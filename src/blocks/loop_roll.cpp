@@ -1,5 +1,4 @@
 #include "blocks/loop_roll.h"
-#include "builder/builder.h"
 #include "builder/dyn_var.h"
 namespace block {
 static bool is_roll(std::set<std::string> ss, std::string &match) {

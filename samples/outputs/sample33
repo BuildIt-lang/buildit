@@ -1,54 +1,29 @@
-STMT_BLOCK
-  DECL_STMT
-    NAMED_TYPE (FooT)
-    VAR (var0)
-    NO_INITIALIZATION
-  EXPR_STMT
-    ASSIGN_EXPR
-      VAR_EXPR
-        VAR (var0)
-      PLUS_EXPR
-        VAR_EXPR
-          VAR (var0)
-        INT_CONST (1)
-  DECL_STMT
-    SCALAR_TYPE (INT)
-    VAR (var1)
-    MEMBER_ACCESS_EXPR (member)
-      VAR_EXPR
-        VAR (var0)
-  DECL_STMT
-    NAMED_TYPE (FooT)
-    VAR (var2)
-    VAR_EXPR
-      VAR (var0)
-  EXPR_STMT
-    ASSIGN_EXPR
-      VAR_EXPR
-        VAR (var2)
-      VAR_EXPR
-        VAR (var0)
-  DECL_STMT
-    POINTER_TYPE
-      NAMED_TYPE (FooT)
-    VAR (var3)
-    ADDR_OF_EXPR
-      VAR_EXPR
-        VAR (var0)
-  EXPR_STMT
-    ASSIGN_EXPR
-      MEMBER_ACCESS_EXPR (member)
-        SQ_BKT_EXPR
-          VAR_EXPR
-            VAR (var3)
-          INT_CONST (0)
-      INT_CONST (0)
-{
-  FooT var0;
-  var0 = var0 + 1;
-  int var1 = var0.member;
-  FooT var2 = var0;
-  var2 = var0;
-  FooT* var3 = &var0;
-  var3[0].member = 0;
+void __global__ cuda_kernel_0 (int* arg0) {
+  int var2 = blockIdx.x * 512 + threadIdx.x;
+  arg0[var2] = 0;
 }
+
+void __global__ cuda_kernel_1 (int* arg0) {
+  int var5 = blockIdx.x * 512 + threadIdx.x;
+  arg0[var5] = 0;
+}
+
+char ret_2_0[sizeof(int*)] __device__;
+void __global__ cuda_kernel_2 (int* arg0) {
+  int var8 = blockIdx.x * 512 + threadIdx.x;
+  arg0[var8] = 0;
+  if (!(blockIdx.x * blockDim.x + threadIdx.x)) {
+    runtime::cudaMemcpyToSymbolMagic(ret_2_0, arg0);
+  } 
+}
+
+void bar (int* arg0) {
+  cuda_kernel_0<<<128, 512>>>(arg0);
+  cudaDeviceSynchronize();
+  runtime::LaunchCooperativeKernel((void*)cuda_kernel_1, 128, 512, arg0);
+  cudaDeviceSynchronize();
+  runtime::LaunchCooperativeKernel((void*)cuda_kernel_2, 128, 512, arg0);
+  cudaDeviceSynchronize();
+  runtime::cudaMemcpyFromSymbolMagic(&arg0, ret_2_0);
+}
+

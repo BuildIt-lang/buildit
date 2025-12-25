@@ -1,35 +1,42 @@
-void staged (void) {
-  int var0 = 24;
-  if (var0) {
-  } 
+FUNC_DECL (my_bar)
+  SCALAR_TYPE (VOID)
+  STMT_BLOCK
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var0)
+      NO_INITIALIZATION
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var1)
+      INT_CONST (0)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (var2)
+      INT_CONST (0)
+    EXPR_STMT
+      ASSIGN_EXPR
+        VAR_EXPR
+          VAR (var1)
+        INT_CONST (1)
+    WHILE_STMT
+      INT_CONST (1)
+      STMT_BLOCK
+        DECL_STMT
+          SCALAR_TYPE (INT)
+          VAR (var3)
+          INT_CONST (1)
+        DECL_STMT
+          SCALAR_TYPE (INT)
+          VAR (var4)
+          INT_CONST (2)
+void my_bar (void) {
+  int var0;
   int var1 = 0;
-  var1 != 1;
-  int var2 = 32;
-  if (var2) {
-  } 
-  int var3 = 0;
-  var1 != 1 && var3 != 1;
-}
-
-void staged2 (void) {
-  int var0 = 0;
-  for (int var1 = 0; var1 < 5; var1 = var1 + 1) {
-    var0 = var0 + 1;
-  }
-  int var2 = var0;
-  for (int var3 = 0; var3 < var0; var3 = var3 + 1) {
-    var2 = var2 + 1;
-  }
-}
-
-void staged2 (void) {
-  int var0 = 0;
-  for (int var1 = 0; var1 < 5; var1 = var1 + 1) {
-    var0 = var0 + 1;
-  }
-  int var2 = var0;
-  for (int var3 = 0; var3 < var0; var3 = var3 + 1) {
-    var2 = var2 + 1;
+  int var2 = 0;
+  var1 = 1;
+  while (1) {
+    int var3 = 1;
+    int var4 = 2;
   }
 }
 

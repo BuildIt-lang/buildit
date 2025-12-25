@@ -1,10 +1,11 @@
-struct linked_list {
-  linked_list* next;
-  struct foo* other;
-};
 void bar (void) {
-  linked_list* x_0;
-  x_0->next->next->next = 0;
-  x_0->other = 0;
+  _Pragma("omp parallel for")
+  for (int outer_0 = 0; outer_0 < 10; outer_0 = outer_0 + 1) {
+    int sum_1 = 0;
+    _Pragma("unroll")
+    for (int inner_2 = 0; inner_2 < 15; inner_2 = inner_2 + 1) {
+      sum_1 = sum_1 + inner_2;
+    }
+  }
 }
 

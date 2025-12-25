@@ -1,22 +1,77 @@
 STMT_BLOCK
   DECL_STMT
     SCALAR_TYPE (INT)
-    VAR (x_0)
-    INT_CONST (18)
+    VAR (t_2)
+    NO_INITIALIZATION
   DECL_STMT
     SCALAR_TYPE (INT)
-    VAR (y_1)
-    INT_CONST (17)
-  EXPR_STMT
-    ASSIGN_EXPR
+    VAR (x_0)
+    NO_INITIALIZATION
+  DECL_STMT
+    SCALAR_TYPE (INT)
+    VAR (var1)
+    VAR_EXPR
+      VAR (x_0)
+  IF_STMT
+    GT_EXPR
       VAR_EXPR
-        VAR (x_0)
-      PLUS_EXPR
-        VAR_EXPR
-          VAR (y_1)
-        INT_CONST (9)
+        VAR (var1)
+      INT_CONST (10)
+    STMT_BLOCK
+      EXPR_STMT
+        ASSIGN_EXPR
+          VAR_EXPR
+            VAR (t_2)
+          INT_CONST (9)
+    STMT_BLOCK
+      EXPR_STMT
+        ASSIGN_EXPR
+          VAR_EXPR
+            VAR (t_2)
+          INT_CONST (0)
+  IF_STMT
+    VAR_EXPR
+      VAR (t_2)
+    STMT_BLOCK
+      DECL_STMT
+        SCALAR_TYPE (INT)
+        VAR (k_3)
+        INT_CONST (0)
+      EXPR_STMT
+        ASSIGN_EXPR
+          VAR_EXPR
+            VAR (k_3)
+          INT_CONST (0)
+    STMT_BLOCK
+  IF_STMT
+    VAR_EXPR
+      VAR (x_0)
+    STMT_BLOCK
+      DECL_STMT
+        SCALAR_TYPE (INT)
+        VAR (k_4)
+        INT_CONST (0)
+      EXPR_STMT
+        ASSIGN_EXPR
+          VAR_EXPR
+            VAR (k_4)
+          INT_CONST (0)
+    STMT_BLOCK
 {
-  int x_0 = 18;
-  int y_1 = 17;
-  x_0 = y_1 + 9;
+  int t_2;
+  int x_0;
+  int var1 = x_0;
+  if (var1 > 10) {
+    t_2 = 9;
+  } else {
+    t_2 = 0;
+  }
+  if (t_2) {
+    int k_3 = 0;
+    k_3 = 0;
+  } 
+  if (x_0) {
+    int k_4 = 0;
+    k_4 = 0;
+  } 
 }

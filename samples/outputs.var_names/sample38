@@ -1,78 +1,13 @@
-STMT_BLOCK
-  DECL_STMT
-    NAMED_TYPE (FooT)
-    VAR (g_0)
-    NO_INITIALIZATION
-  EXPR_STMT
-    ASSIGN_EXPR
-      VAR_EXPR
-        VAR (g_0)
-      PLUS_EXPR
-        VAR_EXPR
-          VAR (g_0)
-        INT_CONST (1)
-  DECL_STMT
-    SCALAR_TYPE (INT)
-    VAR (x_1)
-    MEMBER_ACCESS_EXPR (member)
-      VAR_EXPR
-        VAR (g_0)
-  DECL_STMT
-    NAMED_TYPE (FooT)
-    VAR (h_2)
-    VAR_EXPR
-      VAR (g_0)
-  EXPR_STMT
-    ASSIGN_EXPR
-      VAR_EXPR
-        VAR (h_2)
-      VAR_EXPR
-        VAR (g_0)
-  DECL_STMT
-    POINTER_TYPE
-      NAMED_TYPE (FooT)
-    VAR (ptr_3)
-    ADDR_OF_EXPR
-      VAR_EXPR
-        VAR (g_0)
-  EXPR_STMT
-    ASSIGN_EXPR
-      MEMBER_ACCESS_EXPR (member)
-        SQ_BKT_EXPR
-          VAR_EXPR
-            VAR (ptr_3)
-          INT_CONST (0)
-      INT_CONST (0)
-  EXPR_STMT
-    ASSIGN_EXPR
-      MEMBER_ACCESS_EXPR (member)
-        SQ_BKT_EXPR
-          VAR_EXPR
-            VAR (ptr_3)
-          INT_CONST (0)
-      INT_CONST (1)
-  DECL_STMT
-    NAMED_TYPE (FooT)
-    VAR (i_4)
-    SQ_BKT_EXPR
-      VAR_EXPR
-        VAR (ptr_3)
-      INT_CONST (0)
-  EXPR_STMT
-    ASSIGN_EXPR
-      MEMBER_ACCESS_EXPR (member)
-        VAR_EXPR
-          VAR (i_4)
-      INT_CONST (3)
-{
-  FooT g_0;
-  g_0 = g_0 + 1;
-  int x_1 = g_0.member;
-  FooT h_2 = g_0;
-  h_2 = g_0;
-  FooT* ptr_3 = &g_0;
-  ptr_3->member = 0;
-  ptr_3->member = 1;
-  FooT i_4 = *ptr_3;
-  i_4.member = 3;
+void bar (void) {
+  int y_0[10] = 0;
+  for (int x_1 = 0; x_1 < 10; x_1 = x_1 + 1) {
+    *y_0 = *y_0 + x_1;
+    y_0[x_1] = y_0[x_1] * 2;
+  }
+  for (int x_2 = 0; x_2 < 10; (x_2 = x_2 + 1) - 1) {
+    *y_0 = *y_0 - x_2;
+    y_0[x_2] = y_0[x_2] / 2;
+  }
+  (*y_0 = *y_0 + 1) - 1;
 }
+

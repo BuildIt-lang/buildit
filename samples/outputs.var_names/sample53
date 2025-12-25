@@ -1,40 +1,12 @@
-void foo (void) {
-  int member_var;
+void bar (void) {
   int x_0 = 0;
-  if (x_0) {
-    member_var = 1;
-  } else {
-    member_var = 2;
-  }
-  if (member_var % 2 == 0) {
-    member_var = member_var + 0;
-  } 
-  if (member_var % 2 == 0) {
-    member_var = member_var + 1;
-  } 
-  if (member_var % 2 == 0) {
-    member_var = member_var + 2;
-  } 
-  if (member_var % 2 == 0) {
-    member_var = member_var + 3;
-  } 
-  if (member_var % 2 == 0) {
-    member_var = member_var + 4;
-  } 
-  if (member_var % 2 == 0) {
-    member_var = member_var + 5;
-  } 
-  if (member_var % 2 == 0) {
-    member_var = member_var + 6;
-  } 
-  if (member_var % 2 == 0) {
-    member_var = member_var + 7;
-  } 
-  if (member_var % 2 == 0) {
-    member_var = member_var + 8;
-  } 
-  if (member_var % 2 == 0) {
-    member_var = member_var + 9;
-  } 
+  int* y_1 = &x_0;
+  (*y_1 = *y_1 + 1) - 1;
+  int z_2 = 0;
+  (z_2 = z_2 + 1) - 1;
+  int a_3 = z_2;
+  (z_2 = z_2 + 1) - 1;
+  int b_4 = a_3;
+  (b_4 = b_4 + 1) - 1;
 }
 

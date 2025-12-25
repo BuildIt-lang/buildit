@@ -1,26 +1,23 @@
-a
-bb
-ccc
-dddd
-eeeee
-ffffff
-ggggggg
-hhhhhhhh
-iiiiiiiii
-jjjjjjjjjj
-kkkkkkkkkkk
-llllllllllll
-mmmmmmmmmmmmm
-nnnnnnnnnnnnnn
-ooooooooooooooo
-pppppppppppppppp
-qqqqqqqqqqqqqqqqq
-rrrrrrrrrrrrrrrrrr
-sssssssssssssssssss
-tttttttttttttttttttt
-uuuuuuuuuuuuuuuuuuuuu
-vvvvvvvvvvvvvvvvvvvvvv
-wwwwwwwwwwwwwwwwwwwwwww
-xxxxxxxxxxxxxxxxxxxxxxxx
-yyyyyyyyyyyyyyyyyyyyyyyyy
-zzzzzzzzzzzzzzzzzzzzzzzzzz
+FUNC_DECL (foo)
+  SCALAR_TYPE (VOID)
+  STMT_BLOCK
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (my_var)
+      NO_INITIALIZATION
+    EXPR_STMT
+      ASSIGN_EXPR
+        VAR_EXPR
+          VAR (my_var)
+        INT_CONST (1)
+    DECL_STMT
+      SCALAR_TYPE (INT)
+      VAR (y_0)
+      VAR_EXPR
+        VAR (my_var)
+void foo (void) {
+  int my_var;
+  my_var = 1;
+  int y_0 = my_var;
+}
+

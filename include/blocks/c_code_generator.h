@@ -8,10 +8,11 @@
 
 #include "blocks/block_visitor.h"
 #include "blocks/stmt.h"
-#include "builder/dyn_var.h"
 #include "util/printer.h"
 #include <unordered_map>
 #include <unordered_set>
+#include "builder/forward_declarations.h"
+#include "builder/providers_dyn_var.h"
 
 namespace block {
 class c_code_generator : public block_visitor {
@@ -116,11 +117,11 @@ public:
 	}
 	template <typename T>
 	static void generate_struct_decl(std::ostream &oss, int indent = 0) {
-		static_assert(std::is_base_of<builder::var, T>::value, "Template argument should be a dyn_var");
-		auto save = builder::options::track_members;
-		builder::options::track_members = true;
+		static_assert(builder::is_dyn_var_type<T>::value, "Template argument should be a dyn_var");
+		auto save = builder::user_defined_provider_track_members;
+		builder::user_defined_provider_track_members = true;
 		T v = builder::with_name("_");
-		builder::options::track_members = save;
+		builder::user_defined_provider_track_members = save;
 
 		// Construct a struct decl
 		auto sd = std::make_shared<struct_decl>();
@@ -130,9 +131,9 @@ public:
 		       "Cannot yet, generate decls for types with template args");
 
 		sd->struct_name = to<named_type>(var_type)->type_name;
-		for (auto member: v.members) {
+		for (auto member: v.user_defined_members) {
 			auto decl = std::make_shared<decl_stmt>();
-			decl->decl_var = member->block_var;
+			decl->decl_var = member;
 			decl->init_expr = nullptr;
 			sd->members.push_back(decl);
 		}

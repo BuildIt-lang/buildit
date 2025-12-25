@@ -1,86 +1,125 @@
-FUNC_DECL (my_bar)
+FUNC_DECL (bar)
   SCALAR_TYPE (VOID)
   STMT_BLOCK
     DECL_STMT
       SCALAR_TYPE (INT)
       VAR (var0)
-      INT_CONST (0)
-    DECL_STMT
-      SCALAR_TYPE (INT)
-      VAR (var1)
-      INT_CONST (0)
-    DECL_STMT
-      SCALAR_TYPE (INT)
-      VAR (var2)
-      INT_CONST (0)
-    DECL_STMT
-      SCALAR_TYPE (INT)
-      VAR (var3)
-      INT_CONST (0)
-    DECL_STMT
-      SCALAR_TYPE (INT)
-      VAR (var4)
-      INT_CONST (0)
-    DECL_STMT
-      SCALAR_TYPE (INT)
-      VAR (var5)
-      INT_CONST (0)
-    DECL_STMT
-      SCALAR_TYPE (INT)
-      VAR (var6)
-      INT_CONST (0)
-    DECL_STMT
-      SCALAR_TYPE (INT)
-      VAR (var7)
-      INT_CONST (0)
-    DECL_STMT
-      SCALAR_TYPE (INT)
-      VAR (var8)
-      INT_CONST (0)
-    DECL_STMT
-      SCALAR_TYPE (INT)
-      VAR (var9)
-      INT_CONST (0)
-    DECL_STMT
-      SCALAR_TYPE (INT)
-      VAR (var10)
-      INT_CONST (0)
-    DECL_STMT
-      SCALAR_TYPE (INT)
-      VAR (var11)
-      INT_CONST (0)
-    DECL_STMT
-      SCALAR_TYPE (INT)
-      VAR (var12)
-      INT_CONST (0)
-    DECL_STMT
-      SCALAR_TYPE (INT)
-      VAR (var13)
-      INT_CONST (0)
-    DECL_STMT
-      SCALAR_TYPE (INT)
-      VAR (var14)
-      INT_CONST (0)
-    DECL_STMT
-      SCALAR_TYPE (INT)
-      VAR (var15)
-      INT_CONST (0)
-void my_bar (void) {
-  int var0 = 0;
-  int var1 = 0;
-  int var2 = 0;
-  int var3 = 0;
-  int var4 = 0;
-  int var5 = 0;
-  int var6 = 0;
-  int var7 = 0;
-  int var8 = 0;
-  int var9 = 0;
-  int var10 = 0;
-  int var11 = 0;
-  int var12 = 0;
-  int var13 = 0;
-  int var14 = 0;
-  int var15 = 0;
+      INT_CONST (5)
+    WHILE_STMT
+      LT_EXPR
+        VAR_EXPR
+          VAR (var0)
+        INT_CONST (10)
+      STMT_BLOCK
+        DECL_STMT
+          SCALAR_TYPE (INT)
+          VAR (control_guard0)
+          INT_CONST (0)
+        WHILE_STMT
+          GT_EXPR
+            VAR_EXPR
+              VAR (var0)
+            INT_CONST (100)
+          STMT_BLOCK
+            EXPR_STMT
+              ASSIGN_EXPR
+                VAR_EXPR
+                  VAR (control_guard0)
+                INT_CONST (0)
+            IF_STMT
+              EQUALS_EXPR
+                VAR_EXPR
+                  VAR (var0)
+                INT_CONST (0)
+              STMT_BLOCK
+                EXPR_STMT
+                  ASSIGN_EXPR
+                    VAR_EXPR
+                      VAR (var0)
+                    PLUS_EXPR
+                      VAR_EXPR
+                        VAR (var0)
+                      INT_CONST (5)
+                WHILE_STMT
+                  NE_EXPR
+                    VAR_EXPR
+                      VAR (var0)
+                    INT_CONST (-1)
+                  STMT_BLOCK
+                    EXPR_STMT
+                      ASSIGN_EXPR
+                        VAR_EXPR
+                          VAR (var0)
+                        PLUS_EXPR
+                          VAR_EXPR
+                            VAR (var0)
+                          INT_CONST (6)
+                EXPR_STMT
+                  ASSIGN_EXPR
+                    VAR_EXPR
+                      VAR (control_guard0)
+                    INT_CONST (1)
+                BREAK_STMT
+              STMT_BLOCK
+            EXPR_STMT
+              ASSIGN_EXPR
+                VAR_EXPR
+                  VAR (var0)
+                PLUS_EXPR
+                  VAR_EXPR
+                    VAR (var0)
+                  INT_CONST (4)
+        IF_STMT
+          VAR_EXPR
+            VAR (control_guard0)
+          STMT_BLOCK
+            CONTINUE_STMT
+          STMT_BLOCK
+        EXPR_STMT
+          ASSIGN_EXPR
+            VAR_EXPR
+              VAR (var0)
+            PLUS_EXPR
+              VAR_EXPR
+                VAR (var0)
+              INT_CONST (5)
+        WHILE_STMT
+          NE_EXPR
+            VAR_EXPR
+              VAR (var0)
+            INT_CONST (-1)
+          STMT_BLOCK
+            EXPR_STMT
+              ASSIGN_EXPR
+                VAR_EXPR
+                  VAR (var0)
+                PLUS_EXPR
+                  VAR_EXPR
+                    VAR (var0)
+                  INT_CONST (6)
+void bar (void) {
+  int var0 = 5;
+  while (var0 < 10) {
+    int control_guard0 = 0;
+    while (var0 > 100) {
+      control_guard0 = 0;
+      if (var0 == 0) {
+        var0 = var0 + 5;
+        while (var0 != -1) {
+          var0 = var0 + 6;
+        }
+        control_guard0 = 1;
+        break;
+      } 
+      var0 = var0 + 4;
+    }
+    if (control_guard0) {
+      continue;
+    } 
+    var0 = var0 + 5;
+    while (var0 != -1) {
+      var0 = var0 + 6;
+    }
+  }
 }
 

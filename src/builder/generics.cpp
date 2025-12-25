@@ -1,9 +1,9 @@
 #include "builder/dyn_var.h"
 #include "blocks/var.h"
-
+#include "builder/generics.h"
 namespace builder {
 
-type type_of(const var& v) {
+type type_of(const dyn_var_base& v) {
 	assert(v.block_var);
 	// We want to avoid cloning variables that themselves don't have a type yet
 	assert(v.block_var->var_type && "Cloning type from variable that doesn't have a type");

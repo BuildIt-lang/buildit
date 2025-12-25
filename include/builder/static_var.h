@@ -1,7 +1,6 @@
 #ifndef STATIC_VAR_H
 #define STATIC_VAR_H
 
-#include "builder/builder.h"
 #include "builder/builder_context.h"
 #include "util/var_finder.h"
 
@@ -140,10 +139,6 @@ public:
 			r_state->static_var_tuples.pop_back();
 		}
 		
-	}
-	operator builder() {
-		try_get_name();
-		return (builder)val;
 	}
 	std::string serialize() override {
 		return utils::can_to_string<T>::get_string(val);

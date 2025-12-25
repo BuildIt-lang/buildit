@@ -22,7 +22,7 @@ public:
 	std::vector<std::shared_ptr<builder::static_var_snapshot_base>> static_var_snapshots;
 	std::vector<std::pair<std::string, std::string>> static_var_key_values;
 	std::vector<tag_id> live_dyn_vars;
-
+	size_t dedup_id = 0;
 
 	std::string cached_string;
 	mutable size_t cached_hash = 0;
@@ -38,6 +38,7 @@ public:
 		pointers.clear();
 		static_var_snapshots.clear();
 		live_dyn_vars.clear();
+		dedup_id = 0;
 	}
 
 	// A function to create another tag
@@ -94,6 +95,9 @@ public:
 		for (unsigned i = 0; i < live_dyn_vars.size(); i++) {
 			h = hash_combine(h, (size_t) live_dyn_vars[i]);
 		}
+
+		// Finally add the dedup id in
+		h = hash_combine(h, dedup_id);
 
 		cached_hash = h;
 		return cached_hash;	

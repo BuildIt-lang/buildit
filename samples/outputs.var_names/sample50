@@ -1,56 +1,20 @@
-FUNC_DECL (bar)
-  SCALAR_TYPE (VOID)
-  STMT_BLOCK
-    DECL_STMT
-      SCALAR_TYPE (INT)
-      VAR (k_0)
-      INT_CONST (0)
-    DECL_STMT
-      SCALAR_TYPE (INT)
-      VAR (t_1)
-      INT_CONST (0)
-    WHILE_STMT
-      INT_CONST (1)
-      STMT_BLOCK
-        IF_STMT
-          NE_EXPR
-            VAR_EXPR
-              VAR (k_0)
-            INT_CONST (1)
-          STMT_BLOCK
-            IF_STMT
-              EQUALS_EXPR
-                VAR_EXPR
-                  VAR (k_0)
-                INT_CONST (2)
-              STMT_BLOCK
-                WHILE_STMT
-                  NE_EXPR
-                    VAR_EXPR
-                      VAR (k_0)
-                    INT_CONST (3)
-                  STMT_BLOCK
-              STMT_BLOCK
-          STMT_BLOCK
-            WHILE_STMT
-              NE_EXPR
-                VAR_EXPR
-                  VAR (k_0)
-                INT_CONST (3)
-              STMT_BLOCK
 void bar (void) {
-  int k_0 = 0;
-  int t_1 = 0;
-  while (1) {
-    if (k_0 != 1) {
-      if (k_0 == 2) {
-        while (k_0 != 3) {
-        }
-      } 
-    } else {
-      while (k_0 != 3) {
-      }
-    }
+  int y_0 = 0;
+  int m_1;
+  int n_2;
+  if (y_0) {
+    int z_3 = 1;
+    int& k_4 = m_1;
+    int b_5;
+    int a_6 = z_3;
+    z_3 = z_3 + k_4;
+  } else {
+    int z_7 = 2;
+    int& k_8 = m_1;
+    int b_9;
+    int a_10 = z_7;
+    z_7 = z_7 + k_8;
   }
+  m_1 = m_1 + 3;
 }
 

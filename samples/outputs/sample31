@@ -1,35 +1,48 @@
-FUNC_DECL (func1)
-  SCALAR_TYPE (INT)
-  VAR (arg0)
+FUNC_DECL (bar)
+  SCALAR_TYPE (VOID)
   STMT_BLOCK
     DECL_STMT
-      NAMED_TYPE (foo)
-      VAR (var0)
-      PLUS_EXPR
-        PLUS_EXPR
-          INT_CONST (3)
-          MEMBER_ACCESS_EXPR (var1)
-            VAR_EXPR
-              VAR (arg0)
-        MUL_EXPR
-          INT_CONST (5)
-          MEMBER_ACCESS_EXPR (var1)
-            VAR_EXPR
-              VAR (arg0)
-    DECL_STMT
       SCALAR_TYPE (INT)
-      VAR (var1)
-      PLUS_EXPR
-        MEMBER_ACCESS_EXPR (neighbor)
+      VAR (var0)
+      INT_CONST (0)
+    FOR_STMT
+      EXPR_STMT
+        INT_CONST (0)
+      LT_EXPR
+        VAR_EXPR
+          VAR (var0)
+        INT_CONST (100)
+      ASSIGN_EXPR
+        VAR_EXPR
+          VAR (var0)
+        PLUS_EXPR
           VAR_EXPR
             VAR (var0)
-        INT_CONST (2)
-    RETURN_STMT
-      VAR_EXPR
-        VAR (var1)
-int func1 (foo arg0) {
-  foo var0 = 3 + arg0.var1 + 5 * arg0.var1;
-  int var1 = var0.neighbor + 2;
-  return var1;
+          INT_CONST (1)
+      STMT_BLOCK
+    FOR_STMT
+      EXPR_STMT
+        ASSIGN_EXPR
+          VAR_EXPR
+            VAR (var0)
+          INT_CONST (0)
+      LT_EXPR
+        VAR_EXPR
+          VAR (var0)
+        INT_CONST (100)
+      ASSIGN_EXPR
+        VAR_EXPR
+          VAR (var0)
+        PLUS_EXPR
+          VAR_EXPR
+            VAR (var0)
+          INT_CONST (1)
+      STMT_BLOCK
+void bar (void) {
+  int var0 = 0;
+  for (0; var0 < 100; var0 = var0 + 1) {
+  }
+  for (var0 = 0; var0 < 100; var0 = var0 + 1) {
+  }
 }
 
