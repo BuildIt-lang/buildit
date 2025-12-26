@@ -8,7 +8,9 @@ SAMPLES_DIR=$(BASE_DIR)/samples
 DEPS_DIR=$(BASE_DIR)/deps
 SAMPLES_SRCS=$(wildcard $(SAMPLES_DIR)/*.cpp)
 SAMPLES=$(subst $(SAMPLES_DIR),$(BUILD_DIR),$(SAMPLES_SRCS:.cpp=))
-INCLUDES=$(wildcard $(INCLUDE_DIR)/*.h) $(wildcard $(INCLUDE_DIR)/*/*.h) $(BUILD_DIR)/gen_headers/gen/compiler_headers.h
+
+GEN_INCLUDES=$(BUILD_DIR)/gen_headers/gen/compiler_headers.h
+INCLUDES=$(wildcard $(INCLUDE_DIR)/*.h) $(wildcard $(INCLUDE_DIR)/*/*.h) $(GEN_INCLUDES)
 INCLUDES+=$(wildcard $(INCLUDE_DIR)/*/*/*.h)
 
 BUILDER_SRC=$(wildcard $(SRC_DIR)/builder/*.cpp)
@@ -18,6 +20,7 @@ UTIL_SRC=$(wildcard $(SRC_DIR)/util/*.cpp)
 BUILDER_OBJS=$(subst $(SRC_DIR),$(BUILD_DIR),$(BUILDER_SRC:.cpp=.o))
 BLOCKS_OBJS=$(subst $(SRC_DIR),$(BUILD_DIR),$(BLOCKS_SRC:.cpp=.o))
 UTIL_OBJS=$(subst $(SRC_DIR),$(BUILD_DIR),$(UTIL_SRC:.cpp=.o))
+SAMPLE_OBJS=$(subst $(SAMPLES_DIR),$(BUILD_DIR)/samples,$(SAMPLES_SRCS:.cpp=.o))
 
 LIBRARY_OBJS=$(BUILDER_OBJS) $(BLOCKS_OBJS) $(UTIL_OBJS) 
 LIBRARY=$(BUILD_DIR)/lib$(LIBRARY_NAME).a
